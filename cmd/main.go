@@ -2,6 +2,8 @@
 
 import (
 	"context"
+	"fmt"
+	"io"
 	"log"
 	"net/http"
 	"net/http/httputil"
@@ -73,6 +75,40 @@ func main() {
 		w.Write([]byte(`{"status":"healthy"}`))
 	})
 
+	// Debug endpoint: tests API connectivity and shows config (remove after diagnosing)
+	mux.HandleFunc("/debug/api", func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("Content-Type", "text/html; charset=utf-8")
+		fmt.Fprintf(w, "<h2>API Debug</h2>")
+		fmt.Fprintf(w, "<p><b>API_URL env:</b> %s</p>", htmlEscape(os.Getenv("API_URL")))
+		fmt.Fprintf(w, "<p><b>Resolved API URL:</b> %s</p>", htmlEscape(apiURL))
+		tokenSet := os.Getenv("API_TOKEN") != ""
+		fmt.Fprintf(w, "<p><b>API_TOKEN set:</b> %v</p>", tokenSet)
+
+		// Test connectivity to each important endpoint
+		endpoints := []string{"/auth/user", "/oauth/login?provider=google"}
+		client := &http.Client{Timeout: 5 * time.Second}
+		for _, ep := range endpoints {
+			testURL := apiURL + ep
+			req, err := http.NewRequest("GET", testURL, nil)
+			if err != nil {
+				fmt.Fprintf(w, "<p>❌ <b>%s</b>: failed to build request: %v</p>", ep, err)
+				continue
+			}
+			req.Header.Set("X-API-Token", apiToken)
+			// Forward cookies from browser so session-based endpoints respond correctly
+			req.Header.Set("Cookie", r.Header.Get("Cookie"))
+			resp, err := client.Do(req)
+			if err != nil {
+				fmt.Fprintf(w, "<p>❌ <b>%s</b>: connection error: %v</p>", htmlEscape(ep), err)
+				continue
+			}
+			body, _ := io.ReadAll(io.LimitReader(resp.Body, 512))
+			resp.Body.Close()
+			fmt.Fprintf(w, "<p>%s <b>%s</b>: HTTP %d — <code>%s</code></p>",
+				statusEmoji(resp.StatusCode), htmlEscape(ep), resp.StatusCode, htmlEscape(string(body)))
+		}
+	})
+
 	// Static files with clean URLs (no .html extension)
 	mux.HandleFunc("/", router.ServeStatic)
 
@@ -133,4 +169,19 @@ func (r *Router) ServeStatic(w http.ResponseWriter, req *http.Request) {
 
 	// Serve the file
 	http.ServeFile(w, req, filePath)
+}
+
+func statusEmoji(code int) string {
+	if code >= 200 && code < 300 {
+		return "✅"
+	}
+	return "❌"
+}
+
+func htmlEscape(s string) string {
+	s = strings.ReplaceAll(s, "&", "&amp;")
+	s = strings.ReplaceAll(s, "<", "&lt;")
+	s = strings.ReplaceAll(s, ">", "&gt;")
+	s = strings.ReplaceAll(s, `"`, "&#34;")
+	return s
 }
