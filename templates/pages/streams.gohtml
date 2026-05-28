@@ -1,20 +1,13 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Stream Management - TauchoPortal</title>
-    <link rel="stylesheet" href="/css/main.css">
-    <link rel="stylesheet" href="/css/streams.css">
-    <script src="/js/auth.js"></script>
+{{define "page"}}{{template "base" .}}{{end}}
+
+{{define "head"}}
+<link rel="stylesheet" href="/css/streams.css">
     <script src="/js/translations.js"></script>
     <script src="/js/localization.js"></script>
-    <script src="/js/web-components.js"></script>
-</head>
-<body>
-    <taucho-header></taucho-header>
+{{end}}
 
-    <div class="streams-container">
+{{define "content"}}
+<div class="streams-container">
         <!-- Page Header -->
         <div class="page-title-bar">
             <div>
@@ -431,14 +424,8 @@
                 btn.disabled = false;
             }
         });
-
-        document.getElementById('language-selector').addEventListener('change', (e) => {
-            setLanguage(e.target.value);
-        });
-
-        initLocalization();
-        requireAuth();
-        (async () => {
+initLocalization();
+(async () => {
             await loadStreams();
             renderSidebar();
             if (streamsList.length > 0) {
@@ -448,6 +435,4 @@
             }
         })();
     </script>
-</body>
-</html>
-
+{{end}}

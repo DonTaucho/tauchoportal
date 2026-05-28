@@ -1,20 +1,13 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Event Rules - TauchoPortal</title>
-    <link rel="stylesheet" href="/css/main.css">
-    <link rel="stylesheet" href="/css/conditions.css">
-    <script src="/js/auth.js"></script>
+{{define "page"}}{{template "base" .}}{{end}}
+
+{{define "head"}}
+<link rel="stylesheet" href="/css/conditions.css">
     <script src="/js/translations.js"></script>
     <script src="/js/localization.js"></script>
-    <script src="/js/web-components.js"></script>
-</head>
-<body>
-    <taucho-header></taucho-header>
+{{end}}
 
-    <div class="conditions-container">
+{{define "content"}}
+<div class="conditions-container">
         <!-- Page Header -->
         <div class="page-header">
             <div class="page-header-top">
@@ -373,10 +366,7 @@
             </form>
         </div>
     </div>
-
-    <taucho-footer></taucho-footer>
-
-    <script>
+<script>
         let editingId = null;
 
         // Filter rules by event type
@@ -490,8 +480,5 @@
         window.onclick = function(e) {
             if (e.target === document.getElementById('ruleModal')) closeModal();
         };
-
-        requireAuth();
-    </script>
-</body>
-</html>
+</script>
+{{end}}

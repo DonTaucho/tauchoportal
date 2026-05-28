@@ -1,14 +1,12 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>About - TauchoPortal</title>
-    <link rel="stylesheet" href="/css/main.css">
-    <link rel="stylesheet" href="/css/about.css">
-</head>
-<body>
-    <div class="about-page">
+{{define "page"}}{{template "base" .}}{{end}}
+
+{{define "head"}}
+<link rel="stylesheet" href="/css/about.css">
+{{end}}
+
+{{define "content"}}
+<div class="about-page">
+        {{if .User}}{{else}}
         <nav class="about-nav">
             <a href="/" class="about-logo">🌊 TauchoPortal</a>
             <div class="about-nav-links">
@@ -17,6 +15,7 @@
                 <a href="/register" class="nav-btn nav-btn-primary">Create Account</a>
             </div>
         </nav>
+        {{end}}
 
         <div class="container">
             <div class="header">
@@ -152,5 +151,4 @@
             </div>
         </div>
     </div>
-</body>
-</html>
+{{end}}

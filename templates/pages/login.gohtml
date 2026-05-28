@@ -1,15 +1,11 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Login - TauchoPortal</title>
-    <link rel="stylesheet" href="/css/main.css">
-    <link rel="stylesheet" href="/css/login.css">
-    <script src="/js/auth.js"></script>
-</head>
-<body>
-    <div class="login-container">
+{{define "page"}}{{template "base" .}}{{end}}
+
+{{define "head"}}
+<link rel="stylesheet" href="/css/login.css">
+{{end}}
+
+{{define "content"}}
+<div class="login-container">
         <div class="back-link">
             <a href="/">← Back to Home</a>
         </div>
@@ -92,5 +88,4 @@
             }
         });
     </script>
-</body>
-</html>
+{{end}}

@@ -1,20 +1,13 @@
-﻿<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Dashboard - TauchoPortal</title>
-    <link rel="stylesheet" href="/css/main.css">
-    <link rel="stylesheet" href="/css/dashboard.css">
-    <script src="/js/auth.js"></script>
+{{define "page"}}{{template "base" .}}{{end}}
+
+{{define "head"}}
+<link rel="stylesheet" href="/css/dashboard.css">
     <script src="/js/translations.js"></script>
     <script src="/js/localization.js"></script>
-    <script src="/js/web-components.js"></script>
-</head>
-<body>
-    <taucho-header></taucho-header>
+{{end}}
 
-    <div class="dashboard-container">
+{{define "content"}}
+<div class="dashboard-container">
         <div class="welcome-banner">
             <div class="welcome-text">
                 <h1>Welcome back, <span id="username">...</span> 👋</h1>
@@ -91,17 +84,12 @@
     </div>
 
     <script>
-        document.addEventListener('DOMContentLoaded', async () => {
-            const user = await getUserProfile();
-            if (!user) {
-                window.location.href = '/login';
-                return;
-            }
+        document.addEventListener('DOMContentLoaded', () => {
+            const user = window.__user;
+            if (!user) return;
             document.getElementById('username').textContent = user.username || user.email?.split('@')[0] || 'there';
             const emailEl = document.getElementById('userEmail');
             if (user.email) emailEl.textContent = user.email;
         });
     </script>
-</body>
-</html>
-
+{{end}}

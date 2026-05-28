@@ -1,33 +1,16 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Stream Triggers - TauchoPortal</title>
-    <link rel="stylesheet" href="/css/main.css">
-    <link rel="stylesheet" href="/css/triggers.css">
-    <script src="/js/auth.js"></script>
+{{define "page"}}{{template "base" .}}{{end}}
+
+{{define "head"}}
+<link rel="stylesheet" href="/css/triggers.css">
     <script src="/js/translations.js"></script>
     <script src="/js/localization.js"></script>
-    <script src="/js/web-components.js"></script>
-</head>
-<body>
-    <!-- Header Navigation -->
-    <taucho-header></taucho-header>
+{{end}}
 
-    <div class="triggers-container">
+{{define "content"}}
+<div class="triggers-container">
         <!-- Page Header -->
         <div class="page-header">
-            <div style="display: flex; justify-content: space-between; align-items: center; width: 100%;">
-                <h1>⚡ <span data-i18n="triggers.title">Stream Triggers</span></h1>
-                <select id="language-selector" class="language-selector">
-                    <option value="en">🇬🇧 English</option>
-                    <option value="ja">🇯🇵 日本語</option>
-                    <option value="de">🇩🇪 Deutsch</option>
-                    <option value="fr">🇫🇷 Français</option>
-                    <option value="es">🇪🇸 Español</option>
-                </select>
-            </div>
+            <h1>⚡ <span data-i18n="triggers.title">Stream Triggers</span></h1>
             <p data-i18n="triggers.subtitle">Set up automated actions that trigger when your streams go live</p>
             <div class="page-actions">
                 <button class="btn btn-primary" onclick="openAddTriggerModal()" data-i18n="triggers.addTrigger">+ Create Trigger</button>
@@ -244,9 +227,7 @@
     </div>
 
     <!-- Footer -->
-    <taucho-footer></taucho-footer>
-
-    <script>
+<script>
         let currentAccountId = 'youtube-gaming';
         let actionCounter = 0;
 
@@ -376,13 +357,7 @@
                 // TODO: Delete from backend
             }
         }
-
-        // Language selector
-        document.getElementById('language-selector').addEventListener('change', (e) => {
-            setLanguage(e.target.value);
-        });
-
-        document.getElementById('triggerForm').addEventListener('submit', (e) => {
+document.getElementById('triggerForm').addEventListener('submit', (e) => {
             e.preventDefault();
             const lang = getCurrentLanguage();
             alert(t('triggers.triggerSaved', lang));
@@ -398,8 +373,6 @@
 
         // Initialize
         initLocalization();
-        requireAuth();
-        selectAccount('youtube-gaming');
+selectAccount('youtube-gaming');
     </script>
-</body>
-</html>
+{{end}}

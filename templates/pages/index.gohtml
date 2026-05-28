@@ -1,14 +1,11 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>TauchoPortal - Home</title>
-    <link rel="stylesheet" href="/css/main.css">
-    <link rel="stylesheet" href="/css/index.css">
-    <script src="/js/auth.js"></script></head>
-<body>
-    <div class="container">
+{{define "page"}}{{template "base" .}}{{end}}
+
+{{define "head"}}
+<link rel="stylesheet" href="/css/index.css">
+{{end}}
+
+{{define "content"}}
+<div class="container">
         <h1>🌊 TauchoPortal</h1>
         <p class="subtitle">Bring your live streams to life — automate your smart home with every chat, gift, and reaction.</p>
 
@@ -167,8 +164,8 @@
 
         // If already logged in, go straight to dashboard
         document.addEventListener('DOMContentLoaded', async () => {
-            const user = await getUserProfile();
+            const user = window.__user;
             if (user) window.location.replace('/dashboard');
         });
     </script>
-
+{{end}}

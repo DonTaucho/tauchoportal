@@ -1,4 +1,4 @@
-﻿/**
+/**
  * Authentication helpers - all API calls go through the /api proxy to the API server
  */
 
@@ -13,6 +13,10 @@ let _cachedUser = undefined;
  */
 async function getUserProfile() {
     if (_cachedUser !== undefined) return _cachedUser;
+    if (Object.prototype.hasOwnProperty.call(window, '__user')) {
+        _cachedUser = window.__user || null;
+        return _cachedUser;
+    }
     try {
         const response = await fetch(`${API_BASE}/auth/user`, {
             credentials: 'include'

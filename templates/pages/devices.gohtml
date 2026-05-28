@@ -1,20 +1,13 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>My Devices - TauchoPortal</title>
-    <link rel="stylesheet" href="/css/main.css">
-    <link rel="stylesheet" href="/css/devices.css">
-    <script src="/js/auth.js"></script>
+{{define "page"}}{{template "base" .}}{{end}}
+
+{{define "head"}}
+<link rel="stylesheet" href="/css/devices.css">
     <script src="/js/translations.js"></script>
     <script src="/js/localization.js"></script>
-    <script src="/js/web-components.js"></script>
-</head>
-<body>
-    <taucho-header></taucho-header>
+{{end}}
 
-    <div class="devices-container">
+{{define "content"}}
+<div class="devices-container">
         <div class="page-header">
             <div class="page-header-top">
                 <div>
@@ -92,10 +85,7 @@
             </div>
         </div>
     </div>
-
-    <taucho-footer></taucho-footer>
-
-    <script>
+<script>
     // =============================================
     // Brand & Product Catalog
     // =============================================
@@ -609,9 +599,6 @@
     window.onclick = e => {
         if (e.target === document.getElementById('deviceModal')) closeModal();
     };
-
-    requireAuth();
-    (async () => { await loadDevices(); renderPage(); })();
+(async () => { await loadDevices(); renderPage(); })();
     </script>
-</body>
-</html>
+{{end}}

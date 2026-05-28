@@ -1,20 +1,13 @@
-﻿<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Watched Channels - TauchoPortal</title>
-    <link rel="stylesheet" href="/css/main.css">
-    <link rel="stylesheet" href="/css/monitors.css">
-    <script src="/js/auth.js"></script>
+{{define "page"}}{{template "base" .}}{{end}}
+
+{{define "head"}}
+<link rel="stylesheet" href="/css/monitors.css">
     <script src="/js/translations.js"></script>
     <script src="/js/localization.js"></script>
-    <script src="/js/web-components.js"></script>
-</head>
-<body>
-    <taucho-header></taucho-header>
+{{end}}
 
-    <div class="monitors-container">
+{{define "content"}}
+<div class="monitors-container">
         <!-- VIEW: Channel List -->
         <div id="view-list" class="view">
             <div class="page-header">
@@ -169,10 +162,7 @@
             </form>
         </div>
     </div>
-
-    <taucho-footer></taucho-footer>
-
-    <script>
+<script>
     // =============================================
     // API data
     // =============================================
@@ -935,9 +925,7 @@
     // Init
     // =============================================
     (async () => {
-        requireAuth();
-        await route();
+await route();
     })();
     </script>
-</body>
-</html>
+{{end}}
