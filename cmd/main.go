@@ -19,12 +19,15 @@ import (
 
 	"golang.org/x/oauth2"
 	"google.golang.org/api/idtoken"
+	"tauchoportal/internal/i18n"
 )
 
 type PageData struct {
 	Title string
 	User  *UserProfile
 	Page  string
+	Lang  string
+	I18n  *i18n.Translator
 }
 
 type UserProfile struct {
@@ -59,6 +62,7 @@ type Server struct {
 	tokenSource oauth2.TokenSource
 	templates   map[string]*template.Template
 	publicDir   string
+	i18n        *i18n.Bundle
 }
 
 func main() {
@@ -95,6 +99,7 @@ func main() {
 		tokenSource: tokenSource,
 		templates:   loadTemplates(),
 		publicDir:   "public",
+		i18n:        i18n.Load(),
 	}
 
 	proxy := httputil.NewSingleHostReverseProxy(target)
@@ -129,6 +134,26 @@ func main() {
 	})
 	mux.HandleFunc("/auth/callback/", func(w http.ResponseWriter, r *http.Request) {
 		callbackProxy.ServeHTTP(w, r)
+	})
+	mux.HandleFunc("/set-lang", func(w http.ResponseWriter, r *http.Request) {
+		lang := r.URL.Query().Get("lang")
+		for _, s := range i18n.Supported() {
+			if lang == s {
+				http.SetCookie(w, &http.Cookie{
+					Name:     i18n.CookieName,
+					Value:    lang,
+					Path:     "/",
+					MaxAge:   365 * 24 * 3600,
+					SameSite: http.SameSiteLaxMode,
+				})
+				break
+			}
+		}
+		back := r.URL.Query().Get("back")
+		if back == "" || !strings.HasPrefix(back, "/") {
+			back = "/"
+		}
+		http.Redirect(w, r, back, http.StatusSeeOther)
 	})
 	mux.HandleFunc("/health", func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Content-Type", "application/json")
@@ -225,6 +250,12 @@ func loadTemplates() map[string]*template.Template {
 	headerPath := filepath.Join("templates", "partials", "header.gohtml")
 	funcMap := template.FuncMap{
 		"userJSON": userJSON,
+		"i18nJSON": func(t *i18n.Translator) template.JS {
+			if t == nil {
+				return template.JS("{}")
+			}
+			return t.JS()
+		},
 	}
 
 	for _, pagePath := range pages {
@@ -291,7 +322,8 @@ func (s *Server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	}
 
 	w.Header().Set("Content-Type", "text/html; charset=utf-8")
-	data := PageData{Title: cfg.Title, User: user, Page: cfg.Name}
+	lang := i18n.DetectLang(r)
+	data := PageData{Title: cfg.Title, User: user, Page: cfg.Name, Lang: lang, I18n: s.i18n.Translator(lang)}
 	if err := tmpl.ExecuteTemplate(w, "page", data); err != nil {
 		log.Printf("failed to render page %s: %v", cfg.Name, err)
 		http.Error(w, "failed to render page", http.StatusInternalServerError)
