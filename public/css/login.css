@@ -92,11 +92,13 @@ body {
 
 .oauth-buttons {
     display: flex;
+    flex-wrap: wrap;
     gap: 12px;
 }
 
 .oauth-btn {
-    flex: 1;
+    flex: 1 1 calc(50% - 6px);
+    min-width: 120px;
     padding: 12px;
     background: white;
     border: 2px solid #e0e0e0;
@@ -131,6 +133,36 @@ body {
 .google-btn:hover {
     background: #f1f5ff;
     border-color: #4285f4;
+}
+
+.github-btn {
+    border-color: #24292f;
+    color: #24292f;
+}
+
+.github-btn:hover {
+    background: #f3f4f6;
+    border-color: #24292f;
+}
+
+.discord-btn {
+    border-color: #5865F2;
+    color: #5865F2;
+}
+
+.discord-btn:hover {
+    background: #f0f1ff;
+    border-color: #5865F2;
+}
+
+.twitch-btn {
+    border-color: #9146FF;
+    color: #9146FF;
+}
+
+.twitch-btn:hover {
+    background: #f5f0ff;
+    border-color: #9146FF;
 }
 
 @media (max-width: 480px) {
