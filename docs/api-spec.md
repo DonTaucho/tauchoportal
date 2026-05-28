@@ -12,16 +12,17 @@ One email account is the master identity. OAuth logins are children of that acco
 ### `users` table
 ```json
 {
-  "id": "uuid",
+  "id": "integer (auto-increment PK)",
   "email": "string (unique, not null)",
   "password_hash": "string (bcrypt, nullable — null for OAuth-only registrations)",
-  "username": "string",
+  "username": "string (unique, not null — used as login identifier and @handle)",
   "picture": "string (URL)",
   "email_verified": "bool",
   "created_at": "timestamp",
   "updated_at": "timestamp"
 }
 ```
+**`username` must have a UNIQUE constraint.** It serves as both the display name and the login identifier (like GitHub's `@handle`). Users can change it later but it must stay unique.
 
 ### `oauth_connections` table
 ```json
@@ -50,8 +51,8 @@ Unique constraint: `(provider, provider_user_id)` — one account per provider.
 ### Email+password endpoints
 | Method | Path | Body | Description |
 |--------|------|------|-------------|
-| POST | `/auth/register` | `{ email, password, username }` | Creates `users` row with bcrypt hash |
-| POST | `/auth/login` | `{ email, password }` | Verifies hash, creates session |
+| POST | `/auth/register` | `{ email, password, username }` | Creates `users` row with bcrypt hash. `username` must be unique. |
+| POST | `/auth/login` | `{ identifier, password }` | `identifier` = username **or** email. Look up by email first; if no match, look up by username. Verifies bcrypt hash, creates session. |
 
 ### Auth/connections endpoints
 | Method | Path | Response | Description |
