@@ -174,63 +174,9 @@
 
     <script>
     // =============================================
-    // Sample data (replace with API calls)
+    // API data
     // =============================================
-    const CHANNELS = [
-        {
-            id: 'gaming-stream',
-            name: 'Gaming Stream',
-            platform: 'youtube',
-            channelId: '@GamingStream',
-            active: true,
-            status: 'live',
-            lastStream: 'Live now',
-            conditions: [
-                { id: 'c1', name: 'Keyword Alert: hype', type: 'comment', filter: 'hype', enabled: true, lastTriggered: 'May 25, 14:08' },
-                { id: 'c2', name: 'Super Chat Received', type: 'superchat', filter: '', enabled: true, lastTriggered: 'May 24, 19:41' },
-                { id: 'c3', name: 'Super Sticker', type: 'sticker', filter: '', enabled: false, lastTriggered: 'Never' },
-            ]
-        },
-        {
-            id: 'creative-session',
-            name: 'Creative Session',
-            platform: 'youtube',
-            channelId: '@CreativeSession',
-            active: true,
-            status: 'offline',
-            lastStream: 'May 23, 2025',
-            conditions: [
-                { id: 'c4', name: 'Any Comment', type: 'comment', filter: '', enabled: true, lastTriggered: 'May 23, 21:12' },
-            ]
-        },
-        {
-            id: 'main-broadcast',
-            name: 'Main Broadcast',
-            platform: 'twitch',
-            channelId: 'mainbroadcast',
-            active: true,
-            status: 'offline',
-            lastStream: 'May 24, 2025',
-            conditions: [
-                { id: 'c5', name: 'New Follower', type: 'follow', filter: '', enabled: true, lastTriggered: 'May 23, 21:05' },
-                { id: 'c6', name: 'Cheer (Bits)', type: 'cheer', filter: '', enabled: true, lastTriggered: 'May 22, 18:33' },
-                { id: 'c7', name: 'Hype Train Start', type: 'hype_train', filter: '', enabled: false, lastTriggered: 'Never' },
-            ]
-        },
-        {
-            id: 'niconico-live-1',
-            name: 'Live #1',
-            platform: 'niconico',
-            channelId: 'lv12345678',
-            active: false,
-            status: 'paused',
-            lastStream: 'May 20, 2025',
-            conditions: [
-                { id: 'c8', name: 'Comment Received', type: 'comment', filter: '', enabled: true, lastTriggered: 'May 20, 16:00' },
-                { id: 'c9', name: 'Emotion Effect (Nicoru)', type: 'nicoru', filter: '', enabled: true, lastTriggered: 'May 20, 16:22' },
-            ]
-        },
-    ];
+    let CHANNELS = [];
 
     // Platform-specific event types
     const PLATFORM_EVENTS = {
@@ -282,13 +228,73 @@
     // =============================================
     let currentChannel = null;
 
-    function route() {
+    async function apiRequest(method, path, body) {
+        const opts = { method, credentials: 'include', headers: {} };
+        if (body) {
+            opts.headers['Content-Type'] = 'application/json';
+            opts.body = JSON.stringify(body);
+        }
+        const r = await fetch(API_BASE + path, opts);
+        if (!r.ok) {
+            const t = await r.text();
+            throw new Error(t || r.status);
+        }
+        return r.status === 204 ? null : r.json();
+    }
+
+    async function loadWatches() {
+        try {
+            CHANNELS = await apiRequest('GET', '/watches');
+            CHANNELS = CHANNELS.map(w => ({
+                id: w.id,
+                name: w.name,
+                platform: w.platform,
+                channelId: w.channel_id,
+                active: w.is_active,
+                status: w.status || 'offline',
+                lastStream: w.last_stream_at ? new Date(w.last_stream_at).toLocaleDateString() : 'Never',
+                conditions: []
+            }));
+        } catch (e) {
+            console.error('Failed to load watches:', e);
+            CHANNELS = [];
+        }
+    }
+
+    async function loadConditions(watchId) {
+        const ch = CHANNELS.find(c => c.id === watchId);
+        try {
+            const conds = await apiRequest('GET', `/conditions?watch_id=${watchId}`);
+            if (ch) {
+                ch.conditions = conds.map(c => ({
+                    id: c.id,
+                    name: c.name,
+                    type: c.event_type,
+                    filter: c.filter || '',
+                    enabled: c.is_enabled,
+                    deviceId: c.device_id || null,
+                    deviceAction: c.device_action || null,
+                    deviceActionParams: c.device_action_params || {},
+                    lastTriggered: c.last_triggered_at ? new Date(c.last_triggered_at).toLocaleString() : 'Never'
+                }));
+            }
+            return ch ? ch.conditions : [];
+        } catch (e) {
+            console.error('Failed to load conditions:', e);
+            if (ch) ch.conditions = [];
+            return [];
+        }
+    }
+
+    async function route() {
         const path = window.location.pathname;
         const m = path.match(/^\/monitors\/([^\/]+)(\/conditions)?/);
         if (m) {
+            await loadWatches();
             const ch = CHANNELS.find(c => c.id === m[1]);
             if (!ch) { navigate('/monitors'); return; }
             currentChannel = ch;
+            await loadConditions(ch.id);
             if (m[2]) {
                 showView('view-conditions');
                 renderConditionsView();
@@ -298,6 +304,7 @@
             }
         } else {
             currentChannel = null;
+            await loadWatches();
             showView('view-list');
             renderChannelListView();
         }
@@ -601,23 +608,50 @@
         openModal('channelModal');
     }
 
-    function saveChannel(e) {
+    async function saveChannel(e) {
         e.preventDefault();
-        // TODO: call backend API
-        closeModal('channelModal');
-        renderChannelListView();
+        const btn = document.getElementById('chSaveBtn');
+        btn.disabled = true;
+        try {
+            const body = {
+                name: document.getElementById('chName').value,
+                platform: document.getElementById('chPlatform').value,
+                channel_id: document.getElementById('chId').value,
+                is_active: document.getElementById('chActive').checked
+            };
+            if (editingChannelId) {
+                await apiRequest('PATCH', `/watches/update?id=${editingChannelId}`, body);
+            } else {
+                await apiRequest('POST', '/watches', body);
+            }
+            closeModal('channelModal');
+            await loadWatches();
+            renderChannelListView();
+        } catch (e) {
+            alert('Failed to save channel: ' + e.message);
+        } finally {
+            btn.disabled = false;
+        }
     }
 
-    function toggleChannel(channelId, checkbox) {
-        const ch = CHANNELS.find(c => c.id === channelId);
-        if (ch) ch.active = checkbox.checked;
-        // TODO: call backend API
+    async function toggleChannel(channelId, checkbox) {
+        try {
+            await apiRequest('PATCH', `/watches/update?id=${channelId}`, { is_active: checkbox.checked });
+            const ch = CHANNELS.find(c => c.id === channelId);
+            if (ch) ch.active = checkbox.checked;
+        } catch (e) {
+            checkbox.checked = !checkbox.checked;
+            alert('Failed to update channel: ' + e.message);
+        }
     }
 
-    function deleteChannel(channelId) {
-        if (confirm('Remove this channel from monitoring?\n\nAll conditions for this channel will also be removed.')) {
-            // TODO: call backend API
+    async function deleteChannel(channelId) {
+        if (!confirm('Remove this channel from monitoring?\n\nAll conditions for this channel will also be removed.')) return;
+        try {
+            await apiRequest('DELETE', `/watches?id=${channelId}`);
             navigate('/monitors');
+        } catch (e) {
+            alert('Failed to delete channel: ' + e.message);
         }
     }
 
@@ -626,29 +660,53 @@
     // =============================================
     let editingConditionId = null;
 
-    function openAddConditionModal() {
+    async function openAddConditionModal() {
         editingConditionId = null;
         document.getElementById('condModalTitle').textContent = 'Add Condition';
         document.getElementById('condModalSubtitle').textContent = 'Define when to trigger an action on ' + currentChannel.name + '.';
         document.getElementById('condSaveBtn').textContent = 'Add Condition';
         document.getElementById('conditionForm').reset();
         document.getElementById('condFilterGroup').style.display = 'none';
+        document.getElementById('condActionSelectGroup').style.display = 'none';
+        document.getElementById('condColorGroup').style.display = 'none';
+        document.getElementById('condBrightnessGroup').style.display = 'none';
+        document.getElementById('condBrightness').value = 50;
+        document.getElementById('condBrightnessVal').textContent = '50';
+        document.querySelectorAll('.color-preset').forEach((btn, index) => btn.classList.toggle('selected', index === 0));
         populateEventSelect(currentChannel.platform);
+        await toggleDeviceAction(document.getElementById('condHasDevice'));
         openModal('conditionModal');
     }
 
-    function openEditConditionModal(condId) {
+    async function openEditConditionModal(condId) {
         editingConditionId = condId;
         const cond = currentChannel.conditions.find(c => c.id === condId);
         document.getElementById('condModalTitle').textContent = 'Edit Condition';
         document.getElementById('condModalSubtitle').textContent = 'Update this condition for ' + currentChannel.name + '.';
         document.getElementById('condSaveBtn').textContent = 'Save Changes';
+        document.getElementById('conditionForm').reset();
         document.getElementById('condName').value = cond.name;
         populateEventSelect(currentChannel.platform);
         document.getElementById('condEventType').value = cond.type;
         updateCondEventFields();
         document.getElementById('condFilter').value = cond.filter;
         document.getElementById('condEnabled').checked = cond.enabled;
+        document.getElementById('condHasDevice').checked = !!cond.deviceId;
+        document.getElementById('condBrightness').value = cond.deviceActionParams && cond.deviceActionParams.brightness ? cond.deviceActionParams.brightness : 50;
+        document.getElementById('condBrightnessVal').textContent = document.getElementById('condBrightness').value;
+        document.querySelectorAll('.color-preset').forEach((btn, index) => {
+            const selectedColor = cond.deviceActionParams && cond.deviceActionParams.color;
+            btn.classList.toggle('selected', selectedColor ? btn.dataset.color === selectedColor : index === 0);
+        });
+        await toggleDeviceAction(document.getElementById('condHasDevice'));
+        if (cond.deviceId) {
+            document.getElementById('condDeviceSelect').value = cond.deviceId;
+            updateCondActionSelect();
+            if (cond.deviceAction) {
+                document.getElementById('condActionSelect').value = cond.deviceAction;
+                updateCondActionParams();
+            }
+        }
         openModal('conditionModal');
     }
 
@@ -665,72 +723,175 @@
         document.getElementById('condFilterGroup').style.display = showFilter ? 'block' : 'none';
     }
 
-    function saveCondition(e) {
+    async function saveCondition(e) {
         e.preventDefault();
-        // TODO: call backend API
-        closeModal('conditionModal');
-        renderConditionsView();
-    }
+        const btn = document.getElementById('condSaveBtn');
+        btn.disabled = true;
+        try {
+            const deviceId = document.getElementById('condHasDevice').checked
+                ? document.getElementById('condDeviceSelect').value || null
+                : null;
+            const deviceAction = deviceId ? (document.getElementById('condActionSelect').value || null) : null;
+            const deviceActionParams = {};
+            if (deviceAction === 'color') {
+                const sel = document.querySelector('.color-preset.selected');
+                if (sel) deviceActionParams.color = sel.dataset.color;
+            }
+            if (deviceAction === 'brightness') {
+                deviceActionParams.brightness = parseInt(document.getElementById('condBrightness').value, 10);
+            }
 
-    function toggleCondition(condId, checkbox) {
-        const cond = currentChannel.conditions.find(c => c.id === condId);
-        if (cond) cond.enabled = checkbox.checked;
-        const card = document.querySelector(`[data-cond-id="${condId}"]`);
-        if (card) {
-            const badge = card.querySelector('.rule-status');
-            badge.textContent = checkbox.checked ? 'Enabled' : 'Disabled';
-            badge.className = 'rule-status ' + (checkbox.checked ? 'enabled' : 'disabled');
+            const body = {
+                watch_id: currentChannel.id,
+                name: document.getElementById('condName').value,
+                event_type: document.getElementById('condEventType').value,
+                filter: document.getElementById('condFilter').value || '',
+                is_enabled: document.getElementById('condEnabled').checked,
+                device_id: deviceId,
+                device_action: deviceAction,
+                device_action_params: Object.keys(deviceActionParams).length ? deviceActionParams : null
+            };
+            if (editingConditionId) {
+                await apiRequest('PATCH', `/conditions/update?id=${editingConditionId}`, body);
+            } else {
+                await apiRequest('POST', '/conditions', body);
+            }
+            closeModal('conditionModal');
+            await loadConditions(currentChannel.id);
+            renderConditionsView();
+        } catch (e) {
+            alert('Failed to save condition: ' + e.message);
+        } finally {
+            btn.disabled = false;
         }
-        // TODO: call backend API
     }
 
-    function deleteCondition(condId) {
-        if (confirm('Delete this condition?\n\nThis event will no longer trigger any actions.')) {
+    async function toggleCondition(condId, checkbox) {
+        try {
+            await apiRequest('PATCH', `/conditions/update?id=${condId}`, { is_enabled: checkbox.checked });
+            const cond = currentChannel.conditions.find(c => c.id === condId);
+            if (cond) cond.enabled = checkbox.checked;
+            const card = document.querySelector(`[data-cond-id="${condId}"]`);
+            if (card) {
+                const badge = card.querySelector('.rule-status');
+                badge.textContent = checkbox.checked ? 'Enabled' : 'Disabled';
+                badge.className = 'rule-status ' + (checkbox.checked ? 'enabled' : 'disabled');
+            }
+        } catch (e) {
+            checkbox.checked = !checkbox.checked;
+            alert('Failed to update condition: ' + e.message);
+        }
+    }
+
+    async function deleteCondition(condId) {
+        if (!confirm('Delete this condition?\n\nThis event will no longer trigger any actions.')) return;
+        try {
+            await apiRequest('DELETE', `/conditions?id=${condId}`);
             currentChannel.conditions = currentChannel.conditions.filter(c => c.id !== condId);
             renderConditionsView();
-            // TODO: call backend API
+        } catch (e) {
+            alert('Failed to delete condition: ' + e.message);
         }
     }
 
     // =============================================
     // Device Action (condition modal)
     // =============================================
-    const MOCK_DEVICES = [
-        { id: 'd1', name: 'Living Room LED', model: 'Govee H6159', brand: 'Govee', actions: ['power', 'color', 'brightness', 'scene'] },
-        { id: 'd2', name: 'Desk Lamp',       model: 'Philips Hue White & Color', brand: 'Philips Hue', actions: ['power', 'color', 'brightness'] },
-        { id: 'd3', name: 'Studio Bulb',     model: 'LIFX Color 1000', brand: 'LIFX', actions: ['power', 'color', 'brightness', 'infrared'] },
-        { id: 'd4', name: 'PC Monitor Backlight', model: 'WLED 0.14', brand: 'WLED', actions: ['power', 'color', 'brightness', 'effect'] },
-        { id: 'd5', name: 'Smart Plug (Recording Rig)', model: 'TP-Link Kasa EP25', brand: 'TP-Link Kasa', actions: ['power', 'schedule'] },
-    ];
+    const PRODUCTS = {
+        'govee-h6159': { actions: ['on','off','color','brightness','scene','flash'] },
+        'govee-h6052': { actions: ['on','off','color','brightness','color_temp'] },
+        'govee-h7021': { actions: ['on','off','color','brightness'] },
+        'govee-h5080': { actions: ['on','off','toggle'] },
+        'hue-color':   { actions: ['on','off','color','brightness','color_temp','scene'] },
+        'hue-white':   { actions: ['on','off','brightness','color_temp'] },
+        'hue-strip':   { actions: ['on','off','color','brightness','scene'] },
+        'hue-plug':    { actions: ['on','off','toggle'] },
+        'kasa-ep10':   { actions: ['on','off','toggle'] },
+        'kasa-ep40':   { actions: ['on','off','toggle'] },
+        'kasa-lb130':  { actions: ['on','off','color','brightness'] },
+        'lifx-color':  { actions: ['on','off','color','brightness','color_temp','scene'] },
+        'lifx-mini':   { actions: ['on','off','brightness','color_temp'] },
+        'lifx-strip':  { actions: ['on','off','color','brightness','scene'] },
+        'tuya-bulb':   { actions: ['on','off','color','brightness'] },
+        'tuya-plug':   { actions: ['on','off','toggle'] },
+        'tuya-strip':  { actions: ['on','off','color','brightness'] },
+        'nano-shapes': { actions: ['on','off','color','brightness','scene'] },
+        'nano-lines':  { actions: ['on','off','color','brightness','scene'] },
+        'nano-canvas': { actions: ['on','off','color','brightness','scene'] },
+        'yee-color':   { actions: ['on','off','color','brightness','color_temp'] },
+        'yee-strip':   { actions: ['on','off','color','brightness'] },
+        'yee-desk':    { actions: ['on','off','brightness','color_temp'] },
+        'wled-ctrl':   { actions: ['on','off','color','brightness','scene','flash'] },
+        'wyze-plug':   { actions: ['on','off','toggle'] },
+        'wyze-bulb':   { actions: ['on','off','color','brightness','color_temp'] },
+        'amz-plug':    { actions: ['on','off','toggle'] },
+        'echo-flex':   { actions: ['on','off','toggle'] },
+    };
+    let _deviceCache = null;
 
-    function toggleDeviceAction(checkbox) {
-        document.getElementById('deviceActionFields').style.display = checkbox.checked ? 'block' : 'none';
-        if (checkbox.checked) populateDeviceDropdown();
+    async function toggleDeviceAction(checkbox) {
+        const enabled = checkbox.checked;
+        document.getElementById('deviceActionFields').style.display = enabled ? 'block' : 'none';
+        if (enabled) {
+            await populateDeviceDropdown();
+        } else {
+            document.getElementById('condDeviceSelect').value = '';
+            document.getElementById('condActionSelect').value = '';
+            document.getElementById('condActionSelectGroup').style.display = 'none';
+            updateCondActionParams();
+        }
     }
 
-    function populateDeviceDropdown() {
+    async function populateDeviceDropdown() {
         const sel = document.getElementById('condDeviceSelect');
         while (sel.options.length > 1) sel.remove(1);
-        MOCK_DEVICES.forEach(d => {
-            const o = new Option(`${d.name} — ${d.model}`, d.id);
-            sel.add(o);
-        });
+        try {
+            if (!_deviceCache) _deviceCache = await apiRequest('GET', '/devices');
+            _deviceCache.forEach(d => {
+                const o = new Option(`${d.name} (${d.brand})`, d.id);
+                sel.add(o);
+            });
+        } catch (e) {
+            console.error('Failed to load devices:', e);
+        }
     }
 
     function updateCondActionSelect() {
         const sel = document.getElementById('condDeviceSelect');
-        const device = MOCK_DEVICES.find(d => d.id === sel.value);
+        const device = (_deviceCache || []).find(d => d.id === sel.value);
         const group = document.getElementById('condActionSelectGroup');
-        if (!device) { group.style.display = 'none'; return; }
+        if (!device) {
+            group.style.display = 'none';
+            document.getElementById('condActionSelect').value = '';
+            updateCondActionParams();
+            return;
+        }
+        const product = PRODUCTS[device.product_id];
+        if (!product || !product.actions || product.actions.length === 0) {
+            group.style.display = 'none';
+            document.getElementById('condActionSelect').value = '';
+            updateCondActionParams();
+            return;
+        }
         group.style.display = 'block';
         const aSel = document.getElementById('condActionSelect');
+        const currentValue = aSel.value;
         while (aSel.options.length > 1) aSel.remove(1);
-        const ACTION_LABELS = { power: '⏻ Power On/Off', color: '🎨 Set Color', brightness: '☀️ Set Brightness',
-            scene: '✨ Scene Mode', effect: '🌈 LED Effect', infrared: '💡 Infrared', schedule: '⏰ Schedule' };
-        device.actions.forEach(a => {
+        const ACTION_LABELS = {
+            on: 'Turn On',
+            off: 'Turn Off',
+            toggle: 'Toggle On/Off',
+            color: 'Set Color',
+            brightness: 'Set Brightness',
+            color_temp: 'Set Color Temperature',
+            scene: 'Scene Mode',
+            flash: 'Flash Alert'
+        };
+        product.actions.forEach(a => {
             const o = new Option(ACTION_LABELS[a] || a, a);
             aSel.add(o);
         });
+        if (currentValue && product.actions.includes(currentValue)) aSel.value = currentValue;
         updateCondActionParams();
     }
 
@@ -773,8 +934,10 @@
     // =============================================
     // Init
     // =============================================
-    requireAuth();
-    route();
+    (async () => {
+        requireAuth();
+        await route();
+    })();
     </script>
 </body>
 </html>

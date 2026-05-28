@@ -272,14 +272,30 @@
         flash:      { label: 'Flash Alert',          icon: '⚡' },
     };
 
-    // Sample registered devices (replace with API call)
-    let MY_DEVICES = [
-        { id: 'dev-1', name: 'Gaming Room Strip', brand: 'govee',    productId: 'govee-h6159', room: 'Gaming Room', status: 'online',  configured: true },
-        { id: 'dev-2', name: 'Desk Lamp',         brand: 'govee',    productId: 'govee-h6052', room: 'Office',      status: 'online',  configured: true },
-        { id: 'dev-3', name: 'Living Room Light', brand: 'hue',      productId: 'hue-color',   room: 'Living Room', status: 'offline', configured: true },
-        { id: 'dev-4', name: 'Stream PC Plug',    brand: 'kasa',     productId: 'kasa-ep10',   room: 'Office',      status: 'online',  configured: true },
-        { id: 'dev-5', name: 'LED Matrix',        brand: 'wled',     productId: 'wled-ctrl',   room: 'Gaming Room', status: 'online',  configured: false },
-    ];
+    let MY_DEVICES = [];
+
+    async function apiRequest(method, path, body) {
+        const opts = { method, credentials: 'include', headers: {} };
+        if (body) {
+            opts.headers['Content-Type'] = 'application/json';
+            opts.body = JSON.stringify(body);
+        }
+        const r = await fetch(API_BASE + path, opts);
+        if (!r.ok) {
+            const t = await r.text();
+            throw new Error(t || r.status);
+        }
+        return r.status === 204 ? null : r.json();
+    }
+
+    async function loadDevices() {
+        try {
+            MY_DEVICES = await apiRequest('GET', '/devices');
+        } catch (e) {
+            console.error('Failed to load devices:', e);
+            MY_DEVICES = [];
+        }
+    }
 
     // =============================================
     // Render
@@ -295,7 +311,7 @@
     function renderStats() {
         const online  = MY_DEVICES.filter(d => d.status === 'online').length;
         const offline = MY_DEVICES.filter(d => d.status === 'offline').length;
-        const notConf = MY_DEVICES.filter(d => !d.configured).length;
+        const notConf = MY_DEVICES.filter(d => !d.is_configured).length;
         document.getElementById('statsRow').innerHTML = `
             <div class="stat-card"><span class="stat-number">${MY_DEVICES.length}</span><span class="stat-label">Total</span></div>
             <div class="stat-card online"><span class="stat-number">${online}</span><span class="stat-label">Online</span></div>
@@ -348,14 +364,14 @@
 
     function renderDeviceCard(dev) {
         const brand      = BRANDS.find(b => b.id === dev.brand);
-        const product    = (PRODUCTS[dev.brand] || []).find(p => p.id === dev.productId);
+        const product    = (PRODUCTS[dev.brand] || []).find(p => p.id === dev.product_id);
         const brandColor = brand ? brand.color : '#888';
 
         const statusBadge = dev.status === 'online'
             ? '<span class="status-badge online">🟢 Online</span>'
             : '<span class="status-badge offline">🔴 Offline</span>';
 
-        const configBadge = !dev.configured
+        const configBadge = !dev.is_configured
             ? '<span class="status-badge warn">⚠ Setup incomplete</span>'
             : '';
 
@@ -374,7 +390,7 @@
                 </div>
                 <div class="device-info">
                     <div class="device-name">${dev.name}</div>
-                    <div class="device-model">${product ? product.name : dev.productId}</div>
+                    <div class="device-model">${product ? product.name : dev.product_id}</div>
                     <div class="device-badges">${statusBadge} ${configBadge} ${dev.room ? `<span class="device-room">🏠 ${dev.room}</span>` : ''}</div>
                     <div class="device-action-chips">${chips}</div>
                 </div>
@@ -403,17 +419,34 @@
         document.body.style.overflow = 'hidden';
     }
 
-    function openEditModal(devId) {
+    async function openEditModal(devId) {
         editingId = devId;
         const dev = MY_DEVICES.find(d => d.id === devId);
+        if (!dev) return;
         selectedBrand = dev.brand;
         const brand = BRANDS.find(b => b.id === dev.brand);
         setStep2Brand(brand);
         populateProductSelect(dev.brand);
         renderCredFields(dev.brand);
-        document.getElementById('devName').value = dev.name;
-        document.getElementById('devProduct').value = dev.productId;
-        document.getElementById('devRoom').value = dev.room || '';
+        try {
+            const fullDev = await apiRequest('GET', `/devices/get?id=${devId}`);
+            document.getElementById('devName').value = fullDev.name;
+            document.getElementById('devProduct').value = fullDev.product_id;
+            document.getElementById('devRoom').value = fullDev.room || '';
+            const creds = fullDev.credentials || {};
+            const brandCred = BRAND_CREDS[dev.brand];
+            if (brandCred) {
+                brandCred.fields.forEach(f => {
+                    if (f.type !== 'info') {
+                        const el = document.getElementById('cred_' + f.id);
+                        if (el) el.value = creds[f.id] || '';
+                    }
+                });
+            }
+        } catch (e) {
+            alert('Failed to load device details: ' + e.message);
+            return;
+        }
         document.getElementById('devSaveBtn').textContent = 'Save Changes';
         showStep(2);
         document.getElementById('deviceModal').style.display = 'block';
@@ -510,27 +543,67 @@
     // =============================================
     // CRUD
     // =============================================
-    function saveDevice(e) {
+    async function saveDevice(e) {
         e.preventDefault();
-        // TODO: call backend API
-        closeModal();
-        renderPage();
-    }
-
-    function deleteDevice(devId) {
-        const dev = MY_DEVICES.find(d => d.id === devId);
-        if (confirm(`Remove "${dev.name}"?\n\nConditions using this device will lose their action.`)) {
-            MY_DEVICES = MY_DEVICES.filter(d => d.id !== devId);
+        const btn = document.getElementById('devSaveBtn');
+        btn.disabled = true;
+        try {
+            const creds = {};
+            const brand = selectedBrand;
+            const brandCred = BRAND_CREDS[brand];
+            if (brandCred) {
+                brandCred.fields.forEach(f => {
+                    if (f.type !== 'info') {
+                        const el = document.getElementById('cred_' + f.id);
+                        if (el && el.value) creds[f.id] = el.value;
+                    }
+                });
+            }
+            const body = {
+                name: document.getElementById('devName').value,
+                brand: selectedBrand,
+                product_id: document.getElementById('devProduct').value,
+                room: document.getElementById('devRoom').value || null,
+                credentials: creds
+            };
+            if (editingId) {
+                await apiRequest('PATCH', `/devices/update?id=${editingId}`, body);
+            } else {
+                await apiRequest('POST', '/devices', body);
+            }
+            closeModal();
+            await loadDevices();
             renderPage();
-            // TODO: call backend API
+        } catch (e) {
+            alert('Failed to save device: ' + e.message);
+        } finally {
+            btn.disabled = false;
         }
     }
 
-    function testDevice(devId) {
+    async function deleteDevice(devId) {
         const dev = MY_DEVICES.find(d => d.id === devId);
-        if (!dev.configured) { alert('Complete device setup before testing.'); return; }
-        alert(`Sending test command to "${dev.name}"...\n\n(Will flash or ping the device briefly.)\n\n[Backend API not yet connected]`);
-        // TODO: POST /api/devices/{devId}/test
+        if (!dev) return;
+        if (!confirm(`Remove "${dev.name}"?\n\nConditions using this device will lose their action.`)) return;
+        try {
+            await apiRequest('DELETE', `/devices?id=${devId}`);
+            await loadDevices();
+            renderPage();
+        } catch (e) {
+            alert('Failed to delete device: ' + e.message);
+        }
+    }
+
+    async function testDevice(devId) {
+        const dev = MY_DEVICES.find(d => d.id === devId);
+        if (!dev) return;
+        if (!dev.is_configured) { alert('Complete device setup before testing.'); return; }
+        try {
+            await apiRequest('POST', `/devices/test?id=${devId}`);
+            alert(`Test command sent to "${dev.name}".`);
+        } catch (e) {
+            alert('Test failed: ' + e.message);
+        }
     }
 
     window.onclick = e => {
@@ -538,7 +611,7 @@
     };
 
     requireAuth();
-    renderPage();
+    (async () => { await loadDevices(); renderPage(); })();
     </script>
 </body>
 </html>

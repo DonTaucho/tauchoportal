@@ -93,7 +93,7 @@
                     <div class="stream-header">
                         <div class="stream-title-section">
                             <h2 id="streamTitle">Gaming Stream</h2>
-                            <span id="streamProvider" class="provider-badge">YouTube</span>
+                            <span id="streamProviderBadge" class="provider-badge">YouTube</span>
                             <span id="streamStatus" class="status-badge live">● LIVE</span>
                         </div>
                         <div class="stream-actions">
@@ -214,8 +214,8 @@
                     <input type="text" id="streamRtmpUrl" required data-i18n-placeholder="modal.rtmpUrlPlaceholder" placeholder="rtmp://...">
                 </div>
                 <div class="form-group">
-                    <label for="streamKey" data-i18n="modal.streamKey">Stream Key</label>
-                    <input type="password" id="streamKey" required data-i18n-placeholder="modal.streamKeyPlaceholder" placeholder="Your stream key">
+                    <label for="streamKeyInput" data-i18n="modal.streamKey">Stream Key</label>
+                    <input type="password" id="streamKeyInput" required data-i18n-placeholder="modal.streamKeyPlaceholder" placeholder="Your stream key">
                 </div>
                 <button type="submit" class="submit-btn" data-i18n="modal.addStream">Add Stream</button>
             </form>
@@ -223,117 +223,150 @@
     </div>
 
     <script>
-        let currentStreamId = 1;
-        const streams = {
-            1: {
-                id: 1,
-                title: 'Gaming Stream',
-                provider: 'YouTube',
-                status: 'live',
-                viewers: '1,523',
-                uptime: '1h 23m',
-                health: 'Excellent',
-                bitrate: '5000 kbps',
-                fps: '60',
-                resolution: '1920x1080',
-                url: 'rtmp://live.youtube.com/rtmp/...',
-                key: 'key123456789',
-                started: 'May 14, 2:35 PM'
-            },
-            2: {
-                id: 2,
-                title: 'Creative Session',
-                provider: 'YouTube',
-                status: 'offline',
-                viewers: '0',
-                uptime: '0m',
-                health: 'Offline',
-                bitrate: '-',
-                fps: '-',
-                resolution: '-',
-                url: 'rtmp://live.youtube.com/rtmp/...',
-                key: 'key987654321',
-                started: 'May 13, 6:00 PM'
-            },
-            3: {
-                id: 3,
-                title: 'Main Broadcast',
-                provider: 'Twitch',
-                status: 'live',
-                viewers: '2,145',
-                uptime: '45m',
-                health: 'Excellent',
-                bitrate: '6000 kbps',
-                fps: '60',
-                resolution: '1920x1080',
-                url: 'rtmp://live.twitch.tv/app/...',
-                key: 'twitch_key_123',
-                started: 'May 14, 3:20 PM'
-            },
-            4: {
-                id: 4,
-                title: 'Live #1',
-                provider: 'NicoNico',
-                status: 'ended',
-                viewers: '523',
-                uptime: '2h 15m',
-                health: 'Completed',
-                bitrate: '4000 kbps',
-                fps: '30',
-                resolution: '1280x720',
-                url: 'rtmp://niconico.jp/rtmp/...',
-                key: 'nico_key_456',
-                started: 'May 14, 12:00 PM'
+        let currentStreamId = null;
+        let streams = {};
+        let streamsList = [];
+
+        async function apiRequest(method, path, body) {
+            const opts = { method, credentials: 'include', headers: {} };
+            if (body) {
+                opts.headers['Content-Type'] = 'application/json';
+                opts.body = JSON.stringify(body);
             }
-        };
+            const r = await fetch(API_BASE + path, opts);
+            if (!r.ok) {
+                const t = await r.text();
+                throw new Error(t || r.status);
+            }
+            return r.status === 204 ? null : r.json();
+        }
 
-        function selectStream(id) {
+        async function loadStreams() {
+            try {
+                streamsList = await apiRequest('GET', '/streams');
+                streams = {};
+                streamsList.forEach(s => {
+                    streams[s.id] = {
+                        id: s.id,
+                        title: s.name,
+                        provider: s.platform.charAt(0).toUpperCase() + s.platform.slice(1),
+                        platformKey: s.platform,
+                        status: s.status || 'offline',
+                        isActive: s.is_active,
+                        rtmpUrl: s.rtmp_url,
+                        streamKey: s.stream_key,
+                        startedAt: s.started_at ? new Date(s.started_at).toLocaleString() : null,
+                        viewers: '\u2014',
+                        uptime: '\u2014',
+                        health: '\u2014',
+                        bitrate: '\u2014',
+                        fps: '\u2014',
+                        resolution: '\u2014'
+                    };
+                });
+            } catch (e) {
+                console.error('Failed to load streams:', e);
+                streams = {};
+                streamsList = [];
+            }
+        }
+
+        function renderSidebar() {
+            const byPlatform = {};
+            streamsList.forEach(s => {
+                if (!byPlatform[s.platform]) byPlatform[s.platform] = [];
+                byPlatform[s.platform].push(s);
+            });
+            const platformMeta = {
+                youtube: { label: 'YouTube' },
+                twitch: { label: 'Twitch' },
+                niconico: { label: 'NicoNico' }
+            };
+            const container = document.querySelector('.providers-list');
+            if (!container) return;
+            if (streamsList.length === 0) {
+                container.innerHTML = '<p style="padding:1rem;color:#888">No streams yet. Add one above.</p>';
+                return;
+            }
+            container.innerHTML = Object.entries(byPlatform).map(([platform, list]) => {
+                const meta = platformMeta[platform] || { label: platform };
+                const items = list.map(s => {
+                    const st = streams[s.id];
+                    const badge = st.status === 'live'
+                        ? '<span class="status-badge live">LIVE</span>'
+                        : '<span class="status-badge offline">OFF</span>';
+                    return `<div class="stream-item" onclick="selectStream('${s.id}')" id="sidebar-${s.id}">
+                        ${badge}<span class="stream-title">${st.title}</span>
+                    </div>`;
+                }).join('');
+                return `<div class="provider-group">
+                    <div class="provider-header" onclick="toggleProvider('${platform}')">
+                        <span class="provider-icon">▶</span>
+                        <span class="provider-name">${meta.label}</span>
+                        <span class="provider-count">(${list.length})</span>
+                    </div>
+                    <div class="streams-in-provider" id="${platform}-streams">${items}</div>
+                </div>`;
+            }).join('');
+        }
+
+        async function selectStream(id) {
             currentStreamId = id;
+            try {
+                const full = await apiRequest('GET', `/streams/get?id=${id}`);
+                streams[id] = {
+                    ...streams[id],
+                    streamKey: full.stream_key,
+                    rtmpUrl: full.rtmp_url
+                };
+            } catch (e) {
+                console.error('Failed to fetch stream detail:', e);
+            }
             const stream = streams[id];
-
-            // Update UI
+            if (!stream) return;
             document.getElementById('streamTitle').textContent = stream.title;
-            document.getElementById('streamProvider').textContent = stream.provider;
-            
+            document.getElementById('streamProviderBadge').textContent = stream.provider;
             const statusEl = document.getElementById('streamStatus');
-            statusEl.textContent = '● ' + stream.status.toUpperCase();
+            statusEl.textContent = '\u25CF ' + stream.status.toUpperCase();
             statusEl.className = 'status-badge ' + stream.status;
-
             document.getElementById('metricViewers').textContent = stream.viewers;
             document.getElementById('metricUptime').textContent = stream.uptime;
-            document.getElementById('metricHealth').textContent = '✅ ' + stream.health;
+            document.getElementById('metricHealth').textContent = stream.health === '\u2014' ? '\u2014 Not available' : 'OK ' + stream.health;
             document.getElementById('metricBitrate').textContent = stream.bitrate;
             document.getElementById('metricFps').textContent = stream.fps;
             document.getElementById('metricResolution').textContent = stream.resolution;
-
-            document.getElementById('streamUrl').textContent = stream.url;
-            document.getElementById('streamKey').textContent = '••••••••••••••••';
-            document.getElementById('streamStarted').textContent = stream.started;
-
-            // Update sidebar highlighting
+            document.getElementById('streamUrl').textContent = stream.rtmpUrl || '\u2014';
+            document.getElementById('streamKey').textContent = '\u2022\u2022\u2022\u2022\u2022\u2022\u2022\u2022\u2022\u2022\u2022\u2022\u2022\u2022\u2022\u2022';
+            document.getElementById('streamStarted').textContent = stream.startedAt || '\u2014';
+            document.getElementById('uptimeTrend').textContent = stream.startedAt || '\u2014';
+            document.getElementById('bitrateTrend').textContent = stream.bitrate;
             document.querySelectorAll('.stream-item').forEach(el => el.classList.remove('active'));
-            document.querySelector(`[onclick="selectStream(${id})"]`).classList.add('active');
-
+            const sidebarItem = document.getElementById('sidebar-' + id);
+            if (sidebarItem) sidebarItem.classList.add('active');
             document.getElementById('emptyState').style.display = 'none';
         }
 
         function toggleProvider(provider) {
             const element = document.getElementById(provider + '-streams');
+            if (!element) return;
             element.style.display = element.style.display === 'none' ? 'block' : 'none';
         }
 
         function pauseStream() {
             const lang = getCurrentLanguage();
+            if (!currentStreamId || !streams[currentStreamId]) return;
             alert(t('alert.pauseStream', lang) + streams[currentStreamId].title);
         }
 
         function stopStream() {
             const lang = getCurrentLanguage();
+            if (!currentStreamId || !streams[currentStreamId]) return;
             alert(t('alert.stopStream', lang) + streams[currentStreamId].title);
         }
 
         function editStream() {
             const lang = getCurrentLanguage();
+            if (!currentStreamId || !streams[currentStreamId]) return;
             alert(t('alert.editStream', lang) + streams[currentStreamId].title);
         }
 
@@ -349,11 +382,13 @@
         function toggleStreamKeyVisibility() {
             const element = document.getElementById('streamKey');
             const stream = streams[currentStreamId];
-            if (element.textContent === '••••••••••••••••') {
-                element.textContent = stream.key;
+            if (!stream) return;
+            const masked = '\u2022\u2022\u2022\u2022\u2022\u2022\u2022\u2022\u2022\u2022\u2022\u2022\u2022\u2022\u2022\u2022';
+            if (element.textContent === masked) {
+                element.textContent = stream.streamKey || '\u2014';
                 element.classList.remove('masked');
             } else {
-                element.textContent = '••••••••••••••••';
+                element.textContent = masked;
                 element.classList.add('masked');
             }
         }
@@ -373,28 +408,45 @@
             if (event.target == modal) {
                 closeAddStreamModal();
             }
-        }
+        };
 
-        document.getElementById('addStreamForm').addEventListener('submit', (e) => {
+        document.getElementById('addStreamForm').addEventListener('submit', async (e) => {
             e.preventDefault();
-            const lang = getCurrentLanguage();
-            alert(t('modal.streamAdded', lang));
-            closeAddStreamModal();
+            const btn = e.target.querySelector('[type=submit]');
+            btn.disabled = true;
+            try {
+                await apiRequest('POST', '/streams', {
+                    name: document.getElementById('streamName').value,
+                    platform: document.getElementById('streamProvider').value,
+                    rtmp_url: document.getElementById('streamRtmpUrl').value,
+                    stream_key: document.getElementById('streamKeyInput').value
+                });
+                closeAddStreamModal();
+                await loadStreams();
+                renderSidebar();
+                if (streamsList.length > 0) await selectStream(streamsList[0].id);
+            } catch (e) {
+                alert('Failed to add stream: ' + e.message);
+            } finally {
+                btn.disabled = false;
+            }
         });
 
-        // Language selector
         document.getElementById('language-selector').addEventListener('change', (e) => {
             setLanguage(e.target.value);
         });
 
-        // Initialize localization on page load
         initLocalization();
-
-        // Redirect to login if not authenticated
         requireAuth();
-
-        // Initialize with first stream selected
-        selectStream(1);
+        (async () => {
+            await loadStreams();
+            renderSidebar();
+            if (streamsList.length > 0) {
+                await selectStream(streamsList[0].id);
+            } else {
+                document.getElementById('emptyState').style.display = 'flex';
+            }
+        })();
     </script>
 </body>
 </html>
