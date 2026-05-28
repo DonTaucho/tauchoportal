@@ -123,17 +123,24 @@ func main() {
 	mux.HandleFunc("/debug/api", func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Content-Type", "text/html; charset=utf-8")
 		fmt.Fprintf(w, "<h2>API Debug</h2>")
-		fmt.Fprintf(w, "<p><b>Resolved API URL:</b> %s</p>", htmlEscape(apiURL))
+		fmt.Fprintf(w, "<p><b>API URL:</b> %s</p>", htmlEscape(apiURL))
 		fmt.Fprintf(w, "<p><b>Token audience:</b> %s</p>", htmlEscape(apiAudience))
 		fmt.Fprintf(w, "<p><b>Identity token source:</b> %v</p>", tokenSource != nil)
+
+		cookie := r.Header.Get("Cookie")
+		if cookie != "" {
+			fmt.Fprintf(w, "<p>✅ <b>Session cookie present</b> in browser request (%d bytes)</p>", len(cookie))
+		} else {
+			fmt.Fprintf(w, "<p>⚠️ <b>No cookie</b> in browser request — you may not be logged in</p>")
+		}
 
 		var authHeader string
 		if tokenSource != nil {
 			if tok, err := tokenSource.Token(); err != nil {
-				fmt.Fprintf(w, "<p>ERROR <b>Token fetch error:</b> %v</p>", err)
+				fmt.Fprintf(w, "<p>❌ <b>Token fetch error:</b> %v</p>", err)
 			} else {
 				authHeader = "Bearer " + tok.AccessToken
-				fmt.Fprintf(w, "<p>OK <b>Identity token obtained</b> (expires: %s)</p>", tok.Expiry.Format(time.RFC3339))
+				fmt.Fprintf(w, "<p>✅ <b>Identity token obtained</b> (expires: %s)</p>", tok.Expiry.Format(time.RFC3339))
 			}
 		}
 
@@ -142,22 +149,26 @@ func main() {
 		for _, ep := range endpoints {
 			req, err := http.NewRequestWithContext(r.Context(), http.MethodGet, apiURL+ep, nil)
 			if err != nil {
-				fmt.Fprintf(w, "<p>ERROR <b>%s</b>: failed to build request: %v</p>", htmlEscape(ep), err)
+				fmt.Fprintf(w, "<p>❌ <b>%s</b>: failed to build request: %v</p>", htmlEscape(ep), err)
 				continue
 			}
 			if authHeader != "" {
 				req.Header.Set("Authorization", authHeader)
 			}
-			req.Header.Set("Cookie", r.Header.Get("Cookie"))
+			req.Header.Set("Cookie", cookie)
 			resp, err := client.Do(req)
 			if err != nil {
-				fmt.Fprintf(w, "<p>ERROR <b>%s</b>: connection error: %v</p>", htmlEscape(ep), err)
+				fmt.Fprintf(w, "<p>❌ <b>%s</b>: connection error: %v</p>", htmlEscape(ep), err)
 				continue
 			}
 			body, _ := io.ReadAll(io.LimitReader(resp.Body, 512))
 			resp.Body.Close()
-			fmt.Fprintf(w, "<p>%s <b>%s</b>: HTTP %d - <code>%s</code></p>",
-				statusEmoji(resp.StatusCode), htmlEscape(ep), resp.StatusCode, htmlEscape(string(body)))
+			emoji := "✅"
+			if resp.StatusCode < 200 || resp.StatusCode >= 300 {
+				emoji = "❌"
+			}
+			fmt.Fprintf(w, "<p>%s <b>%s</b>: HTTP %d — <code>%s</code></p>",
+				emoji, htmlEscape(ep), resp.StatusCode, htmlEscape(string(body)))
 		}
 	})
 	mux.Handle("/", server)
@@ -284,33 +295,33 @@ func (s *Server) servePublicFile(w http.ResponseWriter, r *http.Request) {
 func (s *Server) fetchUser(r *http.Request) *UserProfile {
 	req, err := http.NewRequestWithContext(r.Context(), http.MethodGet, s.apiURL+"/auth/user", nil)
 	if err != nil {
+		log.Printf("fetchUser: failed to build request: %v", err)
 		return nil
 	}
-	req.Header.Set("Cookie", r.Header.Get("Cookie"))
+	cookie := r.Header.Get("Cookie")
+	req.Header.Set("Cookie", cookie)
 	attachIdentityToken(req, s.tokenSource)
 
 	client := &http.Client{Timeout: 3 * time.Second}
 	resp, err := client.Do(req)
-	if err != nil || resp.StatusCode != http.StatusOK {
-		if resp != nil {
-			resp.Body.Close()
-		}
+	if err != nil {
+		log.Printf("fetchUser: API call failed (url=%s, cookie_present=%v): %v", s.apiURL+"/auth/user", cookie != "", err)
 		return nil
 	}
 	defer resp.Body.Close()
 
+	body, _ := io.ReadAll(io.LimitReader(resp.Body, 512))
+	if resp.StatusCode != http.StatusOK {
+		log.Printf("fetchUser: API returned %d (cookie_present=%v): %s", resp.StatusCode, cookie != "", string(body))
+		return nil
+	}
+
 	var user UserProfile
-	if err := json.NewDecoder(resp.Body).Decode(&user); err != nil {
+	if err := json.Unmarshal(body, &user); err != nil {
+		log.Printf("fetchUser: failed to decode user JSON: %v — body: %s", err, string(body))
 		return nil
 	}
 	return &user
-}
-
-func statusEmoji(code int) string {
-	if code >= 200 && code < 300 {
-		return "OK"
-	}
-	return "ERROR"
 }
 
 func htmlEscape(s string) string {
