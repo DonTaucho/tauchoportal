@@ -260,6 +260,22 @@
         flash:      { label: 'Flash Alert',          icon: '⚡' },
     };
 
+    // Map HTML field IDs (camelCase) ↔ API keys (snake_case)
+    const CRED_KEY_MAP = {
+        apiKey:       'api_key',
+        devId:        'device_id',
+        bridgeIp:     'bridge_ip',
+        lightId:      'light_id',
+        deviceIp:     'device_ip',
+        clientId:     'client_id',
+        clientSecret: 'client_secret',
+        region:       'region',
+        selector:     'selector',
+        apiKeyId:     'api_key_id',
+        devMac:       'device_mac',
+        endpointId:   'endpoint_id',
+    };
+
     let MY_DEVICES = [];
 
     async function apiRequest(method, path, body) {
@@ -427,7 +443,7 @@
                 brandCred.fields.forEach(f => {
                     if (f.type !== 'info') {
                         const el = document.getElementById('cred_' + f.id);
-                        if (el) el.value = creds[f.id] || '';
+                        if (el) el.value = creds[CRED_KEY_MAP[f.id] || f.id] || '';
                     }
                 });
             }
@@ -543,7 +559,7 @@
                 brandCred.fields.forEach(f => {
                     if (f.type !== 'info') {
                         const el = document.getElementById('cred_' + f.id);
-                        if (el && el.value) creds[f.id] = el.value;
+                        if (el && el.value) creds[CRED_KEY_MAP[f.id] || f.id] = el.value;
                     }
                 });
             }

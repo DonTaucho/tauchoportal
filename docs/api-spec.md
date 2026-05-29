@@ -25,20 +25,21 @@ One email account is the master identity. OAuth logins are children of that acco
 **`username` must have a UNIQUE constraint.** It serves as both the display name and the login identifier (like GitHub's `@handle`). Users can change it later but it must stay unique.
 
 ### `oauth_connections` table
+> **Note:** The database table is named `oauth_accounts` internally. The spec uses `oauth_connections` as the logical concept name.
+
 ```json
 {
-  "id": "uuid",
-  "user_id": "uuid (FK → users.id)",
-  "provider": "google | github | discord | twitch",
-  "provider_user_id": "string (unique per provider)",
-  "provider_email": "string (email returned by the OAuth provider)",
-  "access_token": "string (encrypted at rest)",
-  "refresh_token": "string (encrypted, nullable)",
-  "token_expires_at": "timestamp (nullable)",
-  "connected_at": "timestamp"
+  "id": "integer (auto-increment PK)",
+  "user_id": "integer (FK → users.id, CASCADE DELETE)",
+  "provider": "google | twitch | niconico | instagram | tiktok | kick | facebook | x | bilibili",
+  "oauth_id": "string (provider's user ID — unique per provider)",
+  "created_at": "timestamp"
 }
 ```
-Unique constraint: `(provider, provider_user_id)` — one account per provider.
+Unique constraints: `(provider, oauth_id)` and `(user_id, provider)` — one account per provider per user.
+
+> **Note:** `provider = "google"` represents a Google account used for YouTube. The portal shows YouTube branding for this provider.  
+> NicoNico, Instagram, TikTok, Kick, Facebook, X, and Bilibili OAuth are spec'd but not yet wired — the provider values are reserved for when those flows are implemented.
 
 ### OAuth login flow
 | Scenario | Behaviour |
@@ -55,27 +56,43 @@ The portal handles the OAuth callback — Google redirects the user's browser to
 **Callback path:** `{PORTAL_BASE_URL}/auth/callback/{provider}`  
 e.g. `http://localhost:8080/auth/callback/google` (local) · `https://taucho.org/auth/callback/google` (prod)
 
-**What the API must do:**
-1. `GET /oauth/login?provider=X` — build the auth URL using `GOOGLE_REDIRECT_URL` (or `{provider}_REDIRECT_URL`) from env, return `{ auth_url }`.
-2. `GET /auth/callback/google?code=...&state=...` — exchange code, create session, set cookie, **redirect to `{PORTAL_BASE_URL}/dashboard`**.
-
-**Required env vars on the API server:**
-| Env var | Local value | Production value |
-|---------|------------|-----------------|
-| `GOOGLE_REDIRECT_URL` | `http://localhost:8080/auth/callback/google` | `https://taucho.org/auth/callback/google` |
-| `PORTAL_BASE_URL` | `http://localhost:8080` | `https://taucho.org` |
-
 **Google Cloud Console — Authorized redirect URIs** (OAuth 2.0 Client settings):
 - `http://localhost:8080/auth/callback/google`
 - `https://taucho.org/auth/callback/google`
 
-> ⚠️ Currently the API has `GOOGLE_REDIRECT_URL` hardcoded to `localhost:8080`. This must be an env var so production deployments use the correct URL.
+**What the API must do:**
+1. `GET /oauth/login?provider=X` — build the auth URL using `GOOGLE_REDIRECT_URL` from env, return `{ auth_url }`.
+2. `GET /auth/callback/google?code=...&state=...` — portal proxies this from the user's browser; exchange code, create session, set cookie, **redirect to `{PORTAL_BASE_URL}/dashboard`**.
+
+**Required env vars on the API server:**
+| Env var | Local value | Production value |
+|---------|------------|-----------------|
+| `PORTAL_BASE_URL` | `http://localhost:8080` | `https://taucho.org` |
+| `GOOGLE_REDIRECT_URL` | `http://localhost:8080/auth/callback/google` | `https://taucho.org/auth/callback/google` |
+
+---
+
+## Data Storage
+
+When `DATABASE_URL` is set, all resources (users, watches, conditions, devices, stream accounts) are persisted in PostgreSQL. If `DATABASE_URL` is not set, the service starts with in-memory stores (data is lost on restart) and auth/OAuth endpoints return `503`.
+
+**User ownership** is enforced at the database layer — each watch, condition, device, and stream account has a `user_id` FK. Handlers pass the authenticated user's ID so each user sees only their own data.
+
+**Poller cache** — the poller does not query the database on every poll cycle. Instead a `CachedWatchStore` holds an in-memory snapshot of active/live watches and refreshes it periodically (default every 5 minutes). `SetCurrentlyLive` writes through immediately; `UpdateLastChecked` only updates in-memory to minimise write traffic.
+
+| Env var | Default | Description |
+|---------|---------|-------------|
+| `DATABASE_URL` | — | PostgreSQL connection string (required for persistence) |
+| `CACHE_REFRESH_INTERVAL` | `5m` | How often the poller reloads active watches from DB (e.g. `2m`, `10m`) |
+
+> ⚠️ `GOOGLE_REDIRECT_URL` has **no default**. If it is not set on the API server, OAuth will be disabled rather than silently using localhost.  
+> The API reads `PORTAL_BASE_URL` (preferred) or `UI_BASE_URL` (legacy fallback) to know where to redirect after a successful OAuth login. `Secure` cookie flag is automatically set to `true` when `PORTAL_BASE_URL` starts with `https://`.
 
 ### Email+password endpoints
 | Method | Path | Body | Description |
 |--------|------|------|-------------|
 | POST | `/auth/register` | `{ email, password, username }` | Creates `users` row with bcrypt hash. `username` must be unique. |
-| POST | `/auth/login` | `{ identifier, password }` | `identifier` = username **or** email. Look up by email first; if no match, look up by username. Verifies bcrypt hash, creates session. |
+| POST | `/auth/login` | `{ identifier, password }` | `identifier` = username **or** email. Tries email first; falls back to username. Verifies bcrypt hash, creates session. |
 
 ### Auth/connections endpoints
 | Method | Path | Response | Description |
@@ -110,10 +127,11 @@ Either register them at `/watches/...` on the API server, or change the proxy st
 | GET | `/auth/user` | Get current user profile |
 | PATCH | `/auth/user` | Update `username` and/or `picture` (fields optional) |
 | DELETE | `/auth/user` | Delete account + clear session cookie |
-| POST | `/auth/login` | Email + password login, sets session cookie |
+| POST | `/auth/login` | Email/username + password login, sets session cookie |
 | POST | `/auth/register` | Create new email+password account |
 | POST | `/auth/logout` | Log out, clear session |
-| GET | `/oauth/login?provider=<p>` | Start OAuth login for `google`, `github`, `discord`, or `twitch` — returns `{ auth_url }` |
+| GET | `/oauth/login?provider=<p>` | Start OAuth login — returns `{ auth_url }`. `p` = `google` or `twitch` (others are stubs) |
+| GET | `/auth/callback/google` | OAuth callback (proxied by portal after Google redirects here) |
 | GET | `/auth/connections` | List all OAuth providers linked to the current account |
 | DELETE | `/auth/connections/:provider` | Unlink an OAuth provider from the current account |
 
@@ -183,10 +201,10 @@ Each channel has per-platform event conditions (see Conditions below).
 **Watch object:**
 ```json
 {
-  "id": "string",
-  "user_id": "string",
+  "id": "integer",
+  "user_id": "integer",
   "name": "string",
-  "platform": "youtube | twitch | niconico",
+  "platform": "youtube | twitch | niconico | instagram | tiktok | kick | facebook | x | bilibili",
   "channel_id": "string",
   "is_active": true,
   "status": "live | offline | paused",
@@ -212,13 +230,13 @@ stream event, it can trigger a device action.
 **Condition object:**
 ```json
 {
-  "id": "string",
-  "watch_id": "string",
+  "id": "integer",
+  "watch_id": "integer",
   "name": "string",
-  "event_type": "comment | superchat | sticker | member | follow | sub | cheer | gift | nicoru | hype_train | raid | stream_start | stream_end",
+  "event_type": "comment | superchat | sticker | member | follow | sub | cheer | gift | nicoru | like | hype_train | raid | stream_start | stream_end",
   "filter": "string (optional keyword; empty = match all)",
   "is_enabled": true,
-  "device_id": "string | null",
+  "device_id": "integer | null",
   "device_action": "on | off | toggle | color | brightness | color_temp | scene | flash | null",
   "device_action_params": {
     "color": "#ff0000",
@@ -243,6 +261,12 @@ stream event, it can trigger a device action.
 | YouTube | `comment`, `superchat`, `sticker`, `member`, `stream_start`, `stream_end` |
 | Twitch | `comment`, `cheer`, `follow`, `sub`, `hype_train`, `raid`, `stream_start`, `stream_end` |
 | NicoNico | `comment`, `nicoru`, `gift`, `follow`, `stream_start`, `stream_end` |
+| Instagram | `comment`, `like`, `follow`, `gift`, `stream_start`, `stream_end` |
+| TikTok | `comment`, `like`, `follow`, `gift`, `stream_start`, `stream_end` |
+| Kick | `comment`, `follow`, `sub`, `raid`, `stream_start`, `stream_end` |
+| Facebook | `comment`, `like`, `follow`, `stream_start`, `stream_end` |
+| X (Twitter) | `comment`, `like`, `follow`, `stream_start`, `stream_end` |
+| Bilibili | `comment`, `gift`, `follow`, `stream_start`, `stream_end` |
 
 ---
 
@@ -253,41 +277,44 @@ Registered smart home devices. Credentials are stored per-brand.
 **Device object:**
 ```json
 {
-  "id": "string",
-  "user_id": "string",
+  "id": "integer",
+  "user_id": "integer",
   "name": "string",
   "brand": "govee | hue | kasa | lifx | tuya | nanoleaf | yeelight | wled | wyze | amazon",
   "product_id": "string (e.g. govee-h6159, hue-color)",
   "room": "string (optional)",
   "is_configured": true,
   "status": "online | offline | unknown",
-  "credentials": {
-    "govee":     { "api_key": "...", "device_id": "..." },
-    "hue":       { "bridge_ip": "...", "api_key": "...", "light_id": "..." },
-    "kasa":      { "device_ip": "..." },
-    "lifx":      { "api_key": "...", "selector": "..." },
-    "tuya":      { "client_id": "...", "client_secret": "...", "device_id": "...", "region": "..." },
-    "nanoleaf":  { "device_ip": "...", "api_key": "..." },
-    "yeelight":  { "device_ip": "..." },
-    "wled":      { "device_ip": "..." },
-    "wyze":      { "api_key": "...", "api_key_id": "...", "device_mac": "..." },
-    "amazon":    { "endpoint_id": "..." }
-  }
+  "credentials": "object (shape varies by brand — see below; omitted in list responses)"
 }
 ```
 
+**Credentials shape per brand** — flat JSON, snake_case, no brand-nesting (brand is already in the device body):
+
+| Brand | Fields |
+|-------|--------|
+| govee | `api_key`, `device_id` |
+| hue | `bridge_ip`, `api_key`, `light_id` |
+| kasa | `device_ip` |
+| lifx | `api_key`, `selector` |
+| tuya | `client_id`, `client_secret`, `device_id`, `region` |
+| nanoleaf | `device_ip`, `api_key` |
+| yeelight | `device_ip` |
+| wled | `device_ip` |
+| wyze | `api_key`, `api_key_id`, `device_mac` |
+| amazon | `endpoint_id` |
+
+> **Storage note:** `credentials` is stored as a JSONB column in PostgreSQL. The flat layout (no brand nesting) is intentional — brand is a separate column and nesting would be redundant.  
+> **Security note:** Credentials contain API keys and local IPs. Omit or mask the `credentials` field from `GET /devices` list responses; include it only in `GET /devices/get?id=<id>`.
+
 | Method | Path | Body / Params | Description |
 |--------|------|---------------|-------------|
-| GET | `/devices` | — | List all devices for the authenticated user |
-| GET | `/devices/get?id=<id>` | — | Get a single device |
+| GET | `/devices` | — | List all devices for the authenticated user (`credentials` omitted) |
+| GET | `/devices/get?id=<id>` | — | Get a single device (includes `credentials`) |
 | POST | `/devices` | `{ name, brand, product_id, room?, credentials }` | Register a device |
 | PATCH | `/devices/update?id=<id>` | any subset of `{ name, product_id, room, credentials }` | Update a device |
 | DELETE | `/devices?id=<id>` | — | Delete a device (conditions using it should have device_id cleared) |
 | POST | `/devices/test?id=<id>` | — | Send a brief test command to the physical device (flash/ping) |
-
-> **Security note:** `credentials` contains API keys and local IPs. These should be stored
-> encrypted at rest and never returned in list responses — omit or mask the `credentials` field
-> from GET list responses, include it only in `GET /devices/get?id=<id>`.
 
 ---
 
@@ -299,10 +326,10 @@ Distinct from **watched channels** (which are channels they monitor *for events*
 **Stream object:**
 ```json
 {
-  "id": "string",
-  "user_id": "string",
+  "id": "integer",
+  "user_id": "integer",
   "name": "string",
-  "platform": "youtube | twitch | niconico",
+  "platform": "youtube | twitch | niconico | instagram | tiktok | kick | facebook | x | bilibili",
   "rtmp_url": "string",
   "stream_key": "string (masked in list responses)",
   "is_active": true,
@@ -362,7 +389,8 @@ All routes are now registered **without** `/api/` prefix, matching the portal pr
 
 ## Known Limitations / TODOs
 
-- **`X-User-ID` auth**: All watch/condition/device/stream handlers use `X-User-ID` header as a placeholder. Production should read from session cookie via `sessionMgr.GetUserIDFromCookie()`.
+- **OAuth providers**: Only Google (YouTube) and Twitch OAuth are currently wired up. NicoNico, Instagram, TikTok, Kick, Facebook, X, and Bilibili provider values are reserved — login buttons show on the portal but the flows are stubs.
 - **Device test stub**: `POST /devices/test?id=` acknowledges the request but doesn't call the actual device SDK. Each `brand` needs its own implementation.
 - **Stream metrics**: `GET /streams/get` returns the full stream account but not live metrics (viewers/bitrate/fps). A separate polling integration or `GET /streams/metrics?id=` would be needed.
-- **Database persistence**: All stores are in-memory. SQL store implementations needed to persist across restarts.
+- **oauth_accounts table name**: The spec uses `oauth_connections` as the logical concept name, but the database table may be named `oauth_accounts` internally. The API endpoints and behaviour are the same.
+- **User ownership**: All watches, conditions, devices, and stream accounts have a `user_id` FK. Handlers must read user ID from the session cookie (`sessionMgr.GetUserIDFromCookie()`), not from an `X-User-ID` header.
