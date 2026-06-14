@@ -1525,23 +1525,24 @@ List all brands.
 |-------|---------|-------------|
 | `active_only` | `true` | Set to `false` to include retired brands |
 
-**Response `200`:**
+**Response `200`:** *(sorted by `sort_order` ASC, then by `name` ASC)*
 ```json
 [
   {
     "id": "govee",
     "name": "Govee",
     "website": "https://www.govee.com",
-    "logo_url": "",
+    "logo_url": "https://cdn.example.com/govee-logo.png",
     "brand_color": "#005DAA",
     "affiliate_url": "https://govee.mention-me.com/your-tracking-id",
     "affiliate_commission_percent": 5.50,
     "requires_brand_credentials": false,
+    "sort_order": 1,
     "is_active": true,
     "created_at": "...",
     "updated_at": "..."
   },
-  { "id": "hue", "name": "Philips Hue", "website": "https://www.philips-hue.com", ... }
+  { "id": "hue", "name": "Philips Hue", "website": "https://www.philips-hue.com", "sort_order": 2, ... }
 ]
 ```
 
@@ -1554,7 +1555,14 @@ Get a brand with its product list.
 **Response `200`:**
 ```json
 {
-  "brand": { "id": "govee", "name": "Govee", ... },
+  "brand": { 
+    "id": "govee", 
+    "name": "Govee", 
+    "website": "https://www.govee.com",
+    "logo_url": "https://cdn.example.com/govee-logo.png",
+    "sort_order": 1,
+    ... 
+  },
   "products": [
     { "id": "govee-h6159", "brand_id": "govee", "name": "H6159 LED Strip", "category": "light_strip", "supported_actions": ["set_color","set_brightness"], "is_active": true, ... }
   ]
@@ -1578,6 +1586,7 @@ Create a brand. (Admin operation — access control is portal-side for now.)
   "affiliate_url": "https://acme.example.com/ref?code=TAUCHO", // optional — affiliate link for purchasing
   "affiliate_commission_percent": 5.50, // optional — commission rate (e.g., 5.50%)
   "requires_brand_credentials": false, // optional — flag for future brand-level OAuth support
+  "sort_order": 1, // optional — display order priority; null = alphabetical
   "is_active": true      // optional, default true
 }
 ```
