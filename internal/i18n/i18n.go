@@ -102,6 +102,16 @@ func (t *Translator) T(key string) string {
 	return key
 }
 
+// TH returns the translation for key as template.HTML (unescaped).
+// Use this for translations that contain safe HTML markup like <wbr />, <strong>, etc.
+// DO NOT use this with user-supplied data or untrusted input!
+func (t *Translator) TH(key string) template.HTML {
+	if v, ok := t.strings[key]; ok {
+		return template.HTML(v)
+	}
+	return template.HTML(key)
+}
+
 // JS returns all strings as a JSON object safe for inline <script> injection.
 func (t *Translator) JS() template.JS {
 	b, _ := json.Marshal(t.strings)
