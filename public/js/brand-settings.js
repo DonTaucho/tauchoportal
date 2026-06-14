@@ -28,13 +28,6 @@
   let activeLocalBrand = null;
   let pendingDisconnectBrand = null;
 
-  function t(key, fallback) {
-    if (window.__i18n && Object.prototype.hasOwnProperty.call(window.__i18n, key)) {
-      return window.__i18n[key];
-    }
-    return fallback || key;
-  }
-
   function escapeHtml(value) {
     return String(value ?? '')
       .replaceAll('&', '&amp;')
@@ -50,16 +43,39 @@
     return BRAND_ALIASES[compact] || String(value).trim().toLowerCase().replace(/_/g, '-').replace(/\s+/g, '-');
   }
 
+  function getUiStringsElement() {
+    return document.getElementById('brandSettingsStrings');
+  }
+
+  function getUiString(key, fallback = '') {
+    const value = getUiStringsElement()?.dataset?.[key];
+    return value || fallback;
+  }
+
   function getBrandMeta(brandId) {
     return BRAND_LOOKUP[normalizeBrandId(brandId)] || null;
   }
 
+  function getBrandCard(brandId) {
+    const normalizedBrandId = normalizeBrandId(brandId);
+    const safeBrandId = window.CSS?.escape ? window.CSS.escape(normalizedBrandId) : normalizedBrandId;
+    return document.querySelector(`[data-brand-card][data-brand-id="${safeBrandId}"]`);
+  }
+
   function getBrandTitle(brandId) {
-    return t(`brand.${brandId}.title`, brandId);
+    return getBrandCard(brandId)?.dataset.brandTitle || brandId;
   }
 
   function getBrandDescription(brandId) {
-    return t(`brand.${brandId}.description`, '');
+    return getBrandCard(brandId)?.dataset.brandDescription || '';
+  }
+
+  function getBrandActionLabel(brandId, labelName) {
+    const card = getBrandCard(brandId);
+    if (!card) return '';
+    if (labelName === 'connect') return card.dataset.connectLabel || '';
+    if (labelName === 'disconnect') return card.dataset.disconnectLabel || '';
+    return '';
   }
 
   async function apiRequest(method, path, body) {
@@ -146,12 +162,13 @@
   }
 
   function formatDate(timestamp) {
+    const neverConnected = getUiString('neverConnected', 'Never');
     if (!timestamp || timestamp === '0001-01-01T00:00:00Z') {
-      return t('brandSettings.neverConnected', 'Never');
+      return neverConnected;
     }
     const date = new Date(timestamp);
     if (Number.isNaN(date.getTime())) {
-      return t('brandSettings.neverConnected', 'Never');
+      return neverConnected;
     }
     return date.toLocaleString();
   }
@@ -198,82 +215,100 @@
 
   function getCardState(meta, record) {
     if (meta.authType === 'unsupported') {
-      return { badgeClass: 'warn', badgeText: t('brandSettings.status.unsupported', 'Unsupported'), cardClass: 'is-unsupported' };
+      return {
+        badgeClass: 'warn',
+        badgeText: getUiString('unsupportedLabel', 'Unsupported'),
+        cardClass: 'is-unsupported'
+      };
     }
     if (meta.authType === 'external') {
-      return { badgeClass: 'info', badgeText: t('brandSettings.status.external', 'External'), cardClass: 'is-external' };
+      return {
+        badgeClass: 'info',
+        badgeText: getUiString('externalLabel', 'External app'),
+        cardClass: 'is-external'
+      };
     }
     if (isConnected(record)) {
-      return { badgeClass: 'connected', badgeText: t('brandSettings.connected', 'Connected'), cardClass: 'is-connected' };
+      return {
+        badgeClass: 'connected',
+        badgeText: getUiString('connectedLabel', 'Connected'),
+        cardClass: 'is-connected'
+      };
     }
-    return { badgeClass: 'disconnected', badgeText: t('brandSettings.notConnected', 'Not connected'), cardClass: '' };
+    return {
+      badgeClass: 'disconnected',
+      badgeText: getUiString('notConnectedLabel', 'Not connected'),
+      cardClass: ''
+    };
   }
 
-  function renderBrandActions(meta, record) {
+  function updateBrandCard(meta, record) {
+    const card = getBrandCard(meta.id);
+    if (!card) return;
+
+    const state = getCardState(meta, record);
+    const badge = card.querySelector('[data-brand-status]');
+    const lastConnectedValue = card.querySelector('[data-brand-last-connected]');
+    const actionButton = card.querySelector('[data-brand-action-button]');
+    const note = card.querySelector('[data-brand-note]');
+
+    card.classList.remove('is-connected', 'is-unsupported', 'is-external');
+    if (state.cardClass) {
+      card.classList.add(state.cardClass);
+    }
+
+    if (badge) {
+      badge.className = `status-badge ${state.badgeClass}`;
+      badge.textContent = state.badgeText;
+    }
+
+    if (lastConnectedValue) {
+      lastConnectedValue.textContent = formatDate(getLastConnected(record));
+    }
+
+    if (!actionButton || !note) {
+      return;
+    }
+
+    note.textContent = '';
+    note.hidden = true;
+    note.className = 'brand-note';
+    actionButton.disabled = false;
+    actionButton.hidden = false;
+
     if (isConnected(record)) {
-      return `
-        <div class="brand-actions">
-          <button type="button" class="btn-disconnect brand-action-button" data-brand-action="prompt-disconnect" data-brand-id="${meta.id}">
-            ${escapeHtml(t(`brand.${meta.id}.disconnectButton`, 'Disconnect'))}
-          </button>
-        </div>
-      `;
+      actionButton.className = 'btn-disconnect brand-action-button';
+      actionButton.setAttribute('data-brand-action', 'prompt-disconnect');
+      actionButton.textContent = getBrandActionLabel(meta.id, 'disconnect');
+      return;
     }
 
     if (meta.authType === 'oauth' || meta.authType === 'api-key' || meta.authType === 'local') {
-      return `
-        <div class="brand-actions">
-          <button type="button" class="btn-connect brand-action-button" data-brand-action="connect" data-brand-id="${meta.id}">
-            ${escapeHtml(t(`brand.${meta.id}.connectButton`, 'Connect'))}
-          </button>
-        </div>
-      `;
+      actionButton.className = 'btn-connect brand-action-button';
+      actionButton.setAttribute('data-brand-action', 'connect');
+      actionButton.textContent = getBrandActionLabel(meta.id, 'connect');
+      return;
     }
 
-    const noteClass = meta.authType === 'unsupported' ? 'brand-note warn' : 'brand-note';
-    return `
-      <div class="brand-actions">
-        <button type="button" class="btn-connect brand-action-button" disabled>
-          ${escapeHtml(t(`brand.${meta.id}.connectButton`, 'Not available'))}
-        </button>
-        <span class="${noteClass}">${escapeHtml(getBrandDescription(meta.id))}</span>
-      </div>
-    `;
+    actionButton.className = 'btn-connect brand-action-button';
+    actionButton.removeAttribute('data-brand-action');
+    actionButton.disabled = true;
+    actionButton.textContent = getBrandActionLabel(meta.id, 'connect');
+    note.textContent = getBrandDescription(meta.id);
+    note.hidden = false;
+    if (meta.authType === 'unsupported') {
+      note.classList.add('warn');
+    }
   }
 
   function renderBrandsList() {
-    const grid = document.getElementById('brandsGrid');
-    if (!grid) return;
-
-    grid.innerHTML = BRANDS.map((meta) => {
-      const record = brandAuthStatus[meta.id] || {};
-      const state = getCardState(meta, record);
-      return `
-        <article class="brand-card ${state.cardClass}">
-          <div class="brand-card-header">
-            <div class="brand-card-identity">
-              <div class="brand-logo" aria-hidden="true">${escapeHtml(meta.label)}</div>
-              <div>
-                <h3 class="brand-name">${escapeHtml(getBrandTitle(meta.id))}</h3>
-                <p class="brand-description">${escapeHtml(getBrandDescription(meta.id))}</p>
-              </div>
-            </div>
-            <span class="status-badge ${state.badgeClass}">${escapeHtml(state.badgeText)}</span>
-          </div>
-          <div class="brand-details">
-            <div class="brand-detail-row">
-              <span class="brand-detail-label">${escapeHtml(t('brandSettings.lastConnected', 'Last connected'))}</span>
-              <span>${escapeHtml(formatDate(getLastConnected(record)))}</span>
-            </div>
-          </div>
-          ${renderBrandActions(meta, record)}
-        </article>
-      `;
-    }).join('');
+    BRANDS.forEach((meta) => {
+      updateBrandCard(meta, brandAuthStatus[meta.id] || {});
+    });
   }
 
   async function loadBrandAuthStatus() {
-    setPageMessage(t('brandSettings.loading', 'Loading brand connections...'));
+    setPageMessage(getUiString('loadingMessage', 'Loading brand connections...'));
     try {
       const payload = await apiRequest('GET', '/auth/brands');
       brandAuthStatus = normalizeStatusMap(payload);
@@ -282,32 +317,79 @@
     } catch (error) {
       brandAuthStatus = normalizeStatusMap({});
       renderBrandsList();
-      setPageMessage(`${t('brandSettings.loadError', 'Failed to load brand connections')}: ${error.message}`, 'error');
+      setPageMessage(`${getUiString('loadErrorMessage', 'Failed to load brand connections')}: ${error.message}`, 'error');
+    }
+  }
+
+  function createBrandNoteElement(message) {
+    const note = document.createElement('p');
+    note.className = 'brand-note';
+    note.textContent = message;
+    return note;
+  }
+
+  function createQrImage(src, alt) {
+    const img = document.createElement('img');
+    img.src = src;
+    img.alt = alt;
+    return img;
+  }
+
+  function sanitizeSvgElement(svgElement) {
+    const importedSvg = document.importNode(svgElement, true);
+    importedSvg.querySelectorAll('script, foreignObject, iframe, object, embed').forEach((node) => node.remove());
+    importedSvg.querySelectorAll('*').forEach((node) => {
+      Array.from(node.attributes).forEach((attribute) => {
+        if (/^on/i.test(attribute.name)) {
+          node.removeAttribute(attribute.name);
+        }
+      });
+    });
+    return importedSvg;
+  }
+
+  function createQrSvg(markup) {
+    const parser = new DOMParser();
+    const documentSvg = parser.parseFromString(markup, 'image/svg+xml');
+    if (documentSvg.querySelector('parsererror')) {
+      return null;
+    }
+    const svgElement = documentSvg.documentElement?.nodeName === 'svg'
+      ? documentSvg.documentElement
+      : documentSvg.querySelector('svg');
+    return svgElement ? sanitizeSvgElement(svgElement) : null;
+  }
+
+  function clearNode(node) {
+    while (node.firstChild) {
+      node.removeChild(node.firstChild);
     }
   }
 
   function setOAuthModalContent(result, meta) {
-    document.getElementById('oauthModalTitle').textContent = t('brandSettings.modal.oauthTitle', 'Connect brand');
     document.getElementById('oauthModalBrand').textContent = getBrandTitle(meta.id);
-    document.getElementById('oauthModalMessage').textContent = t('brandSettings.modal.qrHint', 'Scan the QR code or open the link to finish authentication.');
     const qrContainer = document.getElementById('oauthQrContainer');
     const link = document.getElementById('oauthLink');
-    qrContainer.innerHTML = '';
+    clearNode(qrContainer);
 
     if (result?.qr_code_svg) {
-      qrContainer.innerHTML = result.qr_code_svg;
+      const svg = createQrSvg(result.qr_code_svg);
+      if (svg) {
+        qrContainer.appendChild(svg);
+      } else {
+        qrContainer.appendChild(createBrandNoteElement(getUiString('oauthUnavailableMessage', 'QR code is not available for this connection.')));
+      }
     } else if (result?.qr_code_data_url || result?.qr_code_url || result?.qr_code_image) {
-      const img = document.createElement('img');
-      img.src = result.qr_code_data_url || result.qr_code_url || result.qr_code_image;
-      img.alt = getBrandTitle(meta.id);
-      qrContainer.appendChild(img);
+      qrContainer.appendChild(
+        createQrImage(result.qr_code_data_url || result.qr_code_url || result.qr_code_image, getBrandTitle(meta.id))
+      );
     } else {
-      qrContainer.innerHTML = `<p class="brand-note">${escapeHtml(t('brandSettings.modal.oauthUnavailable', 'QR code is not available for this connection.'))}</p>`;
+      qrContainer.appendChild(createBrandNoteElement(getUiString('oauthUnavailableMessage', 'QR code is not available for this connection.')));
     }
 
-    const authUrl = result?.auth_url || result?.authorization_url || result?.url || '#';
-    link.href = authUrl;
-    link.style.display = authUrl && authUrl !== '#' ? 'inline-flex' : 'none';
+    const authUrl = result?.auth_url || result?.authorization_url || result?.url || '';
+    link.href = authUrl || '#';
+    link.style.display = authUrl ? 'inline-flex' : 'none';
   }
 
   async function openOAuthFlow(brand) {
@@ -320,7 +402,7 @@
       setOAuthModalContent(result, meta);
       openModal('oauthModal');
     } catch (error) {
-      setPageMessage(`${t('brandSettings.error.connectFailed', 'Unable to start connection')}: ${error.message}`, 'error');
+      setPageMessage(`${getUiString('connectFailedMessage', 'Unable to start connection')}: ${error.message}`, 'error');
     }
   }
 
@@ -328,7 +410,6 @@
     const meta = getBrandMeta(brand);
     if (!meta) return;
     activeApiKeyBrand = meta;
-    document.getElementById('apiKeyModalTitle').textContent = t('brandSettings.modal.apiKeyTitle', 'Save API key');
     document.getElementById('apiKeyModalBrand').textContent = getBrandTitle(meta.id);
     document.getElementById('apiKeyInput').value = '';
     openModal('apiKeyModal');
@@ -337,7 +418,7 @@
 
   async function saveApiKey(brand, key) {
     if (!key) {
-      setPageMessage(t('brandSettings.validation.apiKeyRequired', 'Please enter an API key or token.'), 'error');
+      setPageMessage(getUiString('apiKeyRequiredMessage', 'Please enter an API key or token.'), 'error');
       return;
     }
 
@@ -348,10 +429,10 @@
         key
       });
       closeModal('apiKeyModal');
-      showToast(t('brandSettings.status.saved', 'Brand authentication saved.'));
+      showToast(getUiString('savedMessage', 'Brand authentication saved.'));
       await loadBrandAuthStatus();
     } catch (error) {
-      setPageMessage(`${t('brandSettings.error.saveFailed', 'Unable to save authentication')}: ${error.message}`, 'error');
+      setPageMessage(`${getUiString('saveFailedMessage', 'Unable to save authentication')}: ${error.message}`, 'error');
     }
   }
 
@@ -359,21 +440,20 @@
     const meta = getBrandMeta(brand);
     if (!meta) return;
     activeLocalBrand = meta;
-    document.getElementById('localDeviceModalTitle').textContent = t('brandSettings.modal.localTitle', 'Connect local device');
     document.getElementById('localDeviceModalBrand').textContent = getBrandTitle(meta.id);
     document.getElementById('deviceIpInput').value = '';
     document.getElementById('deviceTokenInput').value = '';
     document.getElementById('deviceTokenGroup').style.display = meta.requiresToken ? 'block' : 'none';
     document.getElementById('deviceTokenHint').textContent = meta.requiresToken
-      ? t('brandSettings.modal.authTokenHint', 'Paste the token created on the device or bridge.')
-      : t('brandSettings.modal.optionalToken', 'Token is optional for this brand.');
+      ? getUiString('authTokenHintMessage', 'Paste the token created on the device or bridge.')
+      : getUiString('optionalTokenMessage', 'Token is optional for this brand.');
     openModal('localDeviceModal');
     document.getElementById('deviceIpInput').focus();
   }
 
   async function saveLocalDeviceAuth(brand, ip, token) {
     if (!ip) {
-      setPageMessage(t('brandSettings.validation.ipRequired', 'Please enter a device IP address.'), 'error');
+      setPageMessage(getUiString('ipRequiredMessage', 'Please enter a device IP address.'), 'error');
       return;
     }
 
@@ -384,10 +464,10 @@
         auth_token: token
       });
       closeModal('localDeviceModal');
-      showToast(t('brandSettings.status.saved', 'Brand authentication saved.'));
+      showToast(getUiString('savedMessage', 'Brand authentication saved.'));
       await loadBrandAuthStatus();
     } catch (error) {
-      setPageMessage(`${t('brandSettings.error.saveFailed', 'Unable to save authentication')}: ${error.message}`, 'error');
+      setPageMessage(`${getUiString('saveFailedMessage', 'Unable to save authentication')}: ${error.message}`, 'error');
     }
   }
 
@@ -395,8 +475,8 @@
     const meta = getBrandMeta(brand);
     if (!meta) return;
     pendingDisconnectBrand = meta;
-    document.getElementById('disconnectModalDescription').textContent = t(
-      'brandSettings.modal.confirmDisconnectDescription',
+    document.getElementById('disconnectModalDescription').textContent = getUiString(
+      'confirmDisconnectDescription',
       'Disconnect {brand} from your account?'
     ).replace('{brand}', getBrandTitle(meta.id));
     openModal('disconnectModal');
@@ -407,10 +487,10 @@
       await apiRequest('DELETE', `/auth/brand/${encodeURIComponent(brand)}`);
       closeModal('disconnectModal');
       pendingDisconnectBrand = null;
-      showToast(t('brandSettings.status.disconnected', 'Brand disconnected.'));
+      showToast(getUiString('disconnectedMessage', 'Brand disconnected.'));
       await loadBrandAuthStatus();
     } catch (error) {
-      setPageMessage(`${t('brandSettings.error.disconnectFailed', 'Unable to disconnect brand')}: ${error.message}`, 'error');
+      setPageMessage(`${getUiString('disconnectFailedMessage', 'Unable to disconnect brand')}: ${error.message}`, 'error');
     }
   }
 
@@ -439,7 +519,7 @@
       }
 
       const brandButton = event.target.closest('[data-brand-action]');
-      if (brandButton) {
+      if (brandButton && !brandButton.disabled) {
         const brandId = brandButton.getAttribute('data-brand-id');
         if (brandButton.getAttribute('data-brand-action') === 'prompt-disconnect') {
           promptDisconnect(brandId);
@@ -498,13 +578,14 @@
 
   document.addEventListener('DOMContentLoaded', () => {
     bindEvents();
+    renderBrandsList();
     loadBrandAuthStatus();
 
     const params = new URLSearchParams(window.location.search);
     const connected = normalizeBrandId(params.get('connected'));
     if (connected && getBrandMeta(connected)) {
       showToast(
-        t('brandSettings.status.connectedSuccess', '{brand} connected.').replace('{brand}', getBrandTitle(connected))
+        getUiString('connectedSuccessMessage', '{brand} connected.').replace('{brand}', getBrandTitle(connected))
       );
       history.replaceState({}, '', '/brand-settings');
     }
