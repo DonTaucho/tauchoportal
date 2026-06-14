@@ -727,7 +727,151 @@ Set `"clear_filter": true` to remove the filter entirely (resetting to track-all
 | POST | `/devices` | Register a device |
 | PATCH | `/devices/update?id=<id>` | Update a device |
 | DELETE | `/devices?id=<id>` | Delete a device |
-| POST | `/devices/test?id=<id>` | Send a brief test command (stub — needs brand SDK) |
+| POST | `/devices/test?id=<id>` | **Send a test command to device using template system** |
+
+**Device test endpoint** (`POST /devices/test?id=<id>`):
+- ✅ **NOW FULLY FUNCTIONAL** — calls actual device APIs
+- Requires credentials to be set up for the device's brand
+- Uses template system to construct HTTP request
+- Returns success/failure with detailed error info
+- Body: `{ "template_id": <int>, "action": "<string>", "params": <object> }`
+
+### Device Credentials (`/device-credentials/...`) ⭐ NEW
+| Method | Path | Description |
+|--------|------|-------------|
+| GET | `/device-credentials` | List all credentials for current user (masked) |
+| GET | `/device-credentials/get?id=<id>` | Get a single credential (without sensitive fields) |
+| POST | `/device-credentials` | Create a new credential for a device brand |
+| PATCH | `/device-credentials/update?id=<id>` | Update an existing credential |
+| DELETE | `/device-credentials?id=<id>` | Delete a credential |
+
+**Credential fields by brand:**
+- **Govee**: `api_key`, `device_id`
+- **LIFX**: `bearer_token`
+- **Philips Hue**: `bearer_token`, `host_ip`, `port`
+- **WLED**: `host_ip`, `port`
+- **Nanoleaf**: `api_key`, `host_ip`, `port`
+- **TP-Link Kasa**: `username`, `password`, `host_ip`, `port`
+- **Tuya**: `api_key`, `bearer_token`, `device_id`, `region`
+- **Wyze**: `username`, `password`
+- **Yeelight**: `host_ip`, `port`
+
+**Request body for `POST /device-credentials`:**
+```json
+{
+  "brand_name": "govee",
+  "api_key": "your-api-key",
+  "device_id": "device-123",
+  "device_name": "Living Room Light",
+  "device_model": "H6199"
+}
+```
+
+**Security:** All sensitive fields (API keys, tokens, passwords) are masked in API responses (e.g., `****3k9x`).
+
+### Device Templates (`/device-templates/...`) ⭐ NEW
+| Method | Path | Description |
+|--------|------|-------------|
+| GET | `/device-templates` | List all templates (supports `?brand=` and `?category=` filters) |
+| GET | `/device-templates/get?id=<id>` | Get a single template |
+
+**Template object includes:**
+- Brand name, category (power, brightness, color, etc.)
+- HTTP method and URL endpoint pattern
+- Body template with parameter placeholders
+- Authentication type (api_key, bearer_token, oauth, none)
+- Required and optional parameters with constraints
+- UI hints and examples
+
+**Example usage:**
+```bash
+# List templates for Govee
+GET /device-templates?brand=govee
+
+# List templates for brightness control
+GET /device-templates?category=brightness
+
+# Get specific template
+GET /device-templates/get?id=123
+```
+
+### Device Groups (`/device-groups/...`)
+| Method | Path | Description |
+|--------|------|-------------|
+| GET | `/device-groups` | List all device groups for current user |
+| GET | `/device-groups/get?id=<id>` | Get a single device group with all its devices |
+| POST | `/device-groups` | Create a new device group |
+| PATCH | `/device-groups/update?id=<id>` | Update a device group name or option |
+| DELETE | `/device-groups?id=<id>` | Delete a device group (devices remain unassigned) |
+| POST | `/device-groups/assign?device_id=<id>&group_id=<id>` | Assign a device to a device group |
+| POST | `/device-groups/remove?device_id=<id>` | Remove a device from its device group |
+
+**Device Group data model:**
+```json
+{
+  "id": "string (format: group_<timestamp_nanos>)",
+  "user_id": "integer (FK → users.id, CASCADE DELETE)",
+  "name": "string (human-readable group name)",
+  "option": "string (sequential | queue)",
+  "created_at": "timestamp",
+  "updated_at": "timestamp"
+}
+```
+
+**Option values:**
+- `"sequential"` — "cracker popper" behavior; devices trigger one after another
+- `"queue"` — queue-based behavior; each device serves an audience until exhausted, then moves to next device
+
+**Request body for `POST /device-groups`:**
+```json
+{
+  "name": "Living Room Lights",
+  "option": "sequential"
+}
+```
+
+**Request body for `PATCH /device-groups/update?id=<id>` (all optional):**
+```json
+{
+  "name": "Updated Name",
+  "option": "queue"
+}
+```
+
+**Response for `GET /device-groups/get?id=<id>` includes nested devices:**
+```json
+{
+  "id": "group_1718237456000000000",
+  "user_id": 42,
+  "name": "Living Room Lights",
+  "option": "sequential",
+  "devices": [
+    {
+      "id": "device_1",
+      "user_id": 42,
+      "name": "Light 1",
+      "brand": "hue",
+      "product_id": "hue-color-bulb",
+      "room": "living_room",
+      "is_configured": true,
+      "status": "online",
+      "device_group_id": "group_1718237456000000000",
+      "created_at": "2024-06-12T22:00:00Z",
+      "updated_at": "2024-06-12T22:14:07Z"
+    }
+  ],
+  "created_at": "2024-06-12T22:14:07Z",
+  "updated_at": "2024-06-12T22:14:07Z"
+}
+```
+
+**Security notes:**
+- Device groups are scoped to individual users — a user cannot view, modify, or delete another user's groups
+- A device can belong to at most one group at a time
+- Assigning a device to a new group automatically removes it from its previous group
+- Deleting a group does NOT delete its devices — only removes the group reference
+
+**See `/docs/DEVICE_GROUPING.md` for detailed documentation on device grouping, including usage examples and future enhancement roadmap.**
 
 ### Stream Accounts (`/streams/...`)
 | Method | Path | Description |
@@ -1381,23 +1525,24 @@ List all brands.
 |-------|---------|-------------|
 | `active_only` | `true` | Set to `false` to include retired brands |
 
-**Response `200`:**
+**Response `200`:** *(sorted by `sort_order` ASC, then by `name` ASC)*
 ```json
 [
   {
     "id": "govee",
     "name": "Govee",
     "website": "https://www.govee.com",
-    "logo_url": "",
+    "logo_url": "https://cdn.example.com/govee-logo.png",
     "brand_color": "#005DAA",
     "affiliate_url": "https://govee.mention-me.com/your-tracking-id",
     "affiliate_commission_percent": 5.50,
     "requires_brand_credentials": false,
+    "sort_order": 1,
     "is_active": true,
     "created_at": "...",
     "updated_at": "..."
   },
-  { "id": "hue", "name": "Philips Hue", "website": "https://www.philips-hue.com", ... }
+  { "id": "hue", "name": "Philips Hue", "website": "https://www.philips-hue.com", "sort_order": 2, ... }
 ]
 ```
 
@@ -1410,7 +1555,14 @@ Get a brand with its product list.
 **Response `200`:**
 ```json
 {
-  "brand": { "id": "govee", "name": "Govee", ... },
+  "brand": { 
+    "id": "govee", 
+    "name": "Govee", 
+    "website": "https://www.govee.com",
+    "logo_url": "https://cdn.example.com/govee-logo.png",
+    "sort_order": 1,
+    ... 
+  },
   "products": [
     { "id": "govee-h6159", "brand_id": "govee", "name": "H6159 LED Strip", "category": "light_strip", "supported_actions": ["set_color","set_brightness"], "is_active": true, ... }
   ]
@@ -1434,6 +1586,7 @@ Create a brand. (Admin operation — access control is portal-side for now.)
   "affiliate_url": "https://acme.example.com/ref?code=TAUCHO", // optional — affiliate link for purchasing
   "affiliate_commission_percent": 5.50, // optional — commission rate (e.g., 5.50%)
   "requires_brand_credentials": false, // optional — flag for future brand-level OAuth support
+  "sort_order": 1, // optional — display order priority; null = alphabetical
   "is_active": true      // optional, default true
 }
 ```

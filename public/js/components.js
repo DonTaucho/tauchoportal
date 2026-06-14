@@ -18,21 +18,22 @@ async function loadComponent(componentName, targetSelector = null) {
     }
 
     const html = await response.text();
-    
+
     // Create container and inject HTML
     const container = document.querySelector(targetSelector) || document.body;
-    const tempDiv = document.createElement('div');
-    tempDiv.innerHTML = html;
+    const parser = new DOMParser();
+    const doc = parser.parseFromString(html, 'text/html');
+    const fragment = document.createDocumentFragment();
+
+    Array.from(doc.body.childNodes).forEach((node) => {
+      fragment.appendChild(document.importNode(node, true));
+    });
 
     // If targeting body and no selector, prepend to body
     if (!targetSelector) {
-      while (tempDiv.firstChild) {
-        document.body.insertBefore(tempDiv.firstChild, document.body.firstChild);
-      }
+      container.insertBefore(fragment, container.firstChild);
     } else {
-      while (tempDiv.firstChild) {
-        container.appendChild(tempDiv.firstChild);
-      }
+      container.appendChild(fragment);
     }
 
     // After component is loaded, trigger any necessary initialization
