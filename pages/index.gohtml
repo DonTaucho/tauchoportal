@@ -6,39 +6,239 @@
 {{end}}
 
 {{define "content"}}
-<div class="container">
-        <h1><img src="{{.I18n.T "welcome.image"}}" >{{.I18n.T "welcome.titleline"}}</h1>
-        <p class="subtitle">{{.I18n.T "welcome.subtitleline"}}</p>
-
-        <div class="features">
-            <div class="feature">
-                <h3>⚡ Every reactions of audiences</h3>
-                <p>Set trigger for stream events — comments, Super Chats, Bits, gifts, emotion effects — per channel and platform.</p>
+<div class="wholecontents">
+    <div class="indexheader">
+        <div id="topheaderbg" class="topheaderbg"></div>
+        <div class="topbgcontainer">
+            <div id="topheaderlink" class="topheaderlogoarea">
+                <a href="#" onclick="openLoginModal()"><img id="titleimg_s" src="/image/welcome_title_l_e_s.png"></a>
             </div>
-            <div class="feature">
-                <h3>💡 Smart Home Actions</h3>
-                <p>Trigger Govee lights, Philips Hue, LIFX, TP-Link Kasa, and more smart devices when conditions are met.</p>
-            </div>
-            <div class="feature">
-                <h3>☁️ Always On</h3>
-                <p>Cloud-hosted polling service runs continuously — no need to keep a browser or app open while streaming.</p>
+            <div class="topheaderhumburger">
+                <a href="#" onclick="document.getElementById('headerdropdown').style['display']=document.getElementById('headerdropdown').style['display']=='block'?'none':'block';return false">☰</a>
             </div>
         </div>
+    </div>
+    <div id="headerdropdown">
+        <a href="#" onclick="openLoginModal()">Login</a>
+        <select class="language-selector" title="Language" onchange="window.location='/set-lang?lang='+this.value+'&back='+encodeURIComponent(window.location.pathname)">
+            <option value="en" {{if eq .Lang "en"}}selected{{end}}>English</option>
+            <option value="ja" {{if eq .Lang "ja"}}selected{{end}}>日本語</option>
+            <option value="de" {{if eq .Lang "de"}}selected{{end}}>Deutsch</option>
+            <option value="fr" {{if eq .Lang "fr"}}selected{{end}}>Français</option>
+            <option value="es" {{if eq .Lang "es"}}selected{{end}}>Español</option>
+        </select>
+        <a href="/privacy-policy">Privacy Policy</a>
+        <a href="/terms-of-services">Terms of Services</a>
+        <a href="/about">About This Site</a>
+        <a href="/contact">Contact Us</a>
+    </div>
 
-        <div class="cta-buttons" data-auth="unauthenticated">
-            <a href="#" onclick="openLoginModal()" class="btn btn-primary">Sign In</a>
-            <a href="/register" class="btn btn-primary">Create Account</a>
-            <a href="/about" class="btn btn-secondary">Learn More</a>
+    <div>
+        <div id="tauchoTitleImageContainer" class="titleimagecontainer">
+            <img src="/image/welcome_title_l_e.png">
+        </div>
+        <div class="bgfiller">
+            <div>
+                <a href="#" onclick="openLoginModal()" class="loginbutton">Login / Sign Up</a>
+                <a href="/about" style="margin-top: 2em">How it works</a>
+            </div>
         </div>
 
-        <div class="cta-buttons" data-auth="authenticated" style="display:none">
-            <a href="/dashboard" class="btn btn-primary">Go to Dashboard →</a>
-            <a href="/about" class="btn btn-secondary">Learn More</a>
+        <div class="content">
+            <div style="width: 400px">
+                <img src="/image/ad1.png" style="padding: 1em">
+            </div>
+            <div style="min-width: 2em">
+                <h4>Taucho is a Live-Stream-Reactor</h4>
+                <div>Taucho makes live streaming event to trigger<wbr />Smart Home device's action</div>
+                <div>Comments, Gifts, Likes.. <wbr />set any kinds of reactions audiences do,</div>
+                <div>and when it happened ..<strong>POP!!</strong></div>
+            </div>
+        </div>
+        <div class="videoarea1">
+            <div class="wrappertext">
+                <div class="overflowtexts">
+                    <h3>Audiences, POKE THE INFLUENCER!</h3>
+                    <div>Sometimes, you send GIFT to influencers</div>
+                    <div>...which is being quiet until he looks by himself.</div>
+                    <div>Is it actually worth it??</div>
+                    <div>Your spendings are actually precious, isn't it?</div>
+                    <div>Why don't you wanna JOIN to his reality?</div>
+                </div>
+            </div>
+            <div class="videocontainer">
+                <video autoplay muted controls>
+                    <source src="/video/promovideo1.mp4" type="video/mp4">
+                </video>
+            </div>
+        </div>
+                    
+        <div class="content center steps">
+            <div class="step"><h5><span class="stepnumber">1.</span>Pick your channel</h5><span>Login to your platform's accout, select your channel from listed</span></div>
+            <div class="step"><h5><span class="stepnumber">2.</span>Set Whent to happen</h5><span>Select the audience's reaction (Gift, Hype ,Comment). Then set the condition of it (gifts more than 100 points, comments including "hey!"..etc)</span></div>
+            <div class="step"><h5><span class="stepnumber">3.</span>Select your device</h5><span>Select your owned smart device (requires device developer's access to obtain the access key)</span></div>
+            <div class="step"><h5><span class="stepnumber">4.</span>And, ..TA-DA!</h5><span>Start live streaming (having delay around 5-10 minutes to sync). Once the registered reaction occurred, your device will react!!</span></div>
         </div>
 
-        <div class="nav-footer">
-            <p>Ready to get started? <a href="/about">See how it works →</a></p>
+        <div class="content videoarea2">
+            <video autoplay muted controls style="width: 100%;">
+                <source src="/video/promovideo2.mp4" type="video/mp4">
+            </video>
+            <div class="dialog">
+                <h4>You are not ALONE?</h4>
+                <h4>Of cource <strong>NOT!</strong></h4>
+                <h4>Then, <span class="evenstronger">FEEL IT!</span></h4>
+                <hr />
+                <div>Taucho devices makes audiences reaction to happen right next to you</div>
+                <div>Live streamers are surrounded by audiences, you need to feel it in REAL!</div>
+            </div>
         </div>
+        <div class="content center platforms">
+            <h3>✨ Supported Platforms</h3>
+            <div class="grid">
+                <div class="card">
+                    <div class="platform-icon">{{platformIcon "youtube"}}</div>
+                    <strong>YouTube</strong>
+                    <ul>
+                        <li>Live chat comments</li>
+                        <li>Super Chat / Super Sticker</li>
+                        <li>Channel memberships</li>
+                        <li>Stream start / end</li>
+                    </ul>
+                </div>
+                <div class="card">
+                    <div class="platform-icon">{{platformIcon "twitch"}}</div>
+                    <strong>Twitch</strong>
+                    <ul>
+                        <li>Chat comments</li>
+                        <li>Cheering (Bits)</li>
+                        <li>Subscriptions &amp; follows</li>
+                        <li>Hype Train / Raid</li>
+                    </ul>
+                </div>
+                <div class="card">
+                    <div class="platform-icon">{{platformIcon "niconico"}}</div>
+                    <strong>NicoNico</strong>
+                    <ul>
+                        <li>Live comments</li>
+                        <li>Nicoru reactions</li>
+                        <li>Gifts</li>
+                        <li>Emotion effects</li>
+                    </ul>
+                </div>
+                <div class="card">
+                    <div class="platform-icon">{{platformIcon "instagram"}}</div>
+                    <strong>Instagram</strong>
+                    <ul>
+                        <li>Live comments</li>
+                        <li>Hearts / reactions</li>
+                        <li>Stream start / end</li>
+                        <li><em>Coming soon</em></li>
+                    </ul>
+                </div>
+                <div class="card">
+                    <div class="platform-icon">{{platformIcon "tiktok"}}</div>
+                    <strong>TikTok</strong>
+                    <ul>
+                        <li>Live comments</li>
+                        <li>Gifts</li>
+                        <li>Follows</li>
+                        <li><em>Coming soon</em></li>
+                    </ul>
+                </div>
+                <div class="card">
+                    <div class="platform-icon">{{platformIcon "kick"}}</div>
+                    <strong>Kick</strong>
+                    <ul>
+                        <li>Chat comments</li>
+                        <li>Subscriptions</li>
+                        <li>Gifts</li>
+                        <li><em>Coming soon</em></li>
+                    </ul>
+                </div>
+                <div class="card">
+                    <div class="platform-icon">{{platformIcon "facebook"}}</div>
+                    <strong>Facebook</strong>
+                    <ul>
+                        <li>Live comments</li>
+                        <li>Reactions</li>
+                        <li>Stars</li>
+                        <li><em>Coming soon</em></li>
+                    </ul>
+                </div>
+                <div class="card">
+                    <div class="platform-icon">{{platformIcon "x"}}</div>
+                    <strong>X</strong>
+                    <ul>
+                        <li>Live comments</li>
+                        <li>Tips</li>
+                        <li>Stream start / end</li>
+                        <li><em>Coming soon</em></li>
+                    </ul>
+                </div>
+                <div class="card">
+                    <div class="platform-icon">{{platformIcon "bilibili"}}</div>
+                    <strong>Bilibili</strong>
+                    <ul>
+                        <li>Live comments</li>
+                        <li>Gifts</li>
+                        <li>Follows</li>
+                        <li><em>Coming soon</em></li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <div class="content whiteback">
+            <div style="width: 100%">
+                <h4>Generic Smart Home Devices are all supported!</h4>
+                <div>You can use all kinds of Smart devices you already have.</div>
+                <div>Room lighting will blink by audience comments.</div>
+                <div>Curtain will open by audience's hype.</div>
+                <div>And cracker pops by the gifts!</div>
+            </div>
+            <div style="width: 20em">
+                <img src="/image/gadgetsample.png">
+            </div>
+        </div>
+        <div class="content center" style="font-size: smaller">
+            <div style="width: 100%">
+                <h4>It's free! (So please buy some gadgets!)</h4>
+                <div>Using Taucho's services is completely free.</div>
+                <div>Everything is free—there are no ads and no paid content. There isn't even a "PREMIUM PLAN".</div>
+                <div>The entire service is funded by affiliate revenue from the smart gadgets listed here.</div>
+                <div>So, please consider purchasing your smart home gadgets through this site.</div>
+                <div>Of course, you are welcome to use products you already own,</div>
+                <div>but we would be incredibly grateful if you made your purchases here.</div>
+            </div>
+        </div>
+        <div class="content blueback">
+            <div style="width: 100%;">
+                <h2>Easy UI</h2>
+                <div>.. actually...no..not really easy. Sorry..</div>
+                <div>Scheduling future live streams,</div>
+                <div> configuring actions based on specific conditions,</div>
+                <div>registering smart device (you know, only relating to Alexa is already pain in the butt),</div>
+                <div>calling APIs for smart home devices—none of these are simple tasks.</div> 
+                <div>But rest assured! We have a selection of templates available for you to choose from.</div>
+                <div>All you have to do is pick the one you like!</div>
+            </div>
+            <div style="width: 400px">
+                <img src="/image/screenguide.png">
+            </div>
+        </div>
+
+        <hr />
+        <div class="footer">
+            <div>
+                <a href="#">{{platformIcon "youtube"}}</a>
+                <a href="https://www.nicovideo.jp/user/143183688">{{platformIcon "niconico"}}</a>
+                <a href="https://x.com/dontaucho">{{platformIcon "x"}}</a>
+                <a href="https://www.twitch.tv/dontaucho">{{platformIcon "twitch"}}</a>
+            </div>
+            <p>Taucho © 2026 | <a href="/about">About Taucho</a> | <a href="/login">Sign In</a> | <a href="/register">Sign Up</a></p>
+        </div>
+    <div>
     </div>
 
     <!-- Login Modal -->
@@ -46,8 +246,8 @@
         <div class="modal-content">
             <div class="modal-header">
                 <span class="close" onclick="closeLoginModal()">&times;</span>
-                <h2>🌊 Sign In</h2>
-                <p>Welcome back to TauchoPortal</p>
+                <h2><img src="/image/logo_ss.png"> Sign In</h2>
+                <p>Welcome back to Taucho</p>
             </div>
 
             <div class="modal-body">
@@ -56,7 +256,29 @@
         </div>
     </div>
 
-    <script>
+    <script language="javascript">
+        function setupScrollAction(){
+            window.addEventListener("scroll", (event) => {
+                const imgcontainer = document.getElementById("tauchoTitleImageContainer");
+                const topheaderlink = document.getElementById("topheaderlink");
+                const topheaderbg = document.getElementById("topheaderbg");
+                const titleheight = document.getElementById("titleimg_s").height;
+                if (window.scrollY > window.innerHeight - 64) {
+                    topheaderbg.style["display"] = "block";
+                    topheaderlink.style["visibility"] = "visible";
+                    imgcontainer.style["display"] = "none";
+                }
+                else if (window.scrollY > (window.innerHeight / 2 - 64)) {
+                    topheaderbg.style["display"] = "none";
+                    topheaderlink.style["visibility"] = "hidden";
+                    imgcontainer.style["display"] = "block";
+                    imgcontainer.style["width"] = window.innerWidth * (window.innerHeight - window.scrollY + titleheight*4) / (window.innerHeight)+ "px";
+                    imgcontainer.style["width"] = imgcontainer.offsetWidth > window.innerWidth ? window.innerWidth : imgcontainer.offsetWidth + "px";
+                    imgcontainer.style["left"] = (window.innerWidth - imgcontainer.offsetWidth) / 2 + "px";
+                    imgcontainer.style["top"] = Math.pow((window.innerHeight * 2 - window.scrollY) / window.innerHeight, 2) + "px";
+                }
+            });
+        }
         let resetLoginModalPosition = null;
 
         function setupLoginModalDrag() {
@@ -151,6 +373,7 @@
 
         // If already logged in, go straight to dashboard
         document.addEventListener('DOMContentLoaded', async () => {
+            setupScrollAction();
             setupLoginModalDrag();
             const user = window.__user;
             if (user) window.location.replace('/dashboard');
