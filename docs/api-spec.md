@@ -713,6 +713,11 @@ Set `"clear_filter": true` to remove the filter entirely (resetting to track-all
 | POST | `/conditions` | Create a condition |
 | PATCH | `/conditions/update?id=<id>` | Update a condition |
 | DELETE | `/conditions?id=<id>` | Delete a condition |
+| POST | `/conditions/test-draft` | Test unsaved condition logic *(new)* |
+| POST | `/conditions/{id}/test` | Test existing condition *(new)* |
+| POST | `/conditions/test-all` | Test all user conditions *(new)* |
+
+**See `/docs/condition-logic-api.md` for detailed documentation on the condition logic structure and testing endpoints.**
 
 ### Devices (`/devices/...`)
 | Method | Path | Description |
@@ -722,7 +727,151 @@ Set `"clear_filter": true` to remove the filter entirely (resetting to track-all
 | POST | `/devices` | Register a device |
 | PATCH | `/devices/update?id=<id>` | Update a device |
 | DELETE | `/devices?id=<id>` | Delete a device |
-| POST | `/devices/test?id=<id>` | Send a brief test command (stub — needs brand SDK) |
+| POST | `/devices/test?id=<id>` | **Send a test command to device using template system** |
+
+**Device test endpoint** (`POST /devices/test?id=<id>`):
+- ✅ **NOW FULLY FUNCTIONAL** — calls actual device APIs
+- Requires credentials to be set up for the device's brand
+- Uses template system to construct HTTP request
+- Returns success/failure with detailed error info
+- Body: `{ "template_id": <int>, "action": "<string>", "params": <object> }`
+
+### Device Credentials (`/device-credentials/...`) ⭐ NEW
+| Method | Path | Description |
+|--------|------|-------------|
+| GET | `/device-credentials` | List all credentials for current user (masked) |
+| GET | `/device-credentials/get?id=<id>` | Get a single credential (without sensitive fields) |
+| POST | `/device-credentials` | Create a new credential for a device brand |
+| PATCH | `/device-credentials/update?id=<id>` | Update an existing credential |
+| DELETE | `/device-credentials?id=<id>` | Delete a credential |
+
+**Credential fields by brand:**
+- **Govee**: `api_key`, `device_id`
+- **LIFX**: `bearer_token`
+- **Philips Hue**: `bearer_token`, `host_ip`, `port`
+- **WLED**: `host_ip`, `port`
+- **Nanoleaf**: `api_key`, `host_ip`, `port`
+- **TP-Link Kasa**: `username`, `password`, `host_ip`, `port`
+- **Tuya**: `api_key`, `bearer_token`, `device_id`, `region`
+- **Wyze**: `username`, `password`
+- **Yeelight**: `host_ip`, `port`
+
+**Request body for `POST /device-credentials`:**
+```json
+{
+  "brand_name": "govee",
+  "api_key": "your-api-key",
+  "device_id": "device-123",
+  "device_name": "Living Room Light",
+  "device_model": "H6199"
+}
+```
+
+**Security:** All sensitive fields (API keys, tokens, passwords) are masked in API responses (e.g., `****3k9x`).
+
+### Device Templates (`/device-templates/...`) ⭐ NEW
+| Method | Path | Description |
+|--------|------|-------------|
+| GET | `/device-templates` | List all templates (supports `?brand=` and `?category=` filters) |
+| GET | `/device-templates/get?id=<id>` | Get a single template |
+
+**Template object includes:**
+- Brand name, category (power, brightness, color, etc.)
+- HTTP method and URL endpoint pattern
+- Body template with parameter placeholders
+- Authentication type (api_key, bearer_token, oauth, none)
+- Required and optional parameters with constraints
+- UI hints and examples
+
+**Example usage:**
+```bash
+# List templates for Govee
+GET /device-templates?brand=govee
+
+# List templates for brightness control
+GET /device-templates?category=brightness
+
+# Get specific template
+GET /device-templates/get?id=123
+```
+
+### Device Groups (`/device-groups/...`)
+| Method | Path | Description |
+|--------|------|-------------|
+| GET | `/device-groups` | List all device groups for current user |
+| GET | `/device-groups/get?id=<id>` | Get a single device group with all its devices |
+| POST | `/device-groups` | Create a new device group |
+| PATCH | `/device-groups/update?id=<id>` | Update a device group name or option |
+| DELETE | `/device-groups?id=<id>` | Delete a device group (devices remain unassigned) |
+| POST | `/device-groups/assign?device_id=<id>&group_id=<id>` | Assign a device to a device group |
+| POST | `/device-groups/remove?device_id=<id>` | Remove a device from its device group |
+
+**Device Group data model:**
+```json
+{
+  "id": "string (format: group_<timestamp_nanos>)",
+  "user_id": "integer (FK → users.id, CASCADE DELETE)",
+  "name": "string (human-readable group name)",
+  "option": "string (sequential | queue)",
+  "created_at": "timestamp",
+  "updated_at": "timestamp"
+}
+```
+
+**Option values:**
+- `"sequential"` — "cracker popper" behavior; devices trigger one after another
+- `"queue"` — queue-based behavior; each device serves an audience until exhausted, then moves to next device
+
+**Request body for `POST /device-groups`:**
+```json
+{
+  "name": "Living Room Lights",
+  "option": "sequential"
+}
+```
+
+**Request body for `PATCH /device-groups/update?id=<id>` (all optional):**
+```json
+{
+  "name": "Updated Name",
+  "option": "queue"
+}
+```
+
+**Response for `GET /device-groups/get?id=<id>` includes nested devices:**
+```json
+{
+  "id": "group_1718237456000000000",
+  "user_id": 42,
+  "name": "Living Room Lights",
+  "option": "sequential",
+  "devices": [
+    {
+      "id": "device_1",
+      "user_id": 42,
+      "name": "Light 1",
+      "brand": "hue",
+      "product_id": "hue-color-bulb",
+      "room": "living_room",
+      "is_configured": true,
+      "status": "online",
+      "device_group_id": "group_1718237456000000000",
+      "created_at": "2024-06-12T22:00:00Z",
+      "updated_at": "2024-06-12T22:14:07Z"
+    }
+  ],
+  "created_at": "2024-06-12T22:14:07Z",
+  "updated_at": "2024-06-12T22:14:07Z"
+}
+```
+
+**Security notes:**
+- Device groups are scoped to individual users — a user cannot view, modify, or delete another user's groups
+- A device can belong to at most one group at a time
+- Assigning a device to a new group automatically removes it from its previous group
+- Deleting a group does NOT delete its devices — only removes the group reference
+
+**See `/docs/DEVICE_GROUPING.md` for detailed documentation on device grouping, including usage examples and future enhancement roadmap.**
 
 ### Stream Accounts (`/streams/...`)
 | Method | Path | Description |
@@ -1059,6 +1208,8 @@ Channel search uses the public Bilibili search API.
 
 ### Watched Channels — full CRUD (`/watches/...`)
 
+> **🔒 Authorization Required:** All endpoints in this section require authentication via `X-User-ID` header. The API verifies that the authenticated user owns each resource before allowing access. Attempting to access another user's watch, device, or condition will return `403 Forbidden`.
+
 The **Watched Channels** page (`/monitors`) lists all channels the polling service monitors.  
 Each channel has per-platform event conditions (see Conditions below).
 
@@ -1136,6 +1287,8 @@ PATCH /watches/update?id=watch_123
 
 ### Conditions (`/conditions/...`)
 
+> **🔒 Authorization Required:** All endpoints in this section require authentication via `X-User-ID` header. The API verifies that the authenticated user owns the watch associated with each condition before allowing access. Attempting to access another user's condition will return `403 Forbidden`.
+
 Conditions belong to a watched channel. When the API polling service detects a matching
 stream event, it can trigger a device action.
 
@@ -1185,6 +1338,8 @@ stream event, it can trigger a device action.
 ---
 
 ### Devices (`/devices/...`)
+
+> **🔒 Authorization Required:** All endpoints in this section require authentication via `X-User-ID` header. The API verifies that the authenticated user owns each device before allowing access. Attempting to access another user's device will return `403 Forbidden`.
 
 Registered smart home devices. Credentials are stored per-brand.
 
