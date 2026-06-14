@@ -23,7 +23,13 @@ var frJSON []byte
 //go:embed locales/es.json
 var esJSON []byte
 
-var supported = []string{"en", "ja", "de", "fr", "es"}
+//go:embed locales/zh.json
+var zhJSON []byte
+
+//go:embed locales/ko.json
+var koJSON []byte
+
+var supported = []string{"en", "ja", "de", "fr", "es", "zh", "ko"}
 
 const CookieName = "taucho_language"
 
@@ -37,7 +43,7 @@ type Bundle struct {
 func Load() *Bundle {
 	b := &Bundle{locales: make(map[string]map[string]string)}
 	for lang, data := range map[string][]byte{
-		"en": enJSON, "ja": jaJSON, "de": deJSON, "fr": frJSON, "es": esJSON,
+		"en": enJSON, "ja": jaJSON, "de": deJSON, "fr": frJSON, "es": esJSON, "zh": zhJSON, "ko": koJSON,
 	} {
 		var m map[string]string
 		if err := json.Unmarshal(data, &m); err != nil {

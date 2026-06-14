@@ -11,7 +11,7 @@
         <div id="topheaderbg" class="topheaderbg"></div>
         <div class="topbgcontainer">
             <div id="topheaderlink" class="topheaderlogoarea">
-                <a href="#" onclick="openLoginModal()"><img id="titleimg_s" src="/image/welcome_title_l_e_s.png"></a>
+                <a href="#" onclick="openLoginModal()"><img id="titleimg_s" src="{{.I18n.T "index.titleimage_s"}}"></a>
             </div>
             <div class="topheaderhumburger">
                 <a href="#" onclick="document.getElementById('headerdropdown').style['display']=document.getElementById('headerdropdown').style['display']=='block'?'none':'block';return false">☰</a>
@@ -19,7 +19,7 @@
         </div>
     </div>
     <div id="headerdropdown">
-        <a href="#" onclick="openLoginModal()">Login</a>
+        <a href="#" onclick="openLoginModal()">{{.I18n.T "index.loginbutton"}}</a>
         <select class="language-selector" title="Language" onchange="window.location='/set-lang?lang='+this.value+'&back='+encodeURIComponent(window.location.pathname)">
             <option value="en" {{if eq .Lang "en"}}selected{{end}}>English</option>
             <option value="ja" {{if eq .Lang "ja"}}selected{{end}}>日本語</option>
@@ -27,20 +27,20 @@
             <option value="fr" {{if eq .Lang "fr"}}selected{{end}}>Français</option>
             <option value="es" {{if eq .Lang "es"}}selected{{end}}>Español</option>
         </select>
-        <a href="/privacy-policy">Privacy Policy</a>
-        <a href="/terms-of-services">Terms of Services</a>
-        <a href="/about">About This Site</a>
-        <a href="/contact">Contact Us</a>
+        <a href="/privacy-policy">{{.I18n.T "index.privacylink"}}</a>
+        <a href="/terms-of-services">{{.I18n.T "index.termslink"}}</a>
+        <a href="/about">{{.I18n.T "index.aboutlink"}}</a>
+        <a href="/contact">{{.I18n.T "index.contactlink"}}</a>
     </div>
 
     <div>
         <div id="tauchoTitleImageContainer" class="titleimagecontainer">
-            <img src="/image/welcome_title_l_e.png">
+            <img src="{{.I18n.T "index.contactlink"}}">
         </div>
         <div class="bgfiller">
             <div>
-                <a href="#" onclick="openLoginModal()" class="loginbutton">Login / Sign Up</a>
-                <a href="/about" style="margin-top: 2em">How it works</a>
+                <a href="#" onclick="openLoginModal()" class="loginbutton">{{.I18n.T "index.loginsignupbutton"}}</a>
+                <a href="/about" style="margin-top: 2em">{{.I18n.T "index.howitworklink"}}</a>
             </div>
         </div>
 
@@ -49,10 +49,10 @@
                 <img src="/image/ad1.png" style="padding: 1em">
             </div>
             <div style="min-width: 2em">
-                <h4>Taucho is a Live-Stream-Reactor</h4>
-                <div>Taucho makes live streaming event to trigger<wbr />Smart Home device's action</div>
-                <div>Comments, Gifts, Likes.. <wbr />set any kinds of reactions audiences do,</div>
-                <div>and when it happened ..<strong>POP!!</strong></div>
+                <h4>{{.I18n.T "index.section1title"}}</h4>
+                <div>{{.I18n.T "index.section1sentence1"}}</div>
+                <div>{{.I18n.T "index.section1sentence2"}}</div>
+                <div>{{.I18n.T "index.section1sentence3"}}</div>
             </div>
         </div>
         <div class="videoarea1">
