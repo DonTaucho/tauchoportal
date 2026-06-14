@@ -582,7 +582,55 @@ video {
     body {
         padding: 0;
     }
-    
+    .titleimagecontainer {
+        height: 0px;
+        position: absolute;
+    }
+    #headerdropdown{
+        width: 100%;
+    }
+    .bgfiller {
+        height: 20em;
+    }
+    .bgfiller>div{
+        padding-top: 16em;
+    }
+    .content {
+        display: block;
+        padding: 0em 1em;
+        line-height: 1.6em;
+    }
+    .content >div {
+        width: 100% !important;
+    }
+    .content img {
+        width: 100%;
+    }
+    .videoarea1 {
+        display: block;
+    }
+    .videoarea1 .wrappertext {
+        width: unset;
+        position: unset;
+        padding: unset;
+    }
+    .videoarea1 .wrappertext .overflowtexts {
+        padding: 1em;
+        width: 100%;
+        position: unset;
+    }
+    .content.videoarea2 {
+        padding: 0px !important;
+    }
+    .content.videoarea2 > div.dialog {
+        width: 14em !important;
+    }
+    .content .step {
+        margin: 0.5em 0px;
+    }
+    .container {
+        display: block;
+    }
     .container img {
         max-width: 90%;
     }
