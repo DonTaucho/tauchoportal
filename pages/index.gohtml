@@ -20,7 +20,7 @@
     </div>
     <div id="headerdropdown">
         <a href="#" onclick="openLoginModal()">{{.I18n.T "index.loginbutton"}}</a>
-        <select class="language-selector" title="Language" onchange="window.location='/set-lang?lang='+this.value+'&back='+encodeURIComponent(window.location.pathname)">
+        <select class="language-selector" title="{{.I18n.T "index.languageSelectorTitle"}}" onchange="window.location='/set-lang?lang='+this.value+'&back='+encodeURIComponent(window.location.pathname)">
             <option value="en" {{if eq .Lang "en"}}selected{{end}}>English</option>
             <option value="ja" {{if eq .Lang "ja"}}selected{{end}}>日本語</option>
             <option value="de" {{if eq .Lang "de"}}selected{{end}}>Deutsch</option>
@@ -58,12 +58,12 @@
         <div class="videoarea1">
             <div class="wrappertext">
                 <div class="overflowtexts">
-                    <h3>Audiences, POKE THE INFLUENCER!</h3>
-                    <div>Sometimes, you send GIFT to influencers</div>
-                    <div>...which is being quiet until he looks by himself.</div>
-                    <div>Is it actually worth it??</div>
-                    <div>Your spendings are actually precious, isn't it?</div>
-                    <div>Why don't you wanna JOIN to his reality?</div>
+                    <h3>{{.I18n.T "index.section2title"}}</h3>
+                    <div>{{.I18n.T "index.section2desc1"}}</div>
+                    <div>{{.I18n.T "index.section2desc2"}}</div>
+                    <div>{{.I18n.T "index.section2desc3"}}</div>
+                    <div>{{.I18n.T "index.section2desc4"}}</div>
+                    <div>{{.I18n.T "index.section2desc5"}}</div>
                 </div>
             </div>
             <div class="videocontainer">
@@ -74,10 +74,10 @@
         </div>
                     
         <div class="content center steps">
-            <div class="step"><h5><span class="stepnumber">1.</span>Pick your channel</h5><span>Login to your platform's accout, select your channel from listed</span></div>
-            <div class="step"><h5><span class="stepnumber">2.</span>Set Whent to happen</h5><span>Select the audience's reaction (Gift, Hype ,Comment). Then set the condition of it (gifts more than 100 points, comments including "hey!"..etc)</span></div>
-            <div class="step"><h5><span class="stepnumber">3.</span>Select your device</h5><span>Select your owned smart device (requires device developer's access to obtain the access key)</span></div>
-            <div class="step"><h5><span class="stepnumber">4.</span>And, ..TA-DA!</h5><span>Start live streaming (having delay around 5-10 minutes to sync). Once the registered reaction occurred, your device will react!!</span></div>
+            <div class="step"><h5><span class="stepnumber">1.</span>{{.I18n.T "index.step1title"}}</h5><span>{{.I18n.T "index.step1desc"}}</span></div>
+            <div class="step"><h5><span class="stepnumber">2.</span>{{.I18n.T "index.step2title"}}</h5><span>{{.I18n.T "index.step2desc"}}</span></div>
+            <div class="step"><h5><span class="stepnumber">3.</span>{{.I18n.T "index.step3title"}}</h5><span>{{.I18n.T "index.step3desc"}}</span></div>
+            <div class="step"><h5><span class="stepnumber">4.</span>{{.I18n.T "index.step4title"}}</h5><span>{{.I18n.T "index.step4desc"}}</span></div>
         </div>
 
         <div class="content videoarea2">
@@ -85,105 +85,105 @@
                 <source src="/video/promovideo2.mp4" type="video/mp4">
             </video>
             <div class="dialog">
-                <h4>You are not ALONE?</h4>
-                <h4>Of cource <strong>NOT!</strong></h4>
-                <h4>Then, <span class="evenstronger">FEEL IT!</span></h4>
+                <h4>{{.I18n.T "index.section3heading1"}}</h4>
+                <h4>{{.I18n.T "index.section3heading2"}}</h4>
+                <h4>{{.I18n.T "index.section3heading3"}}</h4>
                 <hr />
-                <div>Taucho devices makes audiences reaction to happen right next to you</div>
-                <div>Live streamers are surrounded by audiences, you need to feel it in REAL!</div>
+                <div>{{.I18n.T "index.section3desc1"}}</div>
+                <div>{{.I18n.T "index.section3desc2"}}</div>
             </div>
         </div>
         <div class="content center platforms">
-            <h3>✨ Supported Platforms</h3>
+            <h3>{{.I18n.T "index.platformsTitle"}}</h3>
             <div class="grid">
                 <div class="card">
                     <div class="platform-icon">{{platformIcon "youtube"}}</div>
                     <strong>YouTube</strong>
                     <ul>
-                        <li>Live chat comments</li>
-                        <li>Super Chat / Super Sticker</li>
-                        <li>Channel memberships</li>
-                        <li>Stream start / end</li>
+                        <li>{{.I18n.T "index.featureLiveChatComments"}}</li>
+                        <li>{{.I18n.T "index.featureSuperChatStickers"}}</li>
+                        <li>{{.I18n.T "index.featureChannelMemberships"}}</li>
+                        <li>{{.I18n.T "index.featureStreamStartEnd"}}</li>
                     </ul>
                 </div>
                 <div class="card">
                     <div class="platform-icon">{{platformIcon "twitch"}}</div>
                     <strong>Twitch</strong>
                     <ul>
-                        <li>Chat comments</li>
-                        <li>Cheering (Bits)</li>
-                        <li>Subscriptions &amp; follows</li>
-                        <li>Hype Train / Raid</li>
+                        <li>{{.I18n.T "index.featureChatComments"}}</li>
+                        <li>{{.I18n.T "index.featureCheeringBits"}}</li>
+                        <li>{{.I18n.T "index.featureSubscriptionsFollows"}}</li>
+                        <li>{{.I18n.T "index.featureHypeTrainRaid"}}</li>
                     </ul>
                 </div>
                 <div class="card">
                     <div class="platform-icon">{{platformIcon "niconico"}}</div>
                     <strong>NicoNico</strong>
                     <ul>
-                        <li>Live comments</li>
-                        <li>Nicoru reactions</li>
-                        <li>Gifts</li>
-                        <li>Emotion effects</li>
+                        <li>{{.I18n.T "index.featureLiveComments"}}</li>
+                        <li>{{.I18n.T "index.featureNicoruReactions"}}</li>
+                        <li>{{.I18n.T "index.featureGifts"}}</li>
+                        <li>{{.I18n.T "index.featureEmotionEffects"}}</li>
                     </ul>
                 </div>
                 <div class="card">
                     <div class="platform-icon">{{platformIcon "instagram"}}</div>
                     <strong>Instagram</strong>
                     <ul>
-                        <li>Live comments</li>
-                        <li>Hearts / reactions</li>
-                        <li>Stream start / end</li>
-                        <li><em>Coming soon</em></li>
+                        <li>{{.I18n.T "index.featureLiveComments"}}</li>
+                        <li>{{.I18n.T "index.featureHeartsReactions"}}</li>
+                        <li>{{.I18n.T "index.featureStreamStartEnd"}}</li>
+                        <li><em>{{.I18n.T "index.featureComingSoon"}}</em></li>
                     </ul>
                 </div>
                 <div class="card">
                     <div class="platform-icon">{{platformIcon "tiktok"}}</div>
                     <strong>TikTok</strong>
                     <ul>
-                        <li>Live comments</li>
-                        <li>Gifts</li>
-                        <li>Follows</li>
-                        <li><em>Coming soon</em></li>
+                        <li>{{.I18n.T "index.featureLiveComments"}}</li>
+                        <li>{{.I18n.T "index.featureGifts"}}</li>
+                        <li>{{.I18n.T "index.featureFollows"}}</li>
+                        <li><em>{{.I18n.T "index.featureComingSoon"}}</em></li>
                     </ul>
                 </div>
                 <div class="card">
                     <div class="platform-icon">{{platformIcon "kick"}}</div>
                     <strong>Kick</strong>
                     <ul>
-                        <li>Chat comments</li>
-                        <li>Subscriptions</li>
-                        <li>Gifts</li>
-                        <li><em>Coming soon</em></li>
+                        <li>{{.I18n.T "index.featureChatComments"}}</li>
+                        <li>{{.I18n.T "index.featureSubscriptions"}}</li>
+                        <li>{{.I18n.T "index.featureGifts"}}</li>
+                        <li><em>{{.I18n.T "index.featureComingSoon"}}</em></li>
                     </ul>
                 </div>
                 <div class="card">
                     <div class="platform-icon">{{platformIcon "facebook"}}</div>
                     <strong>Facebook</strong>
                     <ul>
-                        <li>Live comments</li>
-                        <li>Reactions</li>
-                        <li>Stars</li>
-                        <li><em>Coming soon</em></li>
+                        <li>{{.I18n.T "index.featureLiveComments"}}</li>
+                        <li>{{.I18n.T "index.featureReactions"}}</li>
+                        <li>{{.I18n.T "index.featureStars"}}</li>
+                        <li><em>{{.I18n.T "index.featureComingSoon"}}</em></li>
                     </ul>
                 </div>
                 <div class="card">
                     <div class="platform-icon">{{platformIcon "x"}}</div>
                     <strong>X</strong>
                     <ul>
-                        <li>Live comments</li>
-                        <li>Tips</li>
-                        <li>Stream start / end</li>
-                        <li><em>Coming soon</em></li>
+                        <li>{{.I18n.T "index.featureLiveComments"}}</li>
+                        <li>{{.I18n.T "index.featureTips"}}</li>
+                        <li>{{.I18n.T "index.featureStreamStartEnd"}}</li>
+                        <li><em>{{.I18n.T "index.featureComingSoon"}}</em></li>
                     </ul>
                 </div>
                 <div class="card">
                     <div class="platform-icon">{{platformIcon "bilibili"}}</div>
                     <strong>Bilibili</strong>
                     <ul>
-                        <li>Live comments</li>
-                        <li>Gifts</li>
-                        <li>Follows</li>
-                        <li><em>Coming soon</em></li>
+                        <li>{{.I18n.T "index.featureLiveComments"}}</li>
+                        <li>{{.I18n.T "index.featureGifts"}}</li>
+                        <li>{{.I18n.T "index.featureFollows"}}</li>
+                        <li><em>{{.I18n.T "index.featureComingSoon"}}</em></li>
                     </ul>
                 </div>
             </div>
@@ -191,11 +191,11 @@
 
         <div class="content whiteback">
             <div style="width: 100%">
-                <h4>Generic Smart Home Devices are all supported!</h4>
-                <div>You can use all kinds of Smart devices you already have.</div>
-                <div>Room lighting will blink by audience comments.</div>
-                <div>Curtain will open by audience's hype.</div>
-                <div>And cracker pops by the gifts!</div>
+                <h4>{{.I18n.T "index.smartdevicesTitle"}}</h4>
+                <div>{{.I18n.T "index.smartdevicesDesc1"}}</div>
+                <div>{{.I18n.T "index.smartdevicesDesc2"}}</div>
+                <div>{{.I18n.T "index.smartdevicesDesc3"}}</div>
+                <div>{{.I18n.T "index.smartdevicesDesc4"}}</div>
             </div>
             <div style="width: 20em">
                 <img src="/image/gadgetsample.png">
@@ -203,25 +203,24 @@
         </div>
         <div class="content center" style="font-size: smaller">
             <div style="width: 100%">
-                <h4>It's free! (So please buy some gadgets!)</h4>
-                <div>Using Taucho's services is completely free.</div>
-                <div>Everything is free—there are no ads and no paid content. There isn't even a "PREMIUM PLAN".</div>
-                <div>The entire service is funded by affiliate revenue from the smart gadgets listed here.</div>
-                <div>So, please consider purchasing your smart home gadgets through this site.</div>
-                <div>Of course, you are welcome to use products you already own,</div>
-                <div>but we would be incredibly grateful if you made your purchases here.</div>
+                <h4>{{.I18n.T "index.freeTitle"}}</h4>
+                <div>{{.I18n.T "index.freeDesc1"}}</div>
+                <div>{{.I18n.T "index.freeDesc2"}}</div>
+                <div>{{.I18n.T "index.freeDesc3"}}</div>
+                <div>{{.I18n.T "index.freeDesc4"}}</div>
+                <div>{{.I18n.T "index.freeDesc5"}}</div>
+                <div>{{.I18n.T "index.freeDesc6"}}</div>
             </div>
         </div>
         <div class="content blueback">
             <div style="width: 100%;">
-                <h2>Easy UI</h2>
-                <div>.. actually...no..not really easy. Sorry..</div>
-                <div>Scheduling future live streams,</div>
-                <div> configuring actions based on specific conditions,</div>
-                <div>registering smart device (you know, only relating to Alexa is already pain in the butt),</div>
-                <div>calling APIs for smart home devices—none of these are simple tasks.</div> 
-                <div>But rest assured! We have a selection of templates available for you to choose from.</div>
-                <div>All you have to do is pick the one you like!</div>
+                <h2>{{.I18n.T "index.easyuiTitle"}}</h2>
+                <div>{{.I18n.T "index.easyuiDesc1"}}</div>
+                <div>{{.I18n.T "index.easyuiDesc2"}}</div>
+                <div>{{.I18n.T "index.easyuiDesc3"}}</div>
+                <div>{{.I18n.T "index.easyuiDesc4"}}</div>
+                <div>{{.I18n.T "index.easyuiDesc5"}}</div> 
+                <div>{{.I18n.T "index.easyuiDesc6"}}</div>
             </div>
             <div style="width: 400px">
                 <img src="/image/screenguide.png">
@@ -236,7 +235,7 @@
                 <a href="https://x.com/dontaucho">{{platformIcon "x"}}</a>
                 <a href="https://www.twitch.tv/dontaucho">{{platformIcon "twitch"}}</a>
             </div>
-            <p>Taucho © 2026 | <a href="/about">About Taucho</a> | <a href="/login">Sign In</a> | <a href="/register">Sign Up</a></p>
+            <p>Taucho © 2026 | <a href="/about">{{.I18n.T "index.footerAbout"}}</a> | <a href="/login">{{.I18n.T "nav.signIn"}}</a> | <a href="/register">{{.I18n.T "nav.createAccount"}}</a></p>
         </div>
     <div>
     </div>
@@ -246,8 +245,8 @@
         <div class="modal-content">
             <div class="modal-header">
                 <span class="close" onclick="closeLoginModal()">&times;</span>
-                <h2><img src="/image/logo_ss.png"> Sign In</h2>
-                <p>Welcome back to Taucho</p>
+                <h2><img src="/image/logo_ss.png"> {{.I18n.T "nav.signIn"}}</h2>
+                <p>{{.I18n.T "index.welcomeBack"}}</p>
             </div>
 
             <div class="modal-body">

@@ -6,7 +6,6 @@
   "nav.profile": "프로필",
   "nav.accountSettings": "계정 설정",
   "nav.signOut": "로그아웃 중",
-
   "index.titleimage_l": "/image/welcome_title_l_k.png",
   "index.titleimage_s": "/image/welcome_title_s_k.png",
   "index.loginbutton": "로그인",
@@ -20,7 +19,6 @@
   "index.section1sentence1": "당신의 라이브 배달에서받은 의견, 선물을 귀하의 장비에 대한 행동에.",
   "index.section1sentence2": "라이브 전송으로 받은 청취자로부터의 리액션에 대해,",
   "index.section1sentence3": "미리 설정한 조건에 해당하는 반응이 왔을 경우 설정의 기기를 동작시키는 서비스입니다",
-  
   "modal.addNewStream": "➕ Add New Stream",
   "modal.selectProvider": "Select Provider",
   "modal.chooseProvider": "Choose a provider...",
@@ -31,27 +29,22 @@
   "modal.streamKey": "Stream Key",
   "modal.streamKeyPlaceholder": "Your stream key",
   "modal.addStream": "Add Stream",
-
   "alert.copiedToClipboard": "Copied to clipboard!",
   "alert.pauseStream": "Pause stream: ",
   "alert.stopStream": "Stop stream: ",
   "alert.editStream": "Edit stream: ",
-
   "status.live": "🔴 LIVE",
   "status.offline": "⚪ OFFLINE",
   "status.ended": "⏹ ENDED",
   "status.excellent": "✅ Excellent",
   "status.completed": "Completed",
-
   "button.cancel": "Cancel",
   "button.save": "Save Trigger",
-
   "nav.home": "Home",
   "nav.signIn": "Sign In",
   "nav.createAccount": "Create Account",
   "nav.privacy": "Privacy Policy",
   "nav.terms": "Terms of Service",
-
   "policy.privacyTitle": "Privacy Policy",
   "policy.termsTitle": "Terms of Service",
   "policy.lastUpdated": "Last Updated:",
@@ -63,196 +56,197 @@
   "policy.contactInfoText": "If you have questions about these Terms of Service or need to report a violation, please contact us at:",
   "policy.tauchoTeam": "Taucho Team",
   "policy.responseTime": "We will respond to your inquiry within 30 days.",
-
   "policy.intro": "Introduction",
   "policy.introText": "Taucho is committed to protecting your privacy. This Privacy Policy explains how we collect, use, disclose, and otherwise process your information in connection with our streaming automation platform. Please read this Privacy Policy carefully. By accessing or using Taucho, you acknowledge that you have read, understood, and agree to be bound by all the terms of this Privacy Policy.",
-  
   "policy.dataCollected": "Information We Collect",
   "policy.accountData": "Account Information",
   "policy.accountDataDesc": "When you create a Taucho account, we collect: Email address, Username, Password (encrypted), Profile information (name, profile picture), Preferred language and timezone.",
-  
   "policy.streamingCreds": "Streaming Account Credentials",
   "policy.streamingCredsDesc": "To monitor your live streams, we collect and securely store OAuth tokens and authentication credentials for YouTube, Twitch, and NicoNico channels. We never store your passwords. We use OAuth authentication to access only the permissions you explicitly grant. You can revoke access at any time through your streaming platform's settings.",
-  
   "policy.deviceData": "Smart Device Information",
   "policy.deviceDataDesc": "To control your smart devices, we collect: Device names and identifiers, Device types and capabilities, Device authentication tokens (encrypted), Device location (if applicable), Network configuration details.",
-  
   "policy.eventData": "Stream Event Data",
   "policy.eventDataDesc": "We collect data about interactions with your streams: Viewer comments and messages (for condition matching), Super Chat amounts and text, Donation and gift information, Viewer counts and stream duration, Reaction and emotion data.",
-  
   "policy.usageData": "Usage Data",
   "policy.usageDataDesc": "We automatically collect information about your use of Taucho: IP address and browser type, Pages visited and features used, Timestamps of your activity, Clicks and interactions within the platform, Device information (operating system, browser).",
-  
   "policy.communicationData": "Communication Data",
   "policy.communicationDataDesc": "If you contact us for support, we collect: Messages and correspondence, Attachments and screenshots, Support ticket information.",
-  
   "policy.dataUsage": "How We Use Your Information",
   "policy.dataUsageDesc": "We use the information we collect for the following purposes: Service Delivery (to provide and maintain Taucho, monitor streams, control devices), Authentication (to verify identity and prevent fraud), Communication (service updates, inquiries, support), Analytics (analyze user interaction and improve functionality), Security (detect, prevent, and address security incidents), Legal Compliance (comply with applicable laws), Marketing (promotional communications with consent).",
-  
   "policy.dataSharing": "Data Sharing and Disclosure",
   "policy.noSellData": "We Do Not Sell Your Data",
   "policy.noSellDataDesc": "Taucho does not sell, trade, or rent your personal information to third parties for their marketing purposes.",
-  
   "policy.thirdParty": "Third-Party Service Providers",
   "policy.thirdPartyDesc": "We may share your information with trusted third-party service providers including: Cloud infrastructure providers (hosting and storage), Payment processors (billing), Analytics providers (service improvement), Smart home device manufacturers (device control), Streaming platform APIs. These providers are contractually obligated to use information only as necessary and are subject to confidentiality obligations.",
-  
   "policy.legal": "Legal Requirements",
   "policy.legalDesc": "We may disclose your information when required by law or in good faith when necessary to: Comply with legal obligations or government requests, Enforce Terms of Service and other agreements, Protect the security or integrity of our Service, Protect the rights, privacy, safety, or property of users or the public.",
-  
   "policy.businessTransfer": "Business Transfers",
   "policy.businessTransferDesc": "In the event of merger, acquisition, bankruptcy, or sale of assets, your information may be transferred. We will provide notice before your information becomes subject to a different privacy policy.",
-  
   "policy.security": "Data Security",
   "policy.securityDesc": "We implement industry-standard security measures including: Encryption of sensitive data in transit (TLS/SSL) and at rest, Secure password hashing using bcrypt, Regular security audits and penetration testing, Access controls and authentication requirements, Secure credential storage for streaming and device tokens, Firewalls and intrusion detection systems. However, no method of transmission is 100% secure. While we strive to protect information, we cannot guarantee absolute security. You use our Service at your own risk.",
-  
   "policy.retention": "Data Retention",
   "policy.retentionDesc": "We retain your information as long as necessary to provide the Service. Account Information is retained while your account is active, plus 30 days after deletion. Stream Event Data is retained for 90 days. Usage Analytics is retained for 12 months. Support Communications are retained for 2 years. You can request deletion of your account and associated data at any time.",
-  
   "policy.userRights": "Your Privacy Rights",
   "policy.accessRight": "Access and Portability",
   "policy.accessRightDesc": "You have the right to access, download, and receive a copy of your personal information in a structured, commonly used format.",
-  
   "policy.correctionRight": "Correction and Deletion",
   "policy.correctionRightDesc": "You have the right to correct inaccurate information and to request deletion of your data (subject to legal obligations).",
-  
   "policy.optOutRight": "Opt-Out",
   "policy.optOutRightDesc": "You can opt out of promotional communications at any time by clicking the unsubscribe link or adjusting your preferences in your account settings.",
-  
   "policy.gdprRight": "GDPR Rights (EU Residents)",
   "policy.gdprRightDesc": "If you are a resident of the European Union, you have additional rights under GDPR, including the right to object to processing, restrict processing, and withdraw consent.",
-  
   "policy.ccpaRight": "CCPA Rights (California Residents)",
   "policy.ccpaRightDesc": "If you are a California resident, you have rights under CCPA to request disclosure, deletion, and opt-out of the sale of personal information.",
-  
   "policy.cookies": "Cookies and Tracking",
   "policy.cookiesDesc": "Taucho uses cookies to enhance your experience: Session Cookies (maintain login), Preference Cookies (remember language and settings), Analytics Cookies (understand usage). You can control cookie preferences through your browser. Disabling cookies may limit functionality.",
-  
   "policy.thirdPartyLinks": "Third-Party Links",
   "policy.thirdPartyLinksDesc": "Our Service may contain links to third-party websites. This Privacy Policy applies only to Taucho. We are not responsible for the privacy practices of external sites. Please review their privacy policies before providing information.",
-  
   "policy.children": "Children's Privacy",
   "policy.childrenDesc": "Taucho is not intended for children under 13 years of age. We do not knowingly collect personal information from children under 13. If we discover a child under 13 has provided information, we will promptly delete it. If you believe a child has provided information, please contact us immediately.",
-  
   "policy.internationalTransfer": "International Data Transfers",
   "policy.internationalTransferDesc": "Your information may be transferred to, stored in, and processed in countries other than your country of residence. These countries may have different data protection laws. By using Taucho, you consent to the transfer of your information to countries outside your country of residence.",
-  
   "policy.policyChanges": "Changes to This Privacy Policy",
   "policy.policyChangesDesc": "We may update this Privacy Policy periodically to reflect changes in our practices, technology, or legal requirements. We will notify you of material changes by updating the date and, when appropriate, by sending an email. Your continued use of Taucho following posting of revised Privacy Policy means you accept and agree to the changes.",
-
   "terms.title": "Terms of Service",
   "terms.acceptance": "Acceptance of Terms",
   "terms.acceptanceText": "By accessing and using Taucho, you acknowledge that you have read, understood, and agree to be bound by these Terms of Service. If you do not agree with any part of these terms, you may not use our Service. Taucho reserves the right to modify these terms at any time, and your continued use constitutes acceptance of any changes.",
-  
   "terms.serviceDesc": "Description of Service",
   "terms.serviceDescText": "Taucho is a cloud-based streaming automation platform that monitors your live streaming channels across multiple platforms (YouTube, Twitch, NicoNico) and automatically triggers actions on connected smart devices based on stream events such as comments, donations, reactions, and audience engagement.",
-  
   "terms.eligibility": "User Eligibility and Account Registration",
   "terms.ageRequirement": "Age Requirement",
   "terms.ageRequirementText": "You must be at least 13 years of age to use Taucho. By registering, you represent and warrant that you are at least 13 years old and have the legal authority to enter into this agreement.",
-  
   "terms.accountInfo": "Account Information",
   "terms.accountInfoText": "You are responsible for: Providing accurate, current, and complete account information, Maintaining the confidentiality of your password and account credentials, Notifying us immediately of unauthorized access or use, All activities that occur under your account.",
-  
   "terms.termination": "Account Termination",
   "terms.terminationText": "We reserve the right to terminate or suspend your account at any time, for any reason, without notice, including for violation of these Terms of Service.",
-  
   "terms.streamingIntegration": "Streaming Platform Integration",
   "terms.thirdPartyPermissions": "Third-Party Permissions",
   "terms.thirdPartyPermissionsText": "To use Taucho, you must authorize the Service to access your streaming platform accounts through OAuth. You grant us permission to: Access your channel information and stream status, Monitor chat messages and viewer interactions, Retrieve stream metrics and analytics, Detect live stream events and interactions.",
-  
   "terms.platformCompliance": "Compliance with Platform Terms",
   "terms.platformComplianceText": "You are solely responsible for complying with the Terms of Service of all streaming platforms you use (YouTube, Twitch, NicoNico, etc.). We are not liable for any violations of third-party platform terms or policies.",
-  
   "terms.revokeAccess": "Revocation of Access",
   "terms.revokeAccessText": "You may revoke Taucho's access to your streaming accounts at any time through your platform's settings. Upon revocation, we will cease monitoring and cease access to your channel data.",
-  
   "terms.deviceIntegration": "Smart Device Integration",
   "terms.deviceOwnership": "Device Ownership",
   "terms.deviceOwnershipText": "You represent and warrant that you own or have authorization to control all smart devices you register with Taucho. You are solely responsible for ensuring that the use of these devices complies with all applicable laws and regulations.",
-  
   "terms.deviceControl": "Device Control Authorization",
   "terms.deviceControlText": "By registering a smart device, you authorize Taucho to send commands to that device based on the conditions and triggers you configure. You acknowledge that we are not responsible for device malfunctions or unintended actions.",
-  
   "terms.safetyResponsibility": "Safety Responsibility",
   "terms.safetyResponsibilityText": "You are solely responsible for ensuring that automated device triggers do not create safety hazards. This includes ensuring that: Devices do not interfere with essential services or safety systems, Automated actions do not endanger you or others, Device configurations are appropriate for your environment, You have tested and verified device behavior before going live.",
-  
   "terms.deviceTerms": "Third-Party Device Terms",
   "terms.deviceTermsText": "You must comply with the terms and conditions of all smart device manufacturers and platforms you integrate. We assume no responsibility for device compatibility, performance, or adherence to manufacturer specifications.",
-  
   "terms.prohibitedActivities": "Prohibited Activities",
   "terms.prohibitedActivitiesText": "You agree not to use Taucho to: Violate any applicable laws, regulations, or third-party rights, Spam, harass, abuse, or threaten other users, Impersonate or misrepresent yourself or others, Attempt to gain unauthorized access to our systems, Use automated scripts to scrape or extract data (except as authorized), Transmit malware, viruses, or malicious code, Create or distribute phishing content or fraudulent schemes, Circumvent security measures or access restrictions, Interfere with the functionality or performance of the Service, Use the Service for illegal activities, Reverse engineer or decompile our Service, Manipulate stream data or automate fake engagement.",
-  
   "terms.userContent": "User Content and Conduct",
   "terms.contentMonitoring": "Content Monitoring",
   "terms.contentMonitoringText": "We automatically monitor stream chat messages and viewer interactions to identify trigger conditions. By using our Service, you acknowledge that your streaming content and audience interactions will be processed by our systems.",
-  
   "terms.userResponsibility": "User Responsibility",
   "terms.userResponsibilityText": "You are solely responsible for the content you create and share through your streams. We do not monitor or control user-generated content or viewer interactions. You must comply with all applicable laws and platform policies regarding your streaming content.",
-  
   "terms.contentRestrictions": "Content Restrictions",
   "terms.contentRestrictionsText": "We reserve the right to suspend or terminate service for streams or conditions that involve: Hate speech, discrimination, or targeted harassment, Sexual exploitation or child safety violations, Violence or dangerous activities, Copyright or intellectual property violations, Fraudulent or deceptive practices.",
-  
   "terms.intellectualProperty": "Intellectual Property Rights",
   "terms.ourContent": "Our Content",
   "terms.ourContentText": "All content on Taucho, including software, documentation, graphics, design, and logos, is owned by or licensed to Taucho and protected by copyright and intellectual property laws. You may not reproduce, distribute, modify, or transmit this content without our express written permission.",
-  
   "terms.userContentLicense": "User Content License",
   "terms.userContentLicenseText": "By using Taucho, you grant us a worldwide, royalty-free, non-exclusive license to use, reproduce, modify, and display any data or configurations you input, solely for the purpose of providing and improving the Service.",
-  
   "terms.thirdPartyContent": "Third-Party Content",
   "terms.thirdPartyContentText": "Taucho may contain links to or integrate with third-party services. Intellectual property rights for those services are owned by their respective owners. We claim no rights to third-party content.",
-  
   "terms.limitationLiability": "Limitation of Liability",
   "terms.limitationLiabilityText": "TO THE MAXIMUM EXTENT PERMITTED BY LAW, TAUCHO AND ITS OFFICERS, DIRECTORS, EMPLOYEES, AND AGENTS SHALL NOT BE LIABLE FOR: Indirect, incidental, special, or consequential damages, Loss of revenue, profits, data, or business opportunities, Damage to property or equipment, Service interruptions or system failures, Unauthorized access or data breaches (except caused by gross negligence), Actions taken by smart devices or unintended device behavior, Issues with third-party streaming platforms or services. This limitation applies even if Taucho has been advised of the possibility of such damages.",
-  
   "terms.disclaimer": "Disclaimer of Warranties",
   "terms.disclaimerText": "TAUCHO IS PROVIDED ON AN \"AS IS\" AND \"AS AVAILABLE\" BASIS WITHOUT WARRANTIES OF ANY KIND, EXPRESS OR IMPLIED. SPECIFICALLY, WE DISCLAIM: Any warranty of merchantability or fitness for a particular purpose, Any warranty that the Service will be error-free, uninterrupted, or secure, Any warranty regarding the reliability, accuracy, or completeness of data, Any warranty that devices will function as expected or perform intended actions. Your use of Taucho is at your sole risk.",
-  
   "terms.indemnification": "Indemnification",
   "terms.indemnificationText": "You agree to defend, indemnify, and hold harmless Taucho, its officers, directors, employees, and agents from any claims, damages, losses, and expenses (including reasonable attorneys' fees) arising from or related to: Your use of the Service, Your violation of these Terms of Service, Your violation of any applicable laws or rights of third parties, Smart device configurations and automated actions you create, Your streaming content and audience interactions.",
-  
   "terms.serviceAvailability": "Service Availability and Modifications",
   "terms.modifications": "Service Modifications",
   "terms.modificationsText": "We may modify, suspend, or discontinue Taucho or any portion thereof at any time, with or without notice. We are not liable for any harm or damage resulting from such modifications or discontinuation.",
-  
   "terms.downtime": "Downtime and Maintenance",
   "terms.downtimeText": "While we strive for 99.5% uptime, we do not guarantee continuous service availability. We may perform maintenance that may cause temporary service interruptions. We will provide advance notice of scheduled maintenance when possible.",
-  
   "terms.reliability": "Reliability",
   "terms.reliabilityText": "We do not guarantee that: Streams will be detected at all times, All viewer interactions will be captured, Device commands will always execute successfully, The Service will meet your specific needs.",
-  
   "terms.paymentBilling": "Payment and Billing",
   "terms.subscriptionTerms": "Subscription Terms",
   "terms.subscriptionTermsText": "Taucho may offer paid subscriptions with automatic renewal. By subscribing, you authorize us to charge the subscription fee to your payment method on a recurring basis until you cancel.",
-  
   "terms.billingDisputes": "Billing Disputes",
   "terms.billingDisputesText": "You must notify us of any billing disputes or unauthorized charges within 60 days. We will investigate disputed charges in accordance with applicable law.",
-  
   "terms.cancellation": "Cancellation",
   "terms.cancellationText": "You may cancel your subscription at any time through your account settings. Cancellation takes effect at the end of the current billing period. No refunds will be issued for partial months.",
-  
   "terms.disputeResolution": "Dispute Resolution",
   "terms.informalResolution": "Informal Resolution",
   "terms.informalResolutionText": "Before initiating any legal action, you agree to attempt to resolve any dispute by contacting us and describing the issue in detail.",
-  
   "terms.arbitration": "Arbitration",
   "terms.arbitrationText": "Any dispute, claim, or controversy arising from or relating to these Terms of Service or Taucho shall be settled by binding arbitration in accordance with the rules of the American Arbitration Association, rather than in court. The arbitration shall be conducted in English and held in a mutually agreed location.",
-  
   "terms.classAction": "Class Action Waiver",
   "terms.classActionText": "You agree that any arbitration shall be conducted on an individual basis and not as a class action, collective action, or representative action.",
-  
   "terms.governingLaw": "Governing Law",
   "terms.governingLawText": "These Terms of Service are governed by and construed in accordance with the laws of the State of California, USA, without regard to its conflict of law principles. Any legal action or proceeding relating to these terms shall be brought exclusively in the state and federal courts located in California, and you consent to the personal jurisdiction of such courts.",
-  
   "terms.severability": "Severability",
   "terms.severabilityText": "If any provision of these Terms of Service is found to be invalid, illegal, or unenforceable, that provision shall be modified to the minimum extent necessary to make it enforceable, or if such modification is not possible, the provision shall be severed. The remaining provisions shall continue in full force and effect.",
-  
   "terms.entireAgreement": "Entire Agreement",
   "terms.entireAgreementText": "These Terms of Service, together with our Privacy Policy, constitute the entire agreement between you and Taucho regarding your use of the Service and supersede all prior or contemporaneous agreements, communications, and proposals. If there is any conflict between these Terms of Service and our Privacy Policy, these Terms of Service shall prevail.",
-  
   "terms.contact": "Contact Information",
   "terms.contactText": "If you have questions about these Terms of Service or need to report a violation, please contact us at:",
-  
   "terms.changes": "Changes to Terms",
-  "terms.changesText": "We may update these Terms of Service at any time. We will notify you of material changes by updating the date at the top of this page. Your continued use of Taucho after changes are posted constitutes your acceptance of the modified terms. If you do not agree to the changes, you must stop using the Service and cancel your account."
+  "terms.changesText": "We may update these Terms of Service at any time. We will notify you of material changes by updating the date at the top of this page. Your continued use of Taucho after changes are posted constitutes your acceptance of the modified terms. If you do not agree to the changes, you must stop using the Service and cancel your account.",
+  "index.section2title": "시청자 여러분, 스트리머를 콕 찔러보세요!",
+  "index.section2desc1": "가끔 스트리머에게 선물을 보내도,",
+  "index.section2desc2": "...본인이 직접 알아차릴 때까지는 아무 일도 일어나지 않습니다.",
+  "index.section2desc3": "정말 그만한 가치가 있을까요?",
+  "index.section2desc4": "여러분의 응원은 사실 정말 소중하잖아요?",
+  "index.section2desc5": "그의 현실 속으로 함께 들어가 보는 건 어떨까요?",
+  "index.step1title": "채널 선택하기",
+  "index.step1desc": "스트리밍 플랫폼 계정에 로그인한 뒤 사용할 채널을 선택하세요.",
+  "index.step2title": "언제 반응할지 설정하기",
+  "index.step2desc": "시청자 반응 유형(선물, 하이프, 댓글 등)을 고르고, 어떤 조건에서 장치를 작동시킬지 설정하세요.",
+  "index.step3title": "장치 선택하기",
+  "index.step3desc": "보유한 스마트 장치를 선택하세요. 일부 서비스는 개발자 권한이나 액세스 키가 필요합니다.",
+  "index.step4title": "그리고… 짠!",
+  "index.step4desc": "방송을 시작하세요. 잠깐의 동기화 지연 후 등록한 이벤트가 발생할 때마다 장치가 반응합니다.",
+  "index.section3heading1": "당신은 혼자가 아닙니다.",
+  "index.section3heading2": "물론 아니죠!",
+  "index.section3heading3": "그럼, 직접 느껴보세요!",
+  "index.section3desc1": "Taucho 장치는 시청자의 반응을 바로 당신 곁으로 가져옵니다.",
+  "index.section3desc2": "라이브 스트리머는 늘 시청자에게 둘러싸여 있습니다. Taucho가 그 열기를 현실에서 느끼게 해드립니다.",
+  "index.platformsTitle": "✨ 지원 플랫폼",
+  "index.featureLiveChatComments": "라이브 채팅 댓글",
+  "index.featureLiveComments": "라이브 댓글",
+  "index.featureChatComments": "채팅 댓글",
+  "index.featureSuperChatStickers": "슈퍼챗 / 슈퍼 스티커",
+  "index.featureChannelMemberships": "채널 멤버십",
+  "index.featureStreamStartEnd": "방송 시작 / 종료",
+  "index.featureCheeringBits": "치어링 (Bits)",
+  "index.featureSubscriptionsFollows": "구독 / 팔로우",
+  "index.featureHypeTrainRaid": "하이프 트레인 / 레이드",
+  "index.featureNicoruReactions": "니코루 반응",
+  "index.featureGifts": "선물",
+  "index.featureEmotionEffects": "감정 효과",
+  "index.featureHeartsReactions": "하트 / 반응",
+  "index.featureFollows": "팔로우",
+  "index.featureSubscriptions": "구독",
+  "index.featureReactions": "반응",
+  "index.featureStars": "스타",
+  "index.featureTips": "후원",
+  "index.featureComingSoon": "곧 지원 예정",
+  "index.smartdevicesTitle": "일반적인 스마트홈 장치도 지원합니다!",
+  "index.smartdevicesDesc1": "이미 가지고 있는 다양한 스마트 장치를 사용할 수 있습니다.",
+  "index.smartdevicesDesc2": "시청자가 댓글을 남기면 방 조명이 깜빡이게 하세요.",
+  "index.smartdevicesDesc3": "시청자 반응이 뜨거워지면 커튼이 열리게 하세요.",
+  "index.smartdevicesDesc4": "그리고 선물이 도착하면 파티 팝퍼도 터뜨릴 수 있습니다!",
+  "index.freeTitle": "무료입니다! (그러니 가젯도 좀 사 주세요!)",
+  "index.freeDesc1": "Taucho 서비스는 완전히 무료입니다.",
+  "index.freeDesc2": "광고도 없고, 유료 콘텐츠도 없고, 프리미엄 플랜조차 없습니다.",
+  "index.freeDesc3": "이 서비스 전체는 여기 소개된 스마트 가젯의 제휴 수익으로 운영됩니다.",
+  "index.freeDesc4": "그래서 스마트홈 가젯을 구매하실 예정이라면 이 사이트를 통해 구매해 주시면 감사하겠습니다.",
+  "index.freeDesc5": "물론 이미 가지고 있는 제품을 사용하셔도 괜찮지만,",
+  "index.freeDesc6": "여기에서 구매해 주신다면 정말 큰 힘이 됩니다.",
+  "index.easyuiTitle": "쉬운 UI",
+  "index.easyuiDesc1": "...사실은... 그렇게 쉽지는 않습니다. 죄송합니다...",
+  "index.easyuiDesc2": "앞으로의 라이브 방송을 예약하고,",
+  "index.easyuiDesc3": "특정 조건에 맞는 동작을 설정하고,",
+  "index.easyuiDesc4": "스마트 장치를 등록하고 (솔직히 Alexa 관련만 해도 꽤 번거롭습니다),",
+  "index.easyuiDesc5": "스마트홈 API를 호출하는 일은 결코 간단하지 않습니다.",
+  "index.easyuiDesc6": "하지만 걱정하지 마세요. 미리 준비된 템플릿이 있으니, 마음에 드는 것만 고르면 됩니다!",
+  "index.footerAbout": "Taucho 소개",
+  "index.languageSelectorTitle": "언어",
+  "index.welcomeBack": "Taucho에 다시 오신 것을 환영합니다"
 }
