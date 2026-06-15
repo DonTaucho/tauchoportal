@@ -1,7 +1,8 @@
 /* Condition Logic Editor Page */
-
+div{
+	transition: all 1s ease;
+}
 .condition-container {
-    max-width: 1400px;
     margin: 0 auto;
     padding: 2rem;
 }
@@ -29,12 +30,14 @@
     color: #999;
 }
 
+.page-header {
+    margin-bottom: 0.5em !important;
+}
 .page-header-top {
-    display: flex;
     justify-content: space-between;
     align-items: flex-start;
     gap: 2rem;
-    margin-bottom: 2rem;
+    margin-bottom: 0px !important;
 }
 
 .page-header-top h1 {
@@ -65,10 +68,10 @@
 
 /* Editor Container */
 .editor-container {
-    display: grid;
     grid-template-columns: 1fr 320px;
     gap: 2rem;
     margin-bottom: 2rem;
+	display: grid;
 }
 
 .editor-section {
@@ -80,14 +83,13 @@
 
 .editor-section h2 {
     font-size: 1.3rem;
-    margin: 0 0 0.5rem 0;
+    margin: 0;
     color: #222;
 }
 
 .editor-help {
     font-size: 0.9rem;
     color: #666;
-    margin: 0 0 1.5rem 0;
     line-height: 1.5;
 }
 

@@ -118,7 +118,8 @@ body>div{
 .titleimagecontainer {
     position: fixed;
     z-index: 2;
-    height: 460px;
+    max-height: 460px;
+    width: 100%;
 }
 .titleimagecontainer img {
     width: 100%;
@@ -134,10 +135,10 @@ body>div{
 .bgfiller a {
     font-size: 24px;
     padding: 6px 47px;
-    margin-left: -4em;
-    position:absolute;
+    position:unset;
     z-index: 1;
     color: blue;
+    display: block;
 }
 .bgfiller a:hover{
     color: rgb(134, 133, 209);
@@ -152,7 +153,6 @@ body>div{
     font-weight: bold;
     text-decoration: none;
     text-shadow: rgb(40, 57, 102) 0px 2px 1px;
-    margin-left: -5em;
 }
 .bgfiller a.loginbutton:hover {
     background: linear-gradient(rgb(95, 138, 212) 5%, rgb(33, 119, 224) 100%) rgb(143, 175, 230);
@@ -276,7 +276,7 @@ video {
 }
 
 .videoarea2 .dialog{
-    width: 14em;
+    width: 15.2em;
     position: absolute;
     right: 0px;
     top: 1em;

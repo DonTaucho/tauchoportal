@@ -23,6 +23,8 @@
         <select class="language-selector" title="{{.I18n.T "index.languageSelectorTitle"}}" onchange="window.location='/set-lang?lang='+this.value+'&back='+encodeURIComponent(window.location.pathname)">
             <option value="en" {{if eq .Lang "en"}}selected{{end}}>English</option>
             <option value="ja" {{if eq .Lang "ja"}}selected{{end}}>日本語</option>
+            <option value="zh" {{if eq .Lang "zh"}}selected{{end}}>中文</option>
+            <option value="ko" {{if eq .Lang "ko"}}selected{{end}}>한국어</option>
             <option value="de" {{if eq .Lang "de"}}selected{{end}}>Deutsch</option>
             <option value="fr" {{if eq .Lang "fr"}}selected{{end}}>Français</option>
             <option value="es" {{if eq .Lang "es"}}selected{{end}}>Español</option>
@@ -40,7 +42,7 @@
         <div class="bgfiller">
             <div>
                 <a href="#" onclick="openLoginModal()" class="loginbutton">{{.I18n.T "index.loginsignupbutton"}}</a>
-                <a href="/about" style="margin-top: 2em">{{.I18n.T "index.howitworklink"}}</a>
+                <a href="/about">{{.I18n.T "index.howitworklink"}}</a>
             </div>
         </div>
 
