@@ -66,3 +66,57 @@ display:none;
   border-color: rgb(80, 45, 177);
   background-color:rgba(112, 125, 199, 0.226);
 }
+.modal.lower{
+  z-index: 998;
+}
+.modal-body>div{
+  display: none;
+}
+.modal-body.extract .extract{
+  display: block;
+}
+.modal-body.boolean .boolean{
+  display: block;
+}
+.modal-body.comp .comp{
+  display: block;
+}
+.modal-body.text .text{
+  display: block;
+}
+.modal-body.calc .calc{
+  display: block;
+}
+.modal-body.conv .conv{
+  display: block;
+}
+.selector {
+  color: lightgrey;
+  color: lightgrey;
+  border-color: lightgrey;
+}
+.selector input{
+  color: lightgrey;
+  color: lightgrey;
+  border-color: lightgrey;
+}
+.selector select{
+  color: lightgrey;
+  color: lightgrey;
+  border-color: lightgrey;
+}
+.selector.available{
+  color: black;
+  color: black;
+  border-color: black;
+}
+.selector.available input{
+  color: black;
+  color: black;
+  border-color: black;
+}
+.selector.available select{
+  color: black;
+  color: black;
+  border-color: black;
+}

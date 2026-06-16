@@ -154,6 +154,8 @@
   window.addEventListener("load", function(){
     try {
       jsonLoader(JSON.parse(document.getElementById("conditionLogicInput").value), document.getElementById("drawingArea"));
+      
+      document.getElementById("logictotaldescription").innerText = summarize(JSON.parse(document.getElementById("conditionLogicInput").value));
     } catch (q) {
       alert(q);
 // some message
@@ -165,7 +167,7 @@ function addNewButton(){
   var drawingArea = document.getElementById("drawingArea");
   
   addnewdialog.style["display"] = "block";
-  
+
   addnewdialog.style["top"] = event.layerY - (addnewdialog.offsetHeight/3);
   addnewdialog.style["left"] = event.layerX - (addnewdialog.offsetWidth/2);
   
@@ -220,7 +222,7 @@ function addNewButton(){
 
 <div><div><a onclick="document.getElementById('conditionLogicInput').style['height']=document.getElementById('conditionLogicInput').style['height']=='500px'?'0px':'500px'; document.getElementById('upperarea').style['height']=document.getElementById('conditionLogicInput').style['height']=='500px'?'0px':'500px';return false">JSON</a></div>
 <textarea id="conditionLogicInput" class="condition-textarea" style="height: 0px">{
-  "Operator": "AND",
+  "Operator": "OR",
   "Variables": null,
   "SubConditions": [
     {
@@ -252,20 +254,13 @@ function addNewButton(){
           "SubConditions": null
         }
       ]
-    },
-    {
-      "Operator": "AND",
-      "Variables": [
-        "aa"
-      ],
-      "SubConditions": null
     }
   ]
 }</textarea>
 </div>
 </div>
 
-<div>Description Like when comment received blah blah blah</div>
+<div id="logictotaldescription">Description Like when comment received blah blah blah</div>
 <hr>
 <div class="editor-actions">
 <button class="btn btn-secondary" onclick="goBack()">Cancel</button><button class="btn btn-primary" id="saveBtn" onclick="saveConditionLogic()">Save Condition Logic</button></div></div><div class="editor-sidebar"><div class="sidebar-card"><h3>Condition Info</h3><dl><dt>Condition ID</dt><dd><code>cond_1781324936169105600</code></dd><dt>Name</dt><dd>Condition 2 Testestes</dd><dt>Event Type</dt><dd><code>comment</code></dd><dt>Status</dt><dd><span class="badge badge-success">Enabled</span></dd></dl></div><div class="sidebar-card"><h3>Quick Reference</h3><ul><li>AND, OR, NOT</li><li>EQUALS, GREATER_THAN, LESS_THAN</li><li>INCLUDES, REGEX_MATCH</li><li>ADD, SUBTRACT, MULTIPLY, DIVIDE</li><li>PARAM</li></ul></div></div></div><div id="validateResult" class="validate-result" style="display:none"></div></div>
@@ -295,6 +290,118 @@ function addNewButton(){
 </div>
 
 <div id="monToast" class="mon-toast"></div>
+<script>
+var translations = {
+  "staticvalue": "\"{0}\"",
+  "and-joint": " and ",
+  "or-joint": " or ",
+  "equals-joint": " equals to ",
+  "equals-sentense": "{0}",
+//  "equals-joint": " と ",
+//  "equals-sentense": "{0}が同じ",
+  "valueof-joint": ",",
+  "valueof-sentense": "value of {0}",
+  "event_message" : "Chat message text",
+  "event_amount" : "Donation/superchat amount (numeric)",
+  "event_amount_currency" : "Currency code (e.g., \"USD\")",
+  "event_amount_display" : "Formatted amount display",
+  "event_sender_name" : "Sender display name",
+  "event_sender_id" : "Sender user ID",
+  "event_sender_avatar" : "Sender avatar URL",
+  "event_is_member" : "Is channel member (boolean)",
+  "event_is_mod" : "Is moderator (boolean)",
+  "event_badges" : "Array of badge strings",
+  "event_type" : "Event type (e.g., \"comment\", \"superchat\", \"gift\")",
+  "event_platform" : "Platform name (e.g., \"twitch\", \"youtube\")",
+  "event_id" : "Event ID",
+  "event_watch_id" : "Associated watch ID",
+  "event_user_id" : "User ID (owner of the watch)",
+  "event_stream_id" : "Stream ID",
+  "event_received_at" : "Timestamp when received",
+  "event_created_at" : "Timestamp when event occurred"
+};
+</script>
+<div id="addItemModal" class="modal lower">
+    <div class="modal-content modal-large">
+        <div class="modal-header">
+            <span class="close" onclick="closeModal('addItemModal')">×</span>
+            <h2><svg width="1em" height="1em" viewBox="0 0 512 512" xmlns="http://www.w3.org/2000/svg"><path fill="#ffffff" stroke="black" stroke-width="6%" d="M296,464a23.88,23.88,0,0,1-7.55-1.23l-80.15-26.67A23.92,23.92,0,0,1,192,413.32V294.11a.44.44,0,0,0-.09-.13L23.26,97.54A30,30,0,0,1,46.05,48H466a30,30,0,0,1,22.79,49.54L320.09,294a.77.77,0,0,0-.09.13V440a23.93,23.93,0,0,1-24,24Z"></path></svg> Add Item</h2>
+            <p>Add Item.</p>
+        </div>
+        <div id="addModalBody" class="modal-body">
+            <input id="addModalPath" type="hidden" value="">
+            <div class="extract"><p>Which field to obtain from</p><select id="addExtract"><option>Comment</option><option>Comment</option></select></div>
+            <div class="boolean">
+              <div id="boolean_option1" class="selector" onclick="document.getElementById('addtextradio').checked=true;getElementById('boolean_option1').classList.add('available');document.getElementById('boolean_option2').classList.remove('available');document.getElementById('boolean_option3').classList.remove('available')">
+                <div><input id="addtextradio" type="radio" name="addboolradio">Value includes?</div>
+                <div>Comment includes X</div>
+                <span onclick="_this=this;askText(true, true, function(disp,val,type){_this.innerText=disp;_this.setAttribute('type', type);_this.setAttribute('val', val)})">select value</span>
+              </div>
+              <div id="boolean_option2" class="selector" onclick="document.getElementById('addnumericradio').checked=true;document.getElementById('boolean_option1').classList.remove('available');document.getElementById('boolean_option2').classList.add('available');document.getElementById('boolean_option3').classList.remove('available')">
+                <div><input id="addnumericradio" type="radio" name="addboolradio">Comparison?</div>
+                <div><span onclick="_this=this;askNum(true, true, function(disp,val,type){_this.innerText=disp;_this.setAttribute('type', type);_this.setAttribute('val', val)})">select value</span><select><option>&gt;</option><option>=</option><option>&lt;</option></select><span onclick="_this=this;askNum(true, true, function(disp,val,type){_this.innerText=disp;_this.setAttribute('type', type);_this.setAttribute('val', val)})">select value</span></div>
+              </div>
+              <div id="boolean_option3" class="selector" onclick="document.getElementById('addconditionradio').checked=true;document.getElementById('boolean_option1').classList.remove('available');document.getElementById('boolean_option2').classList.remove('available');document.getElementById('boolean_option3').classList.add('available')">
+                <div><input id="addconditionradio" type="radio" name="addboolradio">Add more condition?</div>
+                <select id="addcondition"><option value="AND">AND</option><option value="OR">OR</option><option value="NOT">NOT</option></select>
+              </div>
+            </div>
+            <div class="comp"><input type="text" id="addCompareTarget" />
+              <div>Parsing Param?</div>
+              <input type="text">
+              <div>Add Calculation?</div>
+              <input type="text">
+            </div>
+            <div class="text"><input type="text" id="addTextTarget" /></div>
+            <div class="calc"><input type="text" id="addCalculationTarget" /></div>
+            <div class="conv"><input type="text" id="addConversionTarget" /></div>
+        </div>
+        <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" onclick="closeModal('addItemModal')">Cancel</button>
+            <button type="button" class="btn btn-primary" onclick="addItem()">Add Item</button>
+        </div>
+    </div>
+</div>
+
+<div id="inputTextModal" class="modal">
+    <div class="modal-content modal-small">
+        <div class="modal-header">
+            <span class="close" onclick="closeModal('inputTextModal')">×</span>
+            <p>Value.</p>
+        </div>
+        <div id="inputTextBody" class="modal-body">
+          <input id="inputtextenvselectradio" type="radio" name="inputtextradio">
+          <select id="inputTextEnvSelect"><option value="event_message">comment</option><option value="event_amount">amount</option></select>
+          <hr>
+          <input id="inputtextenterradio" type="radio" name="inputtextradio">
+          <input id="inputTextEnter" type="text" >
+        </div>
+        <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" onclick="closeModal('inputTextModal')">Cancel</button>
+            <button id="inputTextModalButton" type="button" class="btn btn-primary" onclick="">Okay</button>
+        </div>
+    </div>
+</div>
+
+<div id="inputNumModal" class="modal">
+    <div class="modal-content modal-small">
+        <div class="modal-header">
+            <span class="close" onclick="closeModal('inputNumModal')">×</span>
+            <p>Value.</p>
+        </div>
+        <div id="inputNumBody" class="modal-body">
+          <input id="inputnumenvselectradio" type="radio" name="inputnumradio">
+          <select id="inputNumEnvSelect"><option value="event_message">comment</option><option value="event_amount">amount</option></select>
+          <hr>
+          <input id="inputnumenterradio" type="radio" name="inputnumradio">
+          <input id="inputNumEnter" type="text" >
+        </div>
+        <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" onclick="closeModal('inputNumModal')">Cancel</button>
+            <button id="inputNumModalButton" type="button" class="btn btn-primary" onclick="">Okay</button>
+        </div>
+    </div>
+</div>
 
 <div id="filterModal" class="modal">
     <div class="modal-content modal-large">
