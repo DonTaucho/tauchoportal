@@ -7,8 +7,18 @@
 <link rel="stylesheet" href="/css/modals.css">
 <link rel="stylesheet" href="/css/condition.css">
 <link rel="stylesheet" href="/css/channels.css">
+<link rel="stylesheet" href="/testcontrollogic.css">
+  <script src="/testcontrollogic.js"></script>
 
-  <script src="/js/auth.js"></script>
+
+  <style>
+    body {
+      background-image: unset !important;
+    }
+    .taucho-header{
+      visibility: hidden !important;
+    }
+  </style>
 </head>
 <body>
   
@@ -137,71 +147,55 @@
     </aside>
 
     <div class="channels-panel">
+<textarea id="monitor" style="width:900px;height:40px;"></textarea>
 <div id="condition-view" class="view channels-view condition-container"><div class="page-header"><nav class="breadcrumb"><img src="/image/channels_s.png"><a href="/channels">Watched Channels</a><span class="breadcrumb-sep">›</span><a href="/channels/watch_1781323141864247200">Mr.タウチョ</a><span class="breadcrumb-sep">›</span><a href="/channels/watch_1781323141864247200/conditions">Conditions</a><span class="breadcrumb-sep">›</span><span>Condition 2 Testestes</span></nav><div class="page-header-top"><div><h1>Edit Condition Logic</h1><p class="condition-name"><strong>Condition 2 Testestes</strong> on <strong>Mr.タウチョ</strong></p><p class="event-type-info">Event type: <code>comment</code></p></div></div></div><div class="editor-container"><div class="editor-section"><h2>Condition Logic (JSON)</h2><p class="editor-help">Edit the JSON structure below to define complex logic for this condition.</p>
-
-
-<style>
-.toolbox div{
-padding: 1rem 2rem;
-border: 1px solid grey;
-margin: 0px 0px 0.2em 0px;
-background-color: lightblue;
-}
-.item {
-padding: 0.5rem 1rem;
-border: 1px solid grey;
-margin: 1em 1em 0.5em 1em;
-background-color: azure;
-display:inline-block;
-width: 260px;
-overflow: hidden;
-}
-#addnewbutton{
-padding: 1rem 2rem;
-border: 1px solid grey;
-margin: 1em 1em 0.5em 1em;
-width: 260px;
-background-color: pink;
-}
-#addNewDialog{
-padding: 1rem 2rem;
-border: 1px solid grey;
-width: 10em;
-height: 12em
-background-color: pink;
-position: absolute;
-display:none;
-}
-</style>
 <script>
+
+  window.addEventListener("load", function(){
+    try {
+      jsonLoader(JSON.parse(document.getElementById("conditionLogicInput").value), document.getElementById("drawingArea"));
+    } catch (q) {
+      alert(q);
+// some message
+    }
+  }); 
+
 function addNewButton(){
-var addnewdialog = document.getElementById("addNewDialog");
-var drawingArea = document.getElementById("drawingArea");
-
-addnewdialog.style["display"] = "block";
-//addnewdialog.style["top"] = event.offsetY + event.target.offsetTop + event.target.scrollTop;
-//addnewdialog.style["left"] = event.offsetX + event.target.offsetLeft +event.target.scrollWidth;
-addnewdialog.style["top"] = event.pageY - event.target.offsetHeight + event.target.offsetTop;
-addnewdialog.style["left"] = event.pageX - event.target.offsetWidth + event.target.offsetLeft;
-
-
-var y = document.getElementById("addtemplate").cloneNode(true);
-y.id ="";
-var x = document.createElement("div");
-x.innerText = "adding";
-event.target.append(y);
-return false;
-}
-function insertBottom(){
-var addnewbutton = document.getElementById("addnewbutton");
-
-var y = document.getElementById("addtemplate").cloneNode(true);
-y.id ="";
-y.style["display"] = "block";
-
-addnewbutton.before(y);
-document.getElementById("addNewDialog").style["display"] = "none";
-return false;
+  var addnewdialog = document.getElementById("addNewDialog");
+  var drawingArea = document.getElementById("drawingArea");
+  
+  addnewdialog.style["display"] = "block";
+  
+  addnewdialog.style["top"] = event.layerY - (addnewdialog.offsetHeight/3);
+  addnewdialog.style["left"] = event.layerX - (addnewdialog.offsetWidth/2);
+  
+  //monitor.value = "event.client("+ event.clientY+","+ event.clientX +")," +
+  //"e.layer("+ event.layerY+","+ event.layerX +")," +
+  //"e.movement("+ event.movementY+","+ event.movementX +")," +
+  //"e.offset("+ event.offsetY+","+ event.offsetX +")," +
+  //"e.screen("+ event.screenY+","+ event.screenX +")," +
+  //"e.tilt("+ event.tiltY+","+ event.tiltX +")," +
+  //"e.("+ event.y +","+ event.x +")\r\n" +
+  //"target.client("+ event.target.clientTop +","+ event.target.clientLeft +")";
+  
+  
+  var y = document.getElementById("addtemplate").cloneNode(true);
+  y.id ="";
+  var x = document.createElement("div");
+  x.innerText = "adding";
+  event.target.append(y);
+  return false;
+  }
+  function insertBottom(){
+  var addnewbutton = document.getElementById("addnewbutton");
+  
+  var y = document.getElementById("addtemplate").cloneNode(true);
+  y.id ="";
+  y.style["display"] = "block";
+  
+  addnewbutton.before(y);
+  document.getElementById("addNewDialog").style["display"] = "none";
+  return false;
 }
 </script>
 <div>
@@ -209,17 +203,22 @@ return false;
   <div class="toolbox" style="display:inline-block; vertical-align:top; width: 20%"><h3 style="border-bottom: 2px solid blue">ToolBox</h3><div>Input</div><div>Logic</div><div>Convert</div><div>Tool</div><div>Tool</div><div>Tool</div></div>
   <div style="display:inline-block; vertical-align:top; width: 70%">
     <div id="drawingArea" style="border:1px solid grey; height: 100%; position: relative;">
-	  <div class="item">
-	    <h4>item1</h4>
-	    <div><span>item</span></div>
-	    <div> + </div>
-	  </div>
-	  <div id="addnewbutton" onclick="addNewButton()">+</div>
+	    <div class="item">
+	      <h4>item1</h4>
+	      <div><span>item</span></div>
+	      <div> + </div>
+	    </div>
+	    <div id="addnewbutton" onclick="addNewButton()">+</div>
+      <div id="addNewDialog">
+        <h3>Add New Condition</h3>
+        <div>Condition</div>
+        <div onclick="insertBottom()">add</div>
+      </div>
 	</div>
   </div>
 </div>
 
-<div><div><a onclick="document.getElementById('addNewDialog').style['display']='none';document.getElementById('conditionLogicInput').style['height']=document.getElementById('conditionLogicInput').style['height']=='500px'?'0px':'500px'; document.getElementById('upperarea').style['height']=document.getElementById('conditionLogicInput').style['height']=='500px'?'0px':'500px';return false">O</a></div>
+<div><div><a onclick="document.getElementById('conditionLogicInput').style['height']=document.getElementById('conditionLogicInput').style['height']=='500px'?'0px':'500px'; document.getElementById('upperarea').style['height']=document.getElementById('conditionLogicInput').style['height']=='500px'?'0px':'500px';return false">JSON</a></div>
 <textarea id="conditionLogicInput" class="condition-textarea" style="height: 0px">{
   "Operator": "AND",
   "Variables": null,
@@ -253,24 +252,18 @@ return false;
           "SubConditions": null
         }
       ]
+    },
+    {
+      "Operator": "AND",
+      "Variables": [
+        "aa"
+      ],
+      "SubConditions": null
     }
   ]
 }</textarea>
 </div>
 </div>
-
-<div id="addNewDialog">
-  <h3>Add New Condition</h3>
-  <div>Condition</div>
-  <div onclick="insertBottom()">add</div>
-</div>
-
-<div id="addtemplate" style="display:none">
-  <h3>Add New Condition</h3>
-  <div>Condition</div>
-  <div onclick="alert()"></div>
-</div>
-
 
 <div>Description Like when comment received blah blah blah</div>
 <hr>
