@@ -9,6 +9,10 @@ body {
     padding: 20px;
 }
 
+nav {
+    display: none !important;
+}
+
 .login-container {
     max-width: 400px;
     width: 100%;

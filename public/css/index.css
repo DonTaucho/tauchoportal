@@ -10,7 +10,9 @@ body {
     font-size: 20pt;
     line-height: unset !important;
 }
-
+nav {
+    display: none;
+}
 a, select {
     transition: all 0.3s ease;
     box-sizing: unset !important;
