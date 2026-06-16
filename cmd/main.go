@@ -52,9 +52,11 @@ var pageRoutes = map[string]pageConfig{
 	"/register":         {Name: "register", Title: "Register", RequireAuth: false},
 	"/dashboard":        {Name: "dashboard", Title: "Dashboard", RequireAuth: true},
 	"/channels":         {Name: "channels", Title: "Watched Channels", RequireAuth: true},
+	"/channel":          {Name: "channel", Title: "Channel", RequireAuth: true},
+	"/conditions":       {Name: "conditions", Title: "Conditions", RequireAuth: true},
+	"/condition":        {Name: "condition", Title: "Condition Logic", RequireAuth: true},
 	"/devices":          {Name: "devices", Title: "My Devices", RequireAuth: true},
 	"/brand-settings":   {Name: "brand-settings", Title: "Device Brands", RequireAuth: true},
-	"/conditions":       {Name: "conditions", Title: "Conditions", RequireAuth: true},
 	"/about":            {Name: "about", Title: "About", RequireAuth: false},
 	"/account-settings": {Name: "account-settings", Title: "Account Settings", RequireAuth: true},
 	"/privacy-policy":   {Name: "privacy-policy", Title: "Privacy Policy", RequireAuth: false},
@@ -296,6 +298,7 @@ func loadTemplates() map[string]*template.Template {
 
 	basePath := filepath.Join("templates", "layouts", "base.gohtml")
 	headerPath := filepath.Join("templates", "partials", "header.gohtml")
+	nologinheaderPath := filepath.Join("templates", "partials", "nologinheader.gohtml")
 	loginPath := filepath.Join("templates", "partials", "login.gohtml")
 	funcMap := template.FuncMap{
 		"userJSON": userJSON,
@@ -311,7 +314,7 @@ func loadTemplates() map[string]*template.Template {
 
 	for _, pagePath := range pages {
 		name := strings.TrimSuffix(filepath.Base(pagePath), filepath.Ext(pagePath))
-		tmpl, err := template.New(name).Funcs(funcMap).ParseFiles(basePath, headerPath, loginPath, pagePath)
+		tmpl, err := template.New(name).Funcs(funcMap).ParseFiles(basePath, headerPath, nologinheaderPath, loginPath, pagePath)
 		if err != nil {
 			log.Fatalf("failed to parse template %s: %v", pagePath, err)
 		}
@@ -349,7 +352,22 @@ func (s *Server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	cfg, ok := pageRoutes[r.URL.Path]
 	if !ok {
 		if strings.HasPrefix(r.URL.Path, "/channels/") {
-			cfg = pageRoutes["/channels"]
+			// Route to appropriate channel sub-page based on URL pattern
+			parts := strings.Split(strings.TrimPrefix(r.URL.Path, "/"), "/")
+			if len(parts) >= 2 && parts[0] == "channels" {
+				if len(parts) == 2 {
+					// /channels/{channel_id}
+					cfg = pageRoutes["/channel"]
+				} else if len(parts) == 3 && parts[2] == "conditions" {
+					// /channels/{channel_id}/conditions
+					cfg = pageRoutes["/conditions"]
+				} else if len(parts) > 3 && parts[2] == "conditions" {
+					// /channels/{channel_id}/conditions/{condition_id}
+					cfg = pageRoutes["/condition"]
+				} else {
+					cfg = pageRoutes["/channels"]
+				}
+			}
 		} else {
 			http.NotFound(w, r)
 			return

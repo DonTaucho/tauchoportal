@@ -6,32 +6,21 @@
 
 {{define "content"}}
 <div class="policy-page">
-        {{if .User}}{{else}}
-        <nav class="policy-nav">
-            <a href="/" class="policy-logo">🌊 Taucho</a>
-            <div class="policy-nav-links">
-                <a href="/">Home</a>
-                <a href="/login" class="nav-btn">Sign In</a>
-                <a href="/register" class="nav-btn nav-btn-primary">Create Account</a>
-            </div>
-        </nav>
-        {{end}}
-
         <div class="container">
             <div class="policy-header">
-                <h1>Terms of Service</h1>
-                <p class="last-updated">Last Updated: May 31, 2026</p>
+                <h1>{{.I18n.T "terms.title"}}</h1>
+                <p class="last-updated">{{.I18n.T "terms.lastUpdated"}}</p>
             </div>
 
             <div class="policy-content">
                 <section class="policy-section">
-                    <h2>1. {{.I18n.T "policy.acceptanceTerms"}}</h2>
-                    <p>{{.I18n.T "policy.acceptanceTermsText"}}</p>
+                    <h2>1. {{.I18n.T "terms.acceptance"}}</h2>
+                    <p>{{.I18n.T "terms.acceptanceText"}}</p>
                 </section>
 
                 <section class="policy-section">
-                    <h2>2. {{.I18n.T "policy.descriptionService"}}</h2>
-                    <p>{{.I18n.T "policy.descriptionServiceText"}}</p>
+                    <h2>2. {{.I18n.T "terms.serviceDesc"}}</h2>
+                    <p>{{.I18n.T "terms.serviceDescText"}}</p>
                 </section>
 
                 <section class="policy-section">
