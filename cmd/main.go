@@ -58,6 +58,7 @@ var pageRoutes = map[string]pageConfig{
 	"/devices":          {Name: "devices", Title: "My Devices", RequireAuth: true},
 	"/brand-settings":   {Name: "brand-settings", Title: "Device Brands", RequireAuth: true},
 	"/about":            {Name: "about", Title: "About", RequireAuth: false},
+	"/login-settings":   {Name: "login-settings", Title: "Login Settings", RequireAuth: true},
 	"/account-settings": {Name: "account-settings", Title: "Account Settings", RequireAuth: true},
 	"/privacy-policy":   {Name: "privacy-policy", Title: "Privacy Policy", RequireAuth: false},
 	"/terms-of-service": {Name: "terms-of-service", Title: "Terms of Service", RequireAuth: false},

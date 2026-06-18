@@ -31,8 +31,12 @@
           <span class="caret">&#9662;</span>
         </button>
         <div id="userMenu" class="user-menu" style="display:none">
-          <a href="/profile">{{.I18n.T "nav.profile"}}</a>
+          <a href="/login-settings">{{.I18n.T "nav.loginSettings"}}</a>
           <a href="/account-settings">{{.I18n.T "nav.accountSettings"}}</a>
+          <a href="/brand-settings">{{.I18n.T "nav.brandSettings"}}</a>
+          <a href="/about">{{.I18n.T "nav.about"}}</a>
+          <a href="/privacy-policy">{{.I18n.T "nav.privacy"}}</a>
+          <a href="/terms-of-service">{{.I18n.T "nav.terms"}}</a>
           <hr>
           <a href="#" id="logoutBtn" class="logout-item">{{.I18n.T "nav.signOut"}}</a>
         </div>
@@ -55,7 +59,12 @@
         <option value="fr" {{if eq .Lang "fr"}}selected{{end}}>Français</option>
         <option value="es" {{if eq .Lang "es"}}selected{{end}}>Español</option>
       </select>
+      <a href="/login-settings">{{.I18n.T "nav.loginSettings"}}</a>
       <a href="/account-settings">{{.I18n.T "nav.accountSettings"}}</a>
+      <a href="/brand-settings">{{.I18n.T "nav.brandSettings"}}</a>
+      <a href="/about">{{.I18n.T "nav.about"}}</a>
+      <a href="/privacy-policy">{{.I18n.T "nav.privacy"}}</a>
+      <a href="/terms-of-service">{{.I18n.T "nav.terms"}}</a>
       <hr>
       <a href="#" id="logoutBtn_phone" class="logout-item">{{.I18n.T "nav.signOut"}}</a>
     </div>
