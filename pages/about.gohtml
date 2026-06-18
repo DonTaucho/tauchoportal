@@ -6,24 +6,20 @@
 
 {{define "content"}}
 <div class="about-page">
-        {{if .User}}{{else}}
-        <nav class="about-nav">
-            <a href="/" class="about-logo">🌊 TauchoPortal</a>
-            <div class="about-nav-links">
-                <a href="/">Home</a>
-                <a href="/login" class="nav-btn">Sign In</a>
-                <a href="/register" class="nav-btn nav-btn-primary">Create Account</a>
-            </div>
-        </nav>
-        {{end}}
-
         <div class="container">
             <div class="header">
-                <h1>About TauchoPortal</h1>
+                <h1>About Taucho</h1>
             </div>
 
             <div class="section lead-section">
-                <p>TauchoPortal is a live stream automation platform. It watches your YouTube, Twitch, and NicoNico channels around the clock, and when viewers interact — sending a Super Chat, gifting, cheering with Bits, or triggering emotion effects — your smart home devices respond instantly.</p>
+                <img src="/image/sunsetcrabs.png" width="449" height="375">
+                <p>The name "Taucho" is derived from *Taucho-gane*, a local dialect term from the Isahaya region of Japan for the fiddler crab. Fiddler crabs are known for a distinctive movement in which they wave one of their claws as if beckoning toward the setting sun.</p>
+                <p>We named this service with the hope that, even if individual actions are small, their collective impact will create a powerful synergy within influencer content—much</p>
+                <p> ..like the fiddler crab, whose Japanese name literally translates to "one that beckons the tide."</p>
+            </div>
+
+            <div class="section intro">
+                <p>Taucho is a live stream automation platform. It watches your YouTube, Twitch, and NicoNico channels around the clock, and when viewers interact — sending a Super Chat, gifting, cheering with Bits, or triggering emotion effects — your smart home devices respond instantly.</p>
                 <p>No scripts to run. No browser tab to keep open. The cloud service handles all detection and device control automatically.</p>
             </div>
 
@@ -197,6 +193,7 @@
                 </div>
             </div>
 
+            {{if .User}}{{else}}
             <div class="section cta-section">
                 <h2>🚀 Get Started</h2>
                 <p>Create a free account and connect your first streaming channel in minutes.</p>
@@ -205,6 +202,7 @@
                     <a href="/login" class="btn btn-secondary">Sign In</a>
                 </div>
             </div>
+            {{end}}
 
             <div class="footer">
                 <p>TauchoPortal © 2026 | <a href="/">Home</a> | <a href="/login">Sign In</a> | <a href="/register">Sign Up</a> | <a href="https://github.com/DonTaucho/tauchoportal" target="_blank">GitHub</a></p>
