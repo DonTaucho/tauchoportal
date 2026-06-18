@@ -429,6 +429,19 @@ body {
     border: 1px solid #ddd;
 }
 
+.btn-primary:disabled {
+    background: #8e8f8e;
+    color: white;
+}
+
+.btn-primary:disabled:hover { background: #777777; transform: unset; box-shadow: unset; }
+
+.btn-secondary {
+    background: #f0f0f0;
+    color: #333;
+    border: 1px solid #ddd;
+}
+
 .btn-secondary:hover { background: #e0e0e0; }
 
 /* =============================================

@@ -8,35 +8,19 @@ const convoperators = ["PARSEINT", "EXCHANGE"];
 const namingmap = {"AND":"and", "OR":"or", "EQUALS":"equals", "PARAM":"param"};
 const reverselookuptype = {"AND":"boolean", "OR":"boolean", "NOT":"boolean", "EQUALS":"comp", "GREATER_THAN":"comp", "LESS_THAN":"comp", "INCLUDES":"text", "REGEX_MATCH":"text", "COUNT":"group", "SUM":"group", "ADD":"calc","SUBTRACT":"calc","MULTIPLY":"calc","DIVIDE":"calc","MODULO":"calc", "PARSEINT":"conv","EXCHANGE":"conv", "PARAM":"extract"};
 
-//function refresh (jsoncontainerId, area){
-//    jsonLoader(JSON.parse(document.getElementById(jsoncontainerId).value), area);
-//    var addButton = document.createElement("div");
-//    var area = area;
-//    addButton.innerText = "+";
-//    addButton.attributes["jsoncontainerid"] = jsoncontainerId;
-//    addButton.onclick = function(){
-//        var jsoncontainer = document.getElementById(this.attributes["jsoncontainerid"])
-//        var newjson = JSON.parse(jsoncontainer.value);
-//        newjson.SubConditions.push({"Operator": "AND", "Variables": ["aa"], "SubConditions": []});
-//        jsoncontainer.value = JSON.stringify(newjson, null, 2);
-//        refresh(this.attributes["jsoncontainerid"], area);
-//    };
-//    addButton.classList.add("appendnew");
-//    area.appendChild(addButton);
-//}
-
 function jsonLoader(jsonnode, area, path){
     path = path??"0";
     var operator = jsonnode.Operator;
     area.replaceChildren();
     if (jsonnode.SubConditions || jsonnode.Variables) {
         area.classList.add(namingmap[jsonnode.Operator]);
-            
+
+        // Only for the top level (has only one "/"), show summary
         if (path.split("/").length == 2) {
             var summarized = document.createElement("div");
             summarized.classList.add("summary");
             if (jsonnode.SubConditions) {
-                summarized.innerText = summarize(jsonnode);
+                summarized.innerHTML = summarize(jsonnode);
             }
             area.appendChild(summarized);
         }
@@ -66,7 +50,7 @@ function jsonLoader(jsonnode, area, path){
                 addbutton.innerText = "+";
                 addbutton.setAttribute("path", path);
                 addbutton.setAttribute("operator", operator);
-                addbutton.onclick = openAddDialog;
+                addbutton.onclick = openBoolDialog;
                 area.append(addbutton);
             }
         } else if (compoperators.includes(operator) && (
@@ -78,7 +62,7 @@ function jsonLoader(jsonnode, area, path){
             addcompbutton.innerText = "cooommp";
             addcompbutton.setAttribute("path", path);
             addcompbutton.setAttribute("operator", operator);
-            addcompbutton.onclick = askComparison;
+            addcompbutton.onclick = askTextCompare;
             area.append(addcompbutton);
         }  else if (calcoperators.includes(operator)) {
             var asknumbutton = document.createElement("div");
@@ -129,7 +113,7 @@ function summarize(node){
                 items.push(summarize(node.SubConditions[i]));
             }
             for (i in node.Variables) {
-                items.push(translations["staticvalue"].replace("{0}", node.Variables[i]));
+                items.push("<span class='static'>" + translations["staticvalue"].replace("{0}", node.Variables[i]) + "</span>");
             }
             return translations["equals-sentense"].replace("{0}", items.join(translations["equals-joint"]));
         }
@@ -139,78 +123,153 @@ function summarize(node){
                 items.push(summarize(node.SubConditions[i]));
             }
             for (i in node.Variables) {
-                items.push(translations[node.Variables[i]]);
+                items.push("<span class='param'>" + translations[node.Variables[i]] + "</span>");
             }
             return translations["valueof-sentense"].replace("{0}", items.join(translations["valueof-joint"]));
         }
     }
     return null;
 }
-function openAddDialog(){
-    document.getElementById("addModalBody").className = "";
-    document.getElementById("addModalBody").classList.add("modal-body");
-    document.getElementById("addModalBody").classList.add(namingmap[this.getAttribute("operator")]);
-    document.getElementById("addModalBody").classList.add(reverselookuptype[this.getAttribute("operator")]);
-    document.getElementById("addItemModal").style["display"] = "block";
+function openBoolDialog(){
+    document.getElementById("boolBody").className = "";
+    document.getElementById("boolBody").classList.add("modal-body");
+    document.getElementById("boolBody").classList.add(namingmap[this.getAttribute("operator")]);
+    document.getElementById("boolBody").classList.add(reverselookuptype[this.getAttribute("operator")]);
+
+    document.getElementById("booltextradio").checked = false;
+    document.getElementById("bool_text").classList.remove("available");
+    document.getElementById("textcomparebasevalue").value = "";
+    document.getElementById("textcomparebasetype").value = "";
+    document.getElementById("textextractorselectvalue").value = "";
+    document.getElementById("textextractorselecttype").value = "";
+    document.getElementById("textcomparetargetvalue").value = "";
+    document.getElementById("textcomparetargettype").value = "";
+    document.getElementById("boolnumericradio").checked = false;
+    document.getElementById("bool_numeric").classList.remove("available");
+    document.getElementById("numericcomparebasevalue").value = "";
+    document.getElementById("numericcomparebasetype").value = "";
+    document.getElementById("numericcompareoperator").value = ">";
+    document.getElementById("numericcomparetargetvalue").value = "";
+    document.getElementById("numericcomparetargettype").value = "";
+    document.getElementById("boolconditionradio").checked = false;
+    document.getElementById("bool_addmore").classList.remove("available");
+    document.getElementById("boolSubmitButton").disabled = "disabled";
+    document.getElementById("boolcondition").value = "";
+
+    document.getElementById("boolModal").style["display"] = "block";
     
-    document.getElementById("addModalPath").value =  this.attributes["path"];
+    document.getElementById("boolPath").value =  this.getAttribute("path");
 }
-function addItem(){
-    var operation = document.getElementById("addModalBody").classList;
-    var paths = document.getElementById("addModalPath").value.split("/");
+function boolDialogValidator (){
+    var classList = document.getElementById("boolBody").classList;
+    document.getElementById("boolSubmitButton").disabled = "disabled";
+    if (document.getElementById("booltextradio").checked) {
+        document.getElementById("boolSubmitButton").disabled =
+            document.getElementById("textcomparebasevalue").value &&
+            document.getElementById("textcomparebasetype").value && 
+            document.getElementById("textextractorselectvalue").value && 
+            document.getElementById("textextractorselecttype").value &&  
+            document.getElementById("textcomparetargetvalue").value &&   
+            document.getElementById("textcomparetargettype").value ? "" : "disabled";
+    } else if (document.getElementById("boolnumericradio").checked) {
+        document.getElementById("boolSubmitButton").disabled =
+            document.getElementById("numericcomparebasevalue").value &&
+            document.getElementById("numericcomparebasetype").value && 
+            document.getElementById("numericcompareconditionvalue").value && 
+            document.getElementById("numericcomparetargetvalue").value &&  
+            document.getElementById("numericcomparetargettype").value ? "" : "disabled";
+    } else if (document.getElementById("boolconditionradio").checked) {
+        document.getElementById("boolSubmitButton").disabled =
+            document.getElementById("boolcondition").value ? "" : "disabled";
+    }
+}
+function addBool(){
+    var operation = document.getElementById("boolBody").classList;
+    var paths = document.getElementById("boolPath").value.split("/");
     var jsonarea = document.getElementById("conditionLogicInput");
     var json = JSON.parse(jsonarea.value);
     var currentnode = json;
     if (operation.contains("and") || operation.contains("or")) {
         var elem = {};
-        if (document.getElementById("addtextradio").checked) {
+        if (document.getElementById("booltextradio").checked) {
             elem = {"aa": {"aa":123}};
-        } else if (document.getElementById("addnumericradio").checked) {
+        } else if (document.getElementById("boolnumericradio").checked) {
             elem = {"aa": {"aa":123}};
-        } else if (document.getElementById("addconditionradio").checked) {
-            elem["Operator"] = document.getElementById("addcondition").value;
+        } else if (document.getElementById("boolconditionradio").checked) {
+            elem["Operator"] = document.getElementById("boolcondition").value;
             elem["Variables"] = [];
             elem["SubConditions"] = [];
         }
 
         for (var i in paths.slice(1)){
-            currentnode = currentnode.SubConditions[paths[i]]
+            currentnode = currentnode.SubConditions[paths.slice(1)[i]]
         }
         currentnode.SubConditions.push(elem);
     }
     jsonarea.value = JSON.stringify(json, null, 2);
     // to make really sure having not difference between what is shown and the actual data, load from object not the json just made
     jsonLoader(JSON.parse(document.getElementById("conditionLogicInput").value), document.getElementById("drawingArea"));
-    document.getElementById("addItemModal").style["display"] = "none";
+    document.getElementById("boolModal").style["display"] = "none";
     document.getElementById("logictotaldescription").innerText = summarize(json);
 }
-function askComparison(path, operator, parentoperator){
- alert(path + operator);
+function askTextCompare(){
+    document.getElementById("comparisonTextBody").className = "";
+    document.getElementById("comparisonTextBody").classList.add("modal-body");
+    document.getElementById("comparisonTextBody").classList.add("textselection");
+    document.getElementById("comparisonTextModal").style["display"] = "block";
+    document.getElementById("comparisonTextModalButton").onclick = function(){
+
+    }
+}
+function askExtractor(){
+    document.getElementById("extractorequalradio").checked = false;
+    document.getElementById("extractoregexradio").checked = false;
+    document.getElementById("extractorModalButton").checked = false;
+    document.getElementById("extractorModal").style["display"] = "block";
 }
 function askNum(){
- alert(path + operator);
+    document.getElementById("numModal").style["display"] = "block";
 }
-function askText(includeenter, includeenv, callback){
-    document.getElementById("inputTextBody").className = "";
-    document.getElementById("inputTextBody").classList.add("modal-body");
+function askText(currentvalue, currenttype, includeenter, includeenv, callback){
+    document.getElementById("textBody").className = "";
+    document.getElementById("textBody").classList.add("modal-body");
+    document.getElementById("textBody").classList.add("textselection");
+    document.getElementById("textenvradio").checked = currenttype == "env";
+    document.getElementById("textEnvSelect").value = currenttype == "env" ? currentvalue : "event_message";
+    document.getElementById("textenterradio").checked = currenttype == "variable";
+    document.getElementById("textEnter").value = currenttype == "variable" ? currentvalue : "";
+
+    document.getElementById('textEnterArea').classList.remove('available');
+    document.getElementById('textEnvArea').classList.remove('available');
+    if (currenttype == "env") {
+        document.getElementById('textEnvArea').classList.add('available');
+    } else if (currenttype == "variable") {
+        document.getElementById('textEnterArea').classList.add('available');
+    }
     if (includeenter) {
-        document.getElementById("inputTextBody").classList.add("includeenter");
+        document.getElementById("textBody").classList.add("includeenter");
     }
     if (includeenv) {
-        document.getElementById("inputTextBody").classList.add("includeenv");
+        document.getElementById("textBody").classList.add("includeenv");
     }
-    document.getElementById("inputTextModal").style["display"] = "block";
-    inputTextModalButton.onclick = ()=>{
+    document.getElementById("textModal").style["display"] = "block";
+    document.getElementById("textSubmitButton").onclick = ()=>{
         var dispval;
+        var val;
         var type;
-        if (inputtextenterradio.checked) {
-            dispval = document.getElementById("inputTextEnter").value;
+        if (document.getElementById("textenterradio").checked) {
+            dispval = document.getElementById("textEnter").value;
+            val = document.getElementById("textEnter").value;
             type = "variable";
-        } else {
-            dispval = translations[document.getElementById("inputTextEnvSelect").value];
+        } else if (document.getElementById("textenvradio").checked) {
+            dispval = translations[document.getElementById("textEnvSelect").value];
+            val = document.getElementById("textEnvSelect").value;
             type = "env";
         }
-        callback(dispval, document.getElementById("inputTextEnvSelect").value, type);
-        document.getElementById("inputTextModal").style["display"] = "none";
+        callback(dispval, val, type);
+        document.getElementById("textModal").style["display"] = "none";
     };
+}
+function numDialogValidator(){
+    
 }

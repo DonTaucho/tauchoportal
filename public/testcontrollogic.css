@@ -67,56 +67,145 @@ display:none;
   background-color:rgba(112, 125, 199, 0.226);
 }
 .modal.lower{
+  z-index: 997;
+}
+.modal.middle{
   z-index: 998;
 }
-.modal-body>div{
-  display: none;
-}
-.modal-body.extract .extract{
-  display: block;
-}
-.modal-body.boolean .boolean{
-  display: block;
-}
-.modal-body.comp .comp{
-  display: block;
-}
-.modal-body.text .text{
-  display: block;
-}
-.modal-body.calc .calc{
-  display: block;
-}
-.modal-body.conv .conv{
-  display: block;
-}
+
 .selector {
   color: lightgrey;
-  color: lightgrey;
   border-color: lightgrey;
+  margin-bottom: 1em;
 }
 .selector input{
   color: lightgrey;
-  color: lightgrey;
   border-color: lightgrey;
 }
+.selector input[type="radio"]{
+  border-color: black;
+}
 .selector select{
-  color: lightgrey;
   color: lightgrey;
   border-color: lightgrey;
 }
 .selector.available{
   color: black;
-  color: black;
   border-color: black;
 }
 .selector.available input{
-  color: black;
   color: black;
   border-color: black;
 }
 .selector.available select{
   color: black;
-  color: black;
   border-color: black;
+}
+.textselector .value {
+    padding: 0.4em 1em;
+    display: none;
+    width: 8em;
+    text-align: center;
+    border-radius: 4px;
+    background-color: #dde7eb;
+    cursor: pointer;
+    font-weight: bold;
+    border: 2px solid #c7cedd;
+}
+.textselector .placeholder {
+    padding: 0.4em 1em;
+    display: inline-block;
+    width: 8em;
+    text-align: center;
+    border-radius: 4px;
+    background-color: #dde7eb;
+    cursor: pointer;
+    font-weight: unset;
+    border: 2px dotted #c7cedd;
+}
+.available .textselector .value {
+    border-color: #658ce3;
+    background-color: #c0e4f5;
+}
+.available .textselector .value:hover {
+    border-color: #4c7add;
+    background-color: #81caec;
+}
+.available .textselector .placeholder {
+    border: 2px dotted #bacbf0;
+    background-color: #e2f1f8;
+}
+.available .textselector .placeholder:hover {
+    border-color: #acc2f3;
+    background-color: #bfe3f3;
+}
+
+.extractorselector {
+    border: 2px solid #c7cedd;
+    padding: 0.4em 1em;
+    display: inline-block;
+    width: 8em;
+    text-align: center;
+    border-radius: 4px;
+    background-color: #dde7eb;
+    cursor: pointer;
+    font-weight: bold;
+}
+.extractorselector:hover {
+    border-color: #c7cedd;
+    background-color: #dde7eb;
+}
+.available .extractorselector {
+    border-color: #e38d65;
+    background-color: #eebaa2;
+}
+.available .extractorselector:hover {
+    border-color: #d46f40;
+    background-color: #eca07d;
+}
+
+.summary {
+  color: rgb(49, 49, 49);
+}
+
+.summary .param{
+  font-weight:bold;
+  color:rgb(189, 63, 25);
+}
+.summary .static{
+  font-weight:bold;
+  color:rgb(75, 25, 192);
+}
+
+.numselector {
+    border: 2px solid #c7cedd;
+    padding: 0.4em 1em;
+    display: inline-block;
+    width: 8em;
+    text-align: center;
+    border-radius: 4px;
+    background-color: #dde7eb;
+    cursor: pointer;
+    font-weight: bold;
+}
+.numselector:hover {
+    border-color: #c7cedd;
+    background-color: #dde7eb;
+}
+.available .numselector {
+    border-color: #658ce3;
+    background-color: #c0e4f5;
+}
+.available .numselector:hover {
+    border-color: #4c7add;
+    background-color: #81caec;
+}
+.selector select {
+    font-size: 1.5em;
+    border-radius: 5px;
+    padding: 0.2em;
+}
+.modal-content .number{
+  display:inline-block;
+  width: 2.5em;
 }

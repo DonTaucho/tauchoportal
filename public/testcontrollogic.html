@@ -155,7 +155,7 @@
     try {
       jsonLoader(JSON.parse(document.getElementById("conditionLogicInput").value), document.getElementById("drawingArea"));
       
-      document.getElementById("logictotaldescription").innerText = summarize(JSON.parse(document.getElementById("conditionLogicInput").value));
+      document.getElementById("logictotaldescription").innerHTML = summarize(JSON.parse(document.getElementById("conditionLogicInput").value));
     } catch (q) {
       alert(q);
 // some message
@@ -321,84 +321,154 @@ var translations = {
   "event_created_at" : "Timestamp when event occurred"
 };
 </script>
-<div id="addItemModal" class="modal lower">
+<div id="boolModal" class="modal lower">
     <div class="modal-content modal-large">
         <div class="modal-header">
-            <span class="close" onclick="closeModal('addItemModal')">×</span>
+            <span class="close" onclick="closeModal('boolModal')">×</span>
             <h2><svg width="1em" height="1em" viewBox="0 0 512 512" xmlns="http://www.w3.org/2000/svg"><path fill="#ffffff" stroke="black" stroke-width="6%" d="M296,464a23.88,23.88,0,0,1-7.55-1.23l-80.15-26.67A23.92,23.92,0,0,1,192,413.32V294.11a.44.44,0,0,0-.09-.13L23.26,97.54A30,30,0,0,1,46.05,48H466a30,30,0,0,1,22.79,49.54L320.09,294a.77.77,0,0,0-.09.13V440a23.93,23.93,0,0,1-24,24Z"></path></svg> Add Item</h2>
             <p>Add Item.</p>
         </div>
-        <div id="addModalBody" class="modal-body">
-            <input id="addModalPath" type="hidden" value="">
-            <div class="extract"><p>Which field to obtain from</p><select id="addExtract"><option>Comment</option><option>Comment</option></select></div>
-            <div class="boolean">
-              <div id="boolean_option1" class="selector" onclick="document.getElementById('addtextradio').checked=true;getElementById('boolean_option1').classList.add('available');document.getElementById('boolean_option2').classList.remove('available');document.getElementById('boolean_option3').classList.remove('available')">
-                <div><input id="addtextradio" type="radio" name="addboolradio">Value includes?</div>
-                <div>Comment includes X</div>
-                <span onclick="_this=this;askText(true, true, function(disp,val,type){_this.innerText=disp;_this.setAttribute('type', type);_this.setAttribute('val', val)})">select value</span>
-              </div>
-              <div id="boolean_option2" class="selector" onclick="document.getElementById('addnumericradio').checked=true;document.getElementById('boolean_option1').classList.remove('available');document.getElementById('boolean_option2').classList.add('available');document.getElementById('boolean_option3').classList.remove('available')">
-                <div><input id="addnumericradio" type="radio" name="addboolradio">Comparison?</div>
-                <div><span onclick="_this=this;askNum(true, true, function(disp,val,type){_this.innerText=disp;_this.setAttribute('type', type);_this.setAttribute('val', val)})">select value</span><select><option>&gt;</option><option>=</option><option>&lt;</option></select><span onclick="_this=this;askNum(true, true, function(disp,val,type){_this.innerText=disp;_this.setAttribute('type', type);_this.setAttribute('val', val)})">select value</span></div>
-              </div>
-              <div id="boolean_option3" class="selector" onclick="document.getElementById('addconditionradio').checked=true;document.getElementById('boolean_option1').classList.remove('available');document.getElementById('boolean_option2').classList.remove('available');document.getElementById('boolean_option3').classList.add('available')">
-                <div><input id="addconditionradio" type="radio" name="addboolradio">Add more condition?</div>
-                <select id="addcondition"><option value="AND">AND</option><option value="OR">OR</option><option value="NOT">NOT</option></select>
-              </div>
+        <div id="boolBody" class="modal-body">
+            <input id="boolPath" type="hidden" value="">
+            <div id="bool_text" class="selector" onclick="document.getElementById('booltextradio').checked=true;getElementById('bool_text').classList.add('available');document.getElementById('bool_numeric').classList.remove('available');document.getElementById('bool_addmore').classList.remove('available');boolDialogValidator()">
+              <h4><input id="booltextradio" type="radio" name="addboolradio" /> Values Matches/Includes</h4>
+              <span class="textselector" onclick="askText(document.getElementById('textcomparebasevalue').value, document.getElementById('textcomparebasetype').value, true, true, function(disp,val,type){
+                document.getElementById('textcomparebasedisplay').innerText=disp;
+                document.getElementById('textcomparebasevalue').value=val;
+                document.getElementById('textcomparebasetype').value=type;
+                document.getElementById('textcomparebaseplaceholder').style['display']=val?'none':'inline-block';
+                document.getElementById('textcomparebasedisplay').style['display']=val?'inline-block':'none';
+                boolDialogValidator();
+                })">
+                <span id="textcomparebaseplaceholder" class="placeholder">Enter Value</span>
+                <span id="textcomparebasedisplay" class="value" style="display:none"></span>
+                <input id="textcomparebasevalue" type="hidden" />
+                <input id="textcomparebasetype" type="hidden" />
+              </span>
+              <span class="extractorselector" onclick="askExtractor(true, true, function(disp,val,type){
+                document.getElementById('textextractorselectdisplay').innerText=disp;
+                document.getElementById('textextractorselectvalue').value=val;
+                document.getElementById('textextractorselecttype').value=type;
+                boolDialogValidator();
+                })">
+                <span id="textextractorselectdisplay" class="value">Includes</span>
+                <input id="textextractorselectvalue" type="hidden" value="1-1" />
+                <input id="textextractorselecttype" type="hidden" value="SOME" />
+              </span>
+              <span class="textselector" onclick="askText(document.getElementById('textcomparetargetvalue').value, document.getElementById('textcomparetargettype').value, true, true, function(disp,val,type){
+                document.getElementById('textcomparetargetdisplay').innerText=disp;
+                document.getElementById('textcomparetargetvalue').value=val;
+                document.getElementById('textcomparetargettype').value=type;
+                document.getElementById('textcomparetargetplaceholder').style['display']=val?'none':'inline-block';
+                document.getElementById('textcomparetargetdisplay').style['display']=val?'inline-block':'none';
+                boolDialogValidator();
+                })">
+                <span id="textcomparetargetplaceholder" class="placeholder">Enter Value</span>
+                <span id="textcomparetargetdisplay" class="value" style="display:none"></span>
+                <input id="textcomparetargetvalue" type="hidden" />
+                <input id="textcomparetargettype" type="hidden" />
+              </span>
             </div>
-            <div class="comp"><input type="text" id="addCompareTarget" />
-              <div>Parsing Param?</div>
-              <input type="text">
-              <div>Add Calculation?</div>
-              <input type="text">
+            <div id="bool_numeric" class="selector" onclick="document.getElementById('boolnumericradio').checked=true;document.getElementById('bool_text').classList.remove('available');document.getElementById('bool_numeric').classList.add('available');document.getElementById('bool_addmore').classList.remove('available');boolDialogValidator()">
+              <div><input id="boolnumericradio" type="radio" name="addboolradio" />Comparison?</div>
+              <div>
+                <span class="numselector" onclick="_this=this;askNum(true, true, function(disp,val,type){_this.innerText=disp;_this.setAttribute('type', type);_this.setAttribute('val', val)})">select value</span>
+                <input id="numericcomparebasevalue" type="hidden" />
+                <input id="numericcomparebasetype" type="hidden" />
+                <select id="numericcompareoperator"><option value=">">&gt;</option><option value=">">&gt;=</option><option value="==">=</option><option value="<=">&lt;=</option><option value="<">&lt;</option></select>
+                <span class="numselector" onclick="_this=this;askNum(true, true, function(disp,val,type){_this.innerText=disp;_this.setAttribute('type', type);_this.setAttribute('val', val)})">select value</span></div>
+                <input id="numericcomparetargetvalue" type="hidden" />
+                <input id="numericcomparetargettype" type="hidden" />
+           </div>
+            <div id="bool_addmore" class="selector" onclick="document.getElementById('boolconditionradio').checked=true;document.getElementById('bool_text').classList.remove('available');document.getElementById('bool_numeric').classList.remove('available');document.getElementById('bool_addmore').classList.add('available');boolDialogValidator()">
+              <div><input id="boolconditionradio" type="radio" name="addboolradio" />Add more condition?</div>
+              <select id="boolcondition" onchange="boolDialogValidator()"><option value=""></option><option value="AND">AND</option><option value="OR">OR</option><option value="NOT">NOT</option></select>
             </div>
-            <div class="text"><input type="text" id="addTextTarget" /></div>
-            <div class="calc"><input type="text" id="addCalculationTarget" /></div>
-            <div class="conv"><input type="text" id="addConversionTarget" /></div>
         </div>
         <div class="modal-footer">
-            <button type="button" class="btn btn-secondary" onclick="closeModal('addItemModal')">Cancel</button>
-            <button type="button" class="btn btn-primary" onclick="addItem()">Add Item</button>
+            <button type="button" class="btn btn-secondary" onclick="closeModal('boolModal')">Cancel</button>
+            <button id="boolSubmitButton" type="button" class="btn btn-primary" onclick="addBool()">Add Item</button>
         </div>
     </div>
 </div>
 
-<div id="inputTextModal" class="modal">
+<div id="textModal" class="modal">
     <div class="modal-content modal-small">
         <div class="modal-header">
-            <span class="close" onclick="closeModal('inputTextModal')">×</span>
+            <span class="close" onclick="closeModal('textModal')">×</span>
             <p>Value.</p>
         </div>
-        <div id="inputTextBody" class="modal-body">
-          <input id="inputtextenvselectradio" type="radio" name="inputtextradio">
-          <select id="inputTextEnvSelect"><option value="event_message">comment</option><option value="event_amount">amount</option></select>
-          <hr>
-          <input id="inputtextenterradio" type="radio" name="inputtextradio">
-          <input id="inputTextEnter" type="text" >
+        <div id="textBody" class="modal-body textselection">
+          <div class="textselection">
+            <div id="textEnvArea" class="selector envselection" onclick="document.getElementById('textenvradio').checked=true;getElementById('textEnvArea').classList.add('available');document.getElementById('textEnterArea').classList.remove('available');">
+              <h4><input id="textenvradio" type="radio" name="inputtextradio"> Select Input Parameter</h4>
+              <select id="textEnvSelect"><option value="event_message">comment</option><option value="event_amount">amount</option></select>
+            </div>
+            <div id="textEnterArea" class="selector entervalue" onclick="document.getElementById('textenterradio').checked=true;getElementById('textEnterArea').classList.add('available');document.getElementById('textEnvArea').classList.remove('available');">
+              <h4><input id="textenterradio" type="radio" name="inputtextradio"> Static Value</h4>
+              <input id="textEnter" type="text" >
+            </div>
+          </div>
         </div>
         <div class="modal-footer">
-            <button type="button" class="btn btn-secondary" onclick="closeModal('inputTextModal')">Cancel</button>
-            <button id="inputTextModalButton" type="button" class="btn btn-primary" onclick="">Okay</button>
+            <button type="button" class="btn btn-secondary" onclick="closeModal('textModal')">Cancel</button>
+            <button id="textSubmitButton" type="button" class="btn btn-primary" onclick="">Okay</button>
         </div>
     </div>
 </div>
 
-<div id="inputNumModal" class="modal">
+<div id="numModal" class="modal">
     <div class="modal-content modal-small">
         <div class="modal-header">
-            <span class="close" onclick="closeModal('inputNumModal')">×</span>
-            <p>Value.</p>
+            <span class="close" onclick="closeModal('numModal')">×</span>
+            <p>Numeric.</p>
         </div>
-        <div id="inputNumBody" class="modal-body">
-          <input id="inputnumenvselectradio" type="radio" name="inputnumradio">
-          <select id="inputNumEnvSelect"><option value="event_message">comment</option><option value="event_amount">amount</option></select>
-          <hr>
-          <input id="inputnumenterradio" type="radio" name="inputnumradio">
-          <input id="inputNumEnter" type="text" >
+        <div id="numBody" class="modal-body numselection">
+          <div class="numselection">
+            <div id="num_env" class="selector" onclick="document.getElementById('numenvselectradio').checked=true;document.getElementById('num_env').classList.add('available');document.getElementById('num_static').classList.remove('available');numDialogValidator()">
+              <input id="numenvselectradio" type="radio" name="numradio">
+              <select id="numEnvSelect"><option value="event_message">comment</option><option value="event_amount">amount</option></select>
+            </div>
+            <div id="num_static" class="selector" onclick="document.getElementById('numenterradio').checked=true;document.getElementById('num_env').classList.remove('available');document.getElementById('num_static').classList.add('available');numDialogValidator()">
+              <input id="numenterradio" type="radio" name="inputnumradio">
+              <input id="numEnter" type="text" >
+            </div>
+          </div>
         </div>
         <div class="modal-footer">
-            <button type="button" class="btn btn-secondary" onclick="closeModal('inputNumModal')">Cancel</button>
-            <button id="inputNumModalButton" type="button" class="btn btn-primary" onclick="">Okay</button>
+            <button type="button" class="btn btn-secondary" onclick="closeModal('numModal')">Cancel</button>
+            <button id="numModalButton" type="button" class="btn btn-primary" onclick="">Okay</button>
+        </div>
+    </div>
+</div>
+
+<div id="extractorModal" class="modal">
+    <div class="modal-content modal-small">
+        <div class="modal-header">
+            <span class="close" onclick="closeModal('extractorModal')">×</span>
+            <p>Extractor.</p>
+        </div>
+        <div id="extractorBody" class="modal-body">
+          <div id="ext_eq" class="selector" onclick="document.getElementById('extractorequalradio').checked=true;document.getElementById('ext_eq').classList.add('available');document.getElementById('ext_range').classList.remove('available');document.getElementById('ext_reg').classList.remove('available');extractorDialogValidator()">
+            <input id="extractorequalradio" type="radio" name="extractorradio">
+            EQUALS
+          </div>
+          <div id="ext_range" class="selector" onclick="document.getElementById('extractosomeradio').checked=true;document.getElementById('ext_eq').classList.remove('available');document.getElementById('ext_range').classList.add('available');document.getElementById('ext_reg').classList.remove('available');extractorDialogValidator()">
+            <input id="extractosomeradio" type="radio" name="extractorradio">
+            Includes
+            <div><div>Range?</div>
+            <input id="extractrange-from" type="text" class="number" type="tel" inputmode="numeric">~<input id="extractrange-to" type="text" class="number" type="tel" inputmode="numeric">
+            </div>
+          </div>
+          <div id="ext_reg" class="selector" onclick="document.getElementById('extractoregexradio').checked=true;document.getElementById('ext_eq').classList.remove('available');document.getElementById('ext_range').classList.remove('available');document.getElementById('ext_reg').classList.add('available');extractorDialogValidator()">
+            <input id="extractoregexradio" type="radio" name="extractorradio">
+            REGEX
+            <input type="text" />
+          </div>
+        </div>
+        <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" onclick="closeModal('extractorModal')">Cancel</button>
+            <button id="extractorModalButton" type="button" class="btn btn-primary" onclick="">Okay</button>
         </div>
     </div>
 </div>
