@@ -6,13 +6,10 @@ margin: 0px 0px 0.2em 0px;
 background-color: lightblue;
 }
 .item {
-padding: 0.5rem 1rem;
-border: 1px solid grey;
-margin: 1em 1em 0.5em 1em;
-background-color: azure;
 display:inline-block;
 min-width: 4em;
 overflow: hidden;
+position: relative;
 }
 #addnewbutton{
 padding: 1rem 2rem;
@@ -40,6 +37,141 @@ display:none;
   height: 100%;
   overflow-y: auto;
 }
+#drawingArea>div.detailarea>.subcondition>.item>.detailarea {
+	max-height: 1em;
+	overflow: hidden;
+    color: lightgrey;
+    border-top: 1px dotted lightgray;
+    padding-top: 0.7em;
+}
+#drawingArea>div.detailarea>.subcondition>.item:hover>.detailarea {
+	max-height: 20em;
+	overflow-y: auto;
+	color: unset;
+}
+
+#drawingArea>div.detailarea>.subcondition>.item:hover>.detailarea .detailarea{
+	max-height: unset;
+	overflow-y: auto;
+	color: unset;
+}
+
+#drawingArea>legend,
+#drawingArea>.icons {
+  display: none;
+}
+legend{
+    font-size: 0.7em;
+    font-weight: bold;
+    padding: 0em 0.5em;
+}
+.item.equals{
+	padding: 1em;
+    border: 3px solid #45d350;
+    border-radius: 5px;
+    margin: 1em 1em 0.5em 1em;
+    background-color: #f6fff9;
+}
+.item.and{
+    padding: 1em;
+    border: 3px solid #db4545;
+    border-radius: 5px;
+    margin: 1em 1em 0.5em 1em;
+    background-color: #ffe9e5;
+}
+.item.or{
+    padding: 1em;
+    border: 3px solid #4557db;
+    border-radius: 5px;
+    margin: 1em 1em 0.5em 1em;
+    background-color: #e5ecff;
+}
+.item.not{
+    padding: 1em;
+    border: 3px solid #595959;
+    border-radius: 5px;
+    margin: 1em 1em 0.5em 1em;
+    background-color: #efefef;
+}
+.item.param{
+    padding: 1em;
+}
+
+.item .variable{
+	background-color: rgb(219, 128, 74, 0.15);
+    display: inline-block;
+    border: 1px solid rgb(225, 118, 54, 0.15);
+    padding: 0.2em;
+    line-height: 1em;
+	cursor: pointer;
+}
+.item .variable::after{
+    content: "✏️";
+	margin-left: 1em;
+}
+.item.param .variable::after{
+    content: none;
+	margin-left: 0px;
+}
+.item.param .variable{
+	background-color: unset;
+    border: unset;
+	cursor: unset;
+}
+.item .icons{
+    position: absolute;
+	top: -4px;
+	right: 0px;
+	visibility: hidden;
+}
+.item:hover .icons {
+    visibility: visible;
+}
+.item .icons a{
+    cursor: pointer;
+	text-decoration: none;
+}
+.novalue {
+	font-weight: bold;
+	color: #662222;
+	padding: 0.3em;
+	border: 1px dotted red;
+}
+.missingvalue {
+	font-weight: bold;
+	color: #665522;
+	padding: 0.3em;
+	border: 1px dotted orange;
+}
+
+div#logictotaldescription {
+	font-size: 9pt;
+}
+div#logictotaldescription .and, 
+div#logictotaldescription .or {
+	font-size: 12pt;
+}
+div#logictotaldescription span.and::before {
+	content: "(";
+	color: orange;
+	font-size: 1.5em;
+}
+div#logictotaldescription span.and::after {
+	content: ")";
+	color: orange;
+	font-size: 1.5em;
+}
+div#logictotaldescription span.and .and::before {
+	content: "(";
+	color: red;
+	font-size: 1.5em;
+}
+div#logictotaldescription span.and .and::after {
+	content: ")";
+	color: red;
+	font-size: 1.5em;
+}
+
 .addbutton {
   color: transparent;
   border: 2px dotted transparent;
@@ -47,12 +179,83 @@ display:none;
   padding: 0.2em 1em;
   font-weight: bold;
   text-align: center;
+  margin: 1em;
+  cursor: pointer;
 }
 .addbutton:hover {
   color: #351b1b;
   border-color: rgb(167, 78, 78);
   background-color:rgba(247, 161, 149, 0.226);
 }
+
+#drawingArea>.addbutton{
+    color: rgba(241, 197, 197, 0.79);
+    border: 2px dotted rgba(197, 111, 102, 0.2);
+    padding: 1em 2em;
+    background: rgba(255, 54, 54, 0.1);
+}
+#drawingArea>.addbutton:hover {
+  color: #351b1b;
+  border-color: rgb(167, 78, 78);
+  background-color:rgba(247, 161, 149, 0.226);
+}
+
+.addcompbutton {
+  color: transparent;
+  border: 2px dotted transparent;
+  min-height: 1em;
+  padding: 0.2em 1em;
+  font-weight: bold;
+  text-align: center;
+  margin: 1em;
+  cursor: pointer;
+}
+.addcompbutton:hover {
+	color: #79250c;
+    border-color: #bd3f19;
+    background-color: rgba(221, 143, 119, 0.43);
+}
+
+#drawingArea>.addcompbutton{
+    color: rgba(241, 197, 197, 0.79);
+    border: 2px dotted rgba(197, 111, 102, 0.2);
+    padding: 1em 2em;
+    background: rgba(255, 54, 54, 0.1);
+}
+#drawingArea>.addcompbutton:hover {
+	color: #79250c;
+    border-color: #bd3f19;
+    background-color: rgba(221, 143, 119, 0.43);
+}
+
+.asknumbutton {
+  color: transparent;
+  border: 2px dotted transparent;
+  min-height: 1em;
+  padding: 0.2em 1em;
+  font-weight: bold;
+  text-align: center;
+  margin: 1em;
+  cursor: pointer;
+}
+.asknumbutton:hover {
+    color: #1e351b;
+    border-color: rgb(88, 167, 78);
+    background-color: rgba(149, 247, 157, 0.23);
+}
+
+#drawingArea>.asknumbutton{
+    color: rgba(241, 197, 197, 0.79);
+    border: 2px dotted rgba(197, 111, 102, 0.2);
+    padding: 1em 2em;
+    background: rgba(255, 54, 54, 0.1);
+}
+#drawingArea>.asknumbutton:hover {
+    color: #1e351b;
+    border-color: rgb(88, 167, 78);
+    background-color: rgba(149, 247, 157, 0.23);
+}
+
 .questbutton {
   color: transparent;
   border: 2px dotted transparent;
@@ -164,6 +367,21 @@ display:none;
     background-color: #eca07d;
 }
 
+.textrangeinput {
+	overflow-y: hidden;
+	max-height: 0.4em;
+	color: lightgrey;
+}
+
+.selector.available:hover .textrangeinput {
+	overflow-y: unset;
+	height: unset;
+	color: unset;
+	max-height: 4em;
+}
+
+/* Summary */
+
 .summary {
   color: rgb(49, 49, 49);
 }
@@ -208,4 +426,64 @@ display:none;
 .modal-content .number{
   display:inline-block;
   width: 2.5em;
+}
+
+/* for JSON area and the animation */
+#jsonarea {
+	margin-top: 1em;
+	background-color: #ececec;
+}
+#jsonarea textarea{
+	height: 0px;
+}
+#jsonarea.active {
+	height: unset;
+}
+#jsonarea.active textarea{
+	height: 500px;
+}
+#upperarea{
+	overflow: hidden;
+	height: 500px;
+}
+#upperarea.hide{
+	height: 0px;
+}
+#jsontab {
+	text-align: right;
+    background-color: white;
+    margin: 0px 0px -1px 0px;
+    padding: 0px;
+    line-height: 27px;
+    overflow-y: hidden;
+    height: 26px;
+}
+#jsontab img{
+	vertical-align: bottom;
+}
+#jsontab a{
+	background-color: #ececec;
+    margin: 0px;
+    padding: 0px;
+    line-height: 26px;
+    display: inline-block;
+    border-top: 1px solid #a6a6a6;
+    border-right: 1px solid #d3d3d3;
+    padding-right: 1em;
+	border-radius: 0px 6px 0px 0px;
+}
+#jsonareawrapper {
+	border: 1px solid #d3d3d3;
+	height: 1em;
+	overflow: hidden;
+	border-radius: 6px 0px 6px 6px;
+}
+.active #jsonareawrapper {
+	height: unset;
+}
+#sendingparameterarea {
+	width: 100%;
+	border: 1px solid orange;
+	min-height: 12em;
+	padding: 1em;
 }

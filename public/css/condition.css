@@ -104,7 +104,7 @@ div{
 
 /* Textarea */
 .condition-textarea {
-    width: 100%;
+    width: 95%;
     height: 500px;
     padding: 1rem;
     border: 1px solid #ddd;
@@ -116,6 +116,7 @@ div{
     background: #fafafa;
     color: #333;
     box-sizing: border-box;
+	margin: 1em;
 }
 
 .condition-textarea:focus {

@@ -2,13 +2,13 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Condition Logic - TauchoPortal</title>
-  <link rel="stylesheet" href="/css/main.css">
+  <link rel="stylesheet" href="./css/main.css">
   
-<link rel="stylesheet" href="/css/modals.css">
-<link rel="stylesheet" href="/css/condition.css">
-<link rel="stylesheet" href="/css/channels.css">
-<link rel="stylesheet" href="/testcontrollogic.css">
-  <script src="/testcontrollogic.js"></script>
+<link rel="stylesheet" href="./css/modals.css">
+<link rel="stylesheet" href="./css/condition.css">
+<link rel="stylesheet" href="./css/channels.css">
+<link rel="stylesheet" href="./testcontrollogic.css">
+  <script src="./testcontrollogic.js"></script>
 
 
   <style>
@@ -25,13 +25,13 @@
 <header class="taucho-header" data-component="header">
   <div class="header-container">
     <div class="logo-section">
-      <a href="/" class="logo"><img src="/image/logo_ss.png">Taucho</a>
+      <a href="/" class="logo"><img src="./image/logo_ss.png">Taucho</a>
     </div>
 
     <nav class="header-nav">
       <ul>
-        <li><a href="/channels"><img src="/image/channels_ss.png"> Channels</a></li>
-        <li><a href="/devices"><img src="/image/gadget_ss.png"> My Devices</a></li>
+        <li><a href="/channels"><img src="./image/channels_ss.png"> Channels</a></li>
+        <li><a href="/devices"><img src="./image/gadget_ss.png"> My Devices</a></li>
       </ul>
     </nav>
 
@@ -66,8 +66,8 @@
   </div>
   <div class="phone-only">
     <div class="menu-dialog" id="phoneMenuDialog">
-      <a href="/channels"><img src="/image/channels_ss.png"> Channels</a>
-      <a href="/devices"><img src="/image/gadget_ss.png"> My Devices</a>
+      <a href="/channels"><img src="./image/channels_ss.png"> Channels</a>
+      <a href="/devices"><img src="./image/gadget_ss.png"> My Devices</a>
       <select class="language-selector" title="Language" onchange="window.location='/set-lang?lang='+this.value+'&amp;back='+encodeURIComponent(window.location.pathname)">
         <option value="en" selected="">English</option>
         <option value="ja">日本語</option>
@@ -148,14 +148,12 @@
 
     <div class="channels-panel">
 <textarea id="monitor" style="width:900px;height:40px;"></textarea>
-<div id="condition-view" class="view channels-view condition-container"><div class="page-header"><nav class="breadcrumb"><img src="/image/channels_s.png"><a href="/channels">Watched Channels</a><span class="breadcrumb-sep">›</span><a href="/channels/watch_1781323141864247200">Mr.タウチョ</a><span class="breadcrumb-sep">›</span><a href="/channels/watch_1781323141864247200/conditions">Conditions</a><span class="breadcrumb-sep">›</span><span>Condition 2 Testestes</span></nav><div class="page-header-top"><div><h1>Edit Condition Logic</h1><p class="condition-name"><strong>Condition 2 Testestes</strong> on <strong>Mr.タウチョ</strong></p><p class="event-type-info">Event type: <code>comment</code></p></div></div></div><div class="editor-container"><div class="editor-section"><h2>Condition Logic (JSON)</h2><p class="editor-help">Edit the JSON structure below to define complex logic for this condition.</p>
+<div id="condition-view" class="view channels-view condition-container"><div class="page-header"><nav class="breadcrumb"><img src="./image/channels_s.png"><a href="/channels">Watched Channels</a><span class="breadcrumb-sep">›</span><a href="/channels/watch_1781323141864247200">Mr.タウチョ</a><span class="breadcrumb-sep">›</span><a href="/channels/watch_1781323141864247200/conditions">Conditions</a><span class="breadcrumb-sep">›</span><span>Condition 2 Testestes</span></nav><div class="page-header-top"><div><h1>Edit Condition Logic</h1><p class="condition-name"><strong>Condition 2 Testestes</strong> on <strong>Mr.タウチョ</strong></p><p class="event-type-info">Event type: <code>comment</code></p></div></div></div><div class="editor-container"><div class="editor-section"><h2>Condition Logic (JSON)</h2><p class="editor-help">Edit the JSON structure below to define complex logic for this condition.</p>
 <script>
 
   window.addEventListener("load", function(){
     try {
-      jsonLoader(JSON.parse(document.getElementById("conditionLogicInput").value), document.getElementById("drawingArea"));
-      
-      document.getElementById("logictotaldescription").innerHTML = summarize(JSON.parse(document.getElementById("conditionLogicInput").value));
+		refreshSummary();
     } catch (q) {
       alert(q);
 // some message
@@ -201,8 +199,14 @@ function addNewButton(){
 }
 </script>
 <div>
-<div id="upperarea" style='overflow:hidden;height: 500px'>
-  <div class="toolbox" style="display:inline-block; vertical-align:top; width: 20%"><h3 style="border-bottom: 2px solid blue">ToolBox</h3><div>Input</div><div>Logic</div><div>Convert</div><div>Tool</div><div>Tool</div><div>Tool</div></div>
+<div id="upperarea">
+  <div class="toolbox" style="display:inline-block; vertical-align:top; width: 20%">
+	  <h3 style="border-bottom: 2px solid blue">ToolBox</h3>
+	  <h4>Templates</h4>
+	  <div>Input</div><div>Logic</div><div>Convert</div><div>Tool</div><div>Tool</div><div>Tool</div>
+	  <h4>Tool</h4>
+	  <div>Input</div><div>Logic</div><div>Convert</div><div>Tool</div><div>Tool</div><div>Tool</div>
+  </div>
   <div style="display:inline-block; vertical-align:top; width: 70%">
     <div id="drawingArea" style="border:1px solid grey; height: 100%; position: relative;">
 	    <div class="item">
@@ -220,8 +224,8 @@ function addNewButton(){
   </div>
 </div>
 
-<div><div><a onclick="document.getElementById('conditionLogicInput').style['height']=document.getElementById('conditionLogicInput').style['height']=='500px'?'0px':'500px'; document.getElementById('upperarea').style['height']=document.getElementById('conditionLogicInput').style['height']=='500px'?'0px':'500px';return false">JSON</a></div>
-<textarea id="conditionLogicInput" class="condition-textarea" style="height: 0px">{
+<div id="jsonarea"><div id="jsontab"><img src="./image/jsonareaedge.png" width="43" height="27"><a onclick="if(document.getElementById('jsonarea').classList.contains('active')){document.getElementById('jsonarea').classList.remove('active');}else {document.getElementById('jsonarea').classList.add('active')};if(document.getElementById('jsonarea').classList.contains('active')){document.getElementById('upperarea').classList.add('hide')}else {document.getElementById('upperarea').classList.remove('hide')};return false">JSON</a></div>
+<div id="jsonareawrapper"><textarea id="conditionLogicInput" class="condition-textarea">{
   "Operator": "OR",
   "Variables": null,
   "SubConditions": [
@@ -256,11 +260,12 @@ function addNewButton(){
       ]
     }
   ]
-}</textarea>
+}</textarea></div>
 </div>
 </div>
 
-<div id="logictotaldescription">Description Like when comment received blah blah blah</div>
+<div id="logictotaldescription"></div>
+<div id="sendingparameterarea">SendingParameter:none</div>
 <hr>
 <div class="editor-actions">
 <button class="btn btn-secondary" onclick="goBack()">Cancel</button><button class="btn btn-primary" id="saveBtn" onclick="saveConditionLogic()">Save Condition Logic</button></div></div><div class="editor-sidebar"><div class="sidebar-card"><h3>Condition Info</h3><dl><dt>Condition ID</dt><dd><code>cond_1781324936169105600</code></dd><dt>Name</dt><dd>Condition 2 Testestes</dd><dt>Event Type</dt><dd><code>comment</code></dd><dt>Status</dt><dd><span class="badge badge-success">Enabled</span></dd></dl></div><div class="sidebar-card"><h3>Quick Reference</h3><ul><li>AND, OR, NOT</li><li>EQUALS, GREATER_THAN, LESS_THAN</li><li>INCLUDES, REGEX_MATCH</li><li>ADD, SUBTRACT, MULTIPLY, DIVIDE</li><li>PARAM</li></ul></div></div></div><div id="validateResult" class="validate-result" style="display:none"></div></div>
@@ -291,17 +296,63 @@ function addNewButton(){
 
 <div id="monToast" class="mon-toast"></div>
 <script>
-var translations = {
+var translationse = {
   "staticvalue": "\"{0}\"",
   "and-joint": " and ",
   "or-joint": " or ",
   "equals-joint": " equals to ",
   "equals-sentense": "{0}",
-//  "equals-joint": " と ",
-//  "equals-sentense": "{0}が同じ",
   "valueof-joint": ",",
   "valueof-sentense": "value of {0}",
   "event_message" : "Chat message text",
+  "event_amount" : "Donation/superchat amount (numeric)",
+  "event_amount_currency" : "Currency code (e.g., \"USD\")",
+  "event_amount_display" : "Formatted amount display",
+  "event_sender_name" : "Sender display name",
+  "event_sender_id" : "Sender user ID",
+  "event_sender_avatar" : "Sender avatar URL",
+  "event_is_member" : "Is channel member (boolean)",
+  "event_is_mod" : "Is moderator (boolean)",
+  "event_badges" : "Array of badge strings",
+  "event_type" : "Event type (e.g., \"comment\", \"superchat\", \"gift\")",
+  "event_platform" : "Platform name (e.g., \"twitch\", \"youtube\")",
+  "event_id" : "Event ID",
+  "event_watch_id" : "Associated watch ID",
+  "event_user_id" : "User ID (owner of the watch)",
+  "event_stream_id" : "Stream ID",
+  "event_received_at" : "Timestamp when received",
+  "event_created_at" : "Timestamp when event occurred"
+};
+var translations = {
+  "AND": "全ての条件を満たす",
+  "OR": "いずれかの条件を満たす",
+  "NOT": "満たさない",
+  "EQUALS": "一致",
+  "GREATER_THAN": "大きい",
+  "LESS_THAN": "小さい",
+  "INCLUDES": "含む",
+  "REGEX": "正規表現による一致",
+  "ADD": "足し算",
+  "SUBTRACT": "引き算",
+  "MULTIPLY": "掛け算",
+  "DIVIDE": "割り算",
+  "MODULO": "割り算の余り",
+  "PARAM": "配信からのデータ",
+  
+  "staticvalue": "「{0}」",
+  "and-joint": " かつ ",
+  "and-notset": "条件が未設定です",
+  "or-joint": " もしくは ",
+  "or-notset": "条件が未設定です",
+  "not-sentense": "{0}ではない",
+  "not-notset": "条件が未設定です",
+  "equals-joint": " と ",
+  "equals-sentense": "{0}が一致",
+  "equals-novalue": "条件が未設定です",
+  "equals-missingvalue": "未設定",
+  "valueof-joint": "、",
+  "valueof-sentense": "{0}の値",
+  "event_message" : "メッセージ",
   "event_amount" : "Donation/superchat amount (numeric)",
   "event_amount_currency" : "Currency code (e.g., \"USD\")",
   "event_amount_display" : "Formatted amount display",
@@ -430,7 +481,7 @@ var translations = {
               <select id="numEnvSelect"><option value="event_message">comment</option><option value="event_amount">amount</option></select>
             </div>
             <div id="num_static" class="selector" onclick="document.getElementById('numenterradio').checked=true;document.getElementById('num_env').classList.remove('available');document.getElementById('num_static').classList.add('available');numDialogValidator()">
-              <input id="numenterradio" type="radio" name="inputnumradio">
+              <input id="numenterradio" type="radio" name="numradio">
               <input id="numEnter" type="text" >
             </div>
           </div>
@@ -451,13 +502,13 @@ var translations = {
         <div id="extractorBody" class="modal-body">
           <div id="ext_eq" class="selector" onclick="document.getElementById('extractorequalradio').checked=true;document.getElementById('ext_eq').classList.add('available');document.getElementById('ext_range').classList.remove('available');document.getElementById('ext_reg').classList.remove('available');extractorDialogValidator()">
             <input id="extractorequalradio" type="radio" name="extractorradio">
-            EQUALS
+            EQUALS(Exact Match)
           </div>
           <div id="ext_range" class="selector" onclick="document.getElementById('extractosomeradio').checked=true;document.getElementById('ext_eq').classList.remove('available');document.getElementById('ext_range').classList.add('available');document.getElementById('ext_reg').classList.remove('available');extractorDialogValidator()">
             <input id="extractosomeradio" type="radio" name="extractorradio">
             Includes
-            <div><div>Range?</div>
-            <input id="extractrange-from" type="text" class="number" type="tel" inputmode="numeric">~<input id="extractrange-to" type="text" class="number" type="tel" inputmode="numeric">
+            <div class="textrangeinput"><div>Specific Range?</div>
+				<input id="extractrange-from" type="text" class="number" type="tel" inputmode="numeric">~<input id="extractrange-to" type="text" class="number" type="tel" inputmode="numeric">
             </div>
           </div>
           <div id="ext_reg" class="selector" onclick="document.getElementById('extractoregexradio').checked=true;document.getElementById('ext_eq').classList.remove('available');document.getElementById('ext_range').classList.remove('available');document.getElementById('ext_reg').classList.add('available');extractorDialogValidator()">
@@ -469,6 +520,22 @@ var translations = {
         <div class="modal-footer">
             <button type="button" class="btn btn-secondary" onclick="closeModal('extractorModal')">Cancel</button>
             <button id="extractorModalButton" type="button" class="btn btn-primary" onclick="">Okay</button>
+        </div>
+    </div>
+</div>
+
+<div id="singleValueModal" class="modal">
+    <div class="modal-content modal-small">
+        <div class="modal-header">
+            <span class="close" onclick="closeModal('extractorModal')">×</span>
+            <p>Value.</p>
+        </div>
+        <div id="valueBody" class="modal-body">
+			<input id="singleValueEditText" type="text" value=""/>
+        </div>
+        <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" onclick="closeModal('singleValueModal')">Cancel</button>
+            <button id="singleValueModalButton" type="button" class="btn btn-primary" onclick="">Okay</button>
         </div>
     </div>
 </div>
@@ -622,8 +689,8 @@ var translations = {
     </div>
 </div>
 
-<script src="/js/channels-shared.js"></script>
-<script src="/js/channels-sidebar.js"></script>
+<script src="./js/channels-shared.js"></script>
+<script src="./js/channels-sidebar.js"></script>
 
 
 </body></html>

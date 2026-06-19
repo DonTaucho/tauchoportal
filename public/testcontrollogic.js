@@ -5,13 +5,33 @@ const textoperators = ["INCLUDES", "REGEX_MATCH"];
 const groupoperators = ["COUNT", "SUM"];
 const calcoperators = ["ADD", "SUBTRACT", "MULTIPLY", "DIVIDE", "MODULO"];
 const convoperators = ["PARSEINT", "EXCHANGE"];
-const namingmap = {"AND":"and", "OR":"or", "EQUALS":"equals", "PARAM":"param"};
+const namingmap = {"AND":"and", "OR":"or", "NOT":"not", "EQUALS":"equals", "GREATER_THAN":"geater_than", "LESS_THAN":"less_than", "INCLUDES":"includes", "REGEX_MATCH":"regex_match", "COUNT":"count", "SUM":"sum", "ADD":"add", "SUBTRACT":"subtract", "MULTIPLY":"multiply", "DIVIDE":"divide", "MODULO":"modulo", "PARSEINT":"parseint", "EXCHANGE":"exchange", "PARAM":"param"};
 const reverselookuptype = {"AND":"boolean", "OR":"boolean", "NOT":"boolean", "EQUALS":"comp", "GREATER_THAN":"comp", "LESS_THAN":"comp", "INCLUDES":"text", "REGEX_MATCH":"text", "COUNT":"group", "SUM":"group", "ADD":"calc","SUBTRACT":"calc","MULTIPLY":"calc","DIVIDE":"calc","MODULO":"calc", "PARSEINT":"conv","EXCHANGE":"conv", "PARAM":"extract"};
 
 function jsonLoader(jsonnode, area, path){
     path = path??"0";
     var operator = jsonnode.Operator;
     area.replaceChildren();
+    var legendtag = document.createElement("legend");
+	legendtag.innerText = translations[jsonnode.Operator];
+	area.appendChild(legendtag);
+	var editarea = document.createElement("div");
+	editarea.classList.add("icons");
+    var edittag = document.createElement("a");
+	edittag.classList.add("edit");
+	edittag.innerText = "✏️";
+	edittag.setAttribute("path", path);
+	edittag.setAttribute("operator", jsonnode.Operator);
+	edittag.onclick=editItem;
+	editarea.appendChild(edittag);
+    var removetag = document.createElement("a");
+	removetag.classList.add("remove");
+	removetag.innerText = "🗑️";
+	removetag.setAttribute("path", path);
+	removetag.setAttribute("operator", jsonnode.Operator);
+	removetag.onclick=deleteItem;
+	editarea.appendChild(removetag);
+	area.appendChild(editarea);
     if (jsonnode.SubConditions || jsonnode.Variables) {
         area.classList.add(namingmap[jsonnode.Operator]);
 
@@ -24,23 +44,31 @@ function jsonLoader(jsonnode, area, path){
             }
             area.appendChild(summarized);
         }
-        for (var iv in jsonnode.Variables) {
-            var variableitem = document.createElement("div");
-            variableitem.classList.add("variable");
-            variableitem.innerText = jsonnode.Variables[iv];
-            area.appendChild(variableitem);
-        }
+		var detailarea = document.createElement("div");
+		detailarea.classList.add("detailarea");
         if (jsonnode.SubConditions && jsonnode.SubConditions.length) {
             var subconarea = document.createElement("div");
             subconarea.classList.add("subcondition");
             for (var is in jsonnode.SubConditions) {
-                var childarea = document.createElement("div");
+                var childarea = document.createElement("fieldset");
                 childarea.classList.add("item");
                 jsonLoader(jsonnode.SubConditions[is], childarea, path+"/"+is);
                 subconarea.append(childarea);
             }
-            area.appendChild(subconarea);
+            detailarea.appendChild(subconarea);
         }
+        for (var iv in jsonnode.Variables) {
+            var variableitem = document.createElement("div");
+            variableitem.classList.add("variable");
+            variableitem.innerText = jsonnode.Variables[iv];
+			if (jsonnode.Operator!="PARAM") {
+				variableitem.setAttribute("path", path);
+				variableitem.setAttribute("index", iv);
+				variableitem.onclick=editVariable;
+			}
+            detailarea.appendChild(variableitem);
+        }
+		area.appendChild(detailarea);
 
         if (booleanoperators.includes(operator)) {
             // NOT only allows 1 child. Even if systematically handles multiple (will be not-or), limits 1 for suppress complication
@@ -59,20 +87,20 @@ function jsonLoader(jsonnode, area, path){
         )) {
             var addcompbutton = document.createElement("div");
             addcompbutton.classList.add("addcompbutton");
-            addcompbutton.innerText = "cooommp";
+            addcompbutton.innerText = "+";
             addcompbutton.setAttribute("path", path);
             addcompbutton.setAttribute("operator", operator);
             addcompbutton.onclick = askTextCompare;
             area.append(addcompbutton);
-        }  else if (calcoperators.includes(operator)) {
+        } else if (calcoperators.includes(operator)) {
             var asknumbutton = document.createElement("div");
             asknumbutton.classList.add("asknumbutton");
-            asknumbutton.innerText = "numbenubeme";
+            asknumbutton.innerText = "+";
             asknumbutton.setAttribute("path", path);
             asknumbutton.setAttribute("operator", operator);
             asknumbutton.onclick = askNumber;
             area.append(asknumbutton);
-        }else if ((extractionoperators.includes(operator) ||
+        } else if ((extractionoperators.includes(operator) ||
             textoperators.includes(operator) ||
             convoperators.includes(operator))
             &&!jsonnode.Variables
@@ -96,16 +124,35 @@ function summarize(node){
         if (node.Operator == "AND") {
             var items = [];
             for (i in node.SubConditions) {
-                items.push(summarize(node.SubConditions[i]));
+                items.push("<span class='or'>" + summarize(node.SubConditions[i]) + "</span>");
             }
-            return items.join(translations["and-joint"]);
+			if (items.length) {
+				return items.join(translations["and-joint"]);
+			}else {
+				return translations["and-notset"];
+			}
         }
         if (node.Operator == "OR") {
             var items = [];
             for (i in node.SubConditions) {
-                items.push(summarize(node.SubConditions[i]));
+                items.push("<span class='or'>" + summarize(node.SubConditions[i]) + "</span>");
             }
-            return items.join(translations["and-joint"]);
+			if (items.length) {
+				return items.join(translations["or-joint"]);
+			}else {
+				return translations["or-notset"];
+			}
+        }
+        if (node.Operator == "NOT") {
+            var items = [];
+            for (i in node.SubConditions) {
+                items.push("<span class='or'>" + summarize(node.SubConditions[i]) + "</span>");
+            }
+			if (items.length) {
+				return translations["not-sentense"].replace("{0}", items.join(translations["or-joint"]));
+			}else {
+				return translations["not-notset"];
+			}
         }
         if (node.Operator == "EQUALS") {
             var items = [];
@@ -115,7 +162,14 @@ function summarize(node){
             for (i in node.Variables) {
                 items.push("<span class='static'>" + translations["staticvalue"].replace("{0}", node.Variables[i]) + "</span>");
             }
-            return translations["equals-sentense"].replace("{0}", items.join(translations["equals-joint"]));
+			if (!items.length) {
+				return "<span class='novalue'>" + translations["equals-novalue"] + "</span>";
+			} else if (items.length == 1) {
+				items.push("<span class='missingvalue'>" + translations["equals-missingvalue"] + "</span>");
+				return translations["equals-sentense"].replace("{0}", items.join(translations["equals-joint"]));
+			} else {
+				return translations["equals-sentense"].replace("{0}", items.join(translations["equals-joint"]));
+			}
         }
         if (node.Operator == "PARAM") {
             var items = [];
@@ -189,28 +243,25 @@ function addBool(){
     var jsonarea = document.getElementById("conditionLogicInput");
     var json = JSON.parse(jsonarea.value);
     var currentnode = json;
-    if (operation.contains("and") || operation.contains("or")) {
-        var elem = {};
-        if (document.getElementById("booltextradio").checked) {
-            elem = {"aa": {"aa":123}};
-        } else if (document.getElementById("boolnumericradio").checked) {
-            elem = {"aa": {"aa":123}};
-        } else if (document.getElementById("boolconditionradio").checked) {
-            elem["Operator"] = document.getElementById("boolcondition").value;
-            elem["Variables"] = [];
-            elem["SubConditions"] = [];
-        }
+	
+	var elem = {};
+	if (document.getElementById("booltextradio").checked) {
+		elem = {"aa": {"aa":123}};
+	} else if (document.getElementById("boolnumericradio").checked) {
+		elem = {"aa": {"aa":123}};
+	} else if (document.getElementById("boolconditionradio").checked) {
+		elem["Operator"] = document.getElementById("boolcondition").value;
+		elem["Variables"] = [];
+		elem["SubConditions"] = [];
+	}
 
-        for (var i in paths.slice(1)){
-            currentnode = currentnode.SubConditions[paths.slice(1)[i]]
-        }
-        currentnode.SubConditions.push(elem);
-    }
+	for (var i in paths.slice(1)){
+		currentnode = currentnode.SubConditions[paths.slice(1)[i]]
+	}
+	currentnode.SubConditions.push(elem);
     jsonarea.value = JSON.stringify(json, null, 2);
-    // to make really sure having not difference between what is shown and the actual data, load from object not the json just made
-    jsonLoader(JSON.parse(document.getElementById("conditionLogicInput").value), document.getElementById("drawingArea"));
     document.getElementById("boolModal").style["display"] = "none";
-    document.getElementById("logictotaldescription").innerText = summarize(json);
+    refreshSummary();
 }
 function askTextCompare(){
     document.getElementById("comparisonTextBody").className = "";
@@ -270,6 +321,63 @@ function askText(currentvalue, currenttype, includeenter, includeenv, callback){
         document.getElementById("textModal").style["display"] = "none";
     };
 }
+function extractorDialogValidator(){
+    
+}
 function numDialogValidator(){
     
+}
+function editItem(){
+	var operator = event.target.getAttribute("operator");
+	var path = event.target.getAttribute("path");
+
+//
+//
+//
+//
+
+
+    refreshSummary();
+}
+function deleteItem(){
+	var operator = event.target.getAttribute("operator");
+	var paths = event.target.getAttribute("path").split("/");
+    var jsonarea = document.getElementById("conditionLogicInput");
+    var json = JSON.parse(jsonarea.value);
+    var parentnode = json;
+    var currentnode = json;
+	
+	for (var i in paths.slice(1)){
+		parentnode = currentnode;
+		currentnode = currentnode.SubConditions[paths.slice(1)[i]];
+	}
+	parentnode.SubConditions.splice(parentnode.SubConditions.indexOf(currentnode), 1);
+    jsonarea.value = JSON.stringify(json, null, 2);
+	refreshSummary();
+}
+function editVariable(){
+	var operator = event.target.getAttribute("operator");
+	var ind = event.target.getAttribute("index");
+	var paths = event.target.getAttribute("path").split("/");
+	document.getElementById("singleValueEditText").value = event.target.innerText;
+	document.getElementById("singleValueModal").style["display"] = "block";
+    var jsonarea = document.getElementById("conditionLogicInput");
+    var json = JSON.parse(jsonarea.value);
+    var currentnode = json;
+	
+	for (var i in paths.slice(1)){
+		currentnode = currentnode.SubConditions[paths.slice(1)[i]];
+	}
+	singleValueModalButton.onclick =function(){
+		
+		currentnode.Variables[ind] = document.getElementById("singleValueEditText").value;
+		jsonarea.value = JSON.stringify(json, null, 2);
+		refreshSummary();
+		document.getElementById("singleValueModal").style["display"] = "none";
+	}
+}
+function refreshSummary(){
+    // to make really sure having not difference between what is shown and the actual data, load from object not the json just made
+    jsonLoader(JSON.parse(document.getElementById("conditionLogicInput").value), document.getElementById("drawingArea"));
+    document.getElementById("logictotaldescription").innerHTML = summarize(JSON.parse(document.getElementById("conditionLogicInput").value));
 }
