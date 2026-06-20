@@ -6,7 +6,7 @@ margin: 0px 0px 0.2em 0px;
 background-color: lightblue;
 }
 .item {
-display:inline-block;
+display:block;
 min-width: 4em;
 overflow: hidden;
 position: relative;
@@ -60,6 +60,47 @@ display:none;
 #drawingArea>.icons {
   display: none;
 }
+#drawingAreaContainer{
+	display:inline-block;
+	vertical-align:top;
+	width: 70%;
+	top: 0px;
+	left: 0px;
+}
+
+/* for Full Screen view*/
+#fullscreenbuttonarea {
+	width: 100%;
+    margin-top: -42px;
+    text-align: right;
+}
+#fullscreenbutton {
+	width: 42px;
+	height: 42px;
+	border: 1px solid lightgrey;
+	right: 0px;
+	display:inline-block;
+	border-radius: 3px 0px 0px 0px;
+	cursor: pointer;
+}
+
+body.fullscreen .channels-panel{
+	position: unset;
+}
+body.fullscreen .channels-panel .channels-view{
+	position: unset;
+}
+body.fullscreen #drawingAreaContainer{
+	position: absolute;
+	padding: 1rem;
+    width: 100%;
+    height: 100%;
+}
+body.fullscreen #drawingArea{
+	background-color: white;
+	padding: 1rem;
+}
+
 legend{
     font-size: 0.7em;
     font-weight: bold;
@@ -98,12 +139,14 @@ legend{
 }
 
 .item .variable{
-	background-color: rgb(219, 128, 74, 0.15);
+    background-color: rgb(74 8 200 / 12%);
     display: inline-block;
-    border: 1px solid rgb(225, 118, 54, 0.15);
-    padding: 0.2em;
+    border: 1px solid rgb(74 8 200 / 52%);
+    padding: 1rem 1.5rem;
+    margin: 0.5rem 0.5rem 0rem 0rem;
     line-height: 1em;
-	cursor: pointer;
+    cursor: pointer;
+    color: #4a08c8;
 }
 .item .variable::after{
     content: "✏️";
@@ -114,9 +157,12 @@ legend{
 	margin-left: 0px;
 }
 .item.param .variable{
+	color: #bd3f19;
 	background-color: unset;
     border: unset;
 	cursor: unset;
+    padding: unset;
+    margin: unset;
 }
 .item .icons{
     position: absolute;
@@ -367,17 +413,72 @@ div#logictotaldescription span.and .and::after {
     background-color: #eca07d;
 }
 
+.extractorincludes {
+	display: inline-block;
+	margin-right: 2em;
+	vertical-align: top;
+}
 .textrangeinput {
+	display: inline-block;
+}
+.textrangeinput .rangearea{
 	overflow-y: hidden;
-	max-height: 0.4em;
+	height: 0;
+	color: lightgrey;
+}
+.textrangeinput h5{
 	color: lightgrey;
 }
 
-.selector.available:hover .textrangeinput {
-	overflow-y: unset;
-	height: unset;
+.textselection .envselection {
+	display: none;
+}
+.textselection.includeenv .envselection {
+	display: inline-block;
+}
+.textselection .entervalue {
+	display: none;
+}
+.textselection.includeenter .entervalue {
+	display: inline-block;
+}
+.askenvbutton {
+  color: transparent;
+  border: 2px dotted transparent;
+  min-height: 1em;
+  padding: 0.2em 1em;
+  font-weight: bold;
+  text-align: center;
+  margin: 1em;
+  cursor: pointer;
+}
+.askenvbutton:hover {
+    color: #b13e19;
+    border-color: #b13e19;
+    background-color: #c97c6370;
+}
+.asktextbutton {
+  color: transparent;
+  border: 2px dotted transparent;
+  min-height: 1em;
+  padding: 0.2em 1em;
+  font-weight: bold;
+  text-align: center;
+  margin: 1em;
+  cursor: pointer;
+}
+.asktextbutton:hover {
+	color: #4a08c3;
+    border-color: #4a08c3;
+    background-color: #4a08c340;
+}
+
+.selector.available .textrangeinput:hover .rangearea{
+	height: 3em;
 	color: unset;
-	max-height: 4em;
+}
+.selector.available .textrangeinput:hover h5{
+	color: unset;
 }
 
 /* Summary */
