@@ -1,4 +1,4 @@
-package apiclient
+package controller
 
 import (
 	"encoding/json"
@@ -31,8 +31,8 @@ type OAuthConnection struct {
 
 // NicoNicoStatus represents the NicoNico connection status on a user account
 type NicoNicoStatus struct {
-	Connected   bool   `json:"connected"`
-	NicoUserID  string `json:"nico_user_id,omitempty"`
+	Connected    bool   `json:"connected"`
+	NicoUserID   string `json:"nico_user_id,omitempty"`
 	NicoUsername string `json:"nico_username,omitempty"`
 	NicoPicture  string `json:"nico_picture,omitempty"`
 	ConnectedAt  string `json:"connected_at,omitempty"`

@@ -36,13 +36,13 @@
     }
 
     function renderAccordionList() {
-        const list = document.getElementById('accordionList');
-        if (!list) return;
-        list.innerHTML = PLATFORMS.map((platform) => {
-            const meta = PLATFORM_META[platform.id] || { icon: '📺', label: platform.label };
-            const connected = platform.hasOAuth && state.connectedSet.has(platform.id);
-            return `<div class="acc-item" id="acc-${platform.id}"><div class="acc-header" onclick="toggleAcc('${platform.id}')"><span class="acc-plat-icon ${platform.id}">${meta.icon}</span><span class="acc-plat-name">${esc(meta.label)}</span>${connected ? '<span class="acc-connected-dot" title="Connected"></span>' : ''}<span class="acc-chevron" id="acc-chev-${platform.id}">›</span></div><div class="acc-body" id="acc-body-${platform.id}"><div class="acc-body-inner" id="acc-inner-${platform.id}"><div class="acc-init-loading">Loading…</div></div></div></div>`;
-        }).join('');
+        //const list = document.getElementById('accordionList');
+        //if (!list) return;
+        //list.innerHTML = PLATFORMS.map((platform) => {
+        //    const meta = PLATFORM_META[platform.id] || { icon: '📺', label: platform.label };
+        //    const connected = platform.hasOAuth && state.connectedSet.has(platform.id);
+        //    return `<div class="acc-item" id="acc-${platform.id}"><div class="acc-header" onclick="toggleAcc('${platform.id}')"><span class="acc-plat-icon ${platform.id}">${meta.icon}</span><span class="acc-plat-name">${esc(meta.label)}</span>${connected ? '<span class="acc-connected-dot" title="Connected"></span>' : ''}<span class="acc-chevron" id="acc-chev-${platform.id}">›</span></div><div class="acc-body" id="acc-body-${platform.id}"><div class="acc-body-inner" id="acc-inner-${platform.id}"><div class="acc-init-loading">Loading…</div></div></div></div>`;
+        //}).join('');
     }
 
     function toggleAcc(platformId) {
