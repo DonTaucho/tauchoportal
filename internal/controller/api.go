@@ -6,11 +6,13 @@ import (
 	"fmt"
 	"log"
 	"net/http"
+	"net/http/cookiejar"
 	"strings"
 )
 
 var baseUrl string
 var loginUserId string
+var httpClient *http.Client
 
 type API struct {
 	Health            Health
@@ -50,8 +52,7 @@ func apiRequest(response any, method string, path string, request ...Request) {
 		}
 
 		req.Header.Set("X-User-ID", loginUserId)
-		client := &http.Client{}
-		resp, err := client.Do(req)
+		resp, err := httpClient.Do(req)
 		if err != nil {
 			fmt.Println("Request failed:", err)
 			return
@@ -73,8 +74,7 @@ func apiRequest(response any, method string, path string, request ...Request) {
 
 		req.Header.Set("X-User-ID", loginUserId)
 		req.Header.Set("Content-Type", "application/json")
-		client := &http.Client{}
-		resp, err := client.Do(req)
+		resp, err := httpClient.Do(req)
 		if err != nil {
 			fmt.Println("Request failed:", err)
 			return
@@ -96,8 +96,7 @@ func apiRequest(response any, method string, path string, request ...Request) {
 
 		req.Header.Set("X-User-ID", loginUserId)
 		req.Header.Set("Content-Type", "application/json")
-		client := &http.Client{}
-		resp, err := client.Do(req)
+		resp, err := httpClient.Do(req)
 		if err != nil {
 			fmt.Println("Request failed:", err)
 			return
@@ -119,8 +118,7 @@ func apiRequest(response any, method string, path string, request ...Request) {
 
 		req.Header.Set("X-User-ID", loginUserId)
 		req.Header.Set("Content-Type", "application/json")
-		client := &http.Client{}
-		resp, err := client.Do(req)
+		resp, err := httpClient.Do(req)
 		if err != nil {
 			fmt.Println("Request failed:", err)
 			return
@@ -134,9 +132,8 @@ func apiRequest(response any, method string, path string, request ...Request) {
 			log.Fatal("Error:", err)
 			return
 		}
-		client := &http.Client{}
 		req.Header.Set("X-User-ID", loginUserId)
-		resp, err := client.Do(req)
+		resp, err := httpClient.Do(req)
 		if err != nil {
 			fmt.Println("Request failed:", err)
 			return
@@ -151,5 +148,17 @@ func Init(apiURL string, userId string) (API, error) {
 	var api API
 	baseUrl = apiURL
 	loginUserId = userId
+	
+	// Create HTTP client with cookie jar for session persistence
+	if httpClient == nil {
+		jar, err := cookiejar.New(nil)
+		if err != nil {
+			log.Fatal("Failed to create cookie jar:", err)
+		}
+		httpClient = &http.Client{
+			Jar: jar,
+		}
+	}
+	
 	return api, nil
 }
