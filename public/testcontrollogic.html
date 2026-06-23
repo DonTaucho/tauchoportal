@@ -378,6 +378,12 @@ var translations = {
   "divide-joint": " 割る ",
   "modulo-sentense": "{0}を{1}で割った余り",
   "exchange-sentense": "{0}を{1}換算した値",
+  "textextract-equals": "完全一致する",
+  "textextract_one": "含まれる",
+  "textextract_rangefrom": "{0}個以上含まれる",
+  "textextract_rangeto": "{0}個以下含まれる",
+  "textextract_rangefromto": "{0}～{1}個だけ含まれる",
+  "textextract-regex": "正規表現/{0}/による抜き出し",
   "valueof-joint": "、",
   "valueof-sentense": "{0}の値",
   "event_message" : "メッセージ",
@@ -424,28 +430,15 @@ var translations = {
                 <input id="textcomparebasevalue" type="hidden" />
                 <input id="textcomparebasetype" type="hidden" />
               </span>
-              <span class="extractorselector" onclick="askExtractor(true, true, function(disp,val,type){
-                document.getElementById('textextractorselectdisplay').innerText=disp;
-                document.getElementById('textextractorselectvalue').value=val;
-                document.getElementById('textextractorselecttype').value=type;
+              <span class="textconditionselector" onclick="askTextCondition(document.getElementById('textconditionselecttype').value, document.getElementById('textconditionselectvalue').value, function(disp,val,type){
+                document.getElementById('textconditionselectdisplay').innerText=disp;
+                document.getElementById('textconditionselectvalue').value=val;
+                document.getElementById('textconditionselecttype').value=type;
                 boolDialogValidator();
                 })">
-                <span id="textextractorselectdisplay" class="value">Includes</span>
-                <input id="textextractorselectvalue" type="hidden" value="1-" />
-                <input id="textextractorselecttype" type="hidden" value="SOME" />
-              </span>
-              <span class="textselector" onclick="askText(document.getElementById('textcomparetargetvalue').value, document.getElementById('textcomparetargettype').value, true, true, function(disp,val,type){
-                document.getElementById('textcomparetargetdisplay').innerText=disp;
-                document.getElementById('textcomparetargetvalue').value=val;
-                document.getElementById('textcomparetargettype').value=type;
-                document.getElementById('textcomparetargetplaceholder').style['display']=val?'none':'inline-block';
-                document.getElementById('textcomparetargetdisplay').style['display']=val?'inline-block':'none';
-                boolDialogValidator();
-                })">
-                <span id="textcomparetargetplaceholder" class="placeholder">Enter Value</span>
-                <span id="textcomparetargetdisplay" class="value" style="display:none"></span>
-                <input id="textcomparetargetvalue" type="hidden" />
-                <input id="textcomparetargettype" type="hidden" />
+                <span id="textconditionselectdisplay" class="value"> - </span>
+                <input id="textconditionselectvalue" type="hidden" value="" />
+                <input id="textconditionselecttype" type="hidden" value="" />
               </span>
             </div>
             <div id="bool_numeric" class="selector" onclick="document.getElementById('boolnumericradio').checked=true;document.getElementById('bool_text').classList.remove('available');document.getElementById('bool_numeric').classList.add('available');document.getElementById('bool_addmore').classList.remove('available');boolDialogValidator()">
@@ -493,7 +486,7 @@ var translations = {
 			<input id="comp_basevalue" type="hidden" />
 			<input id="comp_basetype" type="hidden" />
 		  </span>
-		  <span class="extractorselector" onclick="askExtractor(true, true, function(disp,val,type){
+		  <span class="textconditionselector" onclick="askTextCondition(true, true, function(disp,val,type){
 			document.getElementById('comp_selectdisplay').innerText=disp;
 			document.getElementById('comp_selectvalue').value=val;
 			document.getElementById('comp_selecttype').value=type;
@@ -525,20 +518,44 @@ var translations = {
 </div>
 
 <div id="textModal" class="modal">
-    <div class="modal-content modal-small">
+    <div class="modal-content modal-middle">
         <div class="modal-header">
             <span class="close" onclick="closeModal('textModal')">×</span>
             <p>Value.</p>
         </div>
         <div id="textBody" class="modal-body textselection">
-          <div class="textselection">
-            <div id="textEnvArea" class="selector envselection" onclick="textDialogValidator();document.getElementById('textenvradio').checked=true;getElementById('textEnvArea').classList.add('available');document.getElementById('textEnterArea').classList.remove('available');">
+          <div>
+            <div id="textEnvArea" class="selector envselection" onclick="textDialogValidator();document.getElementById('textenvradio').checked=true;getElementById('textEnvArea').classList.add('available');document.getElementById('textEnterArea').classList.remove('available');document.getElementById('textExtArea').classList.add('available');document.getElementById('textExtSelect').disabled='';">
               <h4><input id="textenvradio" type="radio" name="inputtextradio"> Select Input Parameter</h4>
               <select id="textEnvSelect" onchange="textDialogValidator()"><option value="event_message">comment</option><option value="event_amount">amount</option></select>
             </div>
-            <div id="textEnterArea" class="selector entervalue" onclick="textDialogValidator();document.getElementById('textenterradio').checked=true;getElementById('textEnterArea').classList.add('available');document.getElementById('textEnvArea').classList.remove('available');">
+            <div id="textEnterArea" class="selector entervalue" onclick="textDialogValidator();document.getElementById('textenterradio').checked=true;getElementById('textEnterArea').classList.add('available');document.getElementById('textEnvArea').classList.remove('available');document.getElementById('textExtArea').classList.add('available');document.getElementById('textExtSelect').disabled='';">
               <h4><input id="textenterradio" type="radio" name="inputtextradio"> Static Value</h4>
               <input id="textEnter" onchange="textDialogValidator()" type="text" >
+            </div>
+          </div>
+          <div class="extractorselection">
+            <div id="textExtArea" class="selector textextractor" onclick="textDialogValidator();">
+              <h4>Extract</h4>
+              <select id="textExtSelect" onchange="textDialogValidator();
+			  document.getElementById('textExtRegex').style['display']=this.value=='regex'?'inline-block':'none';
+			  document.getElementById('textSubFrom').style['display']=this.value=='substring'?'inline-block':'none';
+			  document.getElementById('textSubRange').style['display']=this.value=='substring'?'inline-block':'none';
+			  document.getElementById('textFirstRegex').style['display']=this.value=='first'?'inline-block':'none';
+			  document.getElementById('textLastRegex').style['display']=this.value=='last'?'inline-block':'none';
+			  ">
+				<option value="none">Wholeword</option>
+				<option value="regex">Regex</option>
+			    <option value="substring">Substring</option>
+			    <option value="first">First</option>
+			    <option value="last">Last</option>
+			  </select>
+			  <div>
+				  <input id="textExtRegex" type="text" style="display:none" onchange="textDialogValidator()"/>
+				  <input id="textSubFrom" type="number" inputmode="numeric" min="1" max="999" pattern="[0-9]*" class="numerictext" style="display:none" onchange="textDialogValidator()" /><input id="textSubRange" type="number"   class="numerictext"  inputmode="numeric" min="1" max="999" pattern="[0-9]*" style="display:none" onchange="textDialogValidator()" />
+				  <input id="textFirstRegex" type="number" inputmode="numeric" min="1" max="999" pattern="[0-9]*" class="numerictext" style="display:none" onchange="textDialogValidator()" />
+				  <input id="textLastRegex" type="number" inputmode="numeric" min="1" max="999" pattern="[0-9]*" class="numerictext" style="display:none" onchange="textDialogValidator()" />
+			  </div>
             </div>
           </div>
         </div>
@@ -550,22 +567,37 @@ var translations = {
 </div>
 
 <div id="numModal" class="modal">
-    <div class="modal-content modal-small">
+    <div class="modal-content modal-big">
         <div class="modal-header">
             <span class="close" onclick="closeModal('numModal')">×</span>
             <p>Numeric.</p>
         </div>
         <div id="numBody" class="modal-body numselection">
-          <div class="numselection">
+		    <div>
+		      <div>
+			  valvalval
+		      </div>
+		      <div>
+		        <div class="calcoperator">+</div>
+		        <div class="calcoperator">-</div>
+		        <div class="calcoperator">*</div>
+		        <div class="calcoperator">/</div>
+		        <div class="calcoperator">%</div>
+		      </div>
+		    </div>
+		  <div>
+		  aaa bbb ccc
+		  </div>
+          <!-- div class="numselection">
             <div id="num_env" class="selector" onclick="document.getElementById('numenvselectradio').checked=true;document.getElementById('num_env').classList.add('available');document.getElementById('num_static').classList.remove('available');numDialogValidator()">
               <input id="numenvselectradio" type="radio" name="numradio">
               <select id="numEnvSelect"><option value="event_message">comment</option><option value="event_amount">amount</option></select>
             </div>
             <div id="num_static" class="selector" onclick="document.getElementById('numenterradio').checked=true;document.getElementById('num_env').classList.remove('available');document.getElementById('num_static').classList.add('available');numDialogValidator()">
               <input id="numenterradio" type="radio" name="numradio">
-              <input id="numEnter" type="text" >
+              <input id="numEnter" type="number" inputmode="numeric" class="numerictext" onchange="numDialogValidator()">
             </div>
-          </div>
+          </div -->
         </div>
         <div class="modal-footer">
             <button type="button" class="btn btn-secondary" onclick="closeModal('numModal')">Cancel</button>
@@ -574,38 +606,40 @@ var translations = {
     </div>
 </div>
 
-<div id="extractorModal" class="modal">
+<div id="textConditionModal" class="modal">
     <div class="modal-content modal-small">
         <div class="modal-header">
-            <span class="close" onclick="closeModal('extractorModal')">×</span>
-            <p>Extractor.</p>
+            <span class="close" onclick="closeModal('textConditionModal')">×</span>
+            <p>Condition of text.</p>
         </div>
-        <div id="extractorBody" class="modal-body">
-          <div id="ext_eq" class="selector" onclick="extractorDialogValidator();document.getElementById('extractorequalradio').checked=true;document.getElementById('ext_eq').classList.add('available');document.getElementById('ext_range').classList.remove('available');document.getElementById('ext_reg').classList.remove('available');extractorDialogValidator()">
-            <input id="extractorequalradio" type="radio" name="extractorradio">
+        <div id="textConditionBody" class="modal-body">
+          <div id="ext_eq" class="selector" onclick="textConditionDialogValidator();document.getElementById('textConditionEqualradio').checked=true;document.getElementById('ext_eq').classList.add('available');document.getElementById('ext_range').classList.remove('available');document.getElementById('ext_reg').classList.remove('available');textConditionDialogValidator()">
+            <input id="textConditionEqualradio" type="radio" name="textconditionradio">
             EQUALS(Exact Match)
+            <input id="textconditionequals" type="text" onchange="textConditionDialogValidator()" />
           </div>
-          <div id="ext_range" class="selector" onclick="extractorDialogValidator();document.getElementById('extractosomeradio').checked=true;document.getElementById('ext_eq').classList.remove('available');document.getElementById('ext_range').classList.add('available');document.getElementById('ext_reg').classList.remove('available');extractorDialogValidator()">
-            <div class="extractorincludes">
-			<input id="extractosomeradio" type="radio" name="extractorradio">
+          <div id="ext_range" class="selector" onclick="textConditionDialogValidator();document.getElementById('textconditionrangeradio').checked=true;document.getElementById('ext_eq').classList.remove('available');document.getElementById('ext_range').classList.add('available');document.getElementById('ext_reg').classList.remove('available');textConditionDialogValidator()">
+            <div class="textconditionincludes">
+			<input id="textconditionrangeradio" type="radio" name="textconditionradio">
             Includes
+            <input id="textconditionrangetext" type="text" onchange="textConditionDialogValidator()" />
 			</div>
             <div class="textrangeinput">
 				<h5>Specific Range?</h5>
 				<div class="rangearea">
-				<input id="extractrange-from" type="text" class="number" type="tel" inputmode="numeric">~<input id="extractrange-to" type="text" class="number" type="tel" inputmode="numeric">
+				<input id="textconditionrange-from" type="number" class="number" type="tel" inputmode="numeric" min="1" max="999">~<input id="textconditionrange-to" type="number" class="number" type="tel" inputmode="numeric" min="1" max="999">
 				</div>
             </div>
           </div>
-          <div id="ext_reg" class="selector" onclick="extractorDialogValidator();document.getElementById('extractoregexradio').checked=true;document.getElementById('ext_eq').classList.remove('available');document.getElementById('ext_range').classList.remove('available');document.getElementById('ext_reg').classList.add('available');extractorDialogValidator()">
-            <input id="extractoregexradio" type="radio" name="extractorradio">
+          <div id="ext_reg" class="selector" onclick="textConditionDialogValidator();document.getElementById('textconditionregexradio').checked=true;document.getElementById('ext_eq').classList.remove('available');document.getElementById('ext_range').classList.remove('available');document.getElementById('ext_reg').classList.add('available');textConditionDialogValidator()">
+            <input id="textconditionregexradio" type="radio" name="textconditionradio">
             REGEX
-            <input id="extractoregex" type="text" onchange="extractorDialogValidator()" />
+            <input id="textconditionregex" type="text" onchange="textConditionDialogValidator()" />
           </div>
         </div>
         <div class="modal-footer">
-            <button type="button" class="btn btn-secondary" onclick="closeModal('extractorModal')">Cancel</button>
-            <button id="extractorModalButton" type="button" class="btn btn-primary" onclick="">Okay</button>
+            <button type="button" class="btn btn-secondary" onclick="closeModal('textConditionModal')">Cancel</button>
+            <button id="textConditionModalButton" type="button" class="btn btn-primary" onclick="">Okay</button>
         </div>
     </div>
 </div>
@@ -613,7 +647,7 @@ var translations = {
 <div id="singleValueModal" class="modal">
     <div class="modal-content modal-small">
         <div class="modal-header">
-            <span class="close" onclick="closeModal('extractorModal')">×</span>
+            <span class="close" onclick="closeModal('textConditionModal')">×</span>
             <p>Value.</p>
         </div>
         <div id="valueBody" class="modal-body">

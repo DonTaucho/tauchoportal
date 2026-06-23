@@ -5,6 +5,13 @@ border: 1px solid grey;
 margin: 0px 0px 0.2em 0px;
 background-color: lightblue;
 }
+input[type="number"] {
+    width: 3rem;
+    border-radius: 4px;
+    padding-left: 0.4rem;
+    line-height: 3rem;
+    font-size: x-large;
+}
 .item {
 display:block;
 min-width: 4em;
@@ -106,33 +113,40 @@ legend{
     font-weight: bold;
     padding: 0em 0.5em;
 }
+fieldset{
+    border: none;
+}
 .item.equals{
 	padding: 1em;
-    border: 3px solid #45d350;
-    border-radius: 5px;
+    /* border: 3px solid #45d350; */
+    /* border-radius: 5px; */
     margin: 1em 1em 0.5em 1em;
     background-color: #f6fff9;
+	box-shadow: 2px 2px 4px 1px rgba(0, 0, 0, 0.3);
 }
 .item.and{
     padding: 1em;
-    border: 3px solid #db4545;
-    border-radius: 5px;
+    /* border: 3px solid #db4545; */
+    /* border-radius: 5px; */
     margin: 1em 1em 0.5em 1em;
     background-color: #ffe9e5;
+	box-shadow: 2px 2px 4px 1px rgba(0, 0, 0, 0.3);
 }
 .item.or{
     padding: 1em;
-    border: 3px solid #4557db;
-    border-radius: 5px;
+    /* border: 3px solid #4557db; */
+    /* border-radius: 5px; */
     margin: 1em 1em 0.5em 1em;
     background-color: #e5ecff;
+	box-shadow: 2px 2px 4px 1px rgba(0, 0, 0, 0.3);
 }
 .item.not{
     padding: 1em;
-    border: 3px solid #595959;
-    border-radius: 5px;
+    /* border: 3px solid #595959; */
+    /* border-radius: 5px; */
     margin: 1em 1em 0.5em 1em;
     background-color: #efefef;
+	box-shadow: 2px 2px 4px 1px rgba(0, 0, 0, 0.3);
 }
 .item.param{
     padding: 1em;
@@ -373,50 +387,53 @@ div#logictotaldescription span.and .and::after {
     border: 2px dotted #c7cedd;
 }
 .available .textselector .value {
-    border-color: #658ce3;
-    background-color: #c0e4f5;
+    border-color: #2f8525;
+    background-color: #c6efc1;
 }
 .available .textselector .value:hover {
-    border-color: #4c7add;
-    background-color: #81caec;
+    border-color: #26651e;
+    background-color: #a8d1a2;
 }
 .available .textselector .placeholder {
-    border: 2px dotted #bacbf0;
-    background-color: #e2f1f8;
+    border: 2px dotted #2f8525;
+    background-color: #c6efc1;
 }
 .available .textselector .placeholder:hover {
-    border-color: #acc2f3;
-    background-color: #bfe3f3;
+    border-color: #26651e;
+    background-color: #a8d1a2;
 }
 
-.extractorselector {
+.textconditionselector {
     border: 2px solid #c7cedd;
     padding: 0.4em 1em;
     display: inline-block;
-    width: 8em;
     text-align: center;
     border-radius: 4px;
     background-color: #dde7eb;
     cursor: pointer;
     font-weight: bold;
 }
-.extractorselector:hover {
+.textconditionselector:hover {
     border-color: #c7cedd;
     background-color: #dde7eb;
 }
-.available .extractorselector {
+.available .textconditionselector {
     border-color: #e38d65;
     background-color: #eebaa2;
 }
-.available .extractorselector:hover {
+.available .textconditionselector:hover {
     border-color: #d46f40;
     background-color: #eca07d;
 }
 
-.extractorincludes {
+.textconditionincludes {
 	display: inline-block;
 	margin-right: 2em;
 	vertical-align: top;
+}
+.selector input[type="text"].numerictext{
+	display: inline-block;
+	width: 3em;
 }
 .textrangeinput {
 	display: inline-block;
@@ -430,6 +447,9 @@ div#logictotaldescription span.and .and::after {
 	color: lightgrey;
 }
 
+.textselection {
+	display: flex;
+}
 .textselection .envselection {
 	display: none;
 }
@@ -441,6 +461,23 @@ div#logictotaldescription span.and .and::after {
 }
 .textselection.includeenter .entervalue {
 	display: inline-block;
+}
+.calcoperator {
+    display: inline-block;
+    background-color: #f39393;
+    border-radius: 6px;
+    border: 2px solid #db7f7f;
+    font-weight: bold;
+    font-size: xx-large;
+    color: white;
+    vertical-align: middle;
+    text-align: center;
+    width: 42px;
+    line-height: 42px;
+	cursor: pointer;
+}
+.extractorselection {
+	margin-left: 2rem;
 }
 .askenvbutton {
   color: transparent;
@@ -474,7 +511,7 @@ div#logictotaldescription span.and .and::after {
 }
 
 .selector.available .textrangeinput:hover .rangearea{
-	height: 3em;
+	height: 3.4em;
 	color: unset;
 }
 .selector.available .textrangeinput:hover h5{
@@ -572,6 +609,8 @@ div#logictotaldescription span.and .and::after {
     border-right: 1px solid #d3d3d3;
     padding-right: 1em;
 	border-radius: 0px 6px 0px 0px;
+	cursor: pointer;
+    text-decoration: none;
 }
 #jsonareawrapper {
 	border: 1px solid #d3d3d3;

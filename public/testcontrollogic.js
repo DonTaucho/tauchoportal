@@ -2,11 +2,12 @@ const extractionoperators = ["PARAM"];
 const booleanoperators = ["AND", "OR", "NOT"];
 const compoperators = ["EQUIVALENT", "GREATER_THAN", "LESS_THAN"];
 const textoperators = ["EQUALS", "INCLUDES", "REGEX_MATCH"];
+const textextractors = ["REGEX_EXTRACT", "SUBSTRING", "FIRST", "LAST"];
 const groupoperators = ["COUNT", "SUM"];
 const calcoperators = ["ADD", "SUBTRACT", "MULTIPLY", "DIVIDE", "MODULO"];
 const convoperators = ["PARSEINT", "EXCHANGE"];
-const namingmap = {"AND":"and", "OR":"or", "NOT":"not", "EQUALS":"equals", "GREATER_THAN":"geater_than", "LESS_THAN":"less_than", "INCLUDES":"includes", "EQUIVALENT":"equivalent", "REGEX_MATCH":"regex_match", "COUNT":"count", "SUM":"sum", "ADD":"add", "SUBTRACT":"subtract", "MULTIPLY":"multiply", "DIVIDE":"divide", "MODULO":"modulo", "PARSEINT":"parseint", "EXCHANGE":"exchange", "PARAM":"param"};
-const reverselookuptype = {"AND":"boolean", "OR":"boolean", "NOT":"boolean", "EQUIVALENT":"text", "GREATER_THAN":"comp", "LESS_THAN":"comp", "EQUALS":"comp", "INCLUDES":"text", "REGEX_MATCH":"text", "COUNT":"group", "SUM":"group", "ADD":"calc","SUBTRACT":"calc","MULTIPLY":"calc","DIVIDE":"calc","MODULO":"calc", "PARSEINT":"conv","EXCHANGE":"conv", "PARAM":"extract"};
+const namingmap = {"AND":"and", "OR":"or", "NOT":"not", "EQUIVALENT":"equivalent", "GREATER_THAN":"geater_than", "LESS_THAN":"less_than", "EQUALS":"equals", "INCLUDES":"includes", "REGEX_MATCH":"regex_match", "COUNT":"count", "SUM":"sum", "ADD":"add", "SUBTRACT":"subtract", "MULTIPLY":"multiply", "DIVIDE":"divide", "MODULO":"modulo", "PARSEINT":"parseint", "EXCHANGE":"exchange", "PARAM":"param"};
+const reverselookuptype = {"AND":"boolean", "OR":"boolean", "NOT":"boolean", "EQUIVALENT":"optext", "GREATER_THAN":"comp", "LESS_THAN":"comp", "EQUALS":"comp", "INCLUDES":"optext", "REGEX_MATCH":"optext", "COUNT":"group", "SUM":"group", "ADD":"calc","SUBTRACT":"calc","MULTIPLY":"calc","DIVIDE":"calc","MODULO":"calc", "PARSEINT":"conv","EXCHANGE":"conv", "PARAM":"extract"};
 
 function jsonLoader(jsonnode, area, path){
     path = path??"0";
@@ -91,7 +92,7 @@ function jsonLoader(jsonnode, area, path){
             addcompbutton.innerText = "+";
             addcompbutton.setAttribute("path", path);
             addcompbutton.setAttribute("operator", operator);
-            addcompbutton.onclick = askTextCompare;
+            addcompbutton.onclick = numModal;
             area.append(addcompbutton);
         } else if (textoperators.includes(operator)) {
 			if (!jsonnode.SubConditions || jsonnode.SubConditions.length < 1) {
@@ -446,10 +447,8 @@ function openBoolDialog(condition){
     document.getElementById("bool_text").classList.remove("available");
     document.getElementById("textcomparebasevalue").value = "";
     document.getElementById("textcomparebasetype").value = "";
-    document.getElementById("textextractorselectvalue").value = "";
-    document.getElementById("textextractorselecttype").value = "";
-    document.getElementById("textcomparetargetvalue").value = "";
-    document.getElementById("textcomparetargettype").value = "";
+    document.getElementById("textconditionselectvalue").value = "";
+    document.getElementById("textconditionselecttype").value = "";
     document.getElementById("boolnumericradio").checked = false;
     document.getElementById("bool_numeric").classList.remove("available");
     document.getElementById("numericcomparebasevalue").value = "";
@@ -473,10 +472,8 @@ function boolDialogValidator (){
         document.getElementById("boolSubmitButton").disabled =
             document.getElementById("textcomparebasevalue").value &&
             document.getElementById("textcomparebasetype").value && 
-            document.getElementById("textextractorselectvalue").value && 
-            document.getElementById("textextractorselecttype").value &&  
-            document.getElementById("textcomparetargetvalue").value &&   
-            document.getElementById("textcomparetargettype").value ? "" : "disabled";
+            document.getElementById("textconditionselectvalue").value && 
+            document.getElementById("textconditionselecttype").value ? "" : "disabled";
     } else if (document.getElementById("boolnumericradio").checked) {
         document.getElementById("boolSubmitButton").disabled =
             document.getElementById("numericcomparebasevalue").value &&
@@ -511,16 +508,6 @@ function addBool(){
     document.getElementById("boolModal").style["display"] = "none";
     refreshSummary();
 }
-function askTextCompare(){
-    //document.getElementById("comparisonTextBody").className = "";
-    //document.getElementById("comparisonTextBody").classList.add("modal-body");
-    //document.getElementById("comparisonTextBody").classList.add("textselection");
-    //document.getElementById("comparisonTextModal").style["display"] = "block";
-    //document.getElementById("comparisonTextModalButton").onclick = function(){
-	//
-    //}
-	document.getElementById("extractorModal").style["display"] = "block";
-}
 function askText(currentvalue, currenttype, includeenv, includeenter, callback){
     document.getElementById("textBody").className = "";
     document.getElementById("textBody").classList.add("modal-body");
@@ -532,6 +519,19 @@ function askText(currentvalue, currenttype, includeenv, includeenter, callback){
 
     document.getElementById('textEnterArea').classList.remove('available');
     document.getElementById('textEnvArea').classList.remove('available');
+    document.getElementById('textExtArea').classList.remove('available');
+    document.getElementById('textExtSelect').disabled="disabled";
+    document.getElementById('textExtSelect').value="none";
+	document.getElementById('textExtRegex').style['display']='none';
+	document.getElementById('textExtRegex').value='';
+	document.getElementById('textSubFrom').style['display']='none';
+	document.getElementById('textSubFrom').value='';
+	document.getElementById('textSubRange').style['display']='none';
+	document.getElementById('textSubRange').value='';
+	document.getElementById('textFirstRegex').style['display']='none';
+	document.getElementById('textFirstRegex').value='';
+	document.getElementById('textLastRegex').style['display']='none';
+	document.getElementById('textLastRegex').value='';
 	textDialogValidator();
     if (currenttype == "env") {
         document.getElementById('textEnvArea').classList.add('available');
@@ -563,41 +563,79 @@ function askText(currentvalue, currenttype, includeenv, includeenter, callback){
     };
 }
 function textDialogValidator() {
+	var valid = false;
 	if (document.getElementById("textenvradio").checked) {
-        document.getElementById("textSubmitButton").disabled =
-            document.getElementById("textEnvSelect").value ? "" : "disabled";
-		return;
+        valid = document.getElementById("textEnvSelect").value;
 	} else if (document.getElementById("textenterradio").checked) {
-        document.getElementById("textSubmitButton").disabled =
-            document.getElementById("textEnter").value ? "" : "disabled";
-		return;
+        valid = document.getElementById("textEnter").value;
 	}
-    document.getElementById("textSubmitButton").disabled = "disabled";
+	if (document.getElementById("textExtSelect").value=="regex") {
+	  try {
+		RegExp(document.getElementById("textExtRegex").value);
+	  } catch {
+		valid = false;
+	  }
+	} else if (document.getElementById("textExtSelect").value=="regex") {
+		
+	}
+	
+    document.getElementById("textSubmitButton").disabled = valid ? "" : "disabled";
 }
 
-function askExtractor(){
-    document.getElementById("extractorequalradio").checked = false;
-    document.getElementById("extractoregexradio").checked = false;
-    document.getElementById("extractorModalButton").checked = false;
-    document.getElementById("extractrange-from").value = "";
-    document.getElementById("extractrange-to").value = "";
-    document.getElementById("extractoregex").value = "";
-	extractorDialogValidator();
-    document.getElementById("extractorModal").style["display"] = "block";
+function askTextCondition(currenttype, currentval, callback){
+    document.getElementById("textConditionEqualradio").checked = currenttype == "equals";
+    document.getElementById("textconditionrangeradio").checked = currenttype == "includes";
+    document.getElementById("textconditionregexradio").checked = currenttype == "regex_match";
+    document.getElementById("textconditionrange-from").value = currenttype == "includes" ? currentval.split("-")[0] : "";
+    document.getElementById("textconditionrange-to").value = currenttype == "includes" && currentval.indexOf("-") && currentval !== "-" ? currentval.split("-")[1] : "";
+    document.getElementById("textconditionregex").value = currenttype == "regex_match" ? currentval : "";
+	textConditionDialogValidator();
+	document.getElementById("textConditionModalButton").onclick = () => {
+		var dispval, type, val;
+		if (document.getElementById("textConditionEqualradio").checked) {
+			type = "equals";
+			dispval = translations["textextract-equals"];
+		} else if (document.getElementById("textconditionrangeradio").checked) {
+			type = "includes";
+			rangefrom = document.getElementById("textconditionrange-from").value;
+			rangeto = document.getElementById("textconditionrange-to").value;
+			val = `${rangefrom}-${rangeto}`;
+			if (!rangefrom && !rangeto) {
+				dispval = translations["textextract_one"];
+			} else if (rangefrom && !rangeto) {
+				dispval = translations["textextract_rangefrom"].replace("{0}", rangefrom);
+			} else if (!rangefrom && rangeto) {
+				dispval = translations["textextract_rangeto"].replace("{0}", rangeto).replace("{1}", rangeto);
+			} else if (rangefrom && rangeto) {
+				dispval = translations["textextract_rangefromto"].replace("{0}", rangefrom).replace("{1}", rangeto);
+			}
+		} else if (document.getElementById("textconditionregexradio").checked) {
+			type = "regex_match";
+			val = document.getElementById("textconditionregex").value;
+			dispval = translations["textextract-regex"].replace("{0}", val);
+		}
+        callback(dispval, val, type);
+        document.getElementById("textConditionModal").style["display"] = "none";
+	}
+    document.getElementById("textConditionModal").style["display"] = "block";
 }
-function extractorDialogValidator(){
-	if (document.getElementById("extractorequalradio").checked) {
-        document.getElementById("extractorModalButton").disabled = "";
+function textConditionDialogValidator(){
+	if (document.getElementById("textConditionEqualradio").checked) {
+        document.getElementById("textConditionModalButton").disabled = "";
 		return;
-	} else if (document.getElementById("extractosomeradio").checked) {
-        document.getElementById("extractorModalButton").disabled = "";
+	} else if (document.getElementById("textconditionrangeradio").checked) {
+	document.getElementById("textConditionModalButton").disabled = !document.getElementById("textconditionrange-from").value || !document.getElementById("textconditionrange-to").value || parseInt(document.getElementById("textconditionrange-to").value) > parseInt(document.getElementById("textconditionrange-from").value) ? "" : "disabled";
 		return;
-	} else if (document.getElementById("extractoregexradio").checked) {
-        document.getElementById("extractorModalButton").disabled =
-            document.getElementById("extractoregex").value ? "" : "disabled";
+	} else if (document.getElementById("textconditionregexradio").checked) {
+		try {
+			RegExp(document.getElementById("textconditionregex").value);
+			document.getElementById("textConditionModalButton").disabled = "";
+		} catch {
+			document.getElementById("textConditionModalButton").disabled = "disabled";
+		}
 		return;
 	}
-    document.getElementById("extractorModalButton").disabled = "disabled";
+    document.getElementById("textConditionModalButton").disabled = "disabled";
 }
 function askNum(){
     document.getElementById("numModal").style["display"] = "block";
@@ -654,7 +692,7 @@ function editItem(){
 		// Will be handled as openBoolDialog() directly. Wouldn't be called
 	} else if (reverselookuptype[operator]=="comp") {
 		openComparerDialog(currentnode, operator, finishupdating);
-	} else if (reverselookuptype[operator]=="text") {
+	} else if (reverselookuptype[operator]=="optext") {
 		
 	} else if (reverselookuptype[operator]=="group") {
 		
