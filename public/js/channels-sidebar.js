@@ -20,7 +20,6 @@
 
     function setExistingChannels(channels) {
         state.existingWatchSet = new Set((channels || []).map((channel) => `${channel.platform}:${channel.channelId}`));
-        renderAccordionList();
     }
 
     async function init(options = {}) {

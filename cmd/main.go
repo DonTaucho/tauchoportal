@@ -28,12 +28,19 @@ import (
 )
 
 type PageData struct {
-	Title string
-	User  *UserProfile
-	Page  string
-	Lang  string
-	I18n  *i18n.Translator
-	API   *controller.API
+	Title                    string
+	User                     *UserProfile
+	Page                     string
+	Lang                     string
+	I18n                     *i18n.Translator
+	API                      *controller.API
+	CurrentChannel           *controller.ChannelForTemplate
+	Conditions               []controller.ConditionForTemplate
+	EventTypes               []string
+	ChannelDetail            *controller.ChannelDetailForTemplate
+	ChannelDetailConditions  []controller.ConditionDetailForTemplate
+	PlatformMeta             map[string]map[string]interface{}
+	EventBadgeClass          map[string]string
 }
 
 type UserProfile struct {
@@ -321,6 +328,17 @@ func loadTemplates() map[string]*template.Template {
 		"field":             field,
 		"escHtml":           escapeHTML,
 		"formatCount":       formatChannelCount,
+		"add": func(a, b int) int {
+			return a + b
+		},
+		"sub": func(a, b int) int {
+			return a - b
+		},
+		"urlEscape": func(s string) string {
+			return url.QueryEscape(s)
+		},
+		"getEventLabel":   controller.GetEventLabel,
+		"formatDateTime":  controller.FormatDateTime,
 	}
 
 	for _, pagePath := range pages {
@@ -417,6 +435,33 @@ func (s *Server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "text/html; charset=utf-8")
 	lang := i18n.DetectLang(r)
 	data := PageData{Title: cfg.Title, User: user, Page: cfg.Name, Lang: lang, I18n: s.i18n.Translator(lang), API: &api}
+	
+	// Fetch conditions page data if on /conditions page
+	if cfg.Name == "conditions" {
+		parts := strings.Split(strings.TrimPrefix(r.URL.Path, "/"), "/")
+		if len(parts) >= 3 && parts[0] == "channels" && parts[2] == "conditions" {
+			channelID := parts[1]
+			pageData := controller.PrepareConditionsPageData(channelID)
+			data.CurrentChannel = pageData.CurrentChannel
+			data.Conditions = pageData.Conditions
+			data.EventTypes = pageData.EventTypes
+			data.PlatformMeta = pageData.PlatformMeta
+			data.EventBadgeClass = pageData.EventBadgeClass
+		}
+	}
+	
+	// Fetch channel detail page data if on /channel page
+	if cfg.Name == "channel" {
+		parts := strings.Split(strings.TrimPrefix(r.URL.Path, "/"), "/")
+		if len(parts) >= 2 && parts[0] == "channels" {
+			channelID := parts[1]
+			pageData := controller.PrepareChannelDetailPageData(channelID)
+			data.ChannelDetail = pageData.CurrentChannel
+			data.ChannelDetailConditions = pageData.CurrentChannel.Conditions
+			data.PlatformMeta = pageData.PlatformMeta
+			data.EventBadgeClass = pageData.EventBadgeClass
+		}
+	}
 	if err := tmpl.ExecuteTemplate(w, "page", data); err != nil {
 		log.Printf("failed to render page %s: %v", cfg.Name, err)
 		http.Error(w, "failed to render page", http.StatusInternalServerError)
