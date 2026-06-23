@@ -10,30 +10,24 @@
 {{define "content"}}
 
 {{$platforms := dictparams 
-        "1" `{ "id": "youtube", "label": "YouTube", "hasOAuth": "true", "publicAccess": "false" }`
-        "2" `{ "id": "twitch", "label": "Twitch", "hasOAuth": "true", "publicAccess": "true" }`
-        "3" `{ "id": "niconico", "label": "NicoNico", "hasOAuth": "true", "publicAccess": "false" }`
-        "4" `{ "id": "twitcasting", "label": "TwitCasting", "hasOAuth": "true", "publicAccess": "false" }`
-        "5" `{ "id": "kick", "label": "Kick", "hasOAuth": "false", "publicAccess": "true" }`
-        "6" `{ "id": "bilibili", "label": "Bilibili", "hasOAuth": "false", "publicAccess": "true" }`
-        "7" `{ "id": "instagram", "label": "Instagram", "hasOAuth": "false", "publicAccess": "false" }`
-        "8" `{ "id": "tiktok", "label": "TikTok", "hasOAuth": "false", "publicAccess": "false" }`
-        "9" `{ "id": "facebook", "label": "Facebook", "hasOAuth": "false", "publicAccess": "false" }`
-        "a" `{ "id": "x", "label": "X", "hasOAuth": "false", "publicAccess": "false"}` }}
+        "1" `{ "id": "youtube", "label": "YouTube", "connectionName": "google", "hasOAuth": "true", "publicAccess": "false" }`
+        "2" `{ "id": "twitch", "label": "Twitch", "connectionName": "twitch", "hasOAuth": "true", "publicAccess": "true" }`
+        "3" `{ "id": "niconico", "label": "NicoNico", "connectionName": "niconico", "hasOAuth": "true", "publicAccess": "false" }`
+        "4" `{ "id": "twitcasting", "label": "TwitCasting", "connectionName": "twitcasting", "hasOAuth": "true", "publicAccess": "false" }`
+        "5" `{ "id": "kick", "label": "Kick", "connectionName": "kick", "hasOAuth": "false", "publicAccess": "true" }`
+        "6" `{ "id": "bilibili", "label": "Bilibili", "connectionName": "bilibili", "hasOAuth": "false", "publicAccess": "true" }`
+        "7" `{ "id": "instagram", "label": "Instagram", "connectionName": "instagram", "hasOAuth": "false", "publicAccess": "false" }`
+        "8" `{ "id": "tiktok", "label": "TikTok", "connectionName": "tiktok", "hasOAuth": "false", "publicAccess": "false" }`
+        "9" `{ "id": "facebook", "label": "Facebook", "connectionName": "facebook", "hasOAuth": "false", "publicAccess": "false" }`
+        "a" `{ "id": "x", "label": "X", "connectionName": "x", "hasOAuth": "false", "publicAccess": "false"}` }}
 {{$currentuser := .API.Auth.GetCurrentUser }}
 {{$allwatches := .API.Watches.ListWatches }}
-{{$discoveryAPI := .API.PlatformDiscovery }}
 
-<!-- Pre-fetched data embedded for sidebar - avoid client-side API calls -->
+<!-- Pre-fetched data embedded for sidebar - only fast data, defer external calls -->
 <script type="application/json" id="sidebarData">
 {
   "currentUser": {{toJSON $currentuser}},
-  "allWatches": {{toJSON $allwatches}},
-  "ownChannels": {
-    "youtube": {{toJSON $discoveryAPI.ListMyYouTubeChannels}},
-    "twitch": {{toJSON $discoveryAPI.ListMyTwitchChannels}},
-    "niconico": {{toJSON $discoveryAPI.ListMyNicoNicoChannels}}
-  }
+  "allWatches": {{toJSON $allwatches}}
 }
 </script>
 
@@ -47,11 +41,11 @@
             {{ $connected := false }}
             {{ if or (or (gt (len $currentuser.Connections) 0) $currentuser.Niconico) true }}
                 {{ range $connection := $currentuser.Connections }}
-                    {{ if eq $connection.Provider $platform.id }}
+                    {{ if eq $connection.Provider (field $platform "connectionName") }}
                         {{ $connected = true }}
                     {{ end }}
                 {{ end }}
-                {{ if and (and (eq $platform.id "niconico") $currentuser.Niconico) $currentuser.Niconico.Connected }}
+                {{ if and (and (eq (field $platform "id") "niconico") $currentuser.Niconico) $currentuser.Niconico.Connected }}
                     {{ $connected = true }}
                 {{ end }}
             {{ end }}
