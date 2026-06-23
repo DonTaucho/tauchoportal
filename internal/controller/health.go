@@ -13,12 +13,26 @@ type HealthCheckResponse struct {
 
 func (Health) HealthCheck() HealthCheckResponse {
 	var result HealthCheckResponse
-	apiRequest(&result, http.MethodGet, "health")
+	apiRequest(&result, http.MethodGet, "/health")
 	return result
 }
-func (Health) ServiceStatus() {
 
+type ServiceStatusResponse struct {
+	Error string `json:"error"`
 }
-func (Health) Environment() {
 
+func (Health) ServiceStatus() ServiceStatusResponse {
+	var result ServiceStatusResponse
+	apiRequest(&result, http.MethodGet, "/version")
+	return result
+}
+
+type EnvironmentResponse struct {
+	Error string `json:"error"`
+}
+
+func (Health) Environment() EnvironmentResponse {
+	var result EnvironmentResponse
+	apiRequest(&result, http.MethodGet, "/debug/env")
+	return result
 }

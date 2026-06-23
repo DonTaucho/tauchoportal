@@ -397,7 +397,11 @@ func (s *Server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "template not found", http.StatusInternalServerError)
 		return
 	}
-	api, _ := controller.Init(s.apiURL, strconv.Itoa(user.ID))
+	var useridstr string
+	if user != nil {
+		useridstr = strconv.Itoa(user.ID)
+	}
+	api, _ := controller.Init(s.apiURL, useridstr)
 
 	w.Header().Set("Content-Type", "text/html; charset=utf-8")
 	lang := i18n.DetectLang(r)
