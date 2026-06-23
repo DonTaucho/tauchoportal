@@ -1,11 +1,100 @@
 {{define "page"}}{{template "channels" .}}{{end}}
 
 {{define "channelscontent"}}
-        <div id="view-conditions" class="view channels-view"></div>
+<div id="view-conditions" class="view channels-view">
+  <div class="page-header">
+    <nav class="breadcrumb">
+      <img src="/image/channels_s.png">
+      <a href="/channels">Watched Channels</a>
+      <span class="breadcrumb-sep">›</span>
+      <a href="/channels/{{.CurrentChannel.ID}}">{{.CurrentChannel.Name}}</a>
+      <span class="breadcrumb-sep">›</span>
+      <span>Conditions</span>
+    </nav>
+    <div class="page-header-top">
+      <div>
+        <h1>
+          <span class="platform-icon-sm {{.CurrentChannel.Platform}}">{{$platformMeta := index .PlatformMeta .CurrentChannel.Platform}}{{if $platformMeta}}{{index $platformMeta "icon"}}{{end}}</span>
+          <span>{{.CurrentChannel.Name}}</span> — Conditions
+        </h1>
+        <p>Events on <strong>{{$platformMeta := index .PlatformMeta .CurrentChannel.Platform}}{{if $platformMeta}}{{index $platformMeta "label"}}{{end}}</strong> that will trigger an external action when met.</p>
+      </div>
+      <button class="btn btn-primary" onclick="openAddConditionModal()">+ Add Condition</button>
+    </div>
+    <div class="filter-tabs">
+      <button class="filter-tab active" onclick="filterConds('all', this)">
+        All <span class="tab-count">{{len .Conditions}}</span>
+      </button>
+      {{range $type := .EventTypes}}
+      {{$count := 0}}
+      {{range $.Conditions}}
+        {{if eq .EventType $type}}
+          {{$count = add $count 1}}
+        {{end}}
+      {{end}}
+      <button class="filter-tab" data-type="{{$type}}" onclick="filterConds('{{$type}}', this)">
+        {{getEventLabel $type $.CurrentChannel.Platform}} <span class="tab-count">{{$count}}</span>
+      </button>
+      {{end}}
+    </div>
+  </div>
+
+  <div class="conditions-list" id="conditionsList">
+    {{if eq (len .Conditions) 0}}
+    <div id="empty-state" class="empty-state">
+      <div class="empty-icon">⚙️</div>
+      <h2>No conditions yet</h2>
+      <p>Add a condition to define when to trigger an action on {{.CurrentChannel.Name}}.</p>
+      <button class="btn btn-primary" onclick="openAddConditionModal()">+ Add First Condition</button>
+    </div>
+    {{else}}
+    {{range .Conditions}}
+    {{$filterDetail := ""}}
+    {{if .Filter}}
+      {{$filterDetail = printf " containing <code>\"%s\"</code>" (escHtml .Filter)}}
+    {{end}}
+    <div class="rule-card" data-type="{{.EventType}}" data-cond-id="{{.ID}}">
+      <div class="rule-header">
+        <div class="rule-title-group">
+          {{$badgeClass := index $.EventBadgeClass .EventType}}
+          <span class="event-badge {{if $badgeClass}}{{$badgeClass}}{{else}}stream{{end}}">{{getEventLabel .EventType $.CurrentChannel.Platform}}</span>
+          <h3 class="rule-name">{{escHtml .Name}}</h3>
+          <span class="rule-status {{if .IsEnabled}}enabled{{else}}disabled{{end}}">{{if .IsEnabled}}Enabled{{else}}Disabled{{end}}</span>
+        </div>
+        <div class="rule-controls">
+          <label class="toggle-switch">
+            <input type="checkbox" {{if .IsEnabled}}checked{{end}} onchange="toggleCondition('{{.ID}}', this)">
+            <span class="toggle-slider"></span>
+          </label>
+          <button class="action-btn test" onclick="event.stopPropagation(); openTestConditionModal('{{.ID}}')">🧪 Test</button>
+          <button class="action-btn logic" onclick="editConditionLogic('{{.ID}}')">⚙️ Logic</button>
+          <button class="action-btn edit" onclick="openEditConditionModal('{{.ID}}')">✏️ Edit</button>
+          <button class="action-btn delete" onclick="deleteCondition('{{.ID}}')">🗑</button>
+        </div>
+      </div>
+      <div class="rule-body">
+        <div class="rule-detail-row">
+          <div class="rule-detail">
+            <span class="detail-label">Event</span>
+            <span class="detail-value">{{getEventLabel .EventType $.CurrentChannel.Platform}}{{if .Filter}} containing <code>"{{escHtml .Filter}}"</code>{{end}}</span>
+          </div>
+          <div class="rule-detail">
+            <span class="detail-label">External API</span>
+            <span class="detail-value"><span class="api-not-configured">⚠ Not configured yet</span></span>
+          </div>
+          <div class="rule-detail">
+            <span class="detail-label">Last triggered</span>
+            <span class="detail-value">{{formatDateTime .LastTriggeredAt "Never"}}</span>
+          </div>
+        </div>
+      </div>
+    </div>
+    {{end}}
+    {{end}}
+  </div>
+</div>
 {{end}}
 
 {{define "scripts"}}
 <script src="/js/conditions-list.js"></script>
 {{end}}
-
-
