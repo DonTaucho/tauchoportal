@@ -85,57 +85,26 @@
         if (content) content.style.display = (connected || platform.publicAccess) ? 'block' : 'none';
         
         if (platform.hasOAuth && connected) { 
-            loadAccOwnChannelsFromData(platformId);  // Use embedded data
+            loadAccOwnChannels(platformId);  // Lazy-load on demand
             if (platformId === 'youtube' || platformId === 'twitch') loadAccSubs(platformId, null);
         }
     }
     
-    function loadAccOwnChannelsFromData(platformId) {
+    // Lazy-load own channels from API on-demand instead of pre-rendering
+    async function loadAccOwnChannels(platformId) {
         const results = document.getElementById(`acc-own-${platformId}`); 
         if (!results) return;
         
-        const data = window.__sidebarData;
-        if (!data || !data.ownChannels) { 
-            results.innerHTML = '<div class="result-empty">No channels found.</div>'; 
-            return; 
+        // Show loading state
+        results.innerHTML = '<div class="result-loading">Loading your channels…</div>';
+        
+        try {
+            const endpoint = `/platform/${platformId}/channels/mine`;
+            const items = await apiGet(endpoint);
+            renderMiniChannelResults(results, normalizePagedData(items).items, platformId, 'No own channels found.');
+        } catch (error) { 
+            results.innerHTML = `<div class="result-error">Failed to load channels: ${esc(error.message)}</div>`; 
         }
-        
-        let items = [];
-        if (platformId === 'youtube') items = data.ownChannels.youtube || [];
-        else if (platformId === 'twitch') items = data.ownChannels.twitch || [];
-        else if (platformId === 'niconico') items = data.ownChannels.niconico || [];
-        
-        if (!items || items.length === 0) {
-            results.innerHTML = '<div class="result-empty">No own channels found.</div>';
-            return;
-        }
-        
-        // Populate with mini-cards only
-        results.innerHTML = items.map((channel) => {
-            const channelId = channel.channel_id || channel.id || '';
-            const name = channel.title || channel.display_name || channel.name || channelId;
-            const thumbnail = channel.thumbnail || channel.thumbnail_url || '';
-            const subtitle = channel.subscriber_count != null 
-                ? `${formatCount(channel.subscriber_count)} subscribers` 
-                : (channel.follower_count != null 
-                    ? `${formatCount(channel.follower_count)} followers` 
-                    : '');
-            const added = state.existingWatchSet.has(`${platformId}:${channelId}`);
-            const thumb = thumbnail 
-                ? `<img class="mini-thumb-img" src="${esc(thumbnail)}" alt="" loading="lazy">` 
-                : `<div class="mini-thumb-placeholder">${esc(PLATFORM_META[platformId]?.icon || '📺')}</div>`;
-            
-            return `<div class="mini-card">
-                <div class="mini-thumb">${thumb}</div>
-                <div class="mini-info">
-                    <div class="mini-name">${esc(name)}</div>
-                    <div class="mini-meta">${subtitle}</div>
-                </div>
-                ${added 
-                    ? '<span class="mini-badge-added">Added</span>' 
-                    : `<button class="mini-add-btn" title="Add channel" onclick='openConfirm(${JSON.stringify({ platform: platformId, channelId, name, thumbnail: thumbnail || null })})'>+</button>`}
-            </div>`;
-        }).join('');
     }
 
     function submitAccManual(event, platformId) {
