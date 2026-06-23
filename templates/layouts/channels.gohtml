@@ -21,6 +21,22 @@
         "9" `{ "id": "facebook", "label": "Facebook", "hasOAuth": "false", "publicAccess": "false" }`
         "a" `{ "id": "x", "label": "X", "hasOAuth": "false", "publicAccess": "false"}` }}
 {{$currentuser := .API.Auth.GetCurrentUser }}
+{{$allwatches := .API.Watches.ListWatches }}
+{{$discoveryAPI := .API.PlatformDiscovery }}
+
+<!-- Pre-fetched data embedded for sidebar - avoid client-side API calls -->
+<script type="application/json" id="sidebarData">
+{
+  "currentUser": {{toJSON $currentuser}},
+  "allWatches": {{toJSON $allwatches}},
+  "ownChannels": {
+    "youtube": {{toJSON $discoveryAPI.ListMyYouTubeChannels}},
+    "twitch": {{toJSON $discoveryAPI.ListMyTwitchChannels}},
+    "niconico": {{toJSON $discoveryAPI.ListMyNicoNicoChannels}}
+  }
+}
+</script>
+
 <div class="unified-layout">
     <aside class="add-sidebar" id="addSidebar">
         <div class="add-sidebar-header">
@@ -29,13 +45,15 @@
         <div class="accordion-list" id="accordionList">
             {{ range $index, $platform := $platforms }}
             {{ $connected := false }}
-            {{ range $connection := $currentuser.Connections }}
-            {{ if $connection.Proviver eq $platform.id }}
-            {{ $connected := true }}
-            {{ end }}
-            {{ if $platform.id eq "niconico" and $currentuser.Niconico and $currentuser.Niconico.Connected }}
-            {{ $connected := true }}
-            {{ end }}
+            {{ if or (or (gt (len $currentuser.Connections) 0) $currentuser.Niconico) true }}
+                {{ range $connection := $currentuser.Connections }}
+                    {{ if eq $connection.Provider $platform.id }}
+                        {{ $connected = true }}
+                    {{ end }}
+                {{ end }}
+                {{ if and (and (eq $platform.id "niconico") $currentuser.Niconico) $currentuser.Niconico.Connected }}
+                    {{ $connected = true }}
+                {{ end }}
             {{ end }}
             <div class="acc-item" id="acc-{{ field $platform "id" }}">
                 <div class="acc-header" onclick="toggleAcc('{{field $platform "id"}}')">
@@ -48,7 +66,43 @@
                 </div>
                 <div class="acc-body" id="acc-body-{{field $platform "id"}}">
                     <div class="acc-body-inner" id="acc-inner-{{field $platform "id"}}">
-                        <div class="acc-init-loading">Loading…</div>
+                        {{ $platformId := field $platform "id" }}
+                        {{ $hasOAuth := eq (field $platform "hasOAuth") "true" }}
+                        {{ $publicAccess := eq (field $platform "publicAccess") "true" }}
+                        
+                        <!-- State: Not connected but requires OAuth -->
+                        <div class="acc-not-connected" style="{{if or (not $hasOAuth) $connected}}display:none{{end}}">
+                            <p>Connect your {{ field $platform "label" }} account first.</p>
+                            <a class="acc-connect-link" href="/account-settings">Go to Account Settings →</a>
+                        </div>
+                        
+                        <!-- State: OAuth required but not supported -->
+                        <div class="acc-stub" style="{{if or $connected (not $hasOAuth) $publicAccess}}display:none{{end}}">
+                            <span>🚫</span>
+                            <p>Channel registration for {{ field $platform "label" }} is not yet supported.</p>
+                        </div>
+                        
+                        <!-- State: Connected or public access -->
+                        <div class="acc-content" style="{{if and (not $connected) (not $publicAccess)}}display:none{{end}}">
+                            {{ if and (not (eq $platformId "kick")) (not (eq $platformId "bilibili")) }}
+                                <div class="acc-search-wrap"><span class="acc-search-icon">🔍</span><input class="acc-search" type="text" id="acc-search-{{$platformId}}" placeholder="Search channels…" oninput="onAccSearch('{{$platformId}}', this.value)"></div><div class="acc-results" id="acc-results-{{$platformId}}"></div>
+                            {{ else }}
+                                <div class="acc-results" id="acc-results-{{$platformId}}"></div>
+                            {{ end }}
+                            
+                            {{ if $connected }}
+                                <div class="acc-section-label">Your Channels</div>
+                                <div class="acc-results" id="acc-own-{{$platformId}}"></div>
+                                
+                                {{ if or (eq $platformId "youtube") (eq $platformId "twitch") }}
+                                    <div class="acc-section-label">Following / Subscriptions</div>
+                                    <div class="acc-results" id="acc-subs-{{$platformId}}"></div>
+                                {{ end }}
+                            {{ end }}
+                            
+                            <div class="acc-section-label">Add by ID / URL</div>
+                            <form class="acc-manual" id="acc-manual-{{$platformId}}" onsubmit="submitAccManual(event, '{{$platformId}}')"><input type="text" placeholder="Channel ID or URL" required><button type="submit" class="acc-manual-submit">Add</button></form>
+                        </div>
                     </div>
                 </div>
             </div>

@@ -307,6 +307,7 @@ func loadTemplates() map[string]*template.Template {
 	loginPath := filepath.Join("templates", "partials", "login.gohtml")
 	funcMap := template.FuncMap{
 		"userJSON": userJSON,
+		"toJSON":   toJSON,
 		"i18nJSON": func(t *i18n.Translator) template.JS {
 			if t == nil {
 				return template.JS("{}")
@@ -318,6 +319,8 @@ func loadTemplates() map[string]*template.Template {
 		"dict":              dict,
 		"dictparams":        dictparams,
 		"field":             field,
+		"escHtml":           escapeHTML,
+		"formatCount":       formatChannelCount,
 	}
 
 	for _, pagePath := range pages {
@@ -332,12 +335,16 @@ func loadTemplates() map[string]*template.Template {
 	return result
 }
 
-func userJSON(user *UserProfile) template.JS {
-	payload, err := json.Marshal(user)
+func toJSON(v interface{}) template.JS {
+	payload, err := json.Marshal(v)
 	if err != nil {
 		return template.JS("null")
 	}
 	return template.JS(string(payload))
+}
+
+func userJSON(user *UserProfile) template.JS {
+	return toJSON(user)
 }
 
 func attachIdentityToken(r *http.Request, tokenSource oauth2.TokenSource) {
@@ -402,6 +409,10 @@ func (s *Server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		useridstr = strconv.Itoa(user.ID)
 	}
 	api, _ := controller.Init(s.apiURL, useridstr)
+	
+	// Inject cookies from the incoming request into the controller's HTTP client
+	// This allows the controller to use the same session as the proxy
+	controller.InjectCookies(r)
 
 	w.Header().Set("Content-Type", "text/html; charset=utf-8")
 	lang := i18n.DetectLang(r)
@@ -513,4 +524,27 @@ func field(s interface{}, k string) (interface{}, error) {
 		}
 		return v.Interface(), nil
 	}
+}
+
+func escapeHTML(s string) string {
+	return strings.NewReplacer(
+		"&", "&amp;",
+		"<", "&lt;",
+		">", "&gt;",
+		`"`, "&#34;",
+		"'", "&#39;",
+	).Replace(s)
+}
+
+func formatChannelCount(value int) string {
+	if value == 0 {
+		return ""
+	}
+	if value >= 1000000 {
+		return fmt.Sprintf("%.1fM", float64(value)/1000000)
+	}
+	if value >= 1000 {
+		return fmt.Sprintf("%.1fK", float64(value)/1000)
+	}
+	return fmt.Sprintf("%d", value)
 }
