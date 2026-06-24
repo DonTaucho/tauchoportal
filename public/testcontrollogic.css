@@ -116,7 +116,9 @@ legend{
 fieldset{
     border: none;
 }
-.item.equals{
+.item.equals,
+.item.includes,
+.item.regex_match{
 	padding: 1em;
     /* border: 3px solid #45d350; */
     /* border-radius: 5px; */
@@ -406,12 +408,13 @@ div#logictotaldescription span.and .and::after {
 .textconditionselector {
     border: 2px solid #c7cedd;
     padding: 0.4em 1em;
-    display: inline-block;
+    display: inline;
     text-align: center;
     border-radius: 4px;
     background-color: #dde7eb;
     cursor: pointer;
     font-weight: bold;
+	line-height: 3rem;
 }
 .textconditionselector:hover {
     border-color: #c7cedd;

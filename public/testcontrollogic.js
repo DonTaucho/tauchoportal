@@ -1,12 +1,13 @@
 const extractionoperators = ["PARAM"];
 const booleanoperators = ["AND", "OR", "NOT"];
-const compoperators = ["EQUIVALENT", "GREATER_THAN", "LESS_THAN"];
+const compoperators = ["EQUIVALENT", "GREATER_THAN", "GREATER_OR_EQUAL", "LESS_THAN", "LESS_OR_EQUAL"];
 const textoperators = ["EQUALS", "INCLUDES", "REGEX_MATCH"];
-const textextractors = ["REGEX_EXTRACT", "SUBSTRING", "FIRST", "LAST"];
+const textextractors = ["WHOLEWORD", "REGEX_EXTRACT", "SUBSTRING", "FIRST", "LAST"];
 const groupoperators = ["COUNT", "SUM"];
 const calcoperators = ["ADD", "SUBTRACT", "MULTIPLY", "DIVIDE", "MODULO"];
 const convoperators = ["PARSEINT", "EXCHANGE"];
-const namingmap = {"AND":"and", "OR":"or", "NOT":"not", "EQUIVALENT":"equivalent", "GREATER_THAN":"geater_than", "LESS_THAN":"less_than", "EQUALS":"equals", "INCLUDES":"includes", "REGEX_MATCH":"regex_match", "COUNT":"count", "SUM":"sum", "ADD":"add", "SUBTRACT":"subtract", "MULTIPLY":"multiply", "DIVIDE":"divide", "MODULO":"modulo", "PARSEINT":"parseint", "EXCHANGE":"exchange", "PARAM":"param"};
+const namingmap = {"AND":"and", "OR":"or", "NOT":"not", "EQUIVALENT":"equivalent", "GREATER_THAN":"geater_than", "GREATER_OR_EQUAL":"greater_or_equal", "LESS_THAN":"less_than", "LESS_OR_EQUAL":"less_or_equal" , "EQUALS":"equals", "INCLUDES":"includes", "REGEX_MATCH":"regex_match", "COUNT":"count", "SUM":"sum", "WHOLEWORD":"wholeword", "REGEX_EXTRACT": "regex_extract", "SUBSTRING": "substring", "FIRST": "first", "LAST": "last", "ADD":"add", "SUBTRACT":"subtract", "MULTIPLY":"multiply", "DIVIDE":"divide", "MODULO":"modulo", "PARSEINT":"parseint", "EXCHANGE":"exchange", "PARAM":"param"};
+const operatormap = {"and":"AND", "or":"OR", "not":"NOT", "equivalent":"EQUIVALENT", "geater_than":"GREATER_THAN", "greater_or_equal":"GREATER_OR_EQUAL", "less_than":"LESS_THAN", "less_or_equal":"LESS_OR_EQUAL", "equals":"EQUALS", "includes":"INCLUDES", "regex_match":"REGEX_MATCH", "count":"COUNT", "sum":"SUM", "wholeword":"WHOLEWORD", "regex_extract": "REGEX_EXTRACT", "substring": "SUBSTRING", "first": "FIRST", "last": "LAST", "add":"ADD", "subtract":"SUBTRACT", "multiply":"MULTIPLY", "divide":"DIVIDE", "modulo":"MODULO", "parseint":"PARSEINT", "exchange":"EXCHANGE", "param":"PARAM"};
 const reverselookuptype = {"AND":"boolean", "OR":"boolean", "NOT":"boolean", "EQUIVALENT":"optext", "GREATER_THAN":"comp", "LESS_THAN":"comp", "EQUALS":"comp", "INCLUDES":"optext", "REGEX_MATCH":"optext", "COUNT":"group", "SUM":"group", "ADD":"calc","SUBTRACT":"calc","MULTIPLY":"calc","DIVIDE":"calc","MODULO":"calc", "PARSEINT":"conv","EXCHANGE":"conv", "PARAM":"extract"};
 
 function jsonLoader(jsonnode, area, path){
@@ -130,6 +131,10 @@ function jsonLoader(jsonnode, area, path){
             asknumbutton.setAttribute("operator", operator);
             asknumbutton.onclick = askNumber;
             area.append(asknumbutton);
+        }  else if (textextractors.includes(operator)) {
+            var tbd = document.createElement("div");
+            tbd.innerText = "tbd..";
+            area.append(tbd);
         } else if ((extractionoperators.includes(operator) ||
             textoperators.includes(operator) ||
             convoperators.includes(operator))
@@ -250,6 +255,7 @@ function summarize(node){
 			var target;
             var rangefrom = "";
             var rangeto = "";
+            var items = [];
 			if (node.SubConditions.length>0) {
 			    target = summarize(node.SubConditions[0]);
 			    for (i in node.SubConditions.slice(1)) {
@@ -258,27 +264,39 @@ function summarize(node){
 			} else {
 			    target = "<span class='novalue'>" + translations["includes-novalue"] + "</span>";
 			}
-			if (node.Variables.length > 0 && parseInt(node.Variables[0])) {
-				rangefrom = parseInt(node.Variables[0]);
-			}
-			if (node.Variables.length > 1 && parseInt(node.Variables[1])) {
-				rangeto = parseInt(node.Variables[1]);
+			if (node.Variables.length > 0) {
+				if (node.Variables[0].split("-")[0]&&parseInt(node.Variables[0].split("-")[0])) {
+					rangefrom = parseInt(node.Variables[0].split("-")[0]);
+				}
+				if (node.Variables[0].split("-")[0]&&node.Variables[0].split("-").length>1&&parseInt(node.Variables[0].split("-")[1])){
+					rangeto = parseInt(node.Variables[0].split("-")[1]);
+				}
 			}
 			var comparar;
-			if (items.lange) {
+			if (items?.lange) {
 				comparar = items.join(translations["valueof-joint"]);
 			} else {
 				comparar = "<span class='novalue'>" + translations["includes-missingvalue"] + "</span>";
 			}
 			if (!rangefrom&&!rangeto || rangefrom==1&&!rangeto) {
-			    return translations["includes-sentense_one"].replace("{0}", target).replace("{1}", comparar);
+			    return translations["includes-sentense-one"].replace("{0}", target).replace("{1}", comparar);
 			} else if (rangefrom&&!rangeto) {
-			    return translations["includes-sentense_rangefrom"].replace("{0}", target).replace("{1}", comparar).replace("{2}", rangefrom);
+			    return translations["includes-sentense-rangefrom"].replace("{0}", target).replace("{1}", comparar).replace("{2}", rangefrom);
 			} else if (!rangefrom&&rangeto) {
-			    return translations["includes-sentense_rangeto"].replace("{0}", target).replace("{1}", comparar).replace("{2}", rangeto);
+			    return translations["includes-sentense-rangeto"].replace("{0}", target).replace("{1}", comparar).replace("{2}", rangeto);
 			} else if (rangefrom&&rangeto) {
-			    return translations["includes-sentense_rangefromto"].replace("{0}", target).replace("{1}", comparar).replace("{2}", rangefrom).replace("{3}", rangeto);
+			    return translations["includes-sentense-rangefromto"].replace("{0}", target).replace("{1}", comparar).replace("{2}", rangefrom).replace("{3}", rangeto);
 			}
+			break;
+		case "WHOLEWORD":
+			var items = [];
+			for (i in node.SubConditions) {
+				items.push(summarize(node.SubConditions[i]));
+			}
+            for (i in node.Variables) {
+                items.push(node.Variables[i]);
+            }
+			return translations["textextract-whole"].replace("{0}", items.join(translations["valueof-joint"]));
 			break;
 		case "REGEX_MATCH":
 			var items = [];
@@ -303,6 +321,106 @@ function summarize(node){
 			}
 			
 			return translations["regex-sentense"].replace("{0}", target).replace("{1}", regex);
+			break;
+		case "REGEX_EXTRACT":
+			var items = [];
+            var regexs = [];
+			for (i in node.SubConditions) {
+				items.push(summarize(node.SubConditions[i]));
+			}
+            for (i in node.Variables) {
+                regexs.push("<span class='regexparam'>" + translations["regexparam"].replace("{0}", node.Variables[i]) + "</span>");
+            }
+			var target;
+			if (items.lange) {
+				target = items.join(translations["valueof-joint"]);
+			} else {
+				target = "<span class='novalue'>" + translations["regex-missingvalue"] + "</span>";
+			}
+			var regex;
+			if (items.lange) {
+				regex = items.join(translations["valueof-joint"]);
+			} else {
+				regex = "<span class='novalue'>" + translations["regex-missingvalue"] + "</span>";
+			}
+			
+			return translations["textextract-regex"].replace("{0}", target).replace("{1}", regex);
+			break;
+		case "SUBSTRING":
+			var target;
+            var rangefrom = "";
+            var rangeto = "";
+			var items = [];
+			if (node.SubConditions.length>0) {
+			    target = summarize(node.SubConditions[0]);
+			    for (i in node.SubConditions.slice(1)) {
+			        items.push(summarize(node.SubConditions[i]));
+			    }
+			} else {
+			    target = "<span class='novalue'>" + translations["textextract-sub_missingvalue"] + "</span>";
+			}
+			for (i in node.Variables) {
+				items.push(node.Variables[i]);
+			}
+			if (items.length > 0) {
+				if (items[0].split("-")[0]&&parseInt(items[0].split("-")[0])) {
+					rangefrom = parseInt(items[0].split("-")[0]);
+				}
+				if (items[0].split("-")[0]&&items[0].split("-").length>1&&parseInt(items[0].split("-")[1])){
+					rangeto = parseInt(items[0].split("-")[1]);
+				}
+			}
+			if (!rangefrom&&!rangeto || rangefrom==1&&!rangeto) {
+			    return translations["textextract-sub_missingvalue"];
+			} else if (rangefrom&&!rangeto) {
+			    return translations["textextract-sub_from"].replace("{0}", target).replace("{1}", rangefrom);
+			} else if (!rangefrom&&rangeto) {
+			    return translations["textextract-sub_to"].replace("{0}", target).replace("{1}", rangeto);
+			} else if (rangefrom&&rangeto) {
+			    return translations["textextract-sub_fromto"].replace("{0}", target).replace("{1}", rangefrom).replace("{2}", rangeto);
+			}
+			break;
+		case "FIRST":
+			var target;
+			var items = [];
+			var length = [];
+			if (node.SubConditions.length>0) {
+			    target = summarize(node.SubConditions[0]);
+			    for (i in node.SubConditions.slice(1)) {
+			        items.push(summarize(node.SubConditions[i]));
+			    }
+			} else {
+			    target = "<span class='novalue'>" + translations["textextract-sub_missingvalue"] + "</span>";
+			}
+			for (i in node.Variables) {
+				items.push(node.Variables[i]);
+			}
+			if (!parseInt(length)) {
+			    return translations["textextract-sub_missingvalue"];
+			} else if (rangefrom&&!rangeto) {
+			    return translations["textextract-first"].replace("{0}", target).replace("{1}", parseInt(length));
+			}
+			break;
+		case "LAST":
+			var target;
+			var items = [];
+			var length = [];
+			if (node.SubConditions.length>0) {
+			    target = summarize(node.SubConditions[0]);
+			    for (i in node.SubConditions.slice(1)) {
+			        items.push(summarize(node.SubConditions[i]));
+			    }
+			} else {
+			    target = "<span class='novalue'>" + translations["textextract-sub_missingvalue"] + "</span>";
+			}
+			for (i in node.Variables) {
+				items.push(node.Variables[i]);
+			}
+			if (!parseInt(length)) {
+			    return translations["textextract-sub_missingvalue"];
+			} else if (rangefrom&&!rangeto) {
+			    return translations["textextract-last"].replace("{0}", target).replace("{1}", parseInt(length));
+			}
 			break;
 		case "ADD":
 		    var items = [];
@@ -445,8 +563,10 @@ function openBoolDialog(condition){
 
     document.getElementById("booltextradio").checked = false;
     document.getElementById("bool_text").classList.remove("available");
+    document.getElementById("textcomparebasedisplay").innerText = "";
     document.getElementById("textcomparebasevalue").value = "";
     document.getElementById("textcomparebasetype").value = "";
+    document.getElementById("textconditionselectdisplay").innerText = "";
     document.getElementById("textconditionselectvalue").value = "";
     document.getElementById("textconditionselecttype").value = "";
     document.getElementById("boolnumericradio").checked = false;
@@ -494,7 +614,53 @@ function addBool(){
 	
 	var elem = {};
 	if (document.getElementById("booltextradio").checked) {
-		elem = {"aa": {"aa":123}};
+		
+		var textcomparebasevalue = document.getElementById("textcomparebasevalue").value,
+		
+		textcomparebaseexttype = document.getElementById("textcomparebaseexttype").value,
+		textcomparebaseextvalue = document.getElementById("textcomparebaseextvalue").value,
+		
+		textconditionselectvalue = document.getElementById("textconditionselectvalue").value,
+		textconditionselectrange = document.getElementById("textconditionselectrange").value;
+		textconditionselecttype = document.getElementById("textconditionselecttype").value;
+		
+		switch (document.getElementById("textcomparebasetype").value) {
+			case "env":
+				var variables = [], compvariables = [], paramvariables = [], subconditions = [];
+				if (document.getElementById("textconditionselectvalue").value&&document.getElementById("textconditionselectvalue").value!="undefined") {
+					variables.push(document.getElementById("textconditionselectvalue").value);
+				}
+				if (document.getElementById("textconditionselectrange").value&&document.getElementById("textconditionselectrange").value!="undefined") {
+					variables.push(document.getElementById("textconditionselectrange").value);
+				}
+				if (document.getElementById("textcomparebaseextvalue").value&&document.getElementById("textcomparebaseextvalue").value!="undefined") {
+					compvariables.push(document.getElementById("textcomparebaseextvalue").value);
+				}
+				if (document.getElementById("textcomparebasevalue").value&&document.getElementById("textcomparebasevalue").value!="undefined") {
+					paramvariables.push(document.getElementById("textcomparebasevalue").value);
+				}
+				if (document.getElementById("textcomparebaseexttype").value=="wholeword") {
+					subconditions.push ({"Operator": "PARAM", "Variables": paramvariables});
+				} else {
+					subconditions.push({"Operator": operatormap[document.getElementById("textcomparebaseexttype").value],
+						"SubConditions": [{"Operator": "PARAM", "Variables": paramvariables}],
+						"Variables": compvariables});
+				}
+				elem = {
+					"Operator": operatormap[document.getElementById("textconditionselecttype").value],
+					"Variables": variables,
+					"SubConditions": subconditions
+				}
+				break;
+			
+			case "variable":
+				elem = {
+					"Operator": operatormap[document.getElementById("textcomparebaseexttype").value],
+					"Variables": [document.getElementById("textcomparebaseextvalue").value, document.getElementById("textcomparebasevalue").value],
+					"SubConditions": [{"Operator": document.getElementById("textconditionselecttype").value, "Variables": [document.getElementById("textconditionselectvalue").value]}]
+				}
+				break;
+		}
 	} else if (document.getElementById("boolnumericradio").checked) {
 		elem = {"aa": {"aa":123}};
 	} else if (document.getElementById("boolconditionradio").checked) {
@@ -508,7 +674,7 @@ function addBool(){
     document.getElementById("boolModal").style["display"] = "none";
     refreshSummary();
 }
-function askText(currentvalue, currenttype, includeenv, includeenter, callback){
+function askText(currentvalue, currenttype, currentextractor, currentextractorval, includeenv, includeenter, callback){
     document.getElementById("textBody").className = "";
     document.getElementById("textBody").classList.add("modal-body");
     document.getElementById("textBody").classList.add("textselection");
@@ -520,45 +686,87 @@ function askText(currentvalue, currenttype, includeenv, includeenter, callback){
     document.getElementById('textEnterArea').classList.remove('available');
     document.getElementById('textEnvArea').classList.remove('available');
     document.getElementById('textExtArea').classList.remove('available');
-    document.getElementById('textExtSelect').disabled="disabled";
-    document.getElementById('textExtSelect').value="none";
-	document.getElementById('textExtRegex').style['display']='none';
-	document.getElementById('textExtRegex').value='';
-	document.getElementById('textSubFrom').style['display']='none';
-	document.getElementById('textSubFrom').value='';
-	document.getElementById('textSubRange').style['display']='none';
-	document.getElementById('textSubRange').value='';
-	document.getElementById('textFirstRegex').style['display']='none';
-	document.getElementById('textFirstRegex').value='';
-	document.getElementById('textLastRegex').style['display']='none';
-	document.getElementById('textLastRegex').value='';
-	textDialogValidator();
-    if (currenttype == "env") {
+    document.getElementById('textExtSelect').disabled = currenttype == "variable" || !includeenv ? "disabled" : "";
+    document.getElementById('textExtSelect').value=currentextractor??"wholeword";
+	document.getElementById('textExtRegex').style['display']= currentextractor=="regex_extract" ? "inline-block":"none";
+	document.getElementById('textExtRegex').value=currentextractor=="regex_extract"?currentextractorval:"";
+	document.getElementById('textExtSubFrom').style['display']= currentextractor=="range" ? "inline-block":"none";
+	document.getElementById('textExtSubFrom').value=currentextractor=="range"?currentextractorval?.split(",")[0]:"";
+	document.getElementById('textExtSubTo').style['display']= currentextractor=="range" ? "inline-block":"none";
+	document.getElementById('textExtSubTo').value=currentextractor=="range"&&currentextractorval?.length>1?currentextractorval.split(",")[1]:"";
+	document.getElementById('textExtFirst').style['display']= currentextractor=="first" ? "inline-block":"none";
+	document.getElementById('textExtFirst').value=currentextractor=="first"?currentextractorval:"";
+	document.getElementById('textExtLast').style['display']= currentextractor=="last" ? "inline-block":"none";
+	document.getElementById('textExtLast').value=currentextractor=="last"?currentextractorval:"";
+    document.getElementById("textenterradio").style["display"]= includeenv ? "inline-block" : "none";
+	
+    if (currenttype == "env" || !includeenter) {
         document.getElementById('textEnvArea').classList.add('available');
-    } else if (currenttype == "variable") {
+        document.getElementById('textExtArea').classList.add('available');
+    } else if (currenttype == "variable" || !includeenv) {
         document.getElementById('textEnterArea').classList.add('available');
     }
     if (includeenter) {
         document.getElementById("textBody").classList.add("includeenter");
-    }
+		document.getElementById("textenvradio").style["display"]= "inline-block";
+    } else {
+		document.getElementById("textenvradio").checked = true;
+		document.getElementById("textenvradio").style["display"]= "none";
+	}
     if (includeenv) {
         document.getElementById("textBody").classList.add("includeenv");
-    }
+		document.getElementById("textenterradio").style["display"]= "inline-block";
+    } else {
+		document.getElementById("textenvradio").checked = true;
+		document.getElementById("textenterradio").style["display"]= "none";
+	}
+	textDialogValidator();
     document.getElementById("textModal").style["display"] = "block";
     document.getElementById("textSubmitButton").onclick = ()=>{
-        var dispval;
-        var val;
-        var type;
+        var dispval,val,type,exttype,extval;
         if (document.getElementById("textenterradio").checked) {
             dispval = document.getElementById("textEnter").value;
             val = document.getElementById("textEnter").value;
             type = "variable";
         } else if (document.getElementById("textenvradio").checked) {
-            dispval = translations[document.getElementById("textEnvSelect").value];
             val = document.getElementById("textEnvSelect").value;
             type = "env";
+			exttype = document.getElementById("textExtSelect").value;
+			switch (exttype) {
+				case "regex_extract":
+					extval = document.getElementById("textExtRegex").value;
+					dispval = translations["textextract-regex"].replace("{0}", translations[val]).replace("{1}", extval);
+					break;
+				case "substring":
+					var range_from = document.getElementById('textExtSubFrom').value,
+					  range_to = document.getElementById('textExtSubTo').value,
+					  extval = `${range_from}-${range_to}`;
+					if (!range_from&&!range_to) {
+						dispval = translations["textextract-sub_missingvalue"];
+					} else if (range_from&&!range_to) {
+						dispval = translations["textextract-sub_from"].replace("{0}",translations[val]).replace("{1}", document.getElementById("textExtSubFrom").value);
+					} else if (!range_from&&range_to) {
+						dispval = translations["textextract-sub_to"].replace("{0}",translations[val]).replace("{1}", document.getElementById("textExtSubTo").value);
+					} else if (range_from&&range_to) {
+						dispval = translations["textextract-sub_fromto"].replace("{0}",translations[val]).replace("{1}", document.getElementById("textExtSubFrom").value).replace("{2}", document.getElementById("textExtSubTo").value);
+					}
+					break;
+				case "first":
+					extval = document.getElementById("textExtFirst").value;
+					dispval = translations["textextract-first"].replace("{0}", translations[val]).replace("{1}", extval);
+					break;
+				case "last":
+					extval = document.getElementById("textExtLast").value
+					dispval = translations["textextract-last"].replace("{0}", translations[val]).replace("{1}", extval);
+					break;
+				default:
+					extval = "";
+					exttype = "wholeword";
+					dispval = translations["textextract-whole"].replace("{0}",translations[val]);
+					break;
+			}
         }
-        callback(dispval, val, type);
+        callback(dispval, val, type, exttype, extval);
         document.getElementById("textModal").style["display"] = "none";
     };
 }
@@ -569,62 +777,74 @@ function textDialogValidator() {
 	} else if (document.getElementById("textenterradio").checked) {
         valid = document.getElementById("textEnter").value;
 	}
-	if (document.getElementById("textExtSelect").value=="regex") {
+	if (document.getElementById("textExtSelect").value=="regex_extract") {
 	  try {
 		RegExp(document.getElementById("textExtRegex").value);
 	  } catch {
 		valid = false;
 	  }
-	} else if (document.getElementById("textExtSelect").value=="regex") {
-		
+	} else if (document.getElementById("textExtSelect").value=="substring") {
+		try {
+			valid = !document.getElementById("textExtSubTo").value || !parseInt(document.getElementById("textExtSubFrom").value) || parseInt(document.getElementById("textExtSubTo").value) >= parseInt(document.getElementById("textExtSubFrom").value);
+		} catch {
+			valid = false;
+		}
+	} else if (document.getElementById("textExtSelect").value=="first") {
+		valid = parseInt(document.getElementById("textExtFirst").value);
+	} else if (document.getElementById("textExtSelect").value=="last") {
+		valid = parseInt(document.getElementById("textExtLast").value);
 	}
 	
     document.getElementById("textSubmitButton").disabled = valid ? "" : "disabled";
 }
 
-function askTextCondition(currenttype, currentval, callback){
+function askTextCondition(currenttype, currentrange, currentval, callback){
     document.getElementById("textConditionEqualradio").checked = currenttype == "equals";
     document.getElementById("textconditionrangeradio").checked = currenttype == "includes";
     document.getElementById("textconditionregexradio").checked = currenttype == "regex_match";
-    document.getElementById("textconditionrange-from").value = currenttype == "includes" ? currentval.split("-")[0] : "";
-    document.getElementById("textconditionrange-to").value = currenttype == "includes" && currentval.indexOf("-") && currentval !== "-" ? currentval.split("-")[1] : "";
+    document.getElementById("textconditionrange-from").value = currenttype == "includes" ? currentrange.split("-")[0] : "";
+    document.getElementById("textconditionrange-to").value = currenttype == "includes" && currentrange.indexOf("-") && currentrange !== "-" ? currentrange.split("-")[1] : "";
+    document.getElementById("textconditionequals").value = currenttype == "equals" ? currentval : "";
+    document.getElementById("textconditionrangetext").value = currenttype == "includes" ? currentval : "";
     document.getElementById("textconditionregex").value = currenttype == "regex_match" ? currentval : "";
 	textConditionDialogValidator();
 	document.getElementById("textConditionModalButton").onclick = () => {
-		var dispval, type, val;
+		var dispval, type, range, val;
 		if (document.getElementById("textConditionEqualradio").checked) {
 			type = "equals";
-			dispval = translations["textextract-equals"];
+			val = document.getElementById("textconditionequals").value ? document.getElementById("textconditionequals").value : translations["textcondition-missingvalue"]
+			dispval = translations["textcondition-equals"].replace("{0}", val);
 		} else if (document.getElementById("textconditionrangeradio").checked) {
 			type = "includes";
+			val = document.getElementById("textconditionrangetext").value ? document.getElementById("textconditionrangetext").value : translations["textcondition-missingvalue"];
 			rangefrom = document.getElementById("textconditionrange-from").value;
 			rangeto = document.getElementById("textconditionrange-to").value;
-			val = `${rangefrom}-${rangeto}`;
+			range = `${rangefrom}-${rangeto}`;
 			if (!rangefrom && !rangeto) {
-				dispval = translations["textextract_one"];
+				dispval = translations["textcondition-one"].replace("{0}", val);
 			} else if (rangefrom && !rangeto) {
-				dispval = translations["textextract_rangefrom"].replace("{0}", rangefrom);
+				dispval = translations["textcondition-rangefrom"].replace("{0}", val).replace("{1}", rangefrom);
 			} else if (!rangefrom && rangeto) {
-				dispval = translations["textextract_rangeto"].replace("{0}", rangeto).replace("{1}", rangeto);
+				dispval = translations["textcondition-rangeto"].replace("{0}", val).replace("{1}", rangeto);
 			} else if (rangefrom && rangeto) {
-				dispval = translations["textextract_rangefromto"].replace("{0}", rangefrom).replace("{1}", rangeto);
+				dispval = translations["textcondition-rangefromto"].replace("{0}", val).replace("{1}", rangefrom).replace("{2}", rangeto);
 			}
 		} else if (document.getElementById("textconditionregexradio").checked) {
 			type = "regex_match";
 			val = document.getElementById("textconditionregex").value;
-			dispval = translations["textextract-regex"].replace("{0}", val);
+			dispval = translations["textcondition-regex"].replace("{0}", val);
 		}
-        callback(dispval, val, type);
+        callback(dispval, type, range, val);
         document.getElementById("textConditionModal").style["display"] = "none";
 	}
     document.getElementById("textConditionModal").style["display"] = "block";
 }
 function textConditionDialogValidator(){
 	if (document.getElementById("textConditionEqualradio").checked) {
-        document.getElementById("textConditionModalButton").disabled = "";
+        document.getElementById("textConditionModalButton").disabled = document.getElementById("textconditionequals").value?"":"disabled";
 		return;
 	} else if (document.getElementById("textconditionrangeradio").checked) {
-	document.getElementById("textConditionModalButton").disabled = !document.getElementById("textconditionrange-from").value || !document.getElementById("textconditionrange-to").value || parseInt(document.getElementById("textconditionrange-to").value) > parseInt(document.getElementById("textconditionrange-from").value) ? "" : "disabled";
+		document.getElementById("textConditionModalButton").disabled = document.getElementById("textconditionrangetext").value && (!document.getElementById("textconditionrange-from").value || !document.getElementById("textconditionrange-to").value || parseInt(document.getElementById("textconditionrange-to").value) > parseInt(document.getElementById("textconditionrange-from").value)) ? "" : "disabled";
 		return;
 	} else if (document.getElementById("textconditionregexradio").checked) {
 		try {

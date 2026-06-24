@@ -330,15 +330,26 @@ var translations = {
   "NOT": "満たさない",
   "EQUIVALENT": "一致（数値比較）",
   "GREATER_THAN": "大きい",
+  "GREATER_OR_EQUAL": "以上",
   "LESS_THAN": "小さい",
+  "LESS_OR_EQUAL": "以下",
   "EQUALS": "同一（文字比較）",
   "INCLUDES": "含む",
-  "REGEX": "正規表現による一致",
+  "REGEX_MATCH": "正規表現による一致",
+  "WHOLEWORD": "文全体",
+  "REGEX_EXTRACT": "正規表現による抜き出し",
+  "SUBSTRING": "文章中の部分（文字数指定）",
+  "FIRST": "文頭",
+  "LAST": "文の末尾",
+  "COUNT": "集合の個数",
+  "SUM": "集合の合計",
   "ADD": "足し算",
   "SUBTRACT": "引き算",
   "MULTIPLY": "掛け算",
   "DIVIDE": "割り算",
   "MODULO": "割り算の余り",
+  "PARSEINT": "数値化",
+  "EXCHANGE": "通貨換算",
   "PARAM": "配信からのデータ",
   
   "staticvalue": "「{0}」",
@@ -364,10 +375,10 @@ var translations = {
   "equals-missingvalue": "未設定",
   "includes-novalue": "未設定",
   "includes-missingvalue": "未設定",
-  "includes-sentense_one": "{0}に{1}が含まれる",
-  "includes-sentense_rangefrom": "{0}に{1}が{2}個以上含まれる",
-  "includes-sentense_rangeto": "{0}に{1}が{2}個以下含まれる",
-  "includes-sentense_rangefromto": "{0}に{1}が{2}～{3}個だけ含まれる",
+  "includes-sentense-one": "{0}に{1}が含まれる",
+  "includes-sentense-rangefrom": "{0}に{1}が{2}個以上含まれる",
+  "includes-sentense-rangeto": "{0}に{1}が{2}個以下含まれる",
+  "includes-sentense-rangefromto": "{0}に{1}が{2}～{3}個だけ含まれる",
   "regexparam": "正規表現「{0}」",
   "regex-missingvalue": "未設定",
   "regex-sentense": "{0}の値が{1}に整合する",
@@ -378,12 +389,22 @@ var translations = {
   "divide-joint": " 割る ",
   "modulo-sentense": "{0}を{1}で割った余り",
   "exchange-sentense": "{0}を{1}換算した値",
-  "textextract-equals": "完全一致する",
-  "textextract_one": "含まれる",
-  "textextract_rangefrom": "{0}個以上含まれる",
-  "textextract_rangeto": "{0}個以下含まれる",
-  "textextract_rangefromto": "{0}～{1}個だけ含まれる",
-  "textextract-regex": "正規表現/{0}/による抜き出し",
+  "textextract-whole": "{0}",
+  "textextract-regex": "{0}を正規表現/{1}/によって抜き出した値",
+  "textextract-sub_missingvalue": "未設定",
+  "textextract-sub_from": "{0}の{1}文字目以降",
+  "textextract-sub_to": "{0}の{1}文字目まで",
+  "textextract-sub_fromto": "{0}の{1}文字目から{2}文字目まで",
+  "textextract-first": "{0}の最初の{1}文字分",
+  "textextract-last": "{0}の最後の{1}文字分",
+  "textcondition-novalue": "未設定",
+  "textcondition-missingvalue": "[未設定の値]",
+  "textcondition-equals": "{0}と完全一致する",
+  "textcondition-one": "{0}が含まれる",
+  "textcondition-rangefrom": "{0}が{1}個以上含まれる",
+  "textcondition-rangeto": "{0}が{1}個以下含まれる",
+  "textcondition-rangefromto": "{0}が{1}～{2}個だけ含まれる",
+  "textcondition-regex": "正規表現/{0}/に整合する",
   "valueof-joint": "、",
   "valueof-sentense": "{0}の値",
   "event_message" : "メッセージ",
@@ -417,26 +438,32 @@ var translations = {
             <input id="boolPath" type="hidden" value="">
             <div id="bool_text" class="selector" onclick="document.getElementById('booltextradio').checked=true;getElementById('bool_text').classList.add('available');document.getElementById('bool_numeric').classList.remove('available');document.getElementById('bool_addmore').classList.remove('available');boolDialogValidator()">
               <h4><input id="booltextradio" type="radio" name="addboolradio" /> Values Matches/Includes</h4>
-              <span class="textselector" onclick="askText(document.getElementById('textcomparebasevalue').value, document.getElementById('textcomparebasetype').value, true, false, function(disp,val,type){
-                document.getElementById('textcomparebasedisplay').innerText=disp;
+              <span class="textselector" onclick="askText(document.getElementById('textcomparebasevalue').value, document.getElementById('textcomparebasetype').value,document.getElementById('textcomparebaseexttype').value, document.getElementById('textcomparebaseextvalue').value,true, false, function(disp,val,type,exttype,extval){
+                document.getElementById('textcomparebasedisplay').innerHTML=disp;
                 document.getElementById('textcomparebasevalue').value=val;
                 document.getElementById('textcomparebasetype').value=type;
-                document.getElementById('textcomparebaseplaceholder').style['display']=val?'none':'inline-block';
-                document.getElementById('textcomparebasedisplay').style['display']=val?'inline-block':'none';
+                document.getElementById('textcomparebaseexttype').value=exttype;
+                document.getElementById('textcomparebaseextvalue').value=extval;
+                document.getElementById('textcomparebaseplaceholder').style['display']=val?'none':'inline';
+                document.getElementById('textcomparebasedisplay').style['display']=val?'inline':'none';
                 boolDialogValidator();
                 })">
                 <span id="textcomparebaseplaceholder" class="placeholder">Enter Value</span>
                 <span id="textcomparebasedisplay" class="value" style="display:none"></span>
                 <input id="textcomparebasevalue" type="hidden" />
                 <input id="textcomparebasetype" type="hidden" />
+                <input id="textcomparebaseexttype" type="hidden" />
+                <input id="textcomparebaseextvalue" value="none" type="hidden" />
               </span>
-              <span class="textconditionselector" onclick="askTextCondition(document.getElementById('textconditionselecttype').value, document.getElementById('textconditionselectvalue').value, function(disp,val,type){
+              <span class="textconditionselector" onclick="askTextCondition(document.getElementById('textconditionselecttype').value, document.getElementById('textconditionselectrange').value, document.getElementById('textconditionselectvalue').value, function(disp,type,range,val){
                 document.getElementById('textconditionselectdisplay').innerText=disp;
                 document.getElementById('textconditionselectvalue').value=val;
                 document.getElementById('textconditionselecttype').value=type;
+                document.getElementById('textconditionselectrange').value=range;
                 boolDialogValidator();
                 })">
                 <span id="textconditionselectdisplay" class="value"> - </span>
+                <input id="textconditionselectrange" type="hidden" value="" />
                 <input id="textconditionselectvalue" type="hidden" value="" />
                 <input id="textconditionselecttype" type="hidden" value="" />
               </span>
@@ -538,23 +565,23 @@ var translations = {
             <div id="textExtArea" class="selector textextractor" onclick="textDialogValidator();">
               <h4>Extract</h4>
               <select id="textExtSelect" onchange="textDialogValidator();
-			  document.getElementById('textExtRegex').style['display']=this.value=='regex'?'inline-block':'none';
-			  document.getElementById('textSubFrom').style['display']=this.value=='substring'?'inline-block':'none';
-			  document.getElementById('textSubRange').style['display']=this.value=='substring'?'inline-block':'none';
-			  document.getElementById('textFirstRegex').style['display']=this.value=='first'?'inline-block':'none';
-			  document.getElementById('textLastRegex').style['display']=this.value=='last'?'inline-block':'none';
+			  document.getElementById('textExtRegex').style['display']=this.value=='regex_extract'?'inline-block':'none';
+			  document.getElementById('textExtSubFrom').style['display']=this.value=='substring'?'inline-block':'none';
+			  document.getElementById('textExtSubTo').style['display']=this.value=='substring'?'inline-block':'none';
+			  document.getElementById('textExtFirst').style['display']=this.value=='first'?'inline-block':'none';
+			  document.getElementById('textExtLast').style['display']=this.value=='last'?'inline-block':'none';
 			  ">
-				<option value="none">Wholeword</option>
-				<option value="regex">Regex</option>
+				<option value="wholeword">Wholeword</option>
+				<option value="regex_extract">Regex</option>
 			    <option value="substring">Substring</option>
 			    <option value="first">First</option>
 			    <option value="last">Last</option>
 			  </select>
 			  <div>
 				  <input id="textExtRegex" type="text" style="display:none" onchange="textDialogValidator()"/>
-				  <input id="textSubFrom" type="number" inputmode="numeric" min="1" max="999" pattern="[0-9]*" class="numerictext" style="display:none" onchange="textDialogValidator()" /><input id="textSubRange" type="number"   class="numerictext"  inputmode="numeric" min="1" max="999" pattern="[0-9]*" style="display:none" onchange="textDialogValidator()" />
-				  <input id="textFirstRegex" type="number" inputmode="numeric" min="1" max="999" pattern="[0-9]*" class="numerictext" style="display:none" onchange="textDialogValidator()" />
-				  <input id="textLastRegex" type="number" inputmode="numeric" min="1" max="999" pattern="[0-9]*" class="numerictext" style="display:none" onchange="textDialogValidator()" />
+				  <input id="textExtSubFrom" type="number" inputmode="numeric" min="1" max="999" pattern="[0-9]*" class="numerictext" style="display:none" onchange="textDialogValidator()" /><input id="textExtSubTo" type="number" class="numerictext" inputmode="numeric" min="1" max="999" pattern="[0-9]*" style="display:none" onchange="textDialogValidator()" />
+				  <input id="textExtFirst" type="number" inputmode="numeric" min="1" max="999" pattern="[0-9]*" class="numerictext" style="display:none" onchange="textDialogValidator()" />
+				  <input id="textExtLast" type="number" inputmode="numeric" min="1" max="999" pattern="[0-9]*" class="numerictext" style="display:none" onchange="textDialogValidator()" />
 			  </div>
             </div>
           </div>
@@ -647,7 +674,7 @@ var translations = {
 <div id="singleValueModal" class="modal">
     <div class="modal-content modal-small">
         <div class="modal-header">
-            <span class="close" onclick="closeModal('textConditionModal')">×</span>
+            <span class="close" onclick="closeModal('singleValueModal')">×</span>
             <p>Value.</p>
         </div>
         <div id="valueBody" class="modal-body">
