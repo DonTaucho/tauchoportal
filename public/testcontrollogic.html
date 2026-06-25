@@ -154,8 +154,8 @@
   window.addEventListener("load", function(){
     try {
 		refreshSummary();
-    } catch (q) {
-      alert(q);
+		refreshRequest();
+    } catch {
 // some message
     }
   }); 
@@ -266,7 +266,18 @@ function addNewButton(){
 </div>
 
 <div id="logictotaldescription"></div>
-<div id="sendingparameterarea">SendingParameter:none</div>
+<div id="sendingParameterArea">SendingParameter:none</div>
+<textarea id="sendingparamjson">{"Operator": "WHOLEWORD",
+  "Variables": null,
+  "SubConditions": [
+    {
+      "Operator": "PARAM",
+      "Variables": [
+        "event_sender_id"
+      ],
+      "SubConditions": null
+    }
+  ]}</textarea>
 <hr>
 <div class="editor-actions">
 <button class="btn btn-secondary" onclick="goBack()">Cancel</button><button class="btn btn-primary" id="saveBtn" onclick="saveConditionLogic()">Save Condition Logic</button></div></div><div class="editor-sidebar"><div class="sidebar-card"><h3>Condition Info</h3><dl><dt>Condition ID</dt><dd><code>cond_1781324936169105600</code></dd><dt>Name</dt><dd>Condition 2 Testestes</dd><dt>Event Type</dt><dd><code>comment</code></dd><dt>Status</dt><dd><span class="badge badge-success">Enabled</span></dd></dl></div><div class="sidebar-card"><h3>Quick Reference</h3><ul><li>AND, OR, NOT</li><li>EQUALS, GREATER_THAN, LESS_THAN</li><li>INCLUDES, REGEX_MATCH</li><li>ADD, SUBTRACT, MULTIPLY, DIVIDE</li><li>PARAM</li></ul></div></div></div><div id="validateResult" class="validate-result" style="display:none"></div></div>
@@ -328,6 +339,7 @@ var translations = {
   "AND": "全ての条件を満たす",
   "OR": "いずれかの条件を満たす",
   "NOT": "満たさない",
+  "SOME": "一定数のみ条件を満たす",
   "EQUIVALENT": "一致（数値比較）",
   "GREATER_THAN": "大きい",
   "GREATER_OR_EQUAL": "以上",
@@ -352,6 +364,7 @@ var translations = {
   "EXCHANGE": "通貨換算",
   "PARAM": "配信からのデータ",
   
+  "failedjsonparse": "JSONの読み取りに失敗しました",
   "staticvalue": "「{0}」",
   "and-joint": " かつ ",
   "and-notset": "条件が未設定です",
@@ -359,6 +372,14 @@ var translations = {
   "or-notset": "条件が未設定です",
   "not-sentense": "{0}ではない",
   "not-notset": "条件が未設定です",
+  "some-sentense_prefix": "",
+  "some-sentense_joint": "～",
+  "some-sentense_suffix": "のみが条件を満たす",
+  "some-sentense_from": "{0}のうち、{1}個以上が条件を満たす",
+  "some-sentense_to": "{0}のうち、{1}個以下だけ条件を満たす",
+  "some-sentense_fromto": "{0}のうち、{1}個以上{2}個以下だけ条件を満たす",
+  "some-joint": " 、 ",
+  "some-notset": "条件が未設定です",
   "compare-novalue": "未設定",
   "compare-missingvalue": "未設定",
   "equivalent-joint": " と ",
@@ -379,7 +400,7 @@ var translations = {
   "includes-sentense-rangefrom": "{0}に{1}が{2}個以上含まれる",
   "includes-sentense-rangeto": "{0}に{1}が{2}個以下含まれる",
   "includes-sentense-rangefromto": "{0}に{1}が{2}～{3}個だけ含まれる",
-  "regexparam": "正規表現「{0}」",
+  "regexparam": "正規表現/{0}/",
   "regex-missingvalue": "未設定",
   "regex-sentense": "{0}の値が{1}に整合する",
   "calc-missingvalue": "未設定",
@@ -390,7 +411,7 @@ var translations = {
   "modulo-sentense": "{0}を{1}で割った余り",
   "exchange-sentense": "{0}を{1}換算した値",
   "textextract-whole": "{0}",
-  "textextract-regex": "{0}を正規表現/{1}/によって抜き出した値",
+  "textextract-regex": "{0}を正規表現/{1}/によって抜き出した文字列",
   "textextract-sub_missingvalue": "未設定",
   "textextract-sub_from": "{0}の{1}文字目以降",
   "textextract-sub_to": "{0}の{1}文字目まで",
@@ -481,65 +502,12 @@ var translations = {
            </div>
             <div id="bool_addmore" class="selector" onclick="document.getElementById('boolconditionradio').checked=true;document.getElementById('bool_text').classList.remove('available');document.getElementById('bool_numeric').classList.remove('available');document.getElementById('bool_addmore').classList.add('available');boolDialogValidator()">
               <div><input id="boolconditionradio" type="radio" name="addboolradio" />Add more condition?</div>
-              <select id="boolcondition" onchange="boolDialogValidator()"><option value=""></option><option value="AND">AND</option><option value="OR">OR</option><option value="NOT">NOT</option></select>
+              <select id="boolcondition" onchange="boolDialogValidator()"><option value=""></option><option value="AND">AND</option><option value="OR">OR</option><option value="NOT">NOT</option><option value="SOME">SOME</option></select>
             </div>
         </div>
         <div class="modal-footer">
             <button type="button" class="btn btn-secondary" onclick="closeModal('boolModal')">Cancel</button>
-            <button id="boolSubmitButton" type="button" class="btn btn-primary" onclick="addBool()">Add Item</button>
-        </div>
-    </div>
-</div>
-
-<div id="comparerModal" class="modal lower">
-    <input id="comparerPath" type="hidden" value="">
-    <div class="modal-content modal-large">
-        <div class="modal-header">
-            <span class="close" onclick="closeModal('comparerModal')">×</span>
-            <h2><svg width="1em" height="1em" viewBox="0 0 512 512" xmlns="http://www.w3.org/2000/svg"><path fill="#ffffff" stroke="black" stroke-width="6%" d="M296,464a23.88,23.88,0,0,1-7.55-1.23l-80.15-26.67A23.92,23.92,0,0,1,192,413.32V294.11a.44.44,0,0,0-.09-.13L23.26,97.54A30,30,0,0,1,46.05,48H466a30,30,0,0,1,22.79,49.54L320.09,294a.77.77,0,0,0-.09.13V440a23.93,23.93,0,0,1-24,24Z"></path></svg> compare Items</h2>
-            <p>Compare Items.</p>
-        </div>
-        <div id="comparerBody" class="modal-body">
-		  <span class="textselector" onclick="askText(document.getElementById('comp_basevalue').value, document.getElementById('comp_basetype').value, true, false, function(disp,val,type){
-			document.getElementById('comp_basedisplay').innerText=disp;
-			document.getElementById('comp_basevalue').value=val;
-			document.getElementById('comp_basetype').value=type;
-			document.getElementById('comp_baseplaceholder').style['display']=val?'none':'inline-block';
-			document.getElementById('comp_basedisplay').style['display']=val?'inline-block':'none';
-			boolDialogValidator();
-			})">
-			<span id="comp_baseplaceholder" class="placeholder">Enter Value</span>
-			<span id="comp_basedisplay" class="value" style="display:none"></span>
-			<input id="comp_basevalue" type="hidden" />
-			<input id="comp_basetype" type="hidden" />
-		  </span>
-		  <span class="textconditionselector" onclick="askTextCondition(true, true, function(disp,val,type){
-			document.getElementById('comp_selectdisplay').innerText=disp;
-			document.getElementById('comp_selectvalue').value=val;
-			document.getElementById('comp_selecttype').value=type;
-			boolDialogValidator();
-			})">
-			<span id="comp_selectdisplay" class="value">Includes</span>
-			<input id="comp_selectvalue" type="hidden" value="1-1" />
-			<input id="comp_selecttype" type="hidden" value="SOME" />
-		  </span>
-		  <span class="textselector" onclick="askText(document.getElementById('comp_targetvalue').value, document.getElementById('comp_targettype').value, true, true, function(disp,val,type){
-			document.getElementById('comp_targetdisplay').innerText=disp;
-			document.getElementById('comp_targetvalue').value=val;
-			document.getElementById('comp_targettype').value=type;
-			document.getElementById('comp_targetplaceholder').style['display']=val?'none':'inline-block';
-			document.getElementById('comp_targetdisplay').style['display']=val?'inline-block':'none';
-			boolDialogValidator();
-			})">
-			<span id="comp_targetplaceholder" class="placeholder">Enter Value</span>
-			<span id="comp_targetdisplay" class="value" style="display:none"></span>
-			<input id="comp_targetvalue" type="hidden" />
-			<input id="comp_targettype" type="hidden" />
-		  </span>
-        </div>
-        <div class="modal-footer">
-            <button type="button" class="btn btn-secondary" onclick="closeModal('comparerModal')">Cancel</button>
-            <button id="comparerSubmitButton" type="button" class="btn btn-primary" onclick="">Submit Edit</button>
+            <button id="boolSubmitButton" type="button" class="btn btn-primary" onclick="">Add Item</button>
         </div>
     </div>
 </div>
@@ -554,7 +522,11 @@ var translations = {
           <div>
             <div id="textEnvArea" class="selector envselection" onclick="textDialogValidator();document.getElementById('textenvradio').checked=true;getElementById('textEnvArea').classList.add('available');document.getElementById('textEnterArea').classList.remove('available');document.getElementById('textExtArea').classList.add('available');document.getElementById('textExtSelect').disabled='';">
               <h4><input id="textenvradio" type="radio" name="inputtextradio"> Select Input Parameter</h4>
-              <select id="textEnvSelect" onchange="textDialogValidator()"><option value="event_message">comment</option><option value="event_amount">amount</option></select>
+              <select id="textEnvSelect" onchange="textDialogValidator()">
+				<option value="event_message">comment</option>
+				<option value="event_sender_id">senderid</option>
+				<option value="event_amount">amount</option>
+			  </select>
             </div>
             <div id="textEnterArea" class="selector entervalue" onclick="textDialogValidator();document.getElementById('textenterradio').checked=true;getElementById('textEnterArea').classList.add('available');document.getElementById('textEnvArea').classList.remove('available');document.getElementById('textExtArea').classList.add('available');document.getElementById('textExtSelect').disabled='';">
               <h4><input id="textenterradio" type="radio" name="inputtextradio"> Static Value</h4>

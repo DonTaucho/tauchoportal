@@ -1,14 +1,14 @@
 const extractionoperators = ["PARAM"];
-const booleanoperators = ["AND", "OR", "NOT"];
+const booleanoperators = ["AND", "OR", "NOT", "SOME"];
 const compoperators = ["EQUIVALENT", "GREATER_THAN", "GREATER_OR_EQUAL", "LESS_THAN", "LESS_OR_EQUAL"];
 const textoperators = ["EQUALS", "INCLUDES", "REGEX_MATCH"];
 const textextractors = ["WHOLEWORD", "REGEX_EXTRACT", "SUBSTRING", "FIRST", "LAST"];
 const groupoperators = ["COUNT", "SUM"];
 const calcoperators = ["ADD", "SUBTRACT", "MULTIPLY", "DIVIDE", "MODULO"];
 const convoperators = ["PARSEINT", "EXCHANGE"];
-const namingmap = {"AND":"and", "OR":"or", "NOT":"not", "EQUIVALENT":"equivalent", "GREATER_THAN":"geater_than", "GREATER_OR_EQUAL":"greater_or_equal", "LESS_THAN":"less_than", "LESS_OR_EQUAL":"less_or_equal" , "EQUALS":"equals", "INCLUDES":"includes", "REGEX_MATCH":"regex_match", "COUNT":"count", "SUM":"sum", "WHOLEWORD":"wholeword", "REGEX_EXTRACT": "regex_extract", "SUBSTRING": "substring", "FIRST": "first", "LAST": "last", "ADD":"add", "SUBTRACT":"subtract", "MULTIPLY":"multiply", "DIVIDE":"divide", "MODULO":"modulo", "PARSEINT":"parseint", "EXCHANGE":"exchange", "PARAM":"param"};
-const operatormap = {"and":"AND", "or":"OR", "not":"NOT", "equivalent":"EQUIVALENT", "geater_than":"GREATER_THAN", "greater_or_equal":"GREATER_OR_EQUAL", "less_than":"LESS_THAN", "less_or_equal":"LESS_OR_EQUAL", "equals":"EQUALS", "includes":"INCLUDES", "regex_match":"REGEX_MATCH", "count":"COUNT", "sum":"SUM", "wholeword":"WHOLEWORD", "regex_extract": "REGEX_EXTRACT", "substring": "SUBSTRING", "first": "FIRST", "last": "LAST", "add":"ADD", "subtract":"SUBTRACT", "multiply":"MULTIPLY", "divide":"DIVIDE", "modulo":"MODULO", "parseint":"PARSEINT", "exchange":"EXCHANGE", "param":"PARAM"};
-const reverselookuptype = {"AND":"boolean", "OR":"boolean", "NOT":"boolean", "EQUIVALENT":"optext", "GREATER_THAN":"comp", "LESS_THAN":"comp", "EQUALS":"comp", "INCLUDES":"optext", "REGEX_MATCH":"optext", "COUNT":"group", "SUM":"group", "ADD":"calc","SUBTRACT":"calc","MULTIPLY":"calc","DIVIDE":"calc","MODULO":"calc", "PARSEINT":"conv","EXCHANGE":"conv", "PARAM":"extract"};
+const namingmap = {"AND":"and", "OR":"or", "NOT":"not", "SOME":"some", "EQUIVALENT":"equivalent", "GREATER_THAN":"geater_than", "GREATER_OR_EQUAL":"greater_or_equal", "LESS_THAN":"less_than", "LESS_OR_EQUAL":"less_or_equal" , "EQUALS":"equals", "INCLUDES":"includes", "REGEX_MATCH":"regex_match", "COUNT":"count", "SUM":"sum", "WHOLEWORD":"wholeword", "REGEX_EXTRACT": "regex_extract", "SUBSTRING": "substring", "FIRST": "first", "LAST": "last", "ADD":"add", "SUBTRACT":"subtract", "MULTIPLY":"multiply", "DIVIDE":"divide", "MODULO":"modulo", "PARSEINT":"parseint", "EXCHANGE":"exchange", "PARAM":"param"};
+const operatormap = {"and":"AND", "or":"OR", "not":"NOT", "some":"SOME", "equivalent":"EQUIVALENT", "geater_than":"GREATER_THAN", "greater_or_equal":"GREATER_OR_EQUAL", "less_than":"LESS_THAN", "less_or_equal":"LESS_OR_EQUAL", "equals":"EQUALS", "includes":"INCLUDES", "regex_match":"REGEX_MATCH", "count":"COUNT", "sum":"SUM", "wholeword":"WHOLEWORD", "regex_extract": "REGEX_EXTRACT", "substring": "SUBSTRING", "first": "FIRST", "last": "LAST", "add":"ADD", "subtract":"SUBTRACT", "multiply":"MULTIPLY", "divide":"DIVIDE", "modulo":"MODULO", "parseint":"PARSEINT", "exchange":"EXCHANGE", "param":"PARAM"};
+const reverselookuptype = {"AND":"boolean", "OR":"boolean", "NOT":"boolean", "SOME":"boolean", "EQUIVALENT":"comp", "GREATER_THAN":"comp", "LESS_THAN":"comp", "EQUALS":"optext", "INCLUDES":"optext", "REGEX_MATCH":"optext", "COUNT":"group", "SUM":"group", "ADD":"calc","SUBTRACT":"calc","MULTIPLY":"calc","DIVIDE":"calc","MODULO":"calc", "PARSEINT":"conv","EXCHANGE":"conv", "PARAM":"extract"};
 
 function jsonLoader(jsonnode, area, path){
     path = path??"0";
@@ -36,6 +36,56 @@ function jsonLoader(jsonnode, area, path){
 	area.appendChild(editarea);
     if (jsonnode.SubConditions || jsonnode.Variables) {
         area.classList.add(namingmap[jsonnode.Operator]);
+		
+		if (operator == "SOME") {
+            var somefield = document.createElement("div");
+			var prefix = document.createElement("span");
+			prefix.innerText = translations["some-sentense_prefix"];
+			somefield.append(prefix);
+			var frombutton = document.createElement("input");
+			frombutton.type = "number";
+			frombutton.inputmode = "numeric";
+			frombutton.min = 1;
+			frombutton.max = 999;
+			frombutton.patern="[0-9]*";
+			frombutton.classList.add("numerictext");
+			frombutton.style["display"] = "inline-block";
+			frombutton.setAttribute("path", path);
+			frombutton.value = jsonnode.Variables&&jsonnode.Variables.length>0?jsonnode.Variables[0].split("-")[0]:"";
+			frombutton.onchange = function(){
+				var json = JSON.parse(document.getElementById("conditionLogicInput").value);
+				var path = this.getAttribute("path");
+				var current = getSubCondition(json, path);
+				current.Variables[0] = this.value+"-"+(current.Variables&&current.Variables.length>0&&current.Variables[0].indexOf("-")?current.Variables[0].split("-")[1]:"");
+				reloadJson(json);
+			}
+			somefield.append(frombutton);
+			var joint = document.createElement("span");
+			joint.innerText = translations["some-sentense_joint"];
+			somefield.append(joint);
+			var tobutton = document.createElement("input");
+			tobutton.type = "number";
+			tobutton.inputmode = "numeric";
+			tobutton.min = 1;
+			tobutton.max = 999;
+			tobutton.patern="[0-9]*";
+			tobutton.classList.add("numerictext");
+			tobutton.style["display"] = "inline-block";
+			tobutton.value = jsonnode.Variables&&jsonnode.Variables.length>0&&jsonnode.Variables[0].indexOf("-")?jsonnode.Variables[0].split("-")[1]:"";
+			tobutton.setAttribute("path", path);
+			tobutton.onchange = function(){
+				var json = JSON.parse(document.getElementById("conditionLogicInput").value);
+				var path = this.getAttribute("path");
+				var current = getSubCondition(json, path);
+				current.Variables[0] = (current.Variables&&current.Variables.length>0&&current.Variables[0].indexOf("-")?current.Variables[0].split("-")[0]:"")+"-"+this.value;
+				reloadJson(json);
+			}
+			somefield.append(tobutton);
+			var suffix = document.createElement("span");
+			suffix.innerText = translations["some-sentense_suffix"];
+			somefield.append(suffix);
+			area.append(somefield);
+        }
 
         // Only for the top level (has only one "/"), show summary
         if (path.split("/").length == 2) {
@@ -54,6 +104,7 @@ function jsonLoader(jsonnode, area, path){
             for (var is in jsonnode.SubConditions) {
                 var childarea = document.createElement("fieldset");
                 childarea.classList.add("item");
+				childarea.onclick=function(){this.classList.toggle("focus")}
                 jsonLoader(jsonnode.SubConditions[is], childarea, path+"/"+is);
                 subconarea.append(childarea);
             }
@@ -102,13 +153,12 @@ function jsonLoader(jsonnode, area, path){
 				askenvbutton.innerText = "+";
 				askenvbutton.setAttribute("path", path);
 				askenvbutton.setAttribute("operator", operator);
-				askenvbutton.onclick = function(){askText(null, null, true, false, function(disp, type){
+				askenvbutton.onclick = function(){askText(null, null, null, null, true, false, function(disp, type){
 					var parentjson = JSON.parse(document.getElementById("conditionLogicInput").value);
 					var currentnode = getSubCondition(parentjson, path);
 					currentnode.SubConditions = [];
 					currentnode.SubConditions.push({"Operator": "PARAM", "Variables": [type],"SubConditions": null});
-					document.getElementById("conditionLogicInput").value = JSON.stringify(parentjson, null, 2);
-					refreshSummary();
+					reloadJson(parentjson);
 				})};
 				area.append(askenvbutton);
 			}
@@ -118,7 +168,7 @@ function jsonLoader(jsonnode, area, path){
 				asktextbutton.innerText = "+";
 				asktextbutton.setAttribute("path", path);
 				asktextbutton.setAttribute("operator", operator);
-				asktextbutton.onclick = function(){askText(null, null, true, function(){
+				asktextbutton.onclick = function(){askText(null, null,null, null, true, function(){
 					
 				})};
 				area.append(asktextbutton);
@@ -131,11 +181,9 @@ function jsonLoader(jsonnode, area, path){
             asknumbutton.setAttribute("operator", operator);
             asknumbutton.onclick = askNumber;
             area.append(asknumbutton);
-        }  else if (textextractors.includes(operator)) {
-            var tbd = document.createElement("div");
-            tbd.innerText = "tbd..";
-            area.append(tbd);
-        } else if ((extractionoperators.includes(operator) ||
+        } else if (textextractors.includes(operator)) {
+        
+		} else if ((extractionoperators.includes(operator) ||
             textoperators.includes(operator) ||
             convoperators.includes(operator))
             &&!jsonnode.Variables
@@ -145,7 +193,7 @@ function jsonLoader(jsonnode, area, path){
             asktextbutton.innerText = "?";
             asktextbutton.setAttribute("path", path);
             asktextbutton.setAttribute("operator", operator);
-            asktextbutton.onclick = function(){askText(null, null, true, true)};
+            asktextbutton.onclick = function(){askText(null, null, null, null, true, true)};
             area.append(asktextbutton);
         }
     } else if (jsonnode[0]) {
@@ -188,6 +236,28 @@ function summarize(node){
 				return translations["not-sentense"].replace("{0}", items.join(translations["or-joint"]));
 			}else {
 				return translations["not-notset"];
+			}
+			break;
+		case "SOME":
+            var items = [],
+				rangefrom = node.Variables&&node.Variables[0]?parseInt(node.Variables[0].split("-")[0]):null,
+				rangeto = node.Variables&&node.Variables[0]&&node.Variables[0].split("-").length>1?parseInt(node.Variables[0].split("-")[1]):null;
+            for (i in node.SubConditions) {
+                items.push("<span class='or'>" + summarize(node.SubConditions[i]) + "</span>");
+            }
+			if (items.length) {
+				if (!rangefrom&&!rangeto) {
+					return translations["some-notset"];
+				} else if (rangefrom&&!rangeto) {
+					translations["some-sentense_from"].replace("{0}", items.join(translations["or-joint"])).replace("{1}", rangefrom);
+				} else if (!rangefrom&&rangeto) {
+					translations["some-sentense_to"].replace("{0}", items.join(translations["or-joint"])).replace("{1}", rangeto);
+				} else if (rangefrom&&rangeto) {
+					translations["some-sentense_fromto"].replace("{0}", items.join(translations["or-joint"])).replace("{1}", rangefrom).replace("{2}", rangeto);
+				}
+				return translations["some-sentense"].replace("{0}", items.join(translations["or-joint"]));
+			}else {
+				return translations["some-notset"];
 			}
 			break;
 		case "EQUIVALENT":
@@ -265,15 +335,18 @@ function summarize(node){
 			    target = "<span class='novalue'>" + translations["includes-novalue"] + "</span>";
 			}
 			if (node.Variables.length > 0) {
-				if (node.Variables[0].split("-")[0]&&parseInt(node.Variables[0].split("-")[0])) {
-					rangefrom = parseInt(node.Variables[0].split("-")[0]);
+				items.push(node.Variables[0]);
+			}
+			if (node.Variables.length > 1) {
+				if (node.Variables[1].split("-")[0]&&parseInt(node.Variables[1].split("-")[0])) {
+					rangefrom = parseInt(node.Variables[1].split("-")[0]);
 				}
-				if (node.Variables[0].split("-")[0]&&node.Variables[0].split("-").length>1&&parseInt(node.Variables[0].split("-")[1])){
-					rangeto = parseInt(node.Variables[0].split("-")[1]);
+				if (node.Variables[1].split("-")[0]&&node.Variables[1].split("-").length>1&&parseInt(node.Variables[1].split("-")[1])){
+					rangeto = parseInt(node.Variables[1].split("-")[1]);
 				}
 			}
 			var comparar;
-			if (items?.lange) {
+			if (items?.length) {
 				comparar = items.join(translations["valueof-joint"]);
 			} else {
 				comparar = "<span class='novalue'>" + translations["includes-missingvalue"] + "</span>";
@@ -308,14 +381,14 @@ function summarize(node){
                 regexs.push("<span class='regexparam'>" + translations["regexparam"].replace("{0}", node.Variables[i]) + "</span>");
             }
 			var target;
-			if (items.lange) {
+			if (items.length) {
 				target = items.join(translations["valueof-joint"]);
 			} else {
 				target = "<span class='novalue'>" + translations["regex-missingvalue"] + "</span>";
 			}
 			var regex;
-			if (items.lange) {
-				regex = items.join(translations["valueof-joint"]);
+			if (regexs.length) {
+				regex = regexs.join(translations["valueof-joint"]);
 			} else {
 				regex = "<span class='novalue'>" + translations["regex-missingvalue"] + "</span>";
 			}
@@ -329,17 +402,17 @@ function summarize(node){
 				items.push(summarize(node.SubConditions[i]));
 			}
             for (i in node.Variables) {
-                regexs.push("<span class='regexparam'>" + translations["regexparam"].replace("{0}", node.Variables[i]) + "</span>");
+                regexs.push("<span class='regexparam'>" + node.Variables[i] + "</span>");
             }
 			var target;
-			if (items.lange) {
+			if (items.length) {
 				target = items.join(translations["valueof-joint"]);
 			} else {
 				target = "<span class='novalue'>" + translations["regex-missingvalue"] + "</span>";
 			}
 			var regex;
-			if (items.lange) {
-				regex = items.join(translations["valueof-joint"]);
+			if (regexs.length) {
+				regex = regexs.join(translations["valueof-joint"]);
 			} else {
 				regex = "<span class='novalue'>" + translations["regex-missingvalue"] + "</span>";
 			}
@@ -351,7 +424,7 @@ function summarize(node){
             var rangefrom = "";
             var rangeto = "";
 			var items = [];
-			if (node.SubConditions.length>0) {
+			if (node.SubConditions&&node.SubConditions.length>0) {
 			    target = summarize(node.SubConditions[0]);
 			    for (i in node.SubConditions.slice(1)) {
 			        items.push(summarize(node.SubConditions[i]));
@@ -555,18 +628,23 @@ function summarize(node){
     }
     return null;
 }
-function openBoolDialog(condition){
+function openBoolDialog(ev, path, callback){
+	var path = path, callback =callback;
     document.getElementById("boolBody").className = "";
     document.getElementById("boolBody").classList.add("modal-body");
-    document.getElementById("boolBody").classList.add(namingmap[this.getAttribute("operator")]);
-    document.getElementById("boolBody").classList.add(reverselookuptype[this.getAttribute("operator")]);
+    document.getElementById("boolBody").classList.add(namingmap[ev.target.getAttribute("operator")]);
+    document.getElementById("boolBody").classList.add(reverselookuptype[ev.target.getAttribute("operator")]);
 
     document.getElementById("booltextradio").checked = false;
     document.getElementById("bool_text").classList.remove("available");
+    document.getElementById("textcomparebaseplaceholder").style["display"] = "inline-block";
+    document.getElementById("textcomparebasedisplay").style["display"] = "none";
     document.getElementById("textcomparebasedisplay").innerText = "";
     document.getElementById("textcomparebasevalue").value = "";
     document.getElementById("textcomparebasetype").value = "";
-    document.getElementById("textconditionselectdisplay").innerText = "";
+    document.getElementById("textcomparebaseexttype").value = "";
+    document.getElementById("textcomparebaseextvalue").value = "";
+    document.getElementById("textconditionselectdisplay").innerText = translations["compare-novalue"];
     document.getElementById("textconditionselectvalue").value = "";
     document.getElementById("textconditionselecttype").value = "";
     document.getElementById("boolnumericradio").checked = false;
@@ -582,8 +660,11 @@ function openBoolDialog(condition){
     document.getElementById("boolcondition").value = "";
 
     document.getElementById("boolModal").style["display"] = "block";
-    
-    document.getElementById("boolPath").value =  this.getAttribute("path");
+    document.getElementById("boolPath").value =  ev.target.getAttribute("path");
+	document.getElementById("boolSubmitButton").onclick = function(evb) {editBool(evb, path)};
+	if (callback) {
+		callback();
+	}
 }
 function boolDialogValidator (){
     var classList = document.getElementById("boolBody").classList;
@@ -606,13 +687,20 @@ function boolDialogValidator (){
             document.getElementById("boolcondition").value ? "" : "disabled";
     }
 }
-function addBool(){
+function editBool(ev, path){
     var operation = document.getElementById("boolBody").classList;
     var jsonarea = document.getElementById("conditionLogicInput");
     var json = JSON.parse(jsonarea.value);
-    var currentnode = getSubCondition(json, document.getElementById("boolPath").value);
+	var currentnode;
 	
-	var elem = {};
+	if (path) {
+		currentnode = getSubCondition(json, path);
+	} else {
+		currentnode = {};
+		var parentnode = getSubCondition(json, document.getElementById("boolPath").value);
+		parentnode.SubConditions.push(currentnode);
+	}
+	
 	if (document.getElementById("booltextradio").checked) {
 		
 		var textcomparebasevalue = document.getElementById("textcomparebasevalue").value,
@@ -646,33 +734,27 @@ function addBool(){
 						"SubConditions": [{"Operator": "PARAM", "Variables": paramvariables}],
 						"Variables": compvariables});
 				}
-				elem = {
-					"Operator": operatormap[document.getElementById("textconditionselecttype").value],
-					"Variables": variables,
-					"SubConditions": subconditions
-				}
+				currentnode.Operator = operatormap[document.getElementById("textconditionselecttype").value];
+				currentnode.Variables = variables;
+				currentnode.SubConditions = subconditions;
 				break;
 			
 			case "variable":
-				elem = {
-					"Operator": operatormap[document.getElementById("textcomparebaseexttype").value],
-					"Variables": [document.getElementById("textcomparebaseextvalue").value, document.getElementById("textcomparebasevalue").value],
-					"SubConditions": [{"Operator": document.getElementById("textconditionselecttype").value, "Variables": [document.getElementById("textconditionselectvalue").value]}]
-				}
+				currentnode.Operator = operatormap[document.getElementById("textcomparebaseexttype").value];
+				currentnode.Variables = [document.getElementById("textcomparebaseextvalue").value, document.getElementById("textcomparebasevalue").value];
+				currentnode.SubConditions = [{"Operator": document.getElementById("textconditionselecttype").value, "Variables": [document.getElementById("textconditionselectvalue").value]}];
 				break;
 		}
 	} else if (document.getElementById("boolnumericradio").checked) {
-		elem = {"aa": {"aa":123}};
+		//currentnode = {"aa": {"aa":123}};
 	} else if (document.getElementById("boolconditionradio").checked) {
-		elem["Operator"] = document.getElementById("boolcondition").value;
-		elem["Variables"] = [];
-		elem["SubConditions"] = [];
+		currentnode["Operator"] = document.getElementById("boolcondition").value;
+		currentnode["Variables"] = [];
+		currentnode["SubConditions"] = [];
 	}
 
-	currentnode.SubConditions.push(elem);
-    jsonarea.value = JSON.stringify(json, null, 2);
     document.getElementById("boolModal").style["display"] = "none";
-    refreshSummary();
+    reloadJson(json);
 }
 function askText(currentvalue, currenttype, currentextractor, currentextractorval, includeenv, includeenter, callback){
     document.getElementById("textBody").className = "";
@@ -690,10 +772,10 @@ function askText(currentvalue, currenttype, currentextractor, currentextractorva
     document.getElementById('textExtSelect').value=currentextractor??"wholeword";
 	document.getElementById('textExtRegex').style['display']= currentextractor=="regex_extract" ? "inline-block":"none";
 	document.getElementById('textExtRegex').value=currentextractor=="regex_extract"?currentextractorval:"";
-	document.getElementById('textExtSubFrom').style['display']= currentextractor=="range" ? "inline-block":"none";
-	document.getElementById('textExtSubFrom').value=currentextractor=="range"?currentextractorval?.split(",")[0]:"";
-	document.getElementById('textExtSubTo').style['display']= currentextractor=="range" ? "inline-block":"none";
-	document.getElementById('textExtSubTo').value=currentextractor=="range"&&currentextractorval?.length>1?currentextractorval.split(",")[1]:"";
+	document.getElementById('textExtSubFrom').style['display']= currentextractor=="substring" ? "inline-block":"none";
+	document.getElementById('textExtSubFrom').value=currentextractor=="substring"?currentextractorval?.split("-")[0]:"";
+	document.getElementById('textExtSubTo').style['display']= currentextractor=="substring" ? "inline-block":"none";
+	document.getElementById('textExtSubTo').value=currentextractor=="substring"&&currentextractorval?.length>1?currentextractorval.split("-")[1]:"";
 	document.getElementById('textExtFirst').style['display']= currentextractor=="first" ? "inline-block":"none";
 	document.getElementById('textExtFirst').value=currentextractor=="first"?currentextractorval:"";
 	document.getElementById('textExtLast').style['display']= currentextractor=="last" ? "inline-block":"none";
@@ -785,7 +867,7 @@ function textDialogValidator() {
 	  }
 	} else if (document.getElementById("textExtSelect").value=="substring") {
 		try {
-			valid = !document.getElementById("textExtSubTo").value || !parseInt(document.getElementById("textExtSubFrom").value) || parseInt(document.getElementById("textExtSubTo").value) >= parseInt(document.getElementById("textExtSubFrom").value);
+			valid = isNaN(parseInt(document.getElementById("textExtSubTo").value)) ^ isNaN(parseInt(document.getElementById("textExtSubFrom").value)) || parseInt(document.getElementById("textExtSubTo").value) >= parseInt(document.getElementById("textExtSubFrom").value);
 		} catch {
 			valid = false;
 		}
@@ -864,56 +946,20 @@ function askNum(){
 function numDialogValidator(){
     
 }
-function openComparerDialog(currentnode, operator, callback){
-	var condition = currentnode;
-    document.getElementById("comparerBody").className = "";
-    document.getElementById("comparerBody").classList.add("modal-body");
-    document.getElementById("comparerBody").classList.add(namingmap[operator]);
-    document.getElementById("comparerBody").classList.add(reverselookuptype[operator]);
-	
-	if (currentnode.SubConditions.length) {
-		document.getElementById("comp_baseplaceholder").style["display"] = "inline-block";
-		document.getElementById("comp_basedisplay").style["display"] = "none";
-		document.getElementById("comp_basedisplay").innerText = "";
-		document.getElementById("comp_basevalue").value = "";
-		document.getElementById("comp_basetype").value = "";
-	}
-	
-//	document.getElementById("comp_selectdisplay").style["display"] = "inline-block";
-	document.getElementById("comp_selectvalue").innerText = "";
-	document.getElementById("comp_selecttype").value = "";
-	document.getElementById("comp_targetplaceholder").style["display"] = "inline-block";
-	document.getElementById("comp_targetdisplay").style["display"] = "none";
-	document.getElementById("comp_targetdisplay").innerText = "";
-	document.getElementById("comp_targetvalue").value = "";
-	document.getElementById("comp_targettype").value = "";
-	
-	document.getElementById("comparerSubmitButton").onclick = function(){
-		condition.Variables[0] = "yo";
-		condition.SubConditions[0].Variables[0] = "yo";
-		document.getElementById("comparerModal").style["display"] = "none";
-		callback();
-		refreshSummary();
-	};
-
-    document.getElementById("comparerModal").style["display"] = "block";
-}
-function editItem(){
-	var operator = event.target.getAttribute("operator");
-	var path = event.target.getAttribute("path");
+function editItem(ev){
+	var operator = ev.target.getAttribute("operator");
+	var path = ev.target.getAttribute("path");
     var jsonarea = document.getElementById("conditionLogicInput");
     var json = JSON.parse(jsonarea.value);
 	var currentnode = getSubCondition(json, path);
 	var finishupdating = function(){
-		jsonarea.value = JSON.stringify(json, null, 2);
-		refreshSummary();
+		reloadJson(json);
 	}
 	if (reverselookuptype[operator]=="boolean") {
 		// Will be handled as openBoolDialog() directly. Wouldn't be called
 	} else if (reverselookuptype[operator]=="comp") {
-		openComparerDialog(currentnode, operator, finishupdating);
 	} else if (reverselookuptype[operator]=="optext") {
-		
+		openBoolDialog(ev, path, finishupdating);
 	} else if (reverselookuptype[operator]=="group") {
 		
 	} else if (reverselookuptype[operator]=="calc") {
@@ -921,11 +967,30 @@ function editItem(){
 	} else if (reverselookuptype[operator]=="conv") {
 		
 	} else if (reverselookuptype[operator]=="extract") {
-		
+		var extractor = "wholeword", extractorval = null;
+		if (currentnode.SubConditions && currentnode.SubConditions.length>0 && currentnode.SubConditions[0].Variables) {
+			extractor = currentnode.SubConditions[0].Variables[0];
+			if (currentnode.SubConditions[0].Variables.length > 1) {
+				extractorval = currentnode.SubConditions[0].Variables[1];
+			}
+		}
+		askText(currentnode.Variables[0], "env", extractor, extractorval, true, false, function(dispval, val, type, exttype, extval) {
+			if (exttype == "wholeword") {
+				currentnode.Operator = "PARAM";
+				currentnode.Variables = [val];
+				currentnode.SubConditions = [];
+			} else {
+				currentnode.Operator = operatormap[exttype];
+				currentnode.Variables = [extval];
+				currentnode.SubConditions = [{"Operator": "PARAM", SubConditios: null, Variables: [val]}];
+			}
+			finishupdating();
+		});
+	} else if (reverselookuptype[operator]=="param") {
 	} else if (operator=="_variable") {
 		var ind = event.target.getAttribute("index");
 		var current = event.target.innerText;
-		askText(current, "variable", false, true, function(dispval, val){currentnode.Variables[ind] = val;finishupdating()});
+		askText(current, "variable", null, null, false, true, function(dispval, val){currentnode.Variables[ind] = val;finishupdating()});
 	}
 
     refreshSummary();
@@ -943,8 +1008,7 @@ function deleteItem(){
 		currentnode = currentnode.SubConditions[paths.slice(1)[i]];
 	}
 	parentnode.SubConditions.splice(parentnode.SubConditions.indexOf(currentnode), 1);
-    jsonarea.value = JSON.stringify(json, null, 2);
-	refreshSummary();
+    reloadJson(json);
 }
 function getSubCondition(json, pathstring) {
 	var paths = pathstring.split("/");
@@ -955,7 +1019,24 @@ function getSubCondition(json, pathstring) {
 	return currentnode;
 }
 function refreshSummary(){
-    // to make really sure having not difference between what is shown and the actual data, load from object not the json just made
-    jsonLoader(JSON.parse(document.getElementById("conditionLogicInput").value), document.getElementById("drawingArea"));
-    document.getElementById("logictotaldescription").innerHTML = summarize(JSON.parse(document.getElementById("conditionLogicInput").value));
+	try {
+		// to make really sure having not difference between what is shown and the actual data, load from object not the json just made
+		jsonLoader(JSON.parse(document.getElementById("conditionLogicInput").value), document.getElementById("drawingArea"));
+		document.getElementById("logictotaldescription").innerHTML = summarize(JSON.parse(document.getElementById("conditionLogicInput").value));
+	} catch {
+		document.getElementById("logictotaldescription").innerHTML = "";
+		document.getElementById("drawingArea").replaceChildren();
+		var jsonerror = document.createElement("div");
+		jsonerror.classList.add("jsonerror");
+		jsonerror.innerText = translations["failedjsonparse"];
+		document.getElementById("logictotaldescription").append(jsonerror.cloneNode(true));
+		document.getElementById("drawingArea").append(jsonerror.cloneNode(true));
+	}
+}
+function reloadJson (json){
+    document.getElementById("conditionLogicInput").value = JSON.stringify(json, null, 2);
+	refreshSummary();
+}
+function refreshRequest(){
+	jsonLoader(JSON.parse(document.getElementById("sendingparamjson").value), document.getElementById("sendingParameterArea"))
 }
