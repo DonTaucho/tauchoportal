@@ -39,6 +39,7 @@ type PageData struct {
 	EventTypes               []string
 	ChannelDetail            *controller.ChannelDetailForTemplate
 	ChannelDetailConditions  []controller.ConditionDetailForTemplate
+	Devices                  *controller.DevicesPageData
 	PlatformMeta             map[string]map[string]interface{}
 	EventBadgeClass          map[string]string
 }
@@ -462,6 +463,12 @@ func (s *Server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 			data.EventBadgeClass = pageData.EventBadgeClass
 		}
 	}
+
+	// Fetch devices page data if on /devices page
+	if cfg.Name == "devices" {
+		pageData := controller.PrepareDevicesPageData()
+		data.Devices = pageData
+	}
 	if err := tmpl.ExecuteTemplate(w, "page", data); err != nil {
 		log.Printf("failed to render page %s: %v", cfg.Name, err)
 		http.Error(w, "failed to render page", http.StatusInternalServerError)
@@ -540,7 +547,7 @@ func dictparams(values ...interface{}) (map[string]interface{}, error) {
 	for i := 0; i < len(values); i += 2 {
 		key, ok := values[i].(string)
 		if !ok {
-			log.Fatalf("Error unmarshaling JSON: %v")
+			log.Fatalf("Error: dict key must be a string")
 			return nil, nil
 		}
 		var result map[string]string

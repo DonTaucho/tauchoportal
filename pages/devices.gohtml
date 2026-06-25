@@ -16,18 +16,120 @@
                 </div>
                 <button class="btn btn-primary" onclick="openAddModal()">+ Add Device</button>
             </div>
-            <div class="stats-row" id="statsRow"></div>
+            <!-- Stats Row (pre-rendered) -->
+            <div class="stats-row">
+                {{$total := len .Devices.Devices}}
+                {{$online := 0}}
+                {{$offline := 0}}
+                {{$notConf := 0}}
+                {{range .Devices.Devices}}
+                    {{if eq .Status "online"}}{{$online = add $online 1}}{{end}}
+                    {{if eq .Status "offline"}}{{$offline = add $offline 1}}{{end}}
+                    {{if not .IsConfigured}}{{$notConf = add $notConf 1}}{{end}}
+                {{end}}
+                <div class="stat-card"><span class="stat-number">{{$total}}</span><span class="stat-label">Total</span></div>
+                <div class="stat-card online"><span class="stat-number">{{$online}}</span><span class="stat-label">Online</span></div>
+                <div class="stat-card offline"><span class="stat-number">{{$offline}}</span><span class="stat-label">Offline</span></div>
+                <div class="stat-card warn"><span class="stat-number">{{$notConf}}</span><span class="stat-label">Setup Incomplete</span></div>
+            </div>
         </div>
 
-        <div id="brandFilterTabs"></div>
-        <div class="devices-list" id="devicesList"></div>
+        <!-- Filter Tabs (pre-rendered) -->
+        <div class="filter-tabs">
+            <button class="filter-tab active" data-filter="all" onclick="filterByBrand('all', this)">
+                All <span class="tab-count">{{len .Devices.Devices}}</span>
+            </button>
+            {{range $brandId := .Devices.BrandIDs}}
+                {{$brand := index $.Devices.Brands $brandId}}
+                {{$count := 0}}
+                {{range $.Devices.Devices}}
+                    {{if eq .Brand $brandId}}{{$count = add $count 1}}{{end}}
+                {{end}}
+                {{$brandLabel := $brandId}}
+                {{if $brand}}
+                    {{$brandLabel = $brand.Name}}
+                {{end}}
+                <button class="filter-tab" data-filter="{{$brandId}}" onclick="filterByBrand('{{$brandId}}', this)">
+                    🔌 {{$brandLabel}} <span class="tab-count">{{$count}}</span>
+                </button>
+            {{end}}
+        </div>
 
-        <div class="empty-state" id="emptyState" style="display:none">
+        <!-- Device List (pre-rendered) -->
+        <div class="devices-list" id="devicesList">
+            {{if eq (len .Devices.Devices) 0}}
+            <p class="no-devices-msg">No devices yet. Click "+ Add Device" above to get started.</p>
+            {{else}}
+            {{range .Devices.Devices}}
+                {{$brand := index $.Devices.Brands .Brand}}
+                {{$brandColor := "#888888"}}
+                {{$brandLogo := ""}}
+                {{if $brand}}
+                    {{$brandColor = $brand.BrandColor}}
+                    {{$brandLogo = $brand.LogoURL}}
+                {{end}}
+                
+                <div class="device-card" data-id="{{.ID}}" data-brand="{{.Brand}}">
+                    <div class="device-accent" style="background:{{$brandColor}}"></div>
+                    <div class="device-body">
+                        <div class="device-brand">
+                            {{if $brandLogo}}
+                            <span class="device-brand-icon"><img src="{{$brandLogo}}" alt="{{.Brand}}" style="max-height:24px; width:auto;"></span>
+                            {{else}}
+                            <span class="device-brand-icon">🔌</span>
+                            {{end}}
+                            <span class="device-brand-label">{{if $brand}}{{$brand.Name}}{{else}}{{.Brand}}{{end}}</span>
+                        </div>
+                        <div class="device-info">
+                            <div class="device-name">{{.Name}}</div>
+                            <div class="device-model">{{.ProductName}}</div>
+                            <div class="device-badges">
+                                {{if eq .Status "online"}}
+                                <span class="status-badge online">🟢 Online</span>
+                                {{else}}
+                                <span class="status-badge offline">🔴 Offline</span>
+                                {{end}}
+                                {{if not .IsConfigured}}
+                                <span class="status-badge warn">⚠ Setup incomplete</span>
+                                {{end}}
+                                {{if .Room}}
+                                <span class="device-room">🏠 {{.Room}}</span>
+                                {{end}}
+                            </div>
+                            <div class="device-action-chips">
+                                {{range $idx, $action := .SupportedActions}}
+                                    {{if lt $idx 5}}
+                                    <span class="action-chip" data-action="{{$action}}">
+                                        {{/* Action icon will be set by JS ACTION_META */}}
+                                        {{$action}}
+                                    </span>
+                                    {{end}}
+                                {{end}}
+                                {{if gt (len .SupportedActions) 5}}
+                                <span class="action-chip more">+{{sub (len .SupportedActions) 5}}</span>
+                                {{end}}
+                            </div>
+                        </div>
+                        <div class="device-ctrl">
+                            <button class="action-btn test" onclick="testDevice('{{.ID}}')">⚡ Test</button>
+                            <button class="action-btn edit" onclick="openEditModal('{{.ID}}')">✏️ Edit</button>
+                            <button class="action-btn delete" onclick="deleteDevice('{{.ID}}')">🗑</button>
+                        </div>
+                    </div>
+                </div>
+            {{end}}
+            {{end}}
+        </div>
+
+        <!-- Empty State -->
+        {{if eq (len .Devices.Devices) 0}}
+        <div class="empty-state">
             <div class="empty-icon"><img src="/image/waiting_s.png" /></div>
             <h2>No devices yet</h2>
             <p>Add a smart home device to get started. Configured devices can be triggered by stream event conditions.</p>
             <button class="btn btn-primary" onclick="openAddModal()">+ Add First Device</button>
         </div>
+        {{end}}
     </div>
 
     <!-- Add / Edit Device Modal (Accordion Style) -->
@@ -122,104 +224,7 @@
     let BRANDS = [];
     let PRODUCTS = {};
 
-    // Per-brand API credential fields + docs
-    const BRAND_CREDS = {
-        govee: {
-            fields: [
-                { id: 'apiKey', label: 'Govee API Key', type: 'password',
-                  help: 'Get in Govee Home app → Profile → About Us → Request API Key' },
-                { id: 'devId',  label: 'Device ID',     type: 'text',
-                  help: 'Found in Govee Home app → device → device info, or via GET /v1/devices' },
-            ],
-            docsUrl: 'https://developer.govee.com', docsLabel: 'Govee Developer API Docs',
-        },
-        hue: {
-            fields: [
-                { id: 'bridgeIp', label: 'Hue Bridge IP',        type: 'text',
-                  help: 'Philips Hue app → Settings → My Hue system → Hue Bridges → (i)' },
-                { id: 'apiKey',   label: 'API Token (Username)',  type: 'password',
-                  help: 'Press bridge button, then POST /api with {"devicetype":"taucho"} to generate' },
-                { id: 'lightId',  label: 'Light ID',             type: 'text',
-                  help: 'GET /api/{username}/lights — find your light\'s number in the response' },
-            ],
-            docsUrl: 'https://developers.meethue.com', docsLabel: 'Philips Hue Developer Docs',
-        },
-        kasa: {
-            fields: [
-                { id: 'deviceIp', label: 'Device Local IP', type: 'text',
-                  help: 'Find in your router DHCP table, or Kasa app → device → Settings → Device Info' },
-            ],
-            docsUrl: 'https://github.com/python-kasa/python-kasa', docsLabel: 'TP-Link Kasa Local API',
-        },
-        lifx: {
-            fields: [
-                { id: 'apiKey',   label: 'Personal Access Token', type: 'password',
-                  help: 'Generate at cloud.lifx.com → Settings → Generate New Token' },
-                { id: 'selector', label: 'Light Selector',        type: 'text',
-                  help: 'e.g., "id:d073d5xxxxxx" or "label:Desk Lamp" — see LIFX API docs' },
-            ],
-            docsUrl: 'https://api.developer.lifx.com', docsLabel: 'LIFX HTTP Remote API Docs',
-        },
-        tuya: {
-            fields: [
-                { id: 'clientId',     label: 'Client ID',     type: 'text',
-                  help: 'Tuya IoT Platform → Project → Authorization Key → Access ID' },
-                { id: 'clientSecret', label: 'Client Secret', type: 'password',
-                  help: 'Tuya IoT Platform → Project → Authorization Key → Access Secret' },
-                { id: 'devId',        label: 'Device ID',     type: 'text',
-                  help: 'Tuya IoT Platform → Devices → Device ID column' },
-                { id: 'region',       label: 'Region',        type: 'text',
-                  help: 'us, eu, cn, or in — must match your Tuya account data center' },
-            ],
-            docsUrl: 'https://developer.tuya.com/en/docs/iot', docsLabel: 'Tuya IoT Platform Docs',
-        },
-        nanoleaf: {
-            fields: [
-                { id: 'deviceIp', label: 'Device IP Address', type: 'text',
-                  help: 'Nanoleaf app → device → ⚙ → Device Info → IP Address' },
-                { id: 'apiKey',   label: 'Auth Token',        type: 'password',
-                  help: 'Hold power button 5–7 sec until white flash, then POST /api/v1/new within 30 sec' },
-            ],
-            docsUrl: 'https://forum.nanoleaf.me/docs', docsLabel: 'Nanoleaf OpenAPI Docs',
-        },
-        yeelight: {
-            fields: [
-                { id: 'deviceIp', label: 'Device IP Address', type: 'text',
-                  help: 'Enable "LAN Control" in Yeelight app → device Settings. IP shown in router DHCP.' },
-            ],
-            docsUrl: 'https://www.yeelight.com/download/Yeelight_Inter-Operation_Spec.pdf',
-            docsLabel: 'Yeelight LAN Control Spec',
-        },
-        wled: {
-            fields: [
-                { id: 'deviceIp', label: 'WLED Device IP', type: 'text',
-                  help: 'The local IP of your WLED device (e.g. 192.168.1.100). Set static IP in WLED WiFi settings.' },
-            ],
-            docsUrl: 'https://kno.wled.ge/interfaces/json-api/', docsLabel: 'WLED JSON API Docs',
-        },
-        wyze: {
-            fields: [
-                { id: 'apiKey',   label: 'Wyze API Key', type: 'password',
-                  help: 'Generate at wyze.com → Account → Developer API Key' },
-                { id: 'apiKeyId', label: 'API Key ID',   type: 'text',
-                  help: 'The Key ID shown alongside your API key on the Wyze developer page' },
-                { id: 'devMac',   label: 'Device MAC',   type: 'text',
-                  help: 'Wyze app → Device → Device Info → MAC Address' },
-            ],
-            docsUrl: 'https://wyze-developer-site.vercel.app', docsLabel: 'Wyze Developer API Docs',
-        },
-        amazon: {
-            fields: [
-                { id: 'info', label: '', type: 'info',
-                  help: 'Amazon Alexa integration requires an Alexa Smart Home Skill with AWS Lambda. See the documentation below for full setup instructions.' },
-                { id: 'endpointId', label: 'Endpoint ID', type: 'text',
-                  help: 'The device endpoint ID from your Alexa Smart Home skill discovery response.' },
-            ],
-            docsUrl: 'https://developer.amazon.com/en-US/docs/alexa/smarthome/understand-the-smart-home-skill-api.html',
-            docsLabel: 'Alexa Smart Home Skill API Docs',
-        },
-    };
-
+    // Action metadata (icons + labels)
     const ACTION_META = {
         on:         { label: 'Turn On',              icon: '🔆' },
         off:        { label: 'Turn Off',             icon: '🔅' },
@@ -229,22 +234,6 @@
         color_temp: { label: 'Color Temperature',    icon: '🌡' },
         scene:      { label: 'Play Scene / Effect',  icon: '✨' },
         flash:      { label: 'Flash Alert',          icon: '⚡' },
-    };
-
-    // Map HTML field IDs (camelCase) ↔ API keys (snake_case)
-    const CRED_KEY_MAP = {
-        apiKey:       'api_key',
-        devId:        'device_id',
-        bridgeIp:     'bridge_ip',
-        lightId:      'light_id',
-        deviceIp:     'device_ip',
-        clientId:     'client_id',
-        clientSecret: 'client_secret',
-        region:       'region',
-        selector:     'selector',
-        apiKeyId:     'api_key_id',
-        devMac:       'device_mac',
-        endpointId:   'endpoint_id',
     };
 
     let MY_DEVICES = [];
@@ -299,113 +288,20 @@
     }
 
     // =============================================
-    // Render
+    // Render (Simplified)
     // =============================================
     let activeFilter = 'all';
-
-    function renderPage() {
-        renderStats();
-        renderFilterTabs();
-        renderDeviceList();
-    }
-
-    function renderStats() {
-        const online  = MY_DEVICES.filter(d => d.status === 'online').length;
-        const offline = MY_DEVICES.filter(d => d.status === 'offline').length;
-        const notConf = MY_DEVICES.filter(d => !d.is_configured).length;
-        document.getElementById('statsRow').innerHTML = `
-            <div class="stat-card"><span class="stat-number">${MY_DEVICES.length}</span><span class="stat-label">Total</span></div>
-            <div class="stat-card online"><span class="stat-number">${online}</span><span class="stat-label">Online</span></div>
-            <div class="stat-card offline"><span class="stat-number">${offline}</span><span class="stat-label">Offline</span></div>
-            <div class="stat-card warn"><span class="stat-number">${notConf}</span><span class="stat-label">Setup Incomplete</span></div>
-        `;
-    }
-
-    function renderFilterTabs() {
-        const presentBrands = [...new Set(MY_DEVICES.map(d => d.brand))];
-        const tabs = presentBrands.map(brandId => {
-            const b = BRANDS.find(x => x.id === brandId);
-            const count = MY_DEVICES.filter(d => d.brand === brandId).length;
-            const brandLabel = b ? (b.icon || '🔌') + ' ' + b.name : brandId;
-            return `<button class="filter-tab ${activeFilter === brandId ? 'active' : ''}"
-                onclick="filterByBrand('${brandId}', this)">${brandLabel} <span class="tab-count">${count}</span></button>`;
-        }).join('');
-        document.getElementById('brandFilterTabs').innerHTML = `
-            <div class="filter-tabs">
-                <button class="filter-tab ${activeFilter === 'all' ? 'active' : ''}" onclick="filterByBrand('all', this)">
-                    All <span class="tab-count">${MY_DEVICES.length}</span>
-                </button>
-                ${tabs}
-            </div>`;
-    }
 
     function filterByBrand(brandId, btn) {
         activeFilter = brandId;
         document.querySelectorAll('.filter-tab').forEach(t => t.classList.remove('active'));
         btn.classList.add('active');
-        renderDeviceList();
-    }
-
-    function renderDeviceList() {
-        const filtered = activeFilter === 'all' ? MY_DEVICES : MY_DEVICES.filter(d => d.brand === activeFilter);
-
-        if (MY_DEVICES.length === 0) {
-            document.getElementById('emptyState').style.display = 'flex';
-            document.getElementById('devicesList').innerHTML = '';
-            return;
-        }
-        document.getElementById('emptyState').style.display = 'none';
-
-        if (filtered.length === 0) {
-            document.getElementById('devicesList').innerHTML = '<p class="no-filter-msg">No devices for this brand yet.</p>';
-            return;
-        }
-
-        document.getElementById('devicesList').innerHTML = filtered.map(renderDeviceCard).join('');
-    }
-
-    function renderDeviceCard(dev) {
-        const brand      = BRANDS.find(b => b.id === dev.brand);
-        const product    = (PRODUCTS[dev.brand] || []).find(p => p.id === dev.product_id);
-        const brandColor = brand ? (brand.brand_color || '#888') : '#888';
-        const logoHtml   = brand && brand.logo_url 
-            ? `<img src="${brand.logo_url}" alt="${brand.name}" style="max-height:24px; width:auto;">`
-            : `${brand ? brand.icon : '🔌'}`;
-
-        const statusBadge = dev.status === 'online'
-            ? '<span class="status-badge online">🟢 Online</span>'
-            : '<span class="status-badge offline">🔴 Offline</span>';
-
-        const configBadge = !dev.is_configured
-            ? '<span class="status-badge warn">⚠ Setup incomplete</span>'
-            : '';
-
-        const chips = product ? product.supported_actions.slice(0, 5).map(a => {
-            const m = ACTION_META[a];
-            return `<span class="action-chip">${m ? m.icon : ''} ${m ? m.label : a}</span>`;
-        }).join('') + (product.supported_actions.length > 5 ? `<span class="action-chip more">+${product.supported_actions.length - 5}</span>` : '') : '';
-
-        return `
-        <div class="device-card" data-id="${dev.id}">
-            <div class="device-accent" style="background:${brandColor}"></div>
-            <div class="device-body">
-                <div class="device-brand">
-                    <span class="device-brand-icon">${logoHtml}</span>
-                    <span class="device-brand-label">${brand ? brand.name : dev.brand}</span>
-                </div>
-                <div class="device-info">
-                    <div class="device-name">${dev.name}</div>
-                    <div class="device-model">${product ? product.name : dev.product_id}</div>
-                    <div class="device-badges">${statusBadge} ${configBadge} ${dev.room ? `<span class="device-room">🏠 ${dev.room}</span>` : ''}</div>
-                    <div class="device-action-chips">${chips}</div>
-                </div>
-                <div class="device-ctrl">
-                    <button class="action-btn test" onclick="testDevice('${dev.id}')">⚡ Test</button>
-                    <button class="action-btn edit" onclick="openEditModal('${dev.id}')">✏️ Edit</button>
-                    <button class="action-btn delete" onclick="deleteDevice('${dev.id}')">🗑</button>
-                </div>
-            </div>
-        </div>`;
+        
+        // Show/hide device cards based on filter
+        document.querySelectorAll('.device-card').forEach(card => {
+            const cardBrand = card.dataset.brand;
+            card.style.display = (brandId === 'all' || cardBrand === brandId) ? 'block' : 'none';
+        });
     }
 
     // =============================================
@@ -453,12 +349,12 @@
             document.getElementById('devRoom').value = fullDev.room || '';
             
             const creds = fullDev.credentials || {};
-            const brandCred = BRAND_CREDS[dev.brand];
-            if (brandCred) {
-                brandCred.fields.forEach(f => {
+            const brand = BRANDS.find(b => b.id === dev.brand);
+            if (brand && brand.credential_fields) {
+                brand.credential_fields.forEach(f => {
                     if (f.type !== 'info') {
                         const el = document.getElementById('cred_' + f.id);
-                        if (el) el.value = creds[CRED_KEY_MAP[f.id] || f.id] || '';
+                        if (el) el.value = creds[f.id] || '';
                     }
                 });
             }
@@ -679,10 +575,13 @@
     }
 
     function renderCredFields(brandId) {
-        const creds = BRAND_CREDS[brandId];
-        if (!creds) { document.getElementById('credFields').innerHTML = ''; return; }
+        const brand = BRANDS.find(b => b.id === brandId);
+        if (!brand || !brand.credential_fields) { 
+            document.getElementById('credFields').innerHTML = ''; 
+            return; 
+        }
 
-        document.getElementById('credFields').innerHTML = creds.fields.map(f => {
+        document.getElementById('credFields').innerHTML = brand.credential_fields.map(f => {
             if (f.type === 'info') return `<div class="cred-info"><p>${f.help}</p></div>`;
             const isPwd = f.type === 'password';
             return `
@@ -697,8 +596,9 @@
             </div>`;
         }).join('');
 
-        document.getElementById('credDocsLink').innerHTML = creds.docsUrl
-            ? `<a href="${creds.docsUrl}" target="_blank" rel="noopener" class="docs-link">📖 ${creds.docsLabel} ↗</a>`
+        // Render docs link if available
+        document.getElementById('credDocsLink').innerHTML = brand.docs_url
+            ? `<a href="${brand.docs_url}" target="_blank" rel="noopener" class="docs-link">📖 ${brand.docs_label} ↗</a>`
             : '';
     }
 
@@ -816,12 +716,12 @@
             // Handle catalog devices
             else {
                 const creds = {};
-                const brandCred = BRAND_CREDS[selectedBrand];
-                if (brandCred) {
-                    brandCred.fields.forEach(f => {
+                const brand = BRANDS.find(b => b.id === selectedBrand);
+                if (brand && brand.credential_fields) {
+                    brand.credential_fields.forEach(f => {
                         if (f.type !== 'info') {
                             const el = document.getElementById('cred_' + f.id);
-                            if (el && el.value) creds[CRED_KEY_MAP[f.id] || f.id] = el.value;
+                            if (el && el.value) creds[f.id] = el.value;
                         }
                     });
                 }
@@ -840,8 +740,8 @@
             }
             
             closeModal();
-            await loadDevices();
-            renderPage();
+            // Reload page to get fresh device list from server
+            window.location.reload();
         } catch (e) {
             alert('Failed to save device: ' + e.message);
         } finally {
@@ -855,8 +755,8 @@
         if (!confirm(`Remove "${dev.name}"?\n\nConditions using this device will lose their action.`)) return;
         try {
             await apiRequest('DELETE', `/devices?id=${devId}`);
-            await loadDevices();
-            renderPage();
+            // Reload page to get fresh device list from server
+            window.location.reload();
         } catch (e) {
             alert('Failed to delete device: ' + e.message);
         }
@@ -876,8 +776,15 @@
 
     (async () => {
         await loadBrandsAndProducts();
-        await loadDevices();
-        renderPage();
+        
+        // Update action chip icons based on ACTION_META
+        document.querySelectorAll('.action-chip[data-action]').forEach(chip => {
+            const action = chip.dataset.action;
+            const meta = ACTION_META[action];
+            if (meta) {
+                chip.textContent = (meta.icon || '') + ' ' + (meta.label || action);
+            }
+        });
     })();
     </script>
 {{end}}
