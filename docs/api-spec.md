@@ -1532,17 +1532,54 @@ List all brands.
     "id": "govee",
     "name": "Govee",
     "website": "https://www.govee.com",
-    "logo_url": "https://cdn.example.com/govee-logo.png",
-    "brand_color": "#005DAA",
+    "logo_url": "https://www.govee.com/favicon.ico",
+    "icon": "💡",
+    "brand_color": "#4F7EFF",
     "affiliate_url": "https://govee.mention-me.com/your-tracking-id",
     "affiliate_commission_percent": 5.50,
-    "requires_brand_credentials": false,
+    "requires_brand_credentials": true,
+    "docs_url": "https://developer.govee.com",
+    "docs_label": "Govee Developer API",
+    "credential_fields": [
+      {
+        "id": "api_key",
+        "label": "Govee API Key",
+        "type": "password",
+        "help": "Get in Govee Home app → Profile → About Us → Request API Key",
+        "placeholder": ""
+      }
+    ],
     "sort_order": 1,
     "is_active": true,
-    "created_at": "...",
-    "updated_at": "..."
+    "created_at": "2024-01-15T10:30:00Z",
+    "updated_at": "2024-01-15T10:30:00Z"
   },
-  { "id": "hue", "name": "Philips Hue", "website": "https://www.philips-hue.com", "sort_order": 2, ... }
+  {
+    "id": "tuya",
+    "name": "Tuya",
+    "website": "https://www.tuya.com",
+    "logo_url": "https://www.tuya.com/favicon.ico",
+    "icon": "🔌",
+    "brand_color": "#FF6B6B",
+    "affiliate_url": null,
+    "affiliate_commission_percent": null,
+    "requires_brand_credentials": true,
+    "docs_url": "https://developer.tuya.com",
+    "docs_label": "Tuya Developer Platform",
+    "credential_fields": [
+      {
+        "id": "oauth",
+        "label": "Login with Tuya",
+        "type": "info",
+        "help": "Click to authorize via Tuya OAuth",
+        "placeholder": ""
+      }
+    ],
+    "sort_order": 2,
+    "is_active": true,
+    "created_at": "2024-01-15T10:30:00Z",
+    "updated_at": "2024-01-15T10:30:00Z"
+  }
 ]
 ```
 
@@ -1559,12 +1596,30 @@ Get a brand with its product list.
     "id": "govee", 
     "name": "Govee", 
     "website": "https://www.govee.com",
-    "logo_url": "https://cdn.example.com/govee-logo.png",
+    "logo_url": "https://www.govee.com/favicon.ico",
+    "icon": "💡",
+    "brand_color": "#4F7EFF",
+    "affiliate_url": "https://govee.mention-me.com/your-tracking-id",
+    "affiliate_commission_percent": 5.50,
+    "requires_brand_credentials": true,
+    "docs_url": "https://developer.govee.com",
+    "docs_label": "Govee Developer API",
+    "credential_fields": [
+      {
+        "id": "api_key",
+        "label": "Govee API Key",
+        "type": "password",
+        "help": "Get in Govee Home app → Profile → About Us → Request API Key",
+        "placeholder": ""
+      }
+    ],
     "sort_order": 1,
-    ... 
+    "is_active": true,
+    "created_at": "2024-01-15T10:30:00Z",
+    "updated_at": "2024-01-15T10:30:00Z"
   },
   "products": [
-    { "id": "govee-h6159", "brand_id": "govee", "name": "H6159 LED Strip", "category": "light_strip", "supported_actions": ["set_color","set_brightness"], "is_active": true, ... }
+    { "id": "govee-h6159", "brand_id": "govee", "name": "H6159 LED Strip", "category": "light_strip", "supported_actions": ["set_color","set_brightness"], "is_active": true, "created_at": "2024-01-15T10:30:00Z", "updated_at": "2024-01-15T10:30:00Z" }
   ]
 }
 ```
@@ -1582,10 +1637,22 @@ Create a brand. (Admin operation — access control is portal-side for now.)
   "name": "Acme Lights", // required
   "website": "https://acme.example.com",
   "logo_url": "https://cdn.example.com/acme.png",
+  "icon": "💡", // optional — emoji or icon identifier
   "brand_color": "#FF5733", // optional — hex color for device card accent
   "affiliate_url": "https://acme.example.com/ref?code=TAUCHO", // optional — affiliate link for purchasing
   "affiliate_commission_percent": 5.50, // optional — commission rate (e.g., 5.50%)
   "requires_brand_credentials": false, // optional — flag for future brand-level OAuth support
+  "docs_url": "https://developer.acme.com", // optional — documentation URL
+  "docs_label": "Acme Developer Docs", // optional — documentation link label
+  "credential_fields": [ // optional — array of credential field definitions for frontend form rendering
+    {
+      "id": "api_key",
+      "label": "Acme API Key",
+      "type": "password", // "text", "password", or "info"
+      "help": "Get your API key from your Acme account settings",
+      "placeholder": "sk_live_..."
+    }
+  ],
   "sort_order": 1, // optional — display order priority; null = alphabetical
   "is_active": true      // optional, default true
 }
@@ -1887,3 +1954,91 @@ If the API is ever exposed publicly, it should validate that `X-User-ID` is only
 - Avoids the API needing its own session store or cookie parser on every resource request
 - The portal's `fetchUser()` call is already happening for page renders — on API proxy calls it adds one extra `/auth/user` round-trip per request (acceptable for now; can be optimised later with a short-lived cache keyed by session cookie)
 - `user_id` FK filtering at the DB layer ensures data isolation even if the header is somehow wrong
+
+---
+
+## Catalog Brand Schema Extensions (Devices Page Refactoring)
+
+### Extended Brand Fields
+The Catalog `/brands` endpoint now includes static credential field definitions and documentation links. These are **system-wide static values**, not user-specific credentials.
+
+**New fields added to `Brand` object:**
+```json
+{
+  "id": "govee",
+  "name": "Govee",
+  "logo_url": "https://...",
+  "brand_color": "#4F7EFF",
+  "icon": "💡",
+  "affiliate_url": "https://...",
+  "credential_fields": [
+    {
+      "id": "api_key",
+      "label": "Govee API Key",
+      "type": "password",
+      "help": "Get in Govee Home app → Profile → About Us → Request API Key",
+      "placeholder": ""
+    },
+    {
+      "id": "device_id",
+      "label": "Device ID",
+      "type": "text",
+      "help": "Found in Govee Home app → device → device info, or via GET /v1/devices",
+      "placeholder": ""
+    }
+  ],
+  "docs_url": "https://developer.govee.com",
+  "docs_label": "Govee Developer API Docs"
+}
+```
+
+**Credential Field Types:**
+- `"text"` — regular text input
+- `"password"` — password input (masked in browser)
+- `"info"` — informational message (no input field)
+
+**Purpose:** Frontend can now render brand credential forms server-side using `credential_fields` instead of hardcoding `BRAND_CREDS` in JavaScript.
+
+---
+
+## Action Metadata Endpoint (Optional Future)
+
+### Proposed: GET `/actions/metadata` 🔲
+
+Returns all supported device action types with their UI metadata (icons, labels).
+
+**Response:**
+```json
+{
+  "actions": [
+    {
+      "id": "on",
+      "label": "Turn On",
+      "icon": "🔆",
+      "category": "power"
+    },
+    {
+      "id": "off",
+      "label": "Turn Off",
+      "icon": "🔅",
+      "category": "power"
+    },
+    {
+      "id": "brightness",
+      "label": "Set Brightness",
+      "icon": "✦",
+      "category": "dimming"
+    },
+    {
+      "id": "color",
+      "label": "Set Color",
+      "icon": "🎨",
+      "category": "color"
+    }
+  ]
+}
+```
+
+**Purpose:** Replace hardcoded `ACTION_META` in JavaScript. Frontend embeds this data server-side in template or as JSON blob.
+
+**Status:** 🔲 Not yet implemented — currently hardcoded in frontend JavaScript as `ACTION_META`.

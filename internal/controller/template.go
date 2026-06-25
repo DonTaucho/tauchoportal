@@ -252,9 +252,152 @@ func PrepareChannelDetailPageData(channelID string) *ChannelDetailPageData {
 				"skip_if_title_contains":       currentWatch.StreamFilter.SkipIfTitleContains,
 				"skip_if_description_contains": currentWatch.StreamFilter.SkipIfDescriptionContains,
 			},
-			Conditions: conditions,
 		},
 		PlatformMeta:    GetPlatformMetadata(),
 		EventBadgeClass: GetEventBadgeClasses(),
 	}
+}
+
+// DeviceForTemplate represents a device prepared for template rendering
+type DeviceForTemplate struct {
+	ID             string
+	Name           string
+	Brand          string
+	ProductID      string
+	ProductName    string
+	Room           string
+	Status         string // "online", "offline"
+	IsConfigured   bool
+	BrandColor     string
+	BrandLogo      string
+	SupportedActions []string
+}
+
+// BrandForTemplate represents a device brand for template rendering
+type BrandForTemplate struct {
+	ID               string
+	Name             string
+	LogoURL          string
+	BrandColor       string
+	AffiliateURL     string
+	Icon             string
+	CredentialFields []CredentialField
+	DocsUrl          string
+	DocsLabel        string
+}
+
+// DevicesPageData contains all data needed to render the devices page
+type DevicesPageData struct {
+	Devices  []DeviceForTemplate
+	Brands   map[string]*BrandForTemplate
+	BrandIDs []string
+}
+
+// PrepareDevicesPageData prepares all data needed to render the devices page
+func PrepareDevicesPageData() *DevicesPageData {
+	// Fetch all devices
+	devices := Devices{}.ListDevices()
+	devicesForTemplate := make([]DeviceForTemplate, 0)
+	
+	// Fetch all active brands from catalog
+	catalog := Catalog{}
+	brands := catalog.ListBrands(true)
+	brandsMap := make(map[string]*BrandForTemplate)
+	
+	// Build brands map for quick lookup
+	for _, b := range brands {
+		brandsMap[b.Id] = &BrandForTemplate{
+			ID:               b.Id,
+			Name:             b.Name,
+			LogoURL:          b.LogoUrl,
+			BrandColor:       b.BrandColor,
+			AffiliateURL:     b.AffiliateUrl,
+			Icon:             b.Icon,
+			CredentialFields: b.CredentialFields,
+			DocsUrl:          b.DocsUrl,
+			DocsLabel:        b.DocsLabel,
+		}
+	}
+	
+	// Fetch products by brand for product names and supported actions
+	productsMap := make(map[string]map[string]interface{})
+	for _, brand := range brands {
+		products := catalog.ListProducts(brand.Id, true)
+		productsByID := make(map[string]interface{})
+		for _, p := range products {
+			productsByID[p.Id] = map[string]interface{}{
+				"name":    p.Name,
+				"actions": p.SupportedActions,
+			}
+		}
+		productsMap[brand.Id] = productsByID
+	}
+	
+	// Convert devices to template format
+	for _, dev := range devices {
+		brand := brandsMap[dev.Brand]
+		productName := dev.ProductId
+		var actions []string
+		
+		if productMap, ok := productsMap[dev.Brand]; ok {
+			if prod, ok := productMap[dev.ProductId]; ok {
+				if prodData, ok := prod.(map[string]interface{}); ok {
+					if name, ok := prodData["name"].(string); ok {
+						productName = name
+					}
+					if actionsSlice, ok := prodData["actions"].([]interface{}); ok {
+						actions = make([]string, 0)
+						for _, a := range actionsSlice {
+							if str, ok := a.(string); ok {
+								actions = append(actions, str)
+							}
+						}
+					}
+				}
+			}
+		}
+		
+		brandLogo := ""
+		brandColor := "#888888"
+		
+		if brand != nil {
+			brandLogo = brand.LogoURL
+			brandColor = brand.BrandColor
+		}
+		
+		devicesForTemplate = append(devicesForTemplate, DeviceForTemplate{
+			ID:               dev.Id,
+			Name:             dev.Name,
+			Brand:            dev.Brand,
+			ProductID:        dev.ProductId,
+			ProductName:      productName,
+			Room:             dev.Room,
+			Status:           dev.Status,
+			IsConfigured:     dev.IsConfigured,
+			BrandColor:       brandColor,
+			BrandLogo:        brandLogo,
+			SupportedActions: actions,
+		})
+	}
+	
+	return &DevicesPageData{
+		Devices:  devicesForTemplate,
+		Brands:   brandsMap,
+		BrandIDs: getBrandIDsFromDevices(devicesForTemplate),
+	}
+}
+
+// Helper function to extract unique brand IDs from devices in order of appearance
+func getBrandIDsFromDevices(devices []DeviceForTemplate) []string {
+	seen := make(map[string]bool)
+	var brandIDs []string
+	
+	for _, dev := range devices {
+		if !seen[dev.Brand] {
+			brandIDs = append(brandIDs, dev.Brand)
+			seen[dev.Brand] = true
+		}
+	}
+	
+	return brandIDs
 }
