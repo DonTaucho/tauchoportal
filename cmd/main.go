@@ -300,7 +300,7 @@ func main() {
 
 func loadTemplates() map[string]*template.Template {
 	result := make(map[string]*template.Template)
-	pages, err := filepath.Glob(filepath.Join("pages", "*.gohtml"))
+	pages, err := filepath.Glob(filepath.Join("templates", "pages", "*.html"))
 	if err != nil {
 		log.Fatalf("failed to list templates: %v", err)
 	}
@@ -308,11 +308,11 @@ func loadTemplates() map[string]*template.Template {
 		log.Fatal("no page templates found")
 	}
 
-	baseLayoutPath := filepath.Join("templates", "layouts", "base.gohtml")
-	channelLayoutPath := filepath.Join("templates", "layouts", "channels.gohtml")
-	headerPath := filepath.Join("templates", "partials", "header.gohtml")
-	nologinheaderPath := filepath.Join("templates", "partials", "nologinheader.gohtml")
-	loginPath := filepath.Join("templates", "partials", "login.gohtml")
+	baseLayoutPath := filepath.Join("templates", "layouts", "base.html")
+	channelLayoutPath := filepath.Join("templates", "layouts", "channels.html")
+	headerPath := filepath.Join("templates", "partials", "header.html")
+	nologinheaderPath := filepath.Join("templates", "partials", "nologinheader.html")
+	loginPath := filepath.Join("templates", "partials", "login.html")
 	funcMap := template.FuncMap{
 		"userJSON": userJSON,
 		"toJSON":   toJSON,
