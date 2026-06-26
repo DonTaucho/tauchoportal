@@ -40,6 +40,7 @@ type PageData struct {
 	ChannelDetail            *controller.ChannelDetailForTemplate
 	ChannelDetailConditions  []controller.ConditionDetailForTemplate
 	Devices                  *controller.DevicesPageData
+	Channels                 *controller.ChannelsPageData
 	PlatformMeta             map[string]map[string]interface{}
 	EventBadgeClass          map[string]string
 }
@@ -468,6 +469,12 @@ func (s *Server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	if cfg.Name == "devices" {
 		pageData := controller.PrepareDevicesPageData()
 		data.Devices = pageData
+	}
+
+	// Fetch channels page data if on /channels page
+	if cfg.Name == "channels" {
+		pageData := controller.PrepareChannelsPageData()
+		data.Channels = pageData
 	}
 	if err := tmpl.ExecuteTemplate(w, "page", data); err != nil {
 		log.Printf("failed to render page %s: %v", cfg.Name, err)
