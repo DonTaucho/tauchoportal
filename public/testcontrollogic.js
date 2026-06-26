@@ -153,7 +153,7 @@ function jsonLoader(jsonnode, area, path){
 				askenvbutton.innerText = "+";
 				askenvbutton.setAttribute("path", path);
 				askenvbutton.setAttribute("operator", operator);
-				askenvbutton.onclick = function(){askText(null, null, null, null, true, false, function(disp, type){
+				askenvbutton.onclick = function(){inputText(null, null, null, null, true, false, function(disp, type){
 					var parentjson = JSON.parse(document.getElementById("conditionLogicInput").value);
 					var currentnode = getSubCondition(parentjson, path);
 					currentnode.SubConditions = [];
@@ -163,15 +163,15 @@ function jsonLoader(jsonnode, area, path){
 				area.append(askenvbutton);
 			}
 			if (!jsonnode.Variables || !jsonnode.Variables.length) {
-				var asktextbutton = document.createElement("div");
-				asktextbutton.classList.add("asktextbutton");
-				asktextbutton.innerText = "+";
-				asktextbutton.setAttribute("path", path);
-				asktextbutton.setAttribute("operator", operator);
-				asktextbutton.onclick = function(){askText(null, null,null, null, true, function(){
+				var inputtextbutton = document.createElement("div");
+				inputtextbutton.classList.add("inputtextbutton");
+				inputtextbutton.innerText = "+";
+				inputtextbutton.setAttribute("path", path);
+				inputtextbutton.setAttribute("operator", operator);
+				inputtextbutton.onclick = function(){inputText(null, null,null, null, true, function(){
 					
 				})};
-				area.append(asktextbutton);
+				area.append(inputtextbutton);
 			}
         } else if (calcoperators.includes(operator)) {
             var asknumbutton = document.createElement("div");
@@ -188,13 +188,13 @@ function jsonLoader(jsonnode, area, path){
             convoperators.includes(operator))
             &&!jsonnode.Variables
         ) {
-            var asktextbutton = document.createElement("div");
-            asktextbutton.classList.add("asktextbutton");
-            asktextbutton.innerText = "?";
-            asktextbutton.setAttribute("path", path);
-            asktextbutton.setAttribute("operator", operator);
-            asktextbutton.onclick = function(){askText(null, null, null, null, true, true)};
-            area.append(asktextbutton);
+            var inputtextbutton = document.createElement("div");
+            inputtextbutton.classList.add("inputtextbutton");
+            inputtextbutton.innerText = "?";
+            inputtextbutton.setAttribute("path", path);
+            inputtextbutton.setAttribute("operator", operator);
+            inputtextbutton.onclick = function(){inputText(null, null, null, null, true, true)};
+            area.append(inputtextbutton);
         }
     } else if (jsonnode[0]) {
         for (var i in jsonnode){
@@ -335,7 +335,7 @@ function summarize(node){
 			    target = "<span class='novalue'>" + translations["includes-novalue"] + "</span>";
 			}
 			if (node.Variables.length > 0) {
-				items.push(node.Variables[0]);
+				items.push("<span class='static'>" + node.Variables[0] + "</span>");
 			}
 			if (node.Variables.length > 1) {
 				if (node.Variables[1].split("-")[0]&&parseInt(node.Variables[1].split("-")[0])) {
@@ -361,16 +361,6 @@ function summarize(node){
 			    return translations["includes-sentense-rangefromto"].replace("{0}", target).replace("{1}", comparar).replace("{2}", rangefrom).replace("{3}", rangeto);
 			}
 			break;
-		case "WHOLEWORD":
-			var items = [];
-			for (i in node.SubConditions) {
-				items.push(summarize(node.SubConditions[i]));
-			}
-            for (i in node.Variables) {
-                items.push(node.Variables[i]);
-            }
-			return translations["textextract-whole"].replace("{0}", items.join(translations["valueof-joint"]));
-			break;
 		case "REGEX_MATCH":
 			var items = [];
             var regexs = [];
@@ -394,6 +384,16 @@ function summarize(node){
 			}
 			
 			return translations["regex-sentense"].replace("{0}", target).replace("{1}", regex);
+			break;
+		case "WHOLEWORD":
+			var items = [];
+			for (i in node.SubConditions) {
+				items.push(summarize(node.SubConditions[i]));
+			}
+            for (i in node.Variables) {
+                items.push(node.Variables[i]);
+            }
+			return translations["textextract-whole"].replace("{0}", items.join(translations["valueof-joint"]));
 			break;
 		case "REGEX_EXTRACT":
 			var items = [];
@@ -436,14 +436,14 @@ function summarize(node){
 				items.push(node.Variables[i]);
 			}
 			if (items.length > 0) {
-				if (items[0].split("-")[0]&&parseInt(items[0].split("-")[0])) {
+				if (items[0].split("-")&&parseInt(items[0].split("-")[0])) {
 					rangefrom = parseInt(items[0].split("-")[0]);
 				}
-				if (items[0].split("-")[0]&&items[0].split("-").length>1&&parseInt(items[0].split("-")[1])){
+				if (items[0].split("-")&&items[0].split("-").length>1&&parseInt(items[0].split("-")[1])){
 					rangeto = parseInt(items[0].split("-")[1]);
 				}
 			}
-			if (!rangefrom&&!rangeto || rangefrom==1&&!rangeto) {
+			if (!rangefrom&&!rangeto) {
 			    return translations["textextract-sub_missingvalue"];
 			} else if (rangefrom&&!rangeto) {
 			    return translations["textextract-sub_from"].replace("{0}", target).replace("{1}", rangefrom);
@@ -456,7 +456,7 @@ function summarize(node){
 		case "FIRST":
 			var target;
 			var items = [];
-			var length = [];
+			var length;
 			if (node.SubConditions.length>0) {
 			    target = summarize(node.SubConditions[0]);
 			    for (i in node.SubConditions.slice(1)) {
@@ -468,16 +468,17 @@ function summarize(node){
 			for (i in node.Variables) {
 				items.push(node.Variables[i]);
 			}
-			if (!parseInt(length)) {
+			length = parseInt(items[0]);
+			if (!length) {
 			    return translations["textextract-sub_missingvalue"];
-			} else if (rangefrom&&!rangeto) {
-			    return translations["textextract-first"].replace("{0}", target).replace("{1}", parseInt(length));
+			} else {
+			    return translations["textextract-first"].replace("{0}", target).replace("{1}", length);
 			}
 			break;
 		case "LAST":
 			var target;
 			var items = [];
-			var length = [];
+			var length;
 			if (node.SubConditions.length>0) {
 			    target = summarize(node.SubConditions[0]);
 			    for (i in node.SubConditions.slice(1)) {
@@ -489,10 +490,11 @@ function summarize(node){
 			for (i in node.Variables) {
 				items.push(node.Variables[i]);
 			}
-			if (!parseInt(length)) {
+			length = parseInt(items[0]);
+			if (!length) {
 			    return translations["textextract-sub_missingvalue"];
-			} else if (rangefrom&&!rangeto) {
-			    return translations["textextract-last"].replace("{0}", target).replace("{1}", parseInt(length));
+			} else {
+			    return translations["textextract-last"].replace("{0}", target).replace("{1}", length);
 			}
 			break;
 		case "ADD":
@@ -629,33 +631,95 @@ function summarize(node){
     return null;
 }
 function openBoolDialog(ev, path, callback){
+    var json = JSON.parse(document.getElementById("conditionLogicInput").value);
 	var path = path, callback =callback;
+	var	currentnode = getSubCondition(json, path??"")??{};
     document.getElementById("boolBody").className = "";
     document.getElementById("boolBody").classList.add("modal-body");
     document.getElementById("boolBody").classList.add(namingmap[ev.target.getAttribute("operator")]);
     document.getElementById("boolBody").classList.add(reverselookuptype[ev.target.getAttribute("operator")]);
+	document.getElementById("boolmodal_text").style["display"] = "block";
+	document.getElementById("boolmodal_numeric").style["display"] = "block";
+	document.getElementById("boolmodal_bool").style["display"] = "block";
+    document.getElementById("booltextradio").style["display"] = "inline";
+    document.getElementById("boolnumericradio").style["display"] = "inline";
+    document.getElementById("boolconditionradio").style["display"] = "inline";
 
-    document.getElementById("booltextradio").checked = false;
-    document.getElementById("bool_text").classList.remove("available");
-    document.getElementById("textcomparebaseplaceholder").style["display"] = "inline-block";
-    document.getElementById("textcomparebasedisplay").style["display"] = "none";
-    document.getElementById("textcomparebasedisplay").innerText = "";
-    document.getElementById("textcomparebasevalue").value = "";
-    document.getElementById("textcomparebasetype").value = "";
-    document.getElementById("textcomparebaseexttype").value = "";
-    document.getElementById("textcomparebaseextvalue").value = "";
-    document.getElementById("textconditionselectdisplay").innerText = translations["compare-novalue"];
-    document.getElementById("textconditionselectvalue").value = "";
-    document.getElementById("textconditionselecttype").value = "";
+	if (textoperators.includes(currentnode.Operator)) {
+		document.getElementById("boolmodal_text").style["display"] = "inline";
+		document.getElementById("boolmodal_numeric").style["display"] = "none";
+		document.getElementById("boolmodal_bool").style["display"] = "none";
+		document.getElementById("booltextradio").style["display"] = "none";
+		document.getElementById("booltextradio").checked = true;
+		document.getElementById("boolmodal_text").classList.add("available");
+		document.getElementById("textcomparebaseplaceholder").style["display"] = currentnode.SubConditions&&currentnode.SubConditions.length ? "none":"inline-block";
+		document.getElementById("textcomparebasedisplay").style["display"] = currentnode.SubConditions&&currentnode.SubConditions.length ? "inline":"none";
+		var extopr, taropr, targetbase, targetvar, targetvar1, targetvar2, extvar1, extvar2,  extvar3, operator;
+		if (currentnode.SubConditions&&currentnode.SubConditions[0]&&currentnode.SubConditions[0].Operator == "PARAM") {
+			taropr = namingmap[currentnode.SubConditions[0].Operator];
+			targetbase = currentnode.SubConditions[0].Variables[0];
+			targetvar1 = currentnode.SubConditions[0].Variables[1];
+			targetvar2 = currentnode.SubConditions[0].Variables[2];
+			extopr = namingmap[currentnode.Operator];
+			extvar1 = currentnode.Variables[0];
+			extvar2 = currentnode.Variables&&currentnode.Variables.length&&currentnode.Variables[1]?currentnode.Variables[1].split("-")[0]:currentnode.Variables[1];
+			extvar3 = currentnode.Variables&&currentnode.Variables.length>1&&currentnode.Variables[1].split("-").length>1?currentnode.Variables[1].split("-")[1]:currentnode.Variables[2];
+			operator = currentnode.Operator;
+			document.getElementById("textcomparebasedisplay").innerText = generageDisplayText("extract", taropr, targetbase, targetvar1, targetvar2);
+			document.getElementById("textcomparebaseexttype").value = taropr=="param"?"wholeword":taropr;
+			document.getElementById("textcomparebasevalue").value = targetbase;
+			document.getElementById("textcomparebasetype").value = "env";
+			document.getElementById("textconditionselectdisplay").innerHTML = generageDisplayText("input", extopr, extvar1, extvar2, extvar3);
+			document.getElementById("textconditionselectvalue").value = extvar1;
+			document.getElementById("textconditionselecttype").value = extopr;
+			document.getElementById("textcomparebaseextvalue").value = "";
+			document.getElementById("textconditionselectrange").value = currentnode.Variables[1];
+		} else {
+			taropr = namingmap[currentnode.SubConditions[0].Operator];
+			var paramcondition = currentnode.SubConditions[0];
+			targetbase = paramcondition.SubConditions&&paramcondition.SubConditions[0]&&paramcondition.SubConditions[0].Variables?paramcondition.SubConditions[0].Variables[0]:null;
+			targetvar = paramcondition&&paramcondition.Variables?paramcondition.Variables[0]:null;
+			targetvar1 = targetvar?targetvar.split("-")[0]:targetvar;
+			targetvar2 = targetvar&&targetvar.split("-").length>1?targetvar.split("-")[1]:paramcondition.Variables[1];
+			extopr = namingmap[currentnode.Operator];
+			extvar1 = currentnode.Variables[0];
+			extvar2 = currentnode.Variables&&currentnode.Variables.length&&currentnode.Variables[1]?currentnode.Variables[1].split("-")[0]:currentnode.Variables[1];
+			extvar3 = currentnode.Variables&&currentnode.Variables.length>1&&currentnode.Variables[1].split("-").length>1?currentnode.Variables[1].split("-")[1]:currentnode.Variables[2];
+			operator = currentnode.Operator;
+			document.getElementById("textcomparebasedisplay").innerText = generageDisplayText("extract", taropr, targetbase, targetvar1, targetvar2);
+			document.getElementById("textcomparebaseexttype").value = taropr=="param"?"wholeword":taropr;
+			document.getElementById("textcomparebasevalue").value = targetbase;
+			document.getElementById("textcomparebasetype").value = "env";
+			document.getElementById("textconditionselectdisplay").innerHTML = generageDisplayText("input", extopr, extvar1, extvar2, extvar3);
+			document.getElementById("textconditionselectvalue").value = extvar1;
+			document.getElementById("textconditionselecttype").value = extopr;
+			document.getElementById("textcomparebaseextvalue").value = targetvar;
+			document.getElementById("textconditionselectrange").value = currentnode.Variables[1];
+		}
+	} else {
+		document.getElementById("booltextradio").checked = false;
+		document.getElementById("boolmodal_text").classList.remove("available");
+		document.getElementById("textcomparebaseplaceholder").style["display"] = "inline-block";
+		document.getElementById("textcomparebasedisplay").style["display"] = "none";
+		document.getElementById("textcomparebasedisplay").innerText = "";
+		document.getElementById("textcomparebasevalue").value = "";
+		document.getElementById("textcomparebasetype").value = "";
+		document.getElementById("textcomparebaseexttype").value = "";
+		document.getElementById("textcomparebaseextvalue").value = "";
+		document.getElementById("textconditionselectdisplay").innerText = translations["compare-novalue"];
+		document.getElementById("textconditionselectvalue").value = "";
+		document.getElementById("textconditionselecttype").value = "";
+		document.getElementById("textconditionselectrange").value = "";
+	}
     document.getElementById("boolnumericradio").checked = false;
-    document.getElementById("bool_numeric").classList.remove("available");
+    document.getElementById("boolmodal_numeric").classList.remove("available");
     document.getElementById("numericcomparebasevalue").value = "";
     document.getElementById("numericcomparebasetype").value = "";
     document.getElementById("numericcompareoperator").value = ">";
     document.getElementById("numericcomparetargetvalue").value = "";
     document.getElementById("numericcomparetargettype").value = "";
     document.getElementById("boolconditionradio").checked = false;
-    document.getElementById("bool_addmore").classList.remove("available");
+    document.getElementById("boolmodal_bool").classList.remove("available");
     document.getElementById("boolSubmitButton").disabled = "disabled";
     document.getElementById("boolcondition").value = "";
 
@@ -756,7 +820,7 @@ function editBool(ev, path){
     document.getElementById("boolModal").style["display"] = "none";
     reloadJson(json);
 }
-function askText(currentvalue, currenttype, currentextractor, currentextractorval, includeenv, includeenter, callback){
+function inputText(currentvalue, currenttype, currentextractor, currentextractorval, includeenv, includeenter, callback){
     document.getElementById("textBody").className = "";
     document.getElementById("textBody").classList.add("modal-body");
     document.getElementById("textBody").classList.add("textselection");
@@ -817,34 +881,24 @@ function askText(currentvalue, currenttype, currentextractor, currentextractorva
 			switch (exttype) {
 				case "regex_extract":
 					extval = document.getElementById("textExtRegex").value;
-					dispval = translations["textextract-regex"].replace("{0}", translations[val]).replace("{1}", extval);
+					dispval = generageDisplayText("extract", "regex_extract", val, extval);
 					break;
 				case "substring":
-					var range_from = document.getElementById('textExtSubFrom').value,
-					  range_to = document.getElementById('textExtSubTo').value,
-					  extval = `${range_from}-${range_to}`;
-					if (!range_from&&!range_to) {
-						dispval = translations["textextract-sub_missingvalue"];
-					} else if (range_from&&!range_to) {
-						dispval = translations["textextract-sub_from"].replace("{0}",translations[val]).replace("{1}", document.getElementById("textExtSubFrom").value);
-					} else if (!range_from&&range_to) {
-						dispval = translations["textextract-sub_to"].replace("{0}",translations[val]).replace("{1}", document.getElementById("textExtSubTo").value);
-					} else if (range_from&&range_to) {
-						dispval = translations["textextract-sub_fromto"].replace("{0}",translations[val]).replace("{1}", document.getElementById("textExtSubFrom").value).replace("{2}", document.getElementById("textExtSubTo").value);
-					}
+					extval = `${document.getElementById('textExtSubFrom').value}-${document.getElementById('textExtSubTo').value}`;
+					dispval = generageDisplayText("extract", "substring", val, document.getElementById('textExtSubFrom').value, document.getElementById('textExtSubTo').value);
 					break;
 				case "first":
 					extval = document.getElementById("textExtFirst").value;
-					dispval = translations["textextract-first"].replace("{0}", translations[val]).replace("{1}", extval);
+					dispval = generageDisplayText("extract", "first", val, extval);
 					break;
 				case "last":
-					extval = document.getElementById("textExtLast").value
-					dispval = translations["textextract-last"].replace("{0}", translations[val]).replace("{1}", extval);
+					extval = document.getElementById("textExtLast").value;
+					dispval = generageDisplayText("extract", "last", val, extval);
 					break;
 				default:
 					extval = "";
 					exttype = "wholeword";
-					dispval = translations["textextract-whole"].replace("{0}",translations[val]);
+					dispval = generageDisplayText("extract", "wholeword", val);
 					break;
 			}
         }
@@ -852,35 +906,92 @@ function askText(currentvalue, currenttype, currentextractor, currentextractorva
         document.getElementById("textModal").style["display"] = "none";
     };
 }
+function generageDisplayText(tasktype, operationtype, ...values){
+	var dispval = translations["generic-notset"];
+	switch (tasktype) {
+		case "extract":
+			switch (operationtype) {
+				case "regex_extract":
+					dispval = translations["textextract-regex"].replace("{0}", translations[values[0]]).replace("{1}", values[1]);
+					break;
+				case "substring":
+					var range_from = values[1], range_to = values[2];
+					if (!range_from&&!range_to) {
+						dispval = translations["textextract-sub_missingvalue"];
+					} else if (range_from&&!range_to) {
+						dispval = translations["textextract-sub_from"].replace("{0}",translations[values[0]]).replace("{1}", range_from);
+					} else if (!range_from&&range_to) {
+						dispval = translations["textextract-sub_to"].replace("{0}",translations[values[0]]).replace("{1}", range_to);
+					} else if (range_from&&range_to) {
+						dispval = translations["textextract-sub_fromto"].replace("{0}",translations[values[0]]).replace("{1}", range_from).replace("{2}", range_to);
+					}
+					break;
+				case "first":
+					dispval = translations["textextract-first"].replace("{0}", translations[values[0]]).replace("{1}", values[1]);
+					break;
+				case "last":
+					dispval = translations["textextract-last"].replace("{0}", translations[values[0]]).replace("{1}", values[1]);
+					break;
+				default:
+					dispval = translations["textextract-whole"].replace("{0}",translations[values[0]]);
+					break;
+			}
+			break;
+		case "input":
+			var val = values[0] ? values[0] : translations["textcondition-missingvalue"];
+			switch (operationtype){
+				case "equals":
+					dispval = translations["textcondition-equals"].replace("{0}", val);
+					break;
+				case "includes":
+					var rangefrom = values[1], rangeto = values[2];
+					if (!rangefrom && !rangeto) {
+						dispval = translations["textcondition-one"].replace("{0}", val);
+					} else if (rangefrom && !rangeto) {
+						dispval = translations["textcondition-rangefrom"].replace("{0}", val).replace("{1}", rangefrom);
+					} else if (!rangefrom && rangeto) {
+						dispval = translations["textcondition-rangeto"].replace("{0}", val).replace("{1}", rangeto);
+					} else if (rangefrom && rangeto) {
+						dispval = translations["textcondition-rangefromto"].replace("{0}", val).replace("{1}", rangefrom).replace("{2}", rangeto);
+					}
+					break;
+				case "regex_match":
+					dispval = translations["textcondition-regex"].replace("{0}", val);
+					break;
+			}
+			break;
+	}
+	return dispval
+}
 function textDialogValidator() {
 	var valid = false;
 	if (document.getElementById("textenvradio").checked) {
         valid = document.getElementById("textEnvSelect").value;
+		if (document.getElementById("textExtSelect").value=="regex_extract") {
+		  try {
+			RegExp(document.getElementById("textExtRegex").value);
+		  } catch {
+			valid = false;
+		  }
+		} else if (document.getElementById("textExtSelect").value=="substring") {
+			try {
+				valid = isNaN(parseInt(document.getElementById("textExtSubTo").value)) ^ isNaN(parseInt(document.getElementById("textExtSubFrom").value)) || parseInt(document.getElementById("textExtSubTo").value) >= parseInt(document.getElementById("textExtSubFrom").value);
+			} catch {
+				valid = false;
+			}
+		} else if (document.getElementById("textExtSelect").value=="first") {
+			valid = parseInt(document.getElementById("textExtFirst").value);
+		} else if (document.getElementById("textExtSelect").value=="last") {
+			valid = parseInt(document.getElementById("textExtLast").value);
+		}
 	} else if (document.getElementById("textenterradio").checked) {
         valid = document.getElementById("textEnter").value;
-	}
-	if (document.getElementById("textExtSelect").value=="regex_extract") {
-	  try {
-		RegExp(document.getElementById("textExtRegex").value);
-	  } catch {
-		valid = false;
-	  }
-	} else if (document.getElementById("textExtSelect").value=="substring") {
-		try {
-			valid = isNaN(parseInt(document.getElementById("textExtSubTo").value)) ^ isNaN(parseInt(document.getElementById("textExtSubFrom").value)) || parseInt(document.getElementById("textExtSubTo").value) >= parseInt(document.getElementById("textExtSubFrom").value);
-		} catch {
-			valid = false;
-		}
-	} else if (document.getElementById("textExtSelect").value=="first") {
-		valid = parseInt(document.getElementById("textExtFirst").value);
-	} else if (document.getElementById("textExtSelect").value=="last") {
-		valid = parseInt(document.getElementById("textExtLast").value);
 	}
 	
     document.getElementById("textSubmitButton").disabled = valid ? "" : "disabled";
 }
 
-function askTextCondition(currenttype, currentrange, currentval, callback){
+function inputTextCondition(currenttype, currentrange, currentval, callback){
     document.getElementById("textConditionEqualradio").checked = currenttype == "equals";
     document.getElementById("textconditionrangeradio").checked = currenttype == "includes";
     document.getElementById("textconditionregexradio").checked = currenttype == "regex_match";
@@ -894,27 +1005,17 @@ function askTextCondition(currenttype, currentrange, currentval, callback){
 		var dispval, type, range, val;
 		if (document.getElementById("textConditionEqualradio").checked) {
 			type = "equals";
-			val = document.getElementById("textconditionequals").value ? document.getElementById("textconditionequals").value : translations["textcondition-missingvalue"]
-			dispval = translations["textcondition-equals"].replace("{0}", val);
+			val = document.getElementById("textconditionequals").value;
+			dispval = generageDisplayText("input", "equals", val);
 		} else if (document.getElementById("textconditionrangeradio").checked) {
 			type = "includes";
-			val = document.getElementById("textconditionrangetext").value ? document.getElementById("textconditionrangetext").value : translations["textcondition-missingvalue"];
-			rangefrom = document.getElementById("textconditionrange-from").value;
-			rangeto = document.getElementById("textconditionrange-to").value;
-			range = `${rangefrom}-${rangeto}`;
-			if (!rangefrom && !rangeto) {
-				dispval = translations["textcondition-one"].replace("{0}", val);
-			} else if (rangefrom && !rangeto) {
-				dispval = translations["textcondition-rangefrom"].replace("{0}", val).replace("{1}", rangefrom);
-			} else if (!rangefrom && rangeto) {
-				dispval = translations["textcondition-rangeto"].replace("{0}", val).replace("{1}", rangeto);
-			} else if (rangefrom && rangeto) {
-				dispval = translations["textcondition-rangefromto"].replace("{0}", val).replace("{1}", rangefrom).replace("{2}", rangeto);
-			}
+			val = document.getElementById("textconditionrangetext").value;
+			range = `${document.getElementById("textconditionrange-from").value}-${document.getElementById("textconditionrange-to").value}`;
+			dispval = generageDisplayText("input", "includes", val, document.getElementById("textconditionrange-from").value, document.getElementById("textconditionrange-to").value);
 		} else if (document.getElementById("textconditionregexradio").checked) {
 			type = "regex_match";
 			val = document.getElementById("textconditionregex").value;
-			dispval = translations["textcondition-regex"].replace("{0}", val);
+			dispval = generageDisplayText("input", "regex_match", val);
 		}
         callback(dispval, type, range, val);
         document.getElementById("textConditionModal").style["display"] = "none";
@@ -974,7 +1075,7 @@ function editItem(ev){
 				extractorval = currentnode.SubConditions[0].Variables[1];
 			}
 		}
-		askText(currentnode.Variables[0], "env", extractor, extractorval, true, false, function(dispval, val, type, exttype, extval) {
+		inputText(currentnode.Variables[0], "env", extractor, extractorval, true, false, function(dispval, val, type, exttype, extval) {
 			if (exttype == "wholeword") {
 				currentnode.Operator = "PARAM";
 				currentnode.Variables = [val];
@@ -990,7 +1091,7 @@ function editItem(ev){
 	} else if (operator=="_variable") {
 		var ind = event.target.getAttribute("index");
 		var current = event.target.innerText;
-		askText(current, "variable", null, null, false, true, function(dispval, val){currentnode.Variables[ind] = val;finishupdating()});
+		inputText(current, "variable", null, null, false, true, function(dispval, val){currentnode.Variables[ind] = val;finishupdating()});
 	}
 
     refreshSummary();

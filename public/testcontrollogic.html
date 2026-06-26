@@ -231,6 +231,29 @@ function addNewButton(){
   "Variables": null,
   "SubConditions": [
     {
+      "Operator": "INCLUDES",
+      "Variables": [
+        "aaa",
+        "7-11"
+      ],
+      "SubConditions": [
+        {
+          "Operator": "SUBSTRING",
+          "SubConditions": [
+            {
+              "Operator": "PARAM",
+              "Variables": [
+                "event_amount"
+              ]
+            }
+          ],
+          "Variables": [
+            "2-4"
+          ]
+        }
+      ]
+    },
+    {
       "Operator": "EQUALS",
       "Variables": [
         "yay"
@@ -364,6 +387,7 @@ var translations = {
   "EXCHANGE": "通貨換算",
   "PARAM": "配信からのデータ",
   
+  "generic-notset": "未設定",
   "failedjsonparse": "JSONの読み取りに失敗しました",
   "staticvalue": "「{0}」",
   "and-joint": " かつ ",
@@ -457,9 +481,9 @@ var translations = {
         </div>
         <div id="boolBody" class="modal-body">
             <input id="boolPath" type="hidden" value="">
-            <div id="bool_text" class="selector" onclick="document.getElementById('booltextradio').checked=true;getElementById('bool_text').classList.add('available');document.getElementById('bool_numeric').classList.remove('available');document.getElementById('bool_addmore').classList.remove('available');boolDialogValidator()">
+            <div id="boolmodal_text" class="selector" onclick="document.getElementById('booltextradio').checked=true;getElementById('boolmodal_text').classList.add('available');document.getElementById('boolmodal_numeric').classList.remove('available');document.getElementById('boolmodal_bool').classList.remove('available');boolDialogValidator()">
               <h4><input id="booltextradio" type="radio" name="addboolradio" /> Values Matches/Includes</h4>
-              <span class="textselector" onclick="askText(document.getElementById('textcomparebasevalue').value, document.getElementById('textcomparebasetype').value,document.getElementById('textcomparebaseexttype').value, document.getElementById('textcomparebaseextvalue').value,true, false, function(disp,val,type,exttype,extval){
+              <span class="textselector" onclick="inputText(document.getElementById('textcomparebasevalue').value, document.getElementById('textcomparebasetype').value,document.getElementById('textcomparebaseexttype').value, document.getElementById('textcomparebaseextvalue').value,true, false, function(disp,val,type,exttype,extval){
                 document.getElementById('textcomparebasedisplay').innerHTML=disp;
                 document.getElementById('textcomparebasevalue').value=val;
                 document.getElementById('textcomparebasetype').value=type;
@@ -476,7 +500,7 @@ var translations = {
                 <input id="textcomparebaseexttype" type="hidden" />
                 <input id="textcomparebaseextvalue" value="none" type="hidden" />
               </span>
-              <span class="textconditionselector" onclick="askTextCondition(document.getElementById('textconditionselecttype').value, document.getElementById('textconditionselectrange').value, document.getElementById('textconditionselectvalue').value, function(disp,type,range,val){
+              <span class="textconditionselector" onclick="inputTextCondition(document.getElementById('textconditionselecttype').value, document.getElementById('textconditionselectrange').value, document.getElementById('textconditionselectvalue').value, function(disp,type,range,val){
                 document.getElementById('textconditionselectdisplay').innerText=disp;
                 document.getElementById('textconditionselectvalue').value=val;
                 document.getElementById('textconditionselecttype').value=type;
@@ -489,7 +513,7 @@ var translations = {
                 <input id="textconditionselecttype" type="hidden" value="" />
               </span>
             </div>
-            <div id="bool_numeric" class="selector" onclick="document.getElementById('boolnumericradio').checked=true;document.getElementById('bool_text').classList.remove('available');document.getElementById('bool_numeric').classList.add('available');document.getElementById('bool_addmore').classList.remove('available');boolDialogValidator()">
+            <div id="boolmodal_numeric" class="selector" onclick="document.getElementById('boolnumericradio').checked=true;document.getElementById('boolmodal_text').classList.remove('available');document.getElementById('boolmodal_numeric').classList.add('available');document.getElementById('boolmodal_bool').classList.remove('available');boolDialogValidator()">
               <div><input id="boolnumericradio" type="radio" name="addboolradio" />Comparison?</div>
               <div>
                 <span class="numselector" onclick="_this=this;askNum(true, true, function(disp,val,type){_this.innerText=disp;_this.setAttribute('type', type);_this.setAttribute('val', val)})">select value</span>
@@ -500,7 +524,7 @@ var translations = {
                 <input id="numericcomparetargetvalue" type="hidden" />
                 <input id="numericcomparetargettype" type="hidden" />
            </div>
-            <div id="bool_addmore" class="selector" onclick="document.getElementById('boolconditionradio').checked=true;document.getElementById('bool_text').classList.remove('available');document.getElementById('bool_numeric').classList.remove('available');document.getElementById('bool_addmore').classList.add('available');boolDialogValidator()">
+            <div id="boolmodal_bool" class="selector" onclick="document.getElementById('boolconditionradio').checked=true;document.getElementById('boolmodal_text').classList.remove('available');document.getElementById('boolmodal_numeric').classList.remove('available');document.getElementById('boolmodal_bool').classList.add('available');boolDialogValidator()">
               <div><input id="boolconditionradio" type="radio" name="addboolradio" />Add more condition?</div>
               <select id="boolcondition" onchange="boolDialogValidator()"><option value=""></option><option value="AND">AND</option><option value="OR">OR</option><option value="NOT">NOT</option><option value="SOME">SOME</option></select>
             </div>
@@ -520,7 +544,7 @@ var translations = {
         </div>
         <div id="textBody" class="modal-body textselection">
           <div>
-            <div id="textEnvArea" class="selector envselection" onclick="textDialogValidator();document.getElementById('textenvradio').checked=true;getElementById('textEnvArea').classList.add('available');document.getElementById('textEnterArea').classList.remove('available');document.getElementById('textExtArea').classList.add('available');document.getElementById('textExtSelect').disabled='';">
+            <div id="textEnvArea" class="selector envselection" onclick="document.getElementById('textenvradio').checked=true;getElementById('textEnvArea').classList.add('available');document.getElementById('textEnterArea').classList.remove('available');document.getElementById('textExtArea').classList.add('available');document.getElementById('textExtSelect').disabled='';textDialogValidator();">
               <h4><input id="textenvradio" type="radio" name="inputtextradio"> Select Input Parameter</h4>
               <select id="textEnvSelect" onchange="textDialogValidator()">
 				<option value="event_message">comment</option>
@@ -528,13 +552,13 @@ var translations = {
 				<option value="event_amount">amount</option>
 			  </select>
             </div>
-            <div id="textEnterArea" class="selector entervalue" onclick="textDialogValidator();document.getElementById('textenterradio').checked=true;getElementById('textEnterArea').classList.add('available');document.getElementById('textEnvArea').classList.remove('available');document.getElementById('textExtArea').classList.add('available');document.getElementById('textExtSelect').disabled='';">
+            <div id="textEnterArea" class="selector entervalue" onclick="document.getElementById('textenterradio').checked=true;getElementById('textEnterArea').classList.add('available');document.getElementById('textEnvArea').classList.remove('available');document.getElementById('textExtArea').classList.remove('available');document.getElementById('textExtSelect').disabled='';textDialogValidator();">
               <h4><input id="textenterradio" type="radio" name="inputtextradio"> Static Value</h4>
               <input id="textEnter" onchange="textDialogValidator()" type="text" >
             </div>
           </div>
           <div class="extractorselection">
-            <div id="textExtArea" class="selector textextractor" onclick="textDialogValidator();">
+            <div id="textExtArea" class="selector textextractor" onclick="document.getElementById('textenvradio').checked=true;getElementById('textEnvArea').classList.add('available');document.getElementById('textExtArea').classList.add('available');textDialogValidator();">
               <h4>Extract</h4>
               <select id="textExtSelect" onchange="textDialogValidator();
 			  document.getElementById('textExtRegex').style['display']=this.value=='regex_extract'?'inline-block':'none';
@@ -565,23 +589,25 @@ var translations = {
     </div>
 </div>
 
-<div id="numModal" class="modal">
+<div id="numModal" class="modal middle">
     <div class="modal-content modal-big">
         <div class="modal-header">
             <span class="close" onclick="closeModal('numModal')">×</span>
             <p>Numeric.</p>
         </div>
         <div id="numBody" class="modal-body numselection">
-		    <div>
-		      <div>
+		    <div id="calcarea">
+		      <div id="visualizedcalc">
 			  valvalval
 		      </div>
-		      <div>
+		      <div id="calctoolarea">
 		        <div class="calcoperator">+</div>
 		        <div class="calcoperator">-</div>
 		        <div class="calcoperator">*</div>
 		        <div class="calcoperator">/</div>
 		        <div class="calcoperator">%</div>
+				<hr />
+				<div><a onclick="inputText(1,1,1,1,1,1,1,1)">Select Item</a></div>
 		      </div>
 		    </div>
 		  <div>
