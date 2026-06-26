@@ -5,6 +5,19 @@ import (
 	"time"
 )
 
+// WatchForTemplate represents a watched channel as prepared for template rendering
+type WatchForTemplate struct {
+	ID           string
+	Name         string
+	Platform     string
+	ChannelID    string
+	IsActive     bool
+	Status       string
+	ThumbnailUrl string
+	LastStream   string
+	StreamFilter WatchStreamFilter
+}
+
 // ChannelForTemplate represents a channel as prepared for template rendering
 type ChannelForTemplate struct {
 	ID       string
@@ -45,11 +58,11 @@ func GetEventLabel(eventType, platform string) string {
 			"stream_end":   "Stream End",
 		},
 		"twitch": {
-			"comment":   "Chat Comment",
-			"cheer":     "Cheer",
-			"follow":    "Follow",
-			"sub":       "Subscribe",
-			"raid":      "Raid",
+			"comment":    "Chat Comment",
+			"cheer":      "Cheer",
+			"follow":     "Follow",
+			"sub":        "Subscribe",
+			"raid":       "Raid",
 			"hype_train": "Hype Train",
 		},
 	}
@@ -90,42 +103,42 @@ func GetPlatformMetadata() map[string]map[string]interface{} {
 // GetEventBadgeClasses returns CSS class mapping for event badge styling
 func GetEventBadgeClasses() map[string]string {
 	return map[string]string{
-		"comment":       "comment",
-		"superchat":     "gift",
-		"sticker":       "gift",
-		"cheer":         "gift",
-		"gift":          "gift",
-		"member":        "follow",
-		"follow":        "follow",
-		"sub":           "follow",
-		"nicoru":        "effect",
-		"hype_train":    "stream",
-		"raid":          "stream",
-		"stream_start":  "stream",
-		"stream_end":    "stream",
+		"comment":      "comment",
+		"superchat":    "gift",
+		"sticker":      "gift",
+		"cheer":        "gift",
+		"gift":         "gift",
+		"member":       "follow",
+		"follow":       "follow",
+		"sub":          "follow",
+		"nicoru":       "effect",
+		"hype_train":   "stream",
+		"raid":         "stream",
+		"stream_start": "stream",
+		"stream_end":   "stream",
 	}
 }
 
 // ChannelDetailForTemplate represents a watch channel with all detail info
 type ChannelDetailForTemplate struct {
-	ID               string
-	Name             string
-	Platform         string
-	ChannelID        string
-	ThumbnailURL     string
-	IsActive         bool
-	Status           string // "live", "offline", "paused"
-	LastStreamAt     string
-	StreamFilter     map[string]interface{}
-	Conditions       []ConditionDetailForTemplate
+	ID           string
+	Name         string
+	Platform     string
+	ChannelID    string
+	ThumbnailURL string
+	IsActive     bool
+	Status       string // "live", "offline", "paused"
+	LastStreamAt string
+	StreamFilter map[string]interface{}
+	Conditions   []ConditionDetailForTemplate
 }
 
 // ConditionDetailForTemplate represents a condition for channel detail view
 type ConditionDetailForTemplate struct {
-	ID            string
-	Name          string
-	EventType     string
-	IsEnabled     bool
+	ID              string
+	Name            string
+	EventType       string
+	IsEnabled       bool
 	LastTriggeredAt string
 }
 
@@ -178,14 +191,14 @@ func PrepareConditionsPageData(channelID string) *ConditionsPageData {
 	conditions := make([]ConditionForTemplate, 0)
 	for _, c := range condList {
 		conditions = append(conditions, ConditionForTemplate{
-			ID:            c.Id,
-			Name:          c.Name,
-			EventType:     c.EventType,
-			Filter:        c.Filter,
-			IsEnabled:     c.IsEnabled,
+			ID:              c.Id,
+			Name:            c.Name,
+			EventType:       c.EventType,
+			Filter:          c.Filter,
+			IsEnabled:       c.IsEnabled,
 			LastTriggeredAt: c.LastTriggeredAt,
-			DeviceID:      c.DeviceId,
-			DeviceAction:  c.DeviceAction,
+			DeviceID:        c.DeviceId,
+			DeviceAction:    c.DeviceAction,
 			DeviceActionParams: map[string]interface{}{
 				"color":       c.DeviceActionParams.Color,
 				"duration_ms": c.DeviceActionParams.DurationMs,
@@ -252,6 +265,7 @@ func PrepareChannelDetailPageData(channelID string) *ChannelDetailPageData {
 				"skip_if_title_contains":       currentWatch.StreamFilter.SkipIfTitleContains,
 				"skip_if_description_contains": currentWatch.StreamFilter.SkipIfDescriptionContains,
 			},
+			Conditions: conditions,
 		},
 		PlatformMeta:    GetPlatformMetadata(),
 		EventBadgeClass: GetEventBadgeClasses(),
@@ -260,16 +274,16 @@ func PrepareChannelDetailPageData(channelID string) *ChannelDetailPageData {
 
 // DeviceForTemplate represents a device prepared for template rendering
 type DeviceForTemplate struct {
-	ID             string
-	Name           string
-	Brand          string
-	ProductID      string
-	ProductName    string
-	Room           string
-	Status         string // "online", "offline"
-	IsConfigured   bool
-	BrandColor     string
-	BrandLogo      string
+	ID               string
+	Name             string
+	Brand            string
+	ProductID        string
+	ProductName      string
+	Room             string
+	Status           string // "online", "offline"
+	IsConfigured     bool
+	BrandColor       string
+	BrandLogo        string
 	SupportedActions []string
 }
 
@@ -298,12 +312,12 @@ func PrepareDevicesPageData() *DevicesPageData {
 	// Fetch all devices
 	devices := Devices{}.ListDevices()
 	devicesForTemplate := make([]DeviceForTemplate, 0)
-	
+
 	// Fetch all active brands from catalog
 	catalog := Catalog{}
 	brands := catalog.ListBrands(true)
 	brandsMap := make(map[string]*BrandForTemplate)
-	
+
 	// Build brands map for quick lookup
 	for _, b := range brands {
 		brandsMap[b.Id] = &BrandForTemplate{
@@ -318,7 +332,7 @@ func PrepareDevicesPageData() *DevicesPageData {
 			DocsLabel:        b.DocsLabel,
 		}
 	}
-	
+
 	// Fetch products by brand for product names and supported actions
 	productsMap := make(map[string]map[string]interface{})
 	for _, brand := range brands {
@@ -332,13 +346,13 @@ func PrepareDevicesPageData() *DevicesPageData {
 		}
 		productsMap[brand.Id] = productsByID
 	}
-	
+
 	// Convert devices to template format
 	for _, dev := range devices {
 		brand := brandsMap[dev.Brand]
 		productName := dev.ProductId
 		var actions []string
-		
+
 		if productMap, ok := productsMap[dev.Brand]; ok {
 			if prod, ok := productMap[dev.ProductId]; ok {
 				if prodData, ok := prod.(map[string]interface{}); ok {
@@ -356,15 +370,15 @@ func PrepareDevicesPageData() *DevicesPageData {
 				}
 			}
 		}
-		
+
 		brandLogo := ""
 		brandColor := "#888888"
-		
+
 		if brand != nil {
 			brandLogo = brand.LogoURL
 			brandColor = brand.BrandColor
 		}
-		
+
 		devicesForTemplate = append(devicesForTemplate, DeviceForTemplate{
 			ID:               dev.Id,
 			Name:             dev.Name,
@@ -379,7 +393,7 @@ func PrepareDevicesPageData() *DevicesPageData {
 			SupportedActions: actions,
 		})
 	}
-	
+
 	return &DevicesPageData{
 		Devices:  devicesForTemplate,
 		Brands:   brandsMap,
@@ -391,13 +405,46 @@ func PrepareDevicesPageData() *DevicesPageData {
 func getBrandIDsFromDevices(devices []DeviceForTemplate) []string {
 	seen := make(map[string]bool)
 	var brandIDs []string
-	
+
 	for _, dev := range devices {
 		if !seen[dev.Brand] {
 			brandIDs = append(brandIDs, dev.Brand)
 			seen[dev.Brand] = true
 		}
 	}
-	
+
 	return brandIDs
+}
+
+// ChannelsPageData contains all data needed to render the channels list page
+type ChannelsPageData struct {
+	Watches      []WatchForTemplate
+	PlatformMeta map[string]map[string]interface{}
+}
+
+// PrepareChannelsPageData prepares all data needed to render the channels list page
+func PrepareChannelsPageData() *ChannelsPageData {
+	// Fetch all watches
+	watches := Watches{}.ListWatches()
+
+	watchesForTemplate := make([]WatchForTemplate, 0)
+	for _, w := range watches {
+		lastStream := FormatDateTime(w.LastStreamAt, "Never")
+		watchesForTemplate = append(watchesForTemplate, WatchForTemplate{
+			ID:           w.Id,
+			Name:         w.Name,
+			Platform:     w.Platform,
+			ChannelID:    w.ChannelId,
+			IsActive:     w.IsActive,
+			Status:       w.Status,
+			ThumbnailUrl: w.ThumbnailUrl,
+			LastStream:   lastStream,
+			StreamFilter: w.StreamFilter,
+		})
+	}
+
+	return &ChannelsPageData{
+		Watches:      watchesForTemplate,
+		PlatformMeta: GetPlatformMetadata(),
+	}
 }
