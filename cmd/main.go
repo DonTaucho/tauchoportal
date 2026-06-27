@@ -13,11 +13,13 @@ import (
 	"os"
 	"os/signal"
 	"path/filepath"
+	"reflect"
 	"strconv"
 	"strings"
 	"syscall"
 	"time"
 
+	"tauchoportal/internal/controller"
 	"tauchoportal/internal/i18n"
 	"tauchoportal/internal/icons"
 
@@ -26,11 +28,21 @@ import (
 )
 
 type PageData struct {
-	Title string
-	User  *UserProfile
-	Page  string
-	Lang  string
-	I18n  *i18n.Translator
+	Title                   string
+	User                    *UserProfile
+	Page                    string
+	Lang                    string
+	I18n                    *i18n.Translator
+	API                     *controller.API
+	CurrentChannel          *controller.ChannelForTemplate
+	Conditions              []controller.ConditionForTemplate
+	EventTypes              []string
+	ChannelDetail           *controller.ChannelDetailForTemplate
+	ChannelDetailConditions []controller.ConditionDetailForTemplate
+	Devices                 *controller.DevicesPageData
+	Channels                *controller.ChannelsPageData
+	PlatformMeta            map[string]map[string]interface{}
+	EventBadgeClass         map[string]string
 }
 
 type UserProfile struct {
@@ -58,6 +70,7 @@ var pageRoutes = map[string]pageConfig{
 	"/devices":          {Name: "devices", Title: "My Devices", RequireAuth: true},
 	"/brand-settings":   {Name: "brand-settings", Title: "Device Brands", RequireAuth: true},
 	"/about":            {Name: "about", Title: "About", RequireAuth: false},
+	"/login-settings":   {Name: "login-settings", Title: "Login Settings", RequireAuth: true},
 	"/account-settings": {Name: "account-settings", Title: "Account Settings", RequireAuth: true},
 	"/privacy-policy":   {Name: "privacy-policy", Title: "Privacy Policy", RequireAuth: false},
 	"/terms-of-service": {Name: "terms-of-service", Title: "Terms of Service", RequireAuth: false},
@@ -288,7 +301,7 @@ func main() {
 
 func loadTemplates() map[string]*template.Template {
 	result := make(map[string]*template.Template)
-	pages, err := filepath.Glob(filepath.Join("pages", "*.gohtml"))
+	pages, err := filepath.Glob(filepath.Join("templates", "pages", "*.html"))
 	if err != nil {
 		log.Fatalf("failed to list templates: %v", err)
 	}
@@ -296,12 +309,14 @@ func loadTemplates() map[string]*template.Template {
 		log.Fatal("no page templates found")
 	}
 
-	basePath := filepath.Join("templates", "layouts", "base.gohtml")
-	headerPath := filepath.Join("templates", "partials", "header.gohtml")
-	nologinheaderPath := filepath.Join("templates", "partials", "nologinheader.gohtml")
-	loginPath := filepath.Join("templates", "partials", "login.gohtml")
+	baseLayoutPath := filepath.Join("templates", "layouts", "base.html")
+	channelLayoutPath := filepath.Join("templates", "layouts", "channels.html")
+	headerPath := filepath.Join("templates", "partials", "header.html")
+	nologinheaderPath := filepath.Join("templates", "partials", "nologinheader.html")
+	loginPath := filepath.Join("templates", "partials", "login.html")
 	funcMap := template.FuncMap{
 		"userJSON": userJSON,
+		"toJSON":   toJSON,
 		"i18nJSON": func(t *i18n.Translator) template.JS {
 			if t == nil {
 				return template.JS("{}")
@@ -310,11 +325,27 @@ func loadTemplates() map[string]*template.Template {
 		},
 		"platformIcon":      icons.Get,
 		"platformIconsJSON": icons.AllJSON,
+		"dict":              dict,
+		"dictparams":        dictparams,
+		"field":             field,
+		"escHtml":           escapeHTML,
+		"formatCount":       formatChannelCount,
+		"add": func(a, b int) int {
+			return a + b
+		},
+		"sub": func(a, b int) int {
+			return a - b
+		},
+		"urlEscape": func(s string) string {
+			return url.QueryEscape(s)
+		},
+		"getEventLabel":  controller.GetEventLabel,
+		"formatDateTime": controller.FormatDateTime,
 	}
 
 	for _, pagePath := range pages {
 		name := strings.TrimSuffix(filepath.Base(pagePath), filepath.Ext(pagePath))
-		tmpl, err := template.New(name).Funcs(funcMap).ParseFiles(basePath, headerPath, nologinheaderPath, loginPath, pagePath)
+		tmpl, err := template.New(name).Funcs(funcMap).ParseFiles(baseLayoutPath, channelLayoutPath, headerPath, nologinheaderPath, loginPath, pagePath)
 		if err != nil {
 			log.Fatalf("failed to parse template %s: %v", pagePath, err)
 		}
@@ -324,12 +355,16 @@ func loadTemplates() map[string]*template.Template {
 	return result
 }
 
-func userJSON(user *UserProfile) template.JS {
-	payload, err := json.Marshal(user)
+func toJSON(v interface{}) template.JS {
+	payload, err := json.Marshal(v)
 	if err != nil {
 		return template.JS("null")
 	}
 	return template.JS(string(payload))
+}
+
+func userJSON(user *UserProfile) template.JS {
+	return toJSON(user)
 }
 
 func attachIdentityToken(r *http.Request, tokenSource oauth2.TokenSource) {
@@ -389,10 +424,58 @@ func (s *Server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "template not found", http.StatusInternalServerError)
 		return
 	}
+	var useridstr string
+	if user != nil {
+		useridstr = strconv.Itoa(user.ID)
+	}
+	api, _ := controller.Init(s.apiURL, useridstr)
+
+	// Inject cookies from the incoming request into the controller's HTTP client
+	// This allows the controller to use the same session as the proxy
+	controller.InjectCookies(r)
 
 	w.Header().Set("Content-Type", "text/html; charset=utf-8")
 	lang := i18n.DetectLang(r)
-	data := PageData{Title: cfg.Title, User: user, Page: cfg.Name, Lang: lang, I18n: s.i18n.Translator(lang)}
+	data := PageData{Title: cfg.Title, User: user, Page: cfg.Name, Lang: lang, I18n: s.i18n.Translator(lang), API: &api}
+
+	// Fetch conditions page data if on /conditions page
+	if cfg.Name == "conditions" {
+		parts := strings.Split(strings.TrimPrefix(r.URL.Path, "/"), "/")
+		if len(parts) >= 3 && parts[0] == "channels" && parts[2] == "conditions" {
+			channelID := parts[1]
+			pageData := controller.PrepareConditionsPageData(channelID)
+			data.CurrentChannel = pageData.CurrentChannel
+			data.Conditions = pageData.Conditions
+			data.EventTypes = pageData.EventTypes
+			data.PlatformMeta = pageData.PlatformMeta
+			data.EventBadgeClass = pageData.EventBadgeClass
+		}
+	}
+
+	// Fetch channel detail page data if on /channel page
+	if cfg.Name == "channel" {
+		parts := strings.Split(strings.TrimPrefix(r.URL.Path, "/"), "/")
+		if len(parts) >= 2 && parts[0] == "channels" {
+			channelID := parts[1]
+			pageData := controller.PrepareChannelDetailPageData(channelID)
+			data.ChannelDetail = pageData.CurrentChannel
+			data.ChannelDetailConditions = pageData.CurrentChannel.Conditions
+			data.PlatformMeta = pageData.PlatformMeta
+			data.EventBadgeClass = pageData.EventBadgeClass
+		}
+	}
+
+	// Fetch devices page data if on /devices page
+	if cfg.Name == "devices" {
+		pageData := controller.PrepareDevicesPageData()
+		data.Devices = pageData
+	}
+
+	// Fetch channels page data if on /channels page
+	if cfg.Name == "channels" {
+		pageData := controller.PrepareChannelsPageData()
+		data.Channels = pageData
+	}
 	if err := tmpl.ExecuteTemplate(w, "page", data); err != nil {
 		log.Printf("failed to render page %s: %v", cfg.Name, err)
 		http.Error(w, "failed to render page", http.StatusInternalServerError)
@@ -446,4 +529,81 @@ func htmlEscape(s string) string {
 	s = strings.ReplaceAll(s, ">", "&gt;")
 	s = strings.ReplaceAll(s, `"`, "&#34;")
 	return s
+}
+func dict(values ...interface{}) (map[string]interface{}, error) {
+	if len(values)%2 != 0 {
+		return nil, fmt.Errorf("invalid dict call: must have an even number of arguments")
+	}
+
+	dict := make(map[string]interface{}, len(values)/2)
+	for i := 0; i < len(values); i += 2 {
+		key, ok := values[i].(string)
+		if !ok {
+			return nil, fmt.Errorf("dict keys must be strings")
+		}
+		dict[key] = values[i+1]
+	}
+	return dict, nil
+}
+func dictparams(values ...interface{}) (map[string]interface{}, error) {
+	if len(values)%2 != 0 {
+		return nil, fmt.Errorf("invalid dict call: must have an even number of arguments")
+	}
+
+	dict := make(map[string]interface{}, len(values)/2)
+	for i := 0; i < len(values); i += 2 {
+		key, ok := values[i].(string)
+		if !ok {
+			log.Fatalf("Error: dict key must be a string")
+			return nil, nil
+		}
+		var result map[string]string
+		err := json.Unmarshal([]byte(values[i+1].(string)), &result)
+		if err != nil {
+			log.Fatalf("Error unmarshaling JSON: %v", err)
+			return nil, nil
+		}
+		dict[key] = result
+	}
+	return dict, nil
+}
+func field(s interface{}, k string) (interface{}, error) {
+	if s.(map[string]string) != nil {
+		var params = (s).(map[string]string)
+		return params[k], nil
+
+	} else {
+		v := reflect.Indirect(reflect.ValueOf(s))
+		if v.Kind() != reflect.Struct {
+			return nil, fmt.Errorf("%T is not a struct", s)
+		}
+		v = v.FieldByName(k)
+		if !v.IsValid() {
+			return nil, fmt.Errorf("no field in %T with name %s", s, k)
+		}
+		return v.Interface(), nil
+	}
+}
+
+func escapeHTML(s string) string {
+	return strings.NewReplacer(
+		"&", "&amp;",
+		"<", "&lt;",
+		">", "&gt;",
+		`"`, "&#34;",
+		"'", "&#39;",
+	).Replace(s)
+}
+
+func formatChannelCount(value int) string {
+	if value == 0 {
+		return ""
+	}
+	if value >= 1000000 {
+		return fmt.Sprintf("%.1fM", float64(value)/1000000)
+	}
+	if value >= 1000 {
+		return fmt.Sprintf("%.1fK", float64(value)/1000)
+	}
+	return fmt.Sprintf("%d", value)
 }

@@ -3,8 +3,9 @@
   "nav.dashboard": "Dashboard",
   "nav.channels": "Channels",
   "nav.devices": "My Devices",
-  "nav.profile": "Profile",
+  "nav.loginSettings": "Login Settings",
   "nav.accountSettings": "Account Settings",
+  "nav.brandSettings": "Device Brand Settings",
   "nav.signOut": "Sign Out",
 
   "nav.home": "Home",
@@ -12,6 +13,7 @@
   "nav.createAccount": "Create Account",
   "nav.privacy": "Privacy Policy",
   "nav.terms": "Terms of Service",
+  "nav.about": "About this Site",
 
   "index.titleimage_l": "/image/welcome_title_l_e.png",
   "index.titleimage_s": "/image/welcome_title_s_e.png",

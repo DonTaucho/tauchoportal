@@ -113,6 +113,7 @@ body {
     align-items: center;
     gap: 1rem;
     padding: 1.25rem 1.5rem;
+    cursor: pointer;
 }
 
 .channel-card:hover {
@@ -567,6 +568,7 @@ body {
     border-bottom: 1px solid #f0f0f0;
     gap: 1rem;
     flex-wrap: wrap;
+    cursor: pointer;
 }
 
 .detail-section-header h2 {
@@ -605,6 +607,7 @@ body {
     padding: 0.7rem 1.5rem;
     border-bottom: 1px solid #f8f8f8;
     flex-wrap: wrap;
+    cursor: pointer;
 }
 
 .condition-preview-row:last-child {
