@@ -174,13 +174,13 @@ function jsonLoader(jsonnode, area, path){
 				area.append(inputtextbutton);
 			}
         } else if (calcoperators.includes(operator)) {
-            var asknumbutton = document.createElement("div");
-            asknumbutton.classList.add("asknumbutton");
-            asknumbutton.innerText = "+";
-            asknumbutton.setAttribute("path", path);
-            asknumbutton.setAttribute("operator", operator);
-            asknumbutton.onclick = askNumber;
-            area.append(asknumbutton);
+            var inputnumbutton = document.createElement("div");
+            inputnumbutton.classList.add("asknumbutton");
+            inputnumbutton.innerText = "+";
+            inputnumbutton.setAttribute("path", path);
+            inputnumbutton.setAttribute("operator", operator);
+            inputnumbutton.onclick = inputNumber;
+            area.append(inputnumbutton);
         } else if (textextractors.includes(operator)) {
         
 		} else if ((extractionoperators.includes(operator) ||
@@ -249,11 +249,11 @@ function summarize(node){
 				if (!rangefrom&&!rangeto) {
 					return translations["some-notset"];
 				} else if (rangefrom&&!rangeto) {
-					translations["some-sentense_from"].replace("{0}", items.join(translations["or-joint"])).replace("{1}", rangefrom);
+					return translations["some-sentense_from"].replace("{0}", items.join(translations["or-joint"])).replace("{1}", rangefrom);
 				} else if (!rangefrom&&rangeto) {
-					translations["some-sentense_to"].replace("{0}", items.join(translations["or-joint"])).replace("{1}", rangeto);
+					return translations["some-sentense_to"].replace("{0}", items.join(translations["or-joint"])).replace("{1}", rangeto);
 				} else if (rangefrom&&rangeto) {
-					translations["some-sentense_fromto"].replace("{0}", items.join(translations["or-joint"])).replace("{1}", rangefrom).replace("{2}", rangeto);
+					return translations["some-sentense_fromto"].replace("{0}", items.join(translations["or-joint"])).replace("{1}", rangefrom).replace("{2}", rangeto);
 				}
 				return translations["some-sentense"].replace("{0}", items.join(translations["or-joint"]));
 			}else {
@@ -329,13 +329,13 @@ function summarize(node){
 			if (node.SubConditions.length>0) {
 			    target = summarize(node.SubConditions[0]);
 			    for (i in node.SubConditions.slice(1)) {
-			        items.push(summarize(node.SubConditions[i]));
+			        items.push(translations["staticvalue"].replace("{0}", summarize(node.SubConditions[i])));
 			    }
 			} else {
 			    target = "<span class='novalue'>" + translations["includes-novalue"] + "</span>";
 			}
 			if (node.Variables.length > 0) {
-				items.push("<span class='static'>" + node.Variables[0] + "</span>");
+				items.push("<span class='static'>" + translations["staticvalue"].replace("{0}", node.Variables[0]) + "</span>");
 			}
 			if (node.Variables.length > 1) {
 				if (node.Variables[1].split("-")[0]&&parseInt(node.Variables[1].split("-")[0])) {
@@ -713,11 +713,13 @@ function openBoolDialog(ev, path, callback){
 	}
     document.getElementById("boolnumericradio").checked = false;
     document.getElementById("boolmodal_numeric").classList.remove("available");
-    document.getElementById("numericcomparebasevalue").value = "";
-    document.getElementById("numericcomparebasetype").value = "";
+    document.getElementById("numericcomparebaseplaceholder").style["display"] = "inline-block";
+    document.getElementById("numericcomparebaseplacedisp").style["display"] = "none";
+    document.getElementById("numericcomparebase").value = "";
     document.getElementById("numericcompareoperator").value = ">";
-    document.getElementById("numericcomparetargetvalue").value = "";
-    document.getElementById("numericcomparetargettype").value = "";
+    document.getElementById("numericcomparetargetplaceholder").style["display"] = "inline-block";
+    document.getElementById("numericcomparetargetplacedisp").style["display"] = "none";
+    document.getElementById("numericcomparetarget").value = "";
     document.getElementById("boolconditionradio").checked = false;
     document.getElementById("boolmodal_bool").classList.remove("available");
     document.getElementById("boolSubmitButton").disabled = "disabled";
@@ -725,7 +727,7 @@ function openBoolDialog(ev, path, callback){
 
     document.getElementById("boolModal").style["display"] = "block";
     document.getElementById("boolPath").value =  ev.target.getAttribute("path");
-	document.getElementById("boolSubmitButton").onclick = function(evb) {editBool(evb, path)};
+	document.getElementById("boolSubmitButton").onclick = function(evb) {editBoolItem(evb, path)};
 	if (callback) {
 		callback();
 	}
@@ -741,17 +743,15 @@ function boolDialogValidator (){
             document.getElementById("textconditionselecttype").value ? "" : "disabled";
     } else if (document.getElementById("boolnumericradio").checked) {
         document.getElementById("boolSubmitButton").disabled =
-            document.getElementById("numericcomparebasevalue").value &&
-            document.getElementById("numericcomparebasetype").value && 
-            document.getElementById("numericcompareconditionvalue").value && 
-            document.getElementById("numericcomparetargetvalue").value &&  
-            document.getElementById("numericcomparetargettype").value ? "" : "disabled";
+            document.getElementById("numericcomparebase").value &&
+            document.getElementById("numericcompareoperator").value && 
+            document.getElementById("numericcomparetarget").value ? "" : "disabled";
     } else if (document.getElementById("boolconditionradio").checked) {
         document.getElementById("boolSubmitButton").disabled =
             document.getElementById("boolcondition").value ? "" : "disabled";
     }
 }
-function editBool(ev, path){
+function editBoolItem(ev, path){
     var operation = document.getElementById("boolBody").classList;
     var jsonarea = document.getElementById("conditionLogicInput");
     var json = JSON.parse(jsonarea.value);
@@ -863,7 +863,7 @@ function inputText(currentvalue, currenttype, currentextractor, currentextractor
         document.getElementById("textBody").classList.add("includeenv");
 		document.getElementById("textenterradio").style["display"]= "inline-block";
     } else {
-		document.getElementById("textenvradio").checked = true;
+		document.getElementById("textenterradio").checked = true;
 		document.getElementById("textenterradio").style["display"]= "none";
 	}
 	textDialogValidator();
@@ -1040,13 +1040,35 @@ function textConditionDialogValidator(){
 	}
     document.getElementById("textConditionModalButton").disabled = "disabled";
 }
-function askNum(){
+function inputNumber(currentformula, callback){
     document.getElementById("numModal").style["display"] = "block";
+	numDialogValidator();
+	document.getElementById("numModalButton").onclick = function(){
+		callback(document.getElementById("calcformula").value, document.getElementById("calcdisplay").innerText);
+	}
 }
 
 function numDialogValidator(){
-    
+    document.getElementById("numModalButton").disabled="disabled";
 }
+
+function visualizeFormula(val){
+	var current = document.getElementById("calcformula").value;
+	var formula;
+	try {
+		formula = JSON.parse(current);
+	} catch {
+		formula = {};
+	}
+	var elem = document.createElement("div");
+	for (var property in formula) {
+		var child = document.createElement("span");
+		child.innerText = child;
+		elem.append(child);
+	}
+    document.getElementById("visualizedcalc").replaceChildren(elem);
+}
+
 function editItem(ev){
 	var operator = ev.target.getAttribute("operator");
 	var path = ev.target.getAttribute("path");

@@ -398,6 +398,7 @@ var translations = {
   "not-notset": "条件が未設定です",
   "some-sentense_prefix": "",
   "some-sentense_joint": "～",
+  "some-sentense": "{0}が条件を満たす",
   "some-sentense_suffix": "のみが条件を満たす",
   "some-sentense_from": "{0}のうち、{1}個以上が条件を満たす",
   "some-sentense_to": "{0}のうち、{1}個以下だけ条件を満たす",
@@ -515,15 +516,18 @@ var translations = {
             </div>
             <div id="boolmodal_numeric" class="selector" onclick="document.getElementById('boolnumericradio').checked=true;document.getElementById('boolmodal_text').classList.remove('available');document.getElementById('boolmodal_numeric').classList.add('available');document.getElementById('boolmodal_bool').classList.remove('available');boolDialogValidator()">
               <div><input id="boolnumericradio" type="radio" name="addboolradio" />Comparison?</div>
-              <div>
-                <span class="numselector" onclick="_this=this;askNum(true, true, function(disp,val,type){_this.innerText=disp;_this.setAttribute('type', type);_this.setAttribute('val', val)})">select value</span>
-                <input id="numericcomparebasevalue" type="hidden" />
-                <input id="numericcomparebasetype" type="hidden" />
+                <span class="numselector" onclick="inputNumber(document.getElementById('numericcomparebase').value, function(val,disp){document.getElementById('numericcomparebaseplacedisp').value=disp;document.getElementById('numericcomparebaseplacedisp').style['display']='inline';document.getElementById('numericcomparebaseplaceholder').style['display']='none';document.getElementById('numericcomparebase').value=val})">
+					<span id="numericcomparebaseplaceholder" class="placeholder">Enter Value</span>
+					<span id="numericcomparebaseplacedisp" style="display:none"></span>
+				</span>
+                <input id="numericcomparebase" type="hidden" />
                 <select id="numericcompareoperator"><option value=">">&gt;</option><option value=">">&gt;=</option><option value="==">=</option><option value="<=">&lt;=</option><option value="<">&lt;</option></select>
-                <span class="numselector" onclick="_this=this;askNum(true, true, function(disp,val,type){_this.innerText=disp;_this.setAttribute('type', type);_this.setAttribute('val', val)})">select value</span></div>
-                <input id="numericcomparetargetvalue" type="hidden" />
-                <input id="numericcomparetargettype" type="hidden" />
-           </div>
+                <span class="numselector" onclick="inputNumber(document.getElementById('numericcomparetarget').value, function(val,disp){document.getElementById('numericcomparetargetplacedisp').value=disp;document.getElementById('numericcomparetargetplacedisp').style['display']='inline';document.getElementById('numericcomparetargetplaceholder').style['display']='none';document.getElementById('numericcomparetarget').value=val})">
+					<span id="numericcomparetargetplaceholder" class="placeholder">Enter Value</span>
+					<span id="numericcomparetargetplacedisp" style="display:none"></span>
+				</span>
+                <input id="numericcomparetarget" type="hidden" />
+            </div>
             <div id="boolmodal_bool" class="selector" onclick="document.getElementById('boolconditionradio').checked=true;document.getElementById('boolmodal_text').classList.remove('available');document.getElementById('boolmodal_numeric').classList.remove('available');document.getElementById('boolmodal_bool').classList.add('available');boolDialogValidator()">
               <div><input id="boolconditionradio" type="radio" name="addboolradio" />Add more condition?</div>
               <select id="boolcondition" onchange="boolDialogValidator()"><option value=""></option><option value="AND">AND</option><option value="OR">OR</option><option value="NOT">NOT</option><option value="SOME">SOME</option></select>
@@ -598,31 +602,26 @@ var translations = {
         <div id="numBody" class="modal-body numselection">
 		    <div id="calcarea">
 		      <div id="visualizedcalc">
-			  valvalval
-		      </div>
+			  </div>
+			  <span id="calccursor">|</span>
 		      <div id="calctoolarea">
-		        <div class="calcoperator">+</div>
-		        <div class="calcoperator">-</div>
-		        <div class="calcoperator">*</div>
-		        <div class="calcoperator">/</div>
-		        <div class="calcoperator">%</div>
+		        <div class="calcoperator" onclick="visualizeFormula()">＋</div>
+		        <div class="calcoperator">－</div>
+		        <div class="calcoperator">×</div>
+		        <div class="calcoperator">÷</div>
+		        <div class="calcoperator">≡</div>
 				<hr />
-				<div><a onclick="inputText(1,1,1,1,1,1,1,1)">Select Item</a></div>
+				<div><a onclick="inputText(null, null, null, null, true, true, function (dispval, val, type, exttype, extval){
+					var x = document.createElement('div');
+					x.innerHTML = dispval;
+					document.getElmentById('calcarea').append(x);
+				})">Select Item</a></div>
 		      </div>
 		    </div>
-		  <div>
-		  aaa bbb ccc
-		  </div>
-          <!-- div class="numselection">
-            <div id="num_env" class="selector" onclick="document.getElementById('numenvselectradio').checked=true;document.getElementById('num_env').classList.add('available');document.getElementById('num_static').classList.remove('available');numDialogValidator()">
-              <input id="numenvselectradio" type="radio" name="numradio">
-              <select id="numEnvSelect"><option value="event_message">comment</option><option value="event_amount">amount</option></select>
-            </div>
-            <div id="num_static" class="selector" onclick="document.getElementById('numenterradio').checked=true;document.getElementById('num_env').classList.remove('available');document.getElementById('num_static').classList.add('available');numDialogValidator()">
-              <input id="numenterradio" type="radio" name="numradio">
-              <input id="numEnter" type="number" inputmode="numeric" class="numerictext" onchange="numDialogValidator()">
-            </div>
-          </div -->
+			<input type="hidden" id="calcformula" value='{"Operator":"PLUS", "SubConditions":[{"Operator": "PARAM", "SubConditions":null, "Variables":["event_amount"]}], "Variables": ["2", "3"]}'/>
+		    <div id="calcdisplay">
+		    
+		    </div>
         </div>
         <div class="modal-footer">
             <button type="button" class="btn btn-secondary" onclick="closeModal('numModal')">Cancel</button>
@@ -665,22 +664,6 @@ var translations = {
         <div class="modal-footer">
             <button type="button" class="btn btn-secondary" onclick="closeModal('textConditionModal')">Cancel</button>
             <button id="textConditionModalButton" type="button" class="btn btn-primary" onclick="">Okay</button>
-        </div>
-    </div>
-</div>
-
-<div id="singleValueModal" class="modal">
-    <div class="modal-content modal-small">
-        <div class="modal-header">
-            <span class="close" onclick="closeModal('singleValueModal')">×</span>
-            <p>Value.</p>
-        </div>
-        <div id="valueBody" class="modal-body">
-			<input id="singleValueEditText" type="text" value=""/>
-        </div>
-        <div class="modal-footer">
-            <button type="button" class="btn btn-secondary" onclick="closeModal('singleValueModal')">Cancel</button>
-            <button id="singleValueModalButton" type="button" class="btn btn-primary" onclick="">Okay</button>
         </div>
     </div>
 </div>

@@ -51,18 +51,25 @@ display:none;
     border-top: 1px dotted lightgray;
     padding-top: 0.7em;
 }
-#drawingArea>div.detailarea>.subcondition>.item:hover>.detailarea,
-#drawingArea>div.detailarea>.subcondition>.item.focus>.detailarea {
+#drawingArea>div.detailarea>.subcondition>.item:hover>.detailarea {
 	max-height: 20em;
 	overflow-y: auto;
 	color: unset;
 }
 
-#drawingArea>div.detailarea>.subcondition>.item:hover>.detailarea .detailarea,
-#drawingArea>div.detailarea>.subcondition>.item.focus>.detailarea .detailarea{
+#drawingArea>div.detailarea>.subcondition>.item:hover>.detailarea .detailarea{
 	max-height: unset;
 	overflow-y: unset;
 	color: unset;
+}
+#drawingArea>div.detailarea>.subcondition>.item.focus>.detailarea {
+	max-height: 20em;
+	overflow-y: auto;
+}
+
+#drawingArea>div.detailarea>.subcondition>.item.focus>.detailarea .detailarea{
+	max-height: unset;
+	overflow-y: unset;
 }
 
 #drawingArea>legend,
@@ -179,11 +186,12 @@ fieldset{
     background-color: rgb(74 8 200 / 12%);
     display: inline-block;
     border: 1px solid rgb(74 8 200 / 52%);
-    padding: 1rem 1.5rem;
+    padding: 0.5rem 0.7rem;
     margin: 0.5rem 0.5rem 0rem 0rem;
     line-height: 1em;
     cursor: pointer;
     color: #4a08c8;
+	border-radius: 4px;
 }
 .item .variable::after{
     content: "✏️";
@@ -200,6 +208,9 @@ fieldset{
 	cursor: unset;
     padding: unset;
     margin: unset;
+}
+.item.focus{
+	border: 1px solid yellow;
 }
 .item .icons{
     position: absolute;
@@ -235,25 +246,157 @@ div#logictotaldescription .and,
 div#logictotaldescription .or {
 	font-size: 12pt;
 }
-div#logictotaldescription span.and::before {
+div#logictotaldescription .and::before, 
+div#logictotaldescription .or::before {
+	content: "(";
+	color: transparent;
+}
+div#logictotaldescription .and::after, 
+div#logictotaldescription .or::after {
+	content: ")";
+	color: transparent;
+}
+div#logictotaldescription span.and:hover::before {
 	content: "(";
 	color: orange;
-	font-size: 1.5em;
+	font-size: 1em;
+	line-height: 1rem;
 }
-div#logictotaldescription span.and::after {
+div#logictotaldescription span.and:hover::after {
 	content: ")";
 	color: orange;
-	font-size: 1.5em;
+	font-size: 1em;
+	line-height: 1rem;
 }
-div#logictotaldescription span.and .and::before {
+div#logictotaldescription span.and .and:hover::before {
 	content: "(";
 	color: red;
-	font-size: 1.5em;
+	font-size: 1.2em;
 }
-div#logictotaldescription span.and .and::after {
+div#logictotaldescription span.and .and:hover::after {
 	content: ")";
 	color: red;
-	font-size: 1.5em;
+	font-size: 1.2em;
+}
+div#logictotaldescription span.and .or:hover::before {
+	content: "(";
+	color: red;
+	font-size: 1.2em;
+}
+div#logictotaldescription span.and .or:hover::after {
+	content: ")";
+	color: red;
+	font-size: 1.2em;
+}
+div#logictotaldescription span.and .and .and:hover::before {
+	content: "(";
+	color: black;
+	font-size: 1.4em;
+}
+div#logictotaldescription span.and .and .and:hover::after {
+	content: ")";
+	color: black;
+	font-size: 1.4em;
+}
+div#logictotaldescription span.and .or .and:hover::before {
+	content: "(";
+	color: black;
+	font-size: 1.4em;
+}
+div#logictotaldescription span.and .or .and:hover::after {
+	content: ")";
+	color: black;
+	font-size: 1.4em;
+}
+div#logictotaldescription span.and .and .or:hover::before {
+	content: "(";
+	color: black;
+	font-size: 1.4em;
+}
+div#logictotaldescription span.and .and .or:hover::after {
+	content: ")";
+	color: black;
+	font-size: 1.4em;
+}
+div#logictotaldescription span.and .or .or:hover::before {
+	content: "(";
+	color: black;
+	font-size: 1.4em;
+}
+div#logictotaldescription span.and .or .or:hover::after {
+	content: ")";
+	color: black;
+	font-size: 1.4em;
+}
+div#logictotaldescription span.or:hover::before {
+	content: "(";
+	color: orange;
+	font-size: 1em;
+}
+div#logictotaldescription span.or:hover::after {
+	content: ")";
+	color: orange;
+	font-size: 1em;
+}
+div#logictotaldescription span.or .and:hover::before {
+	content: "(";
+	color: red;
+	font-size: 1.2em;
+}
+div#logictotaldescription span.or .and:hover::after {
+	content: ")";
+	color: red;
+	font-size: 1.2em;
+}
+div#logictotaldescription span.or .or:hover::before {
+	content: "(";
+	color: red;
+	font-size: 1.2em;
+}
+div#logictotaldescription span.or .or:hover::after {
+	content: ")";
+	color: red;
+	font-size: 1.2em;
+}
+div#logictotaldescription span.or .and .or:hover::before {
+	content: "(";
+	color: black;
+	font-size: 1.4em;
+}
+div#logictotaldescription span.or .and .or:hover::after {
+	content: ")";
+	color: black;
+	font-size: 1.4em;
+}
+div#logictotaldescription span.or .and .and:hover::before {
+	content: "(";
+	color: black;
+	font-size: 1.4em;
+}
+div#logictotaldescription span.or .and .and:hover::after {
+	content: ")";
+	color: black;
+	font-size: 1.4em;
+}
+div#logictotaldescription span.or .or .or:hover::before {
+	content: "(";
+	color: black;
+	font-size: 1.4em;
+}
+div#logictotaldescription span.or .or .or:hover::after {
+	content: ")";
+	color: black;
+	font-size: 1.4em;
+}
+div#logictotaldescription span.or .or .and:hover::before {
+	content: "(";
+	color: black;
+	font-size: 1.4em;
+}
+div#logictotaldescription span.or .or .and:hover::after {
+	content: ")";
+	color: black;
+	font-size: 1.4em;
 }
 
 .addbutton {
@@ -499,7 +642,7 @@ fieldset.item.regex_extract .variable,
 fieldset.item.substring .variable,
 fieldset.item.first .variable,
 fieldset.item.last .variable {
-    background-color: rgb(135 116 44 / 25%);
+    background-color: rgb(135, 116, 44, 0.25);
     border-color: #77651f;
     color: #87742c;
     padding: 0.5rem;
@@ -525,6 +668,16 @@ fieldset.item.substring>.detailarea>div,
 fieldset.item.first>.detailarea>div,
 fieldset.item.last>.detailarea>div {
     display:inline-block;
+}
+
+fieldset.item.param {
+    background-color: rgb(223, 196, 172, 0.32);
+    padding: 1rem;
+    display: inline-block;
+	border-radius: 4px;
+}
+fieldset.item.param>div.icons{
+    display: none;
 }
 
 .calcoperator {
@@ -644,13 +797,23 @@ fieldset.item.last>.detailarea>div {
     width: 80%;
     display: inline-block;
     vertical-align: top;
-    border: 1px solid blue;
+    border: 1px solid #c9c9d5;
     height: 100%;
     min-height: 22em;
+	padding: 0.3em;
 }
 #calctoolarea {
     width: 6em;
     display: inline-block;
+}
+#calccursor {
+	animation: retro-blink 1s step-start infinite;
+}
+
+@keyframes retro-blink {
+  50% {
+    opacity: 0;
+  }
 }
 
 /* for JSON area and the animation */
