@@ -2,11 +2,6 @@
     'use strict';
     const { apiRequest, openModal, closeModal } = window;
     let filteringChannelId = null;
-
-    function navigate(path) {
-        window.location.href = path;
-    }
-
     async function updateDisplayName(channelId, newName) {
         const trimmed = (newName || '').trim();
         if (!trimmed) {
@@ -135,7 +130,6 @@
     }
 
     Object.assign(window, {
-        navigate,
         startEditDisplayName,
         toggleChannel,
         deleteChannel,

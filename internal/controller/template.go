@@ -2,6 +2,7 @@ package controller
 
 import (
 	"html"
+	"sort"
 	"time"
 )
 
@@ -274,37 +275,41 @@ func PrepareChannelDetailPageData(channelID string) *ChannelDetailPageData {
 
 // DeviceForTemplate represents a device prepared for template rendering
 type DeviceForTemplate struct {
-	ID               string
-	Name             string
-	Brand            string
-	ProductID        string
-	ProductName      string
-	Room             string
-	Status           string // "online", "offline"
-	IsConfigured     bool
-	BrandColor       string
-	BrandLogo        string
-	SupportedActions []string
+	ID               string      `json:"id"`
+	Name             string      `json:"name"`
+	Brand            string      `json:"brand"`
+	ProductID        string      `json:"product_id"`
+	ProductName      string      `json:"product_name"`
+	Room             string      `json:"room"`
+	Status           string      `json:"status"` // "online", "offline"
+	IsConfigured     bool        `json:"is_configured"`
+	BrandColor       string      `json:"brand_color"`
+	BrandLogo        string      `json:"brand_logo"`
+	SupportedActions []string    `json:"supported_actions"`
+	Credentials      map[string]string `json:"credentials"`
 }
 
 // BrandForTemplate represents a device brand for template rendering
 type BrandForTemplate struct {
-	ID               string
-	Name             string
-	LogoURL          string
-	BrandColor       string
-	AffiliateURL     string
-	Icon             string
-	CredentialFields []CredentialField
-	DocsUrl          string
-	DocsLabel        string
+	ID               string             `json:"id"`
+	Name             string             `json:"name"`
+	LogoURL          string             `json:"logo_url"`
+	BrandColor       string             `json:"brand_color"`
+	AffiliateURL     string             `json:"affiliate_url"`
+	Icon             string             `json:"icon"`
+	CredentialFields []CredentialField  `json:"credential_fields"`
+	DocsUrl          string             `json:"docs_url"`
+	DocsLabel        string             `json:"docs_label"`
+	SortOrder        int                `json:"sort_order"`
 }
 
 // DevicesPageData contains all data needed to render the devices page
 type DevicesPageData struct {
-	Devices  []DeviceForTemplate
-	Brands   map[string]*BrandForTemplate
-	BrandIDs []string
+	Devices       []DeviceForTemplate
+	Brands        map[string]*BrandForTemplate
+	BrandsSorted  []*BrandForTemplate
+	Products      map[string][]Product
+	BrandIDs      []string
 }
 
 // PrepareDevicesPageData prepares all data needed to render the devices page
@@ -317,10 +322,16 @@ func PrepareDevicesPageData() *DevicesPageData {
 	catalog := Catalog{}
 	brands := catalog.ListBrands(true)
 	brandsMap := make(map[string]*BrandForTemplate)
+	brandsSorted := make([]*BrandForTemplate, 0)
 
-	// Build brands map for quick lookup
+	// Sort brands by sort_order
+	sort.Slice(brands, func(i, j int) bool {
+		return brands[i].SortOrder < brands[j].SortOrder
+	})
+
+	// Build brands map for quick lookup and sorted slice
 	for _, b := range brands {
-		brandsMap[b.Id] = &BrandForTemplate{
+		brandForTemplate := &BrandForTemplate{
 			ID:               b.Id,
 			Name:             b.Name,
 			LogoURL:          b.LogoUrl,
@@ -330,11 +341,15 @@ func PrepareDevicesPageData() *DevicesPageData {
 			CredentialFields: b.CredentialFields,
 			DocsUrl:          b.DocsUrl,
 			DocsLabel:        b.DocsLabel,
+			SortOrder:        b.SortOrder,
 		}
+		brandsMap[b.Id] = brandForTemplate
+		brandsSorted = append(brandsSorted, brandForTemplate)
 	}
 
 	// Fetch products by brand for product names and supported actions
 	productsMap := make(map[string]map[string]interface{})
+	productsForTemplate := make(map[string][]Product)
 	for _, brand := range brands {
 		products := catalog.ListProducts(brand.Id, true)
 		productsByID := make(map[string]interface{})
@@ -345,6 +360,7 @@ func PrepareDevicesPageData() *DevicesPageData {
 			}
 		}
 		productsMap[brand.Id] = productsByID
+		productsForTemplate[brand.Id] = products
 	}
 
 	// Convert devices to template format
@@ -379,6 +395,13 @@ func PrepareDevicesPageData() *DevicesPageData {
 			brandColor = brand.BrandColor
 		}
 
+		// Extract credentials map
+		credentialsMap := make(map[string]string)
+		if dev.Credentials != nil {
+			credentialsMap["api_key"] = dev.Credentials.ApiKey
+			credentialsMap["device_id"] = dev.Credentials.DeviceId
+		}
+
 		devicesForTemplate = append(devicesForTemplate, DeviceForTemplate{
 			ID:               dev.Id,
 			Name:             dev.Name,
@@ -391,13 +414,16 @@ func PrepareDevicesPageData() *DevicesPageData {
 			BrandColor:       brandColor,
 			BrandLogo:        brandLogo,
 			SupportedActions: actions,
+			Credentials:      credentialsMap,
 		})
 	}
 
 	return &DevicesPageData{
-		Devices:  devicesForTemplate,
-		Brands:   brandsMap,
-		BrandIDs: getBrandIDsFromDevices(devicesForTemplate),
+		Devices:      devicesForTemplate,
+		Brands:       brandsMap,
+		BrandsSorted: brandsSorted,
+		Products:     productsForTemplate,
+		BrandIDs:     getBrandIDsFromDevices(devicesForTemplate),
 	}
 }
 

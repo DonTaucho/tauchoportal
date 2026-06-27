@@ -43,7 +43,7 @@
                              data-channel-name="{{.Name}}"
                              data-filter-data='{{.StreamFilter | toJSON}}'
                              onclick="navigate('/channels/{{.ID}}')">
-                        <div class="platform-icon {{.Platform}}">
+                            <div class="platform-icon {{.Platform}}">
                                 {{if .ThumbnailUrl}}
                                     <img src="{{.ThumbnailUrl}}" alt="{{.Name}}" style="width:100%; height:100%; object-fit:cover; border-radius:4px">
                                 {{else}}

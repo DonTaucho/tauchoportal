@@ -28,21 +28,21 @@ import (
 )
 
 type PageData struct {
-	Title                    string
-	User                     *UserProfile
-	Page                     string
-	Lang                     string
-	I18n                     *i18n.Translator
-	API                      *controller.API
-	CurrentChannel           *controller.ChannelForTemplate
-	Conditions               []controller.ConditionForTemplate
-	EventTypes               []string
-	ChannelDetail            *controller.ChannelDetailForTemplate
-	ChannelDetailConditions  []controller.ConditionDetailForTemplate
-	Devices                  *controller.DevicesPageData
-	Channels                 *controller.ChannelsPageData
-	PlatformMeta             map[string]map[string]interface{}
-	EventBadgeClass          map[string]string
+	Title                   string
+	User                    *UserProfile
+	Page                    string
+	Lang                    string
+	I18n                    *i18n.Translator
+	API                     *controller.API
+	CurrentChannel          *controller.ChannelForTemplate
+	Conditions              []controller.ConditionForTemplate
+	EventTypes              []string
+	ChannelDetail           *controller.ChannelDetailForTemplate
+	ChannelDetailConditions []controller.ConditionDetailForTemplate
+	Devices                 *controller.DevicesPageData
+	Channels                *controller.ChannelsPageData
+	PlatformMeta            map[string]map[string]interface{}
+	EventBadgeClass         map[string]string
 }
 
 type UserProfile struct {
@@ -339,8 +339,8 @@ func loadTemplates() map[string]*template.Template {
 		"urlEscape": func(s string) string {
 			return url.QueryEscape(s)
 		},
-		"getEventLabel":   controller.GetEventLabel,
-		"formatDateTime":  controller.FormatDateTime,
+		"getEventLabel":  controller.GetEventLabel,
+		"formatDateTime": controller.FormatDateTime,
 	}
 
 	for _, pagePath := range pages {
@@ -429,7 +429,7 @@ func (s *Server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		useridstr = strconv.Itoa(user.ID)
 	}
 	api, _ := controller.Init(s.apiURL, useridstr)
-	
+
 	// Inject cookies from the incoming request into the controller's HTTP client
 	// This allows the controller to use the same session as the proxy
 	controller.InjectCookies(r)
@@ -437,7 +437,7 @@ func (s *Server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "text/html; charset=utf-8")
 	lang := i18n.DetectLang(r)
 	data := PageData{Title: cfg.Title, User: user, Page: cfg.Name, Lang: lang, I18n: s.i18n.Translator(lang), API: &api}
-	
+
 	// Fetch conditions page data if on /conditions page
 	if cfg.Name == "conditions" {
 		parts := strings.Split(strings.TrimPrefix(r.URL.Path, "/"), "/")
@@ -451,7 +451,7 @@ func (s *Server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 			data.EventBadgeClass = pageData.EventBadgeClass
 		}
 	}
-	
+
 	// Fetch channel detail page data if on /channel page
 	if cfg.Name == "channel" {
 		parts := strings.Split(strings.TrimPrefix(r.URL.Path, "/"), "/")
