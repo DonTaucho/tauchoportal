@@ -6,71 +6,158 @@
 
 {{define "content"}}
 <div class="dashboard-container">
-        <div class="welcome-banner">
-            <div class="welcome-text">
-                <h1>Welcome back, <span id="username">...</span> 👋</h1>
-                <p id="userEmail" class="welcome-sub"></p>
-            </div>
-        </div>
-
-        <div class="section-title">Quick Navigation</div>
-
-        <div class="cards-grid">
-            <a href="/channels" class="card">
-                <div class="card-icon">👁️</div>
-                <div class="card-body">
-                    <h3>Watched Channels</h3>
-                    <p>Configure which live streaming channels to monitor. The service detects streams automatically.</p>
-                </div>
-                <div class="card-arrow">→</div>
-            </a>
-
-            <a href="/devices" class="card">
-                <div class="card-icon">💡</div>
-                <div class="card-body">
-                    <h3>My Devices</h3>
-                    <p>Register and manage your smart home devices — lights, plugs, LED controllers, and more.</p>
-                </div>
-                <div class="card-arrow">→</div>
-            </a>
-
-        </div>
-
-        <div class="section-title">How It Works</div>
-        <div class="flow-row">
-            <div class="flow-step">
-                <div class="flow-icon">📡</div>
-                <div class="flow-label">Watch Channels</div>
-                <div class="flow-desc">Add streaming accounts to monitor</div>
-            </div>
-            <div class="flow-arrow">→</div>
-            <div class="flow-step">
-                <div class="flow-icon">⚡</div>
-                <div class="flow-label">Set Conditions</div>
-                <div class="flow-desc">Define event rules per channel</div>
-            </div>
-            <div class="flow-arrow">→</div>
-            <div class="flow-step">
-                <div class="flow-icon">💡</div>
-                <div class="flow-label">Assign Devices</div>
-                <div class="flow-desc">Link conditions to smart devices</div>
-            </div>
-            <div class="flow-arrow">→</div>
-            <div class="flow-step">
-                <div class="flow-icon">🎉</div>
-                <div class="flow-label">Stream!</div>
-                <div class="flow-desc">Devices react automatically</div>
-            </div>
+    <!-- Header -->
+    <div class="dashboard-header">
+        <div>
+            <h1>Dashboard</h1>
+            <p class="header-subtitle">System overview and quick stats</p>
         </div>
     </div>
 
-    <script>
-        document.addEventListener('DOMContentLoaded', () => {
-            const user = window.__user;
-            if (!user) return;
-            document.getElementById('username').textContent = user.username || user.email?.split('@')[0] || 'there';
-            const emailEl = document.getElementById('userEmail');
-            if (user.email) emailEl.textContent = user.email;
-        });
-    </script>
+    <!-- Stats Grid -->
+    <div class="stats-grid">
+        <div class="stat-card">
+            <div class="stat-icon stat-channels">👁️</div>
+            <div class="stat-info">
+                <div class="stat-value">{{index .Dashboard.Stats "total_channels"}}</div>
+                <div class="stat-label">Total Channels</div>
+            </div>
+            {{with (index .Dashboard.Stats "live_channels")}}
+            <div class="stat-badge">{{.}} live</div>
+            {{end}}
+        </div>
+
+        <div class="stat-card">
+            <div class="stat-icon stat-devices">💡</div>
+            <div class="stat-info">
+                <div class="stat-value">{{index .Dashboard.Stats "total_devices"}}</div>
+                <div class="stat-label">Total Devices</div>
+            </div>
+            {{with (index .Dashboard.Stats "online_devices")}}
+            <div class="stat-badge">{{.}} online</div>
+            {{end}}
+        </div>
+
+        <div class="stat-card">
+            <div class="stat-icon stat-conditions">⚡</div>
+            <div class="stat-info">
+                <div class="stat-value">{{index .Dashboard.Stats "total_conditions"}}</div>
+                <div class="stat-label">Total Conditions</div>
+            </div>
+            <div class="stat-badge">Automation rules</div>
+        </div>
+    </div>
+
+    <!-- Content Grid -->
+    <div class="dashboard-grid">
+        <!-- Channels Section -->
+        <section class="dashboard-section">
+            <div class="section-header">
+                <h2>Watched Channels</h2>
+                <a href="/channels" class="section-link">View all →</a>
+            </div>
+            <div class="item-list">
+                {{if .Dashboard.Channels}}
+                    {{range .Dashboard.Channels}}
+                    <div class="list-item">
+                        <div class="item-platform">
+                            {{if eq .Platform "youtube"}}📺{{else if eq .Platform "twitch"}}📱{{else}}📡{{end}}
+                        </div>
+                        <div class="item-info">
+                            <div class="item-name">{{.Name}}</div>
+                            <div class="item-detail">{{.Platform}}</div>
+                        </div>
+                        <div class="item-status {{.Status}}">
+                            {{if eq .Status "live"}}🔴 Live{{else}}⚪ Offline{{end}}
+                        </div>
+                    </div>
+                    {{end}}
+                {{else}}
+                    <div class="empty-state">
+                        <p>No channels yet</p>
+                        <a href="/channels" class="btn-small">Add Channel</a>
+                    </div>
+                {{end}}
+            </div>
+        </section>
+
+        <!-- Devices Section -->
+        <section class="dashboard-section">
+            <div class="section-header">
+                <h2>Smart Devices</h2>
+                <a href="/devices" class="section-link">View all →</a>
+            </div>
+            <div class="item-list">
+                {{if .Dashboard.Devices}}
+                    {{range .Dashboard.Devices}}
+                    <div class="list-item">
+                        <div class="item-icon">
+                            {{if .IsConfigured}}💡{{else}}🔲{{end}}
+                        </div>
+                        <div class="item-info">
+                            <div class="item-name">{{.Name}}</div>
+                            <div class="item-detail">{{.Brand}}{{if .Room}} • {{.Room}}{{end}}</div>
+                        </div>
+                        <div class="item-status {{if eq .Status "online"}}online{{else}}offline{{end}}">
+                            {{if eq .Status "online"}}🟢 Online{{else}}⚫ Offline{{end}}
+                        </div>
+                    </div>
+                    {{end}}
+                {{else}}
+                    <div class="empty-state">
+                        <p>No devices registered</p>
+                        <a href="/devices" class="btn-small">Add Device</a>
+                    </div>
+                {{end}}
+            </div>
+        </section>
+
+        <!-- Conditions Section -->
+        <section class="dashboard-section">
+            <div class="section-header">
+                <h2>Active Conditions</h2>
+                <a href="/channels" class="section-link">Manage →</a>
+            </div>
+            <div class="item-list">
+                {{if .Dashboard.Conditions}}
+                    {{range .Dashboard.Conditions}}
+                    <div class="list-item">
+                        <div class="item-icon">
+                            {{if .IsEnabled}}⚡{{else}}💤{{end}}
+                        </div>
+                        <div class="item-info">
+                            <div class="item-name">{{.Name}}</div>
+                            <div class="item-detail">Triggers: {{.EventType}}</div>
+                        </div>
+                        <div class="item-status {{if .IsEnabled}}enabled{{else}}disabled{{end}}">
+                            {{if .IsEnabled}}Enabled{{else}}Disabled{{end}}
+                        </div>
+                    </div>
+                    {{end}}
+                {{else}}
+                    <div class="empty-state">
+                        <p>No conditions configured</p>
+                        <a href="/channels" class="btn-small">Create Condition</a>
+                    </div>
+                {{end}}
+            </div>
+        </section>
+    </div>
+
+    <!-- Quick Actions -->
+    <div class="quick-actions">
+        <a href="/channels" class="action-card">
+            <span class="action-icon">👁️</span>
+            <span class="action-label">Manage Channels</span>
+        </a>
+        <a href="/devices" class="action-card">
+            <span class="action-icon">💡</span>
+            <span class="action-label">Manage Devices</span>
+        </a>
+        <a href="/channels" class="action-card">
+            <span class="action-icon">⚡</span>
+            <span class="action-label">Configure Conditions</span>
+        </a>
+    </div>
+</div>
 {{end}}

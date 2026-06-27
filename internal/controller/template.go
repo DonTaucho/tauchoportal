@@ -150,6 +150,97 @@ type ChannelDetailPageData struct {
 	EventBadgeClass map[string]string
 }
 
+// DashboardPageData contains all data needed to render the dashboard
+type DashboardPageData struct {
+	Channels        []WatchForTemplate
+	Devices         []DeviceForTemplate
+	Conditions      []ConditionForTemplate
+	Stats           map[string]interface{}
+	PlatformMeta    map[string]map[string]interface{}
+	EventBadgeClass map[string]string
+}
+
+// PrepareDashboardPageData prepares all data needed to render the dashboard
+func PrepareDashboardPageData() *DashboardPageData {
+	// Fetch all data
+	watches := Watches{}.ListWatches()
+	devices := Devices{}.ListDevices()
+	cond := Conditions{}
+	conditions := cond.ListConditions("") // Get all conditions across all watches
+
+	// Convert watches to template format
+	channelsForTemplate := make([]WatchForTemplate, 0)
+	for _, w := range watches {
+		channelsForTemplate = append(channelsForTemplate, WatchForTemplate{
+			ID:           w.Id,
+			Name:         w.Name,
+			Platform:     w.Platform,
+			ChannelID:    w.ChannelId,
+			IsActive:     w.IsActive,
+			Status:       w.Status,
+			ThumbnailUrl: w.ThumbnailUrl,
+			LastStream:   FormatDateTime(w.LastStreamAt, "Never"),
+		})
+	}
+
+	// Convert devices to template format (simplified)
+	devicesForTemplate := make([]DeviceForTemplate, 0)
+	for _, d := range devices {
+		devicesForTemplate = append(devicesForTemplate, DeviceForTemplate{
+			ID:           d.Id,
+			Name:         d.Name,
+			Brand:        d.Brand,
+			ProductID:    d.ProductId,
+			Room:         d.Room,
+			Status:       d.Status,
+			IsConfigured: d.IsConfigured,
+		})
+	}
+
+	// Convert conditions to template format (simplified)
+	conditionsForTemplate := make([]ConditionForTemplate, 0)
+	for _, c := range conditions {
+		conditionsForTemplate = append(conditionsForTemplate, ConditionForTemplate{
+			ID:        c.Id,
+			Name:      c.Name,
+			EventType: c.EventType,
+			IsEnabled: c.IsEnabled,
+		})
+	}
+
+	// Calculate stats
+	liveCount := 0
+	for _, w := range watches {
+		if w.Status == "live" {
+			liveCount++
+		}
+	}
+
+	onlineDevices := 0
+	for _, d := range devices {
+		if d.Status == "online" {
+			onlineDevices++
+		}
+	}
+
+	stats := map[string]interface{}{
+		"total_channels":    len(watches),
+		"live_channels":     liveCount,
+		"total_devices":     len(devices),
+		"online_devices":    onlineDevices,
+		"total_conditions":  len(conditions),
+	}
+
+	return &DashboardPageData{
+		Channels:        channelsForTemplate,
+		Devices:         devicesForTemplate,
+		Conditions:      conditionsForTemplate,
+		Stats:           stats,
+		PlatformMeta:    GetPlatformMetadata(),
+		EventBadgeClass: GetEventBadgeClasses(),
+	}
+}
+
 // ConditionsPageData contains all data needed to render a conditions page
 type ConditionsPageData struct {
 	CurrentChannel  *ChannelForTemplate

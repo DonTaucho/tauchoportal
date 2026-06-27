@@ -41,6 +41,7 @@ type PageData struct {
 	ChannelDetailConditions []controller.ConditionDetailForTemplate
 	Devices                 *controller.DevicesPageData
 	Channels                *controller.ChannelsPageData
+	Dashboard               *controller.DashboardPageData
 	PlatformMeta            map[string]map[string]interface{}
 	EventBadgeClass         map[string]string
 }
@@ -463,6 +464,12 @@ func (s *Server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 			data.PlatformMeta = pageData.PlatformMeta
 			data.EventBadgeClass = pageData.EventBadgeClass
 		}
+	}
+
+	// Fetch dashboard page data if on /dashboard page
+	if cfg.Name == "dashboard" {
+		pageData := controller.PrepareDashboardPageData()
+		data.Dashboard = pageData
 	}
 
 	// Fetch devices page data if on /devices page
