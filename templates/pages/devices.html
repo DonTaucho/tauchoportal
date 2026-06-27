@@ -220,9 +220,12 @@
     // =============================================
     // Brand & Product Catalog
     // =============================================
-    // Loaded from API endpoints
-    let BRANDS = [];
-    let PRODUCTS = {};
+    // Pre-loaded from server on page load (sorted by sort_order ascending)
+    let BRANDS = {{toJSON .Devices.BrandsSorted}} || [];
+    let PRODUCTS = {{toJSON .Devices.Products}} || {};
+
+    // Devices pre-loaded from server on page load
+    let MY_DEVICES = {{toJSON .Devices.Devices}} || [];
 
     // Action metadata (icons + labels)
     const ACTION_META = {
@@ -235,8 +238,6 @@
         scene:      { label: 'Play Scene / Effect',  icon: '✨' },
         flash:      { label: 'Flash Alert',          icon: '⚡' },
     };
-
-    let MY_DEVICES = [];
 
     async function apiRequest(method, path, body) {
         const opts = { method, credentials: 'include', headers: {} };
@@ -253,41 +254,19 @@
     }
 
     async function loadBrandsAndProducts() {
-        try {
-            // Load brands from catalog only (products loaded on demand)
-            const brandList = await apiRequest('GET', '/catalog/brands?active_only=true');
-            BRANDS = brandList || [];
-        } catch (e) {
-            console.error('Failed to load brands:', e);
-            alert('Failed to load device brands: ' + e.message);
-        }
+        // Brands are pre-loaded from server on page load
+        // This function is deprecated, kept only for backward compatibility
+        // Products are loaded on-demand via loadProductsForBrand()
     }
     
     async function loadProductsForBrand(brandId) {
-        try {
-            // Load products for a specific brand (on-demand, lazy loading)
-            if (!PRODUCTS[brandId]) {
-                const products = await apiRequest('GET', `/catalog/products?brand_id=${brandId}`);
-                PRODUCTS[brandId] = products || [];
-            }
-            return PRODUCTS[brandId];
-        } catch (e) {
-            console.warn(`Failed to load products for brand ${brandId}:`, e);
-            PRODUCTS[brandId] = [];
-            return [];
-        }
+        // All products are pre-loaded from server on page load
+        // This function is deprecated, kept for backward compatibility
+        // If a brand's products are not yet loaded, they will be when user clicks accordion
+        return PRODUCTS[brandId] || [];
     }
 
-    async function loadDevices() {
-        try {
-            MY_DEVICES = await apiRequest('GET', '/devices');
-        } catch (e) {
-            console.error('Failed to load devices:', e);
-            MY_DEVICES = [];
-        }
-    }
-
-    // =============================================
+    // Products are loaded on-demand via loadProductsForBrand() to minimize bandwidth
     // Render (Simplified)
     // =============================================
     let activeFilter = 'all';
@@ -327,7 +306,6 @@
         if (!dev) return;
         
         try {
-            const fullDev = await apiRequest('GET', `/devices/get?id=${devId}`);
             selectedBrand = dev.brand;
             selectedProduct = dev.product_id;
             
@@ -345,10 +323,11 @@
                 renderCredFields(dev.brand);
             }
             
-            document.getElementById('devName').value = fullDev.name;
-            document.getElementById('devRoom').value = fullDev.room || '';
+            // Use credentials from MY_DEVICES (pre-loaded from server)
+            document.getElementById('devName').value = dev.name;
+            document.getElementById('devRoom').value = dev.room || '';
             
-            const creds = fullDev.credentials || {};
+            const creds = dev.credentials || {};
             const brand = BRANDS.find(b => b.id === dev.brand);
             if (brand && brand.credential_fields) {
                 brand.credential_fields.forEach(f => {

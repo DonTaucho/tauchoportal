@@ -16,7 +16,7 @@
       {{if .ChannelDetail.ThumbnailURL}}
         <img src="{{.ChannelDetail.ThumbnailURL}}" alt="{{escHtml .ChannelDetail.Name}}" style="width:100%; height:100%; object-fit:cover; border-radius:4px">
       {{else}}
-        {{$platformMeta := index .PlatformMeta .ChannelDetail.Platform}}{{if $platformMeta}}{{index $platformMeta "icon"}}{{end}}
+        {{ platformIcon .ChannelDetail.Platform }}
       {{end}}
     </div>
 
@@ -27,8 +27,8 @@
       <div class="channel-meta">
         {{$platformMeta := index .PlatformMeta .ChannelDetail.Platform}}
         <span class="platform-tag {{.ChannelDetail.Platform}}">
-          <span style="display:inline-block; margin-right:4px">{{if $platformMeta}}{{index $platformMeta "icon"}}{{end}}</span>
-          {{if $platformMeta}}{{index $platformMeta "label"}}{{end}}
+          <span style="display:inline-block; margin-right:4px">{{ platformIcon .ChannelDetail.Platform }}</span>
+          {{if $platformMeta}}{{index $platformMeta "label"}}{{else}}{{.ChannelDetail.Platform}}{{end}}
         </span>
         <div class="meta-item">
           <span class="meta-label">Last stream</span>
@@ -72,14 +72,16 @@
 
   <div style="display:flex; gap:0.5rem;">
     <button class="btn btn-secondary" onclick="openTestAllConditionsModal()">🧪 Test Conditions</button>
-    <a class="btn btn-primary" href="/channels/{{.ChannelDetail.ID}}/conditions">Manage Conditions →</a>
   </div>
 
   <div class="detail-section">
-    <div class="detail-section-header">
+    <div class="detail-section-header" onclick="navigate('/channels/{{.ChannelDetail.ID}}/conditions')">
       <div>
         <h2>⚙️ Conditions <span class="conditions-count-badge">{{len .ChannelDetailConditions}}</span></h2>
         <p>Events to react to on <strong>{{escHtml .ChannelDetail.Name}}</strong>.</p>
+      </div>
+      <div class="btn btn-primary">
+        Manage Conditions →
       </div>
     </div>
     <div class="conditions-preview">
@@ -89,13 +91,18 @@
         {{range $i, $condition := .ChannelDetailConditions}}
           {{if lt $i 3}}
           {{$badgeClass := index $.EventBadgeClass $condition.EventType}}
-          <div class="condition-preview-row">
+          <div class="condition-preview-row" onclick="navigate('/channels/{{$.ChannelDetail.ID}}/conditions/{{$condition.ID}}')">
             <span class="event-badge {{if $badgeClass}}{{$badgeClass}}{{else}}stream{{end}}">
               {{getEventLabel $condition.EventType $.ChannelDetail.Platform}}
             </span>
             <span class="cond-preview-name">{{escHtml $condition.Name}}</span>
             <span class="rule-status {{if $condition.IsEnabled}}enabled{{else}}disabled{{end}}">
               {{if $condition.IsEnabled}}On{{else}}Off{{end}}
+            </span>
+            <span>
+              <div class="btn btn-primary">
+                Edit Condition →
+              </div>
             </span>
           </div>
           {{end}}
