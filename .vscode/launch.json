@@ -1,4 +1,4 @@
-﻿{
+{
     "version": "0.2.0",
     "configurations": [
         {
@@ -32,6 +32,7 @@
             "request": "launch",
             "mode": "debug",
             "program": "${workspaceFolder}/cmd",
+            "output": "${workspaceFolder}/bin/debug.exe",
             "cwd": "${workspaceFolder}",
             "env": {
                 "PORT": "8080",

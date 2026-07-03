@@ -1532,17 +1532,54 @@ List all brands.
     "id": "govee",
     "name": "Govee",
     "website": "https://www.govee.com",
-    "logo_url": "https://cdn.example.com/govee-logo.png",
-    "brand_color": "#005DAA",
+    "logo_url": "https://www.govee.com/favicon.ico",
+    "icon": "💡",
+    "brand_color": "#4F7EFF",
     "affiliate_url": "https://govee.mention-me.com/your-tracking-id",
     "affiliate_commission_percent": 5.50,
-    "requires_brand_credentials": false,
+    "requires_brand_credentials": true,
+    "docs_url": "https://developer.govee.com",
+    "docs_label": "Govee Developer API",
+    "credential_fields": [
+      {
+        "id": "api_key",
+        "label": "Govee API Key",
+        "type": "password",
+        "help": "Get in Govee Home app → Profile → About Us → Request API Key",
+        "placeholder": ""
+      }
+    ],
     "sort_order": 1,
     "is_active": true,
-    "created_at": "...",
-    "updated_at": "..."
+    "created_at": "2024-01-15T10:30:00Z",
+    "updated_at": "2024-01-15T10:30:00Z"
   },
-  { "id": "hue", "name": "Philips Hue", "website": "https://www.philips-hue.com", "sort_order": 2, ... }
+  {
+    "id": "tuya",
+    "name": "Tuya",
+    "website": "https://www.tuya.com",
+    "logo_url": "https://www.tuya.com/favicon.ico",
+    "icon": "🔌",
+    "brand_color": "#FF6B6B",
+    "affiliate_url": null,
+    "affiliate_commission_percent": null,
+    "requires_brand_credentials": true,
+    "docs_url": "https://developer.tuya.com",
+    "docs_label": "Tuya Developer Platform",
+    "credential_fields": [
+      {
+        "id": "oauth",
+        "label": "Login with Tuya",
+        "type": "info",
+        "help": "Click to authorize via Tuya OAuth",
+        "placeholder": ""
+      }
+    ],
+    "sort_order": 2,
+    "is_active": true,
+    "created_at": "2024-01-15T10:30:00Z",
+    "updated_at": "2024-01-15T10:30:00Z"
+  }
 ]
 ```
 
@@ -1559,12 +1596,30 @@ Get a brand with its product list.
     "id": "govee", 
     "name": "Govee", 
     "website": "https://www.govee.com",
-    "logo_url": "https://cdn.example.com/govee-logo.png",
+    "logo_url": "https://www.govee.com/favicon.ico",
+    "icon": "💡",
+    "brand_color": "#4F7EFF",
+    "affiliate_url": "https://govee.mention-me.com/your-tracking-id",
+    "affiliate_commission_percent": 5.50,
+    "requires_brand_credentials": true,
+    "docs_url": "https://developer.govee.com",
+    "docs_label": "Govee Developer API",
+    "credential_fields": [
+      {
+        "id": "api_key",
+        "label": "Govee API Key",
+        "type": "password",
+        "help": "Get in Govee Home app → Profile → About Us → Request API Key",
+        "placeholder": ""
+      }
+    ],
     "sort_order": 1,
-    ... 
+    "is_active": true,
+    "created_at": "2024-01-15T10:30:00Z",
+    "updated_at": "2024-01-15T10:30:00Z"
   },
   "products": [
-    { "id": "govee-h6159", "brand_id": "govee", "name": "H6159 LED Strip", "category": "light_strip", "supported_actions": ["set_color","set_brightness"], "is_active": true, ... }
+    { "id": "govee-h6159", "brand_id": "govee", "name": "H6159 LED Strip", "category": "light_strip", "supported_actions": ["set_color","set_brightness"], "is_active": true, "created_at": "2024-01-15T10:30:00Z", "updated_at": "2024-01-15T10:30:00Z" }
   ]
 }
 ```
@@ -1582,10 +1637,22 @@ Create a brand. (Admin operation — access control is portal-side for now.)
   "name": "Acme Lights", // required
   "website": "https://acme.example.com",
   "logo_url": "https://cdn.example.com/acme.png",
+  "icon": "💡", // optional — emoji or icon identifier
   "brand_color": "#FF5733", // optional — hex color for device card accent
   "affiliate_url": "https://acme.example.com/ref?code=TAUCHO", // optional — affiliate link for purchasing
   "affiliate_commission_percent": 5.50, // optional — commission rate (e.g., 5.50%)
   "requires_brand_credentials": false, // optional — flag for future brand-level OAuth support
+  "docs_url": "https://developer.acme.com", // optional — documentation URL
+  "docs_label": "Acme Developer Docs", // optional — documentation link label
+  "credential_fields": [ // optional — array of credential field definitions for frontend form rendering
+    {
+      "id": "api_key",
+      "label": "Acme API Key",
+      "type": "password", // "text", "password", or "info"
+      "help": "Get your API key from your Acme account settings",
+      "placeholder": "sk_live_..."
+    }
+  ],
   "sort_order": 1, // optional — display order priority; null = alphabetical
   "is_active": true      // optional, default true
 }
@@ -1714,7 +1781,343 @@ Products must be added manually (via `POST /catalog/products`) as specific devic
 
 ---
 
+## Brand Authentication & Credentials ⚠️ NOT YET IMPLEMENTED
+
+**Status:** Required for `/brand-settings` page to function. Currently missing.
+
+The portal needs to store and manage **user-specific brand credentials** (API keys, OAuth tokens, device IPs, etc.) for device integrations. This is separate from the global `catalog/brands` table and is user-scoped.
+
+### `user_brand_credentials` Table (NEW)
+
+```json
+{
+  "id": "string (nano-time ID or UUID, e.g. \"ubcred_1748500000000\")",
+  "user_id": "integer (FK → users.id, CASCADE DELETE)",
+  "brand_id": "string (e.g., 'govee', 'hue', 'tuya' — references catalog.brands.id)",
+  "auth_type": "string (one of: 'api_key', 'oauth', 'local', 'bearer_token', 'none')",
+  "status": "string (one of: 'connected', 'expired', 'revoked', 'invalid')",
+  
+  // Credential payload — varies by brand and auth_type
+  "credentials": "jsonb ({
+    'api_key'?: string,           // For api_key auth (Govee, Lifx, Wyze)
+    'device_id'?: string,         // For local/IP devices (Nanoleaf, Yeelight, Kasa, WLED)
+    'bridge_ip'?: string,         // For Hue bridge
+    'light_id'?: string,          // For Hue light ID
+    'selector'?: string,          // For Lifx device selector
+    'device_mac'?: string,        // For Wyze MAC address
+    'region'?: string,            // For Tuya region
+    'client_id'?: string,         // For Tuya OAuth
+    'client_secret'?: string,     // For Tuya OAuth
+    // More fields as needed per brand
+  })",
+  
+  // OAuth token storage (if auth_type = 'oauth')
+  "oauth_access_token": "string (nullable, masked in list responses)",
+  "oauth_refresh_token": "string (nullable, masked in list responses, NOT returned to client)",
+  "oauth_token_expires_at": "timestamp (nullable)",
+  "oauth_scope": "string (space-separated, e.g. 'read write')",
+  
+  // Metadata
+  "is_primary": "bool (one brand per user per type; one 'primary' per brand for multi-account)",
+  "connected_at": "timestamp (when user first successfully authenticated)",
+  "last_tested_at": "timestamp (last time credentials were validated)",
+  "last_used_at": "timestamp (last time a device using these credentials was controlled)",
+  "error_message": "string (nullable — last error message if status is 'invalid' or 'expired')",
+  
+  "created_at": "timestamp",
+  "updated_at": "timestamp"
+}
+```
+
+**Unique constraints:**
+- `(user_id, brand_id)` — **one** credential set per brand per user (initially). If future feature allows multiple per brand, add `is_primary` to unique constraint instead.
+
+**Indexes:**
+- `user_id, brand_id` (for quick lookup)
+- `user_id, status` (for finding expired/invalid)
+
+### Brand Credentials Endpoints
+
+#### GET /auth/brands
+
+**Purpose:** Get all brands and their connection status for the current user.
+
+**Response `200`:**
+```json
+{
+  "brands": [
+    {
+      "id": "govee",
+      "name": "Govee",
+      "is_connected": true,
+      "auth_type": "api_key",
+      "status": "connected",
+      "connected_at": "2026-05-20T10:30:00Z",
+      "last_tested_at": "2026-06-24T14:15:00Z",
+      "error_message": null
+    },
+    {
+      "id": "hue",
+      "name": "Philips Hue",
+      "is_connected": false,
+      "auth_type": "local",
+      "status": null,
+      "connected_at": null,
+      "last_tested_at": null,
+      "error_message": null
+    },
+    {
+      "id": "tuya",
+      "name": "Tuya",
+      "is_connected": true,
+      "auth_type": "oauth",
+      "status": "connected",
+      "connected_at": "2026-06-10T09:00:00Z",
+      "last_tested_at": "2026-06-24T18:00:00Z",
+      "oauth_scope": "read write",
+      "error_message": null
+    }
+  ]
+}
+```
+
+**Notes:**
+- Does NOT return credential values (api_key, tokens, IPs, etc.)
+- Shows connection status for UI badges
+- Shows `last_tested_at` for debugging
+
+**Error responses:**
+- `401` — not authenticated
+
+---
+
+#### GET /auth/brands/\<brand_id\>
+
+Get detailed connection status for a specific brand.
+
+**Response `200`:**
+```json
+{
+  "id": "govee",
+  "name": "Govee",
+  "is_connected": true,
+  "auth_type": "api_key",
+  "status": "connected",
+  "connected_at": "2026-05-20T10:30:00Z",
+  "last_tested_at": "2026-06-24T14:15:00Z",
+  "last_used_at": "2026-06-24T22:10:00Z",
+  "error_message": null,
+  "credential_fields": [
+    // Returned from catalog/brands, showing what fields are stored
+    { "id": "api_key", "label": "API Key", "type": "password" },
+    { "id": "device_id", "label": "Device ID", "type": "text" }
+  ]
+}
+```
+
+---
+
+#### POST /auth/brand/\<brand_id\>/connect
+
+Save/update credentials for a brand.
+
+**Body (varies by brand):**
+
+For API-key brands (Govee, Lifx):
+```json
+{
+  "auth_type": "api_key",
+  "credentials": {
+    "api_key": "...",
+    "device_id": "..." // optional, brand-dependent
+  }
+}
+```
+
+For local IP brands (Hue, Nanoleaf):
+```json
+{
+  "auth_type": "local",
+  "credentials": {
+    "bridge_ip": "192.168.1.50",
+    "api_key": "...",
+    "light_id": "..." // optional
+  }
+}
+```
+
+For OAuth brands (Tuya):
+```json
+{
+  "auth_type": "oauth",
+  "oauth_code": "...",           // From OAuth callback
+  "oauth_state": "..."           // For CSRF validation
+}
+```
+
+**Response `200` / `201`:**
+```json
+{
+  "id": "ubcred_...",
+  "brand_id": "govee",
+  "status": "connected",
+  "connected_at": "2026-06-24T23:27:37Z",
+  "error_message": null
+}
+```
+
+**Error responses:**
+- `400` — invalid credentials format, missing required fields
+- `401` — not authenticated
+- `422` — credentials validation failed (e.g., invalid IP, unreachable device)
+- `503` — brand API unreachable (backend tried to validate)
+
+---
+
+#### POST /auth/brand/\<brand_id\>/test
+
+Test credentials without saving (validation only).
+
+**Body:** Same as `/connect` endpoint.
+
+**Response `200`:**
+```json
+{
+  "is_valid": true,
+  "message": "✅ Credentials verified. Found 3 devices.",
+  "device_count": 3,
+  "devices": [
+    { "id": "device_1", "name": "Living Room Light", "status": "online" },
+    { "id": "device_2", "name": "Bedroom Light", "status": "offline" },
+    { "id": "device_3", "name": "Kitchen Light", "status": "online" }
+  ]
+}
+```
+
+**Response `422` (validation failed):**
+```json
+{
+  "is_valid": false,
+  "error": "Invalid API key. Check your Govee app settings."
+}
+```
+
+---
+
+#### POST /auth/brand/\<brand_id\>/disconnect
+
+Revoke/delete brand credentials.
+
+**Response `200`:**
+```json
+{ "status": "disconnected" }
+```
+
+**Response `204`:** (no content) — also acceptable
+
+---
+
+#### PATCH /auth/brand/\<brand_id\>/update
+
+Partially update credentials (e.g., update device IP without changing API key).
+
+**Body:**
+```json
+{
+  "credentials": {
+    "bridge_ip": "192.168.1.51"  // Only update this field
+  }
+}
+```
+
+**Response `200`:**
+```json
+{
+  "id": "ubcred_...",
+  "brand_id": "hue",
+  "status": "connected",
+  "updated_at": "2026-06-24T23:27:37Z"
+}
+```
+
+---
+
+### OAuth Flow for Brand Credentials
+
+For OAuth brands (currently Tuya; potentially Lifx in future):
+
+1. **Frontend calls:** `GET /auth/brand/tuya/oauth-start`
+2. **Backend returns:** `{ "auth_url": "https://tuya.cloud/...", "state": "..." }`
+3. **Frontend:** Redirects user to Tuya login page
+4. **Tuya redirects back to:** `/callback?code=...&state=...`
+5. **Frontend calls:** `POST /auth/brand/tuya/connect` with code + state
+6. **Backend:** Exchanges code for tokens, saves to `user_brand_credentials`
+7. **Frontend:** Shows success message
+
+---
+
+### Database Schema (PostgreSQL)
+
+```sql
+CREATE TABLE user_brand_credentials (
+  id VARCHAR(32) PRIMARY KEY,
+  user_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+  brand_id VARCHAR(50) NOT NULL,  -- References catalog.brands(id)
+  auth_type VARCHAR(20) NOT NULL CHECK (auth_type IN ('api_key', 'oauth', 'local', 'bearer_token', 'none')),
+  status VARCHAR(20) CHECK (status IN ('connected', 'expired', 'revoked', 'invalid')),
+  
+  credentials JSONB NOT NULL,
+  
+  oauth_access_token VARCHAR(2048),
+  oauth_refresh_token VARCHAR(2048),
+  oauth_token_expires_at TIMESTAMP,
+  oauth_scope TEXT,
+  
+  is_primary BOOLEAN DEFAULT true,
+  connected_at TIMESTAMP NOT NULL DEFAULT NOW(),
+  last_tested_at TIMESTAMP,
+  last_used_at TIMESTAMP,
+  error_message TEXT,
+  
+  created_at TIMESTAMP NOT NULL DEFAULT NOW(),
+  updated_at TIMESTAMP NOT NULL DEFAULT NOW(),
+  
+  UNIQUE(user_id, brand_id),
+  CONSTRAINT valid_oauth_fields CHECK (
+    (auth_type != 'oauth') OR (oauth_access_token IS NOT NULL)
+  ),
+  FOREIGN KEY (brand_id) REFERENCES catalog.brands(id)
+);
+
+CREATE INDEX idx_user_brand_credentials_user_id ON user_brand_credentials(user_id);
+CREATE INDEX idx_user_brand_credentials_user_brand ON user_brand_credentials(user_id, brand_id);
+CREATE INDEX idx_user_brand_credentials_status ON user_brand_credentials(user_id, status);
+```
+
+---
+
+### Migration Notes
+
+If this table is added in a migration:
+
+1. **Backward compatibility:** New column, no data migration needed
+2. **Optional initially:** Brand settings page can gracefully degrade if endpoint not available
+3. **Data model:** No cascade deletes to devices — disconnecting a brand credential doesn't delete devices. Devices remain with invalid credentials (visible error in UI).
+
+---
+
+### Future Enhancements
+
+1. **Multiple credentials per brand:** Change unique constraint to `(user_id, brand_id, is_primary)` when multi-account support is needed
+2. **Credential sharing:** Add `shared_with` JSONB array to allow household members access
+3. **Audit logging:** Add `audit_log` table tracking when credentials were accessed/used
+4. **Encryption:** Encrypt `credentials` JSONB at rest using `pgcrypto`
+5. **Credential versioning:** Store old credentials in history for audit trail
+
+---
+
 ## Live Events ✅
+
 
 Real-time in-stream interaction events (comments, gifts, superchats, etc.) ingested by the platform listener layer once a live stream is detected.
 
@@ -1887,3 +2290,91 @@ If the API is ever exposed publicly, it should validate that `X-User-ID` is only
 - Avoids the API needing its own session store or cookie parser on every resource request
 - The portal's `fetchUser()` call is already happening for page renders — on API proxy calls it adds one extra `/auth/user` round-trip per request (acceptable for now; can be optimised later with a short-lived cache keyed by session cookie)
 - `user_id` FK filtering at the DB layer ensures data isolation even if the header is somehow wrong
+
+---
+
+## Catalog Brand Schema Extensions (Devices Page Refactoring)
+
+### Extended Brand Fields
+The Catalog `/brands` endpoint now includes static credential field definitions and documentation links. These are **system-wide static values**, not user-specific credentials.
+
+**New fields added to `Brand` object:**
+```json
+{
+  "id": "govee",
+  "name": "Govee",
+  "logo_url": "https://...",
+  "brand_color": "#4F7EFF",
+  "icon": "💡",
+  "affiliate_url": "https://...",
+  "credential_fields": [
+    {
+      "id": "api_key",
+      "label": "Govee API Key",
+      "type": "password",
+      "help": "Get in Govee Home app → Profile → About Us → Request API Key",
+      "placeholder": ""
+    },
+    {
+      "id": "device_id",
+      "label": "Device ID",
+      "type": "text",
+      "help": "Found in Govee Home app → device → device info, or via GET /v1/devices",
+      "placeholder": ""
+    }
+  ],
+  "docs_url": "https://developer.govee.com",
+  "docs_label": "Govee Developer API Docs"
+}
+```
+
+**Credential Field Types:**
+- `"text"` — regular text input
+- `"password"` — password input (masked in browser)
+- `"info"` — informational message (no input field)
+
+**Purpose:** Frontend can now render brand credential forms server-side using `credential_fields` instead of hardcoding `BRAND_CREDS` in JavaScript.
+
+---
+
+## Action Metadata Endpoint (Optional Future)
+
+### Proposed: GET `/actions/metadata` 🔲
+
+Returns all supported device action types with their UI metadata (icons, labels).
+
+**Response:**
+```json
+{
+  "actions": [
+    {
+      "id": "on",
+      "label": "Turn On",
+      "icon": "🔆",
+      "category": "power"
+    },
+    {
+      "id": "off",
+      "label": "Turn Off",
+      "icon": "🔅",
+      "category": "power"
+    },
+    {
+      "id": "brightness",
+      "label": "Set Brightness",
+      "icon": "✦",
+      "category": "dimming"
+    },
+    {
+      "id": "color",
+      "label": "Set Color",
+      "icon": "🎨",
+      "category": "color"
+    }
+  ]
+}
+```
+
+**Purpose:** Replace hardcoded `ACTION_META` in JavaScript. Frontend embeds this data server-side in template or as JSON blob.
+
+**Status:** 🔲 Not yet implemented — currently hardcoded in frontend JavaScript as `ACTION_META`.

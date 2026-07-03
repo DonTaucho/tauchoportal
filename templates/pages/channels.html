@@ -1,0 +1,152 @@
+{{define "page"}}{{template "channels" .}}{{end}}
+
+{{define "channelshead"}}{{end}}
+
+{{define "channelscontent"}}
+        <div id="view-list" class="view channels-view">
+            <div class="page-header">
+                <div class="page-header-top">
+                    <div>
+                        <h1><img src="/image/channels_s.png"> Channels</h1>
+                        <p>Live streaming accounts monitored by the polling service. Add channels via the sidebar on the left.</p>
+                    </div>
+                </div>
+                <div class="stats-row">
+                    {{if .Channels.Watches}}
+                        {{$active := 0}}
+                        {{$paused := 0}}
+                        {{$live := 0}}
+                        {{range .Channels.Watches}}
+                            {{if .IsActive}}{{$active = add $active 1}}{{else}}{{$paused = add $paused 1}}{{end}}
+                            {{if eq .Status "live"}}{{$live = add $live 1}}{{end}}
+                        {{end}}
+                        <div class="stat-card active"><span class="stat-number">{{$active}}</span><span class="stat-label">Watching</span></div>
+                        <div class="stat-card paused"><span class="stat-number">{{$paused}}</span><span class="stat-label">Paused</span></div>
+                        <div class="stat-card live"><span class="stat-number">{{$live}}</span><span class="stat-label">Live Now</span></div>
+                        <div class="stat-card"><span class="stat-number">{{len .Channels.Watches}}</span><span class="stat-label">Total</span></div>
+                    {{else}}
+                        <div class="stat-card active"><span class="stat-number">0</span><span class="stat-label">Watching</span></div>
+                        <div class="stat-card paused"><span class="stat-number">0</span><span class="stat-label">Paused</span></div>
+                        <div class="stat-card live"><span class="stat-number">0</span><span class="stat-label">Live Now</span></div>
+                        <div class="stat-card"><span class="stat-number">0</span><span class="stat-label">Total</span></div>
+                    {{end}}
+                </div>
+            </div>
+            
+            {{if .Channels.Watches}}
+                <div class="channels-list">
+                    {{$platformMeta := .Channels.PlatformMeta}}
+                    {{range .Channels.Watches}}
+                        {{$platform := index $platformMeta .Platform}}
+                        <div class="channel-card {{if eq .Status "live"}}live{{end}} {{if not .IsActive}}paused{{end}}" 
+                             data-channel-id="{{.ID}}" 
+                             data-channel-name="{{.Name}}"
+                             data-filter-data='{{.StreamFilter | toJSON}}'
+                             onclick="navigate('/channels/{{.ID}}')">
+                            <div class="platform-icon {{.Platform}}">
+                                {{if .ThumbnailUrl}}
+                                    <img src="{{.ThumbnailUrl}}" alt="{{.Name}}" style="width:100%; height:100%; object-fit:cover; border-radius:4px">
+                                {{else}}
+                                    {{ platformIcon .Platform }}
+                                {{end}}
+                            </div>
+                            
+                            <div class="channel-info">
+                                <div class="channel-name editable-name" onclick="event.stopPropagation(); startEditDisplayName(event, '{{.ID}}', decodeURIComponent('{{.Name | urlEscape}}'))">
+                                    {{.Name}} <span class="name-edit-pencil">✏️</span>
+                                    {{if .StreamFilter.RequireTitleContains}}
+                                        {{if or .StreamFilter.SkipIfTitleContains .StreamFilter.SkipIfDescriptionContains}}
+                                            <span class="filter-badge" title="Stream filter active"><svg width="1em" height="1em" viewBox="0 0 512 512" xmlns="http://www.w3.org/2000/svg"><path fill="#ffffff" stroke="black" stroke-width="6%" d="M296,464a23.88,23.88,0,0,1-7.55-1.23l-80.15-26.67A23.92,23.92,0,0,1,192,413.32V294.11a.44.44,0,0,0-.09-.13L23.26,97.54A30,30,0,0,1,46.05,48H466a30,30,0,0,1,22.79,49.54L320.09,294a.77.77,0,0,0-.09.13V440a23.93,23.93,0,0,1-24,24Z"></path></svg> Filter</span>
+                                        {{end}}
+                                    {{end}}
+                                </div>
+                                
+                                <div class="channel-meta">
+                                    <span class="platform-tag {{.Platform}}">
+                                        {{ platformIcon .Platform }}
+                                        {{if $platform}}{{index $platform "label"}}{{else}}{{.Platform}}{{end}}
+                                    </span>
+                                    <span class="channel-id">{{.ChannelID}}</span>
+                                    <div class="meta-item">
+                                        <span class="meta-label">Last stream:</span>
+                                        <span class="meta-value">{{.LastStream}}</span>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="channel-status-group">
+                                {{if eq .Status "live"}}
+                                    <span class="live-badge">🔴 Live</span>
+                                {{else if .IsActive}}
+                                    <span class="offline-badge">Offline</span>
+                                {{else}}
+                                    <span class="paused-badge">Paused</span>
+                                {{end}}
+                            </div>
+                            
+                            <div class="channel-edit">
+                                <span class="watch-toggle-label {{if not .IsActive}}paused{{end}}">Watch</span>
+                                <label class="toggle-switch" onclick="event.stopPropagation()">
+                                    <input type="checkbox" {{if .IsActive}}checked{{end}} onchange="toggleChannel('{{.ID}}', this)">
+                                    <span class="toggle-slider"></span>
+                                </label>
+                                <button class="action-btn filter {{if or .StreamFilter.RequireTitleContains .StreamFilter.SkipIfTitleContains .StreamFilter.SkipIfDescriptionContains}}active{{end}}" onclick="event.stopPropagation(); openFilterModal('{{.ID}}')">
+                                    <svg width="1em" height="1em" viewBox="0 0 512 512" xmlns="http://www.w3.org/2000/svg"><path fill="#ffffff" stroke="black" stroke-width="6%" d="M296,464a23.88,23.88,0,0,1-7.55-1.23l-80.15-26.67A23.92,23.92,0,0,1,192,413.32V294.11a.44.44,0,0,0-.09-.13L23.26,97.54A30,30,0,0,1,46.05,48H466a30,30,0,0,1,22.79,49.54L320.09,294a.77.77,0,0,0-.09.13V440a23.93,23.93,0,0,1-24,24Z"></path></svg>
+                                </button>
+                                <button class="action-btn delete" onclick="event.stopPropagation(); deleteChannel('{{.ID}}')">🗑</button>
+                            </div>
+                        </div>
+                    {{end}}
+                </div>
+            {{else}}
+                <div class="empty-state" style="display:flex">
+                    <div class="empty-icon"><img src="/image/waiting_s.png" /></div>
+                    <h2>No channels yet</h2>
+                    <p>Choose a platform on the left and add the channels you want to monitor.</p>
+                </div>
+            {{end}}
+        </div>
+
+        <!-- Filter Modal -->
+        <div id="filterModal" class="modal" style="display:none">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h2>Stream Filter</h2>
+                    <p id="filterModalSubtitle"></p>
+                </div>
+                
+                <div class="modal-body">
+                    <div class="form-section">
+                        <label>Require Title Contains (one per line)</label>
+                        <textarea id="filterRequireTitle" placeholder="Enter keywords that must appear in stream title..."></textarea>
+                    </div>
+                    
+                    <div class="form-section">
+                        <label>Skip If Title Contains (one per line)</label>
+                        <textarea id="filterSkipTitle" placeholder="Enter keywords to skip stream..."></textarea>
+                    </div>
+                    
+                    <div class="form-section">
+                        <label>Skip If Description Contains (one per line)</label>
+                        <textarea id="filterSkipDesc" placeholder="Enter keywords to skip stream..."></textarea>
+                    </div>
+                    
+                    <div class="form-section">
+                        <label class="checkbox-label">
+                            <input type="checkbox" id="filterClearAll">
+                            <span>Clear All Filters</span>
+                        </label>
+                    </div>
+                </div>
+                
+                <div class="modal-buttons">
+                    <button class="btn btn-secondary" onclick="closeModal('filterModal')">Cancel</button>
+                    <button id="filterSaveBtn" class="btn btn-primary" onclick="saveFilter()">Save</button>
+                </div>
+            </div>
+        </div>
+{{end}}
+
+{{define "scripts"}}
+<script src="/js/channels-list.js"></script>
+{{end}}

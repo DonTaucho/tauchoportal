@@ -1,0 +1,124 @@
+{{define "page"}}{{template "channels" .}}{{end}}
+
+{{define "channelscontent"}}
+<div id="view-channel" class="view channels-view">
+  <div class="page-header">
+    <nav class="breadcrumb">
+      <img src="/image/channels_s.png">
+      <a href="/channels">Watched Channels</a>
+      <span class="breadcrumb-sep">›</span>
+      <span>{{.ChannelDetail.Name}}</span>
+    </nav>
+  </div>
+
+  <div class="channel-detail-card">
+    <div class="platform-icon {{.ChannelDetail.Platform}} large">
+      {{if .ChannelDetail.ThumbnailURL}}
+        <img src="{{.ChannelDetail.ThumbnailURL}}" alt="{{escHtml .ChannelDetail.Name}}" style="width:100%; height:100%; object-fit:cover; border-radius:4px">
+      {{else}}
+        {{ platformIcon .ChannelDetail.Platform }}
+      {{end}}
+    </div>
+
+    <div class="channel-detail-info">
+      <h1 class="editable-name" onclick="startEditDisplayName(event, '{{.ChannelDetail.ID}}', decodeURIComponent('{{.ChannelDetail.Name | urlEscape}}'))">
+        {{escHtml .ChannelDetail.Name}} <span class="name-edit-pencil">✏️</span>
+      </h1>
+      <div class="channel-meta">
+        {{$platformMeta := index .PlatformMeta .ChannelDetail.Platform}}
+        <span class="platform-tag {{.ChannelDetail.Platform}}">
+          <span style="display:inline-block; margin-right:4px">{{ platformIcon .ChannelDetail.Platform }}</span>
+          {{if $platformMeta}}{{index $platformMeta "label"}}{{else}}{{.ChannelDetail.Platform}}{{end}}
+        </span>
+        <div class="meta-item">
+          <span class="meta-label">Last stream</span>
+          <span class="meta-value">{{formatDateTime .ChannelDetail.LastStreamAt "Never"}}</span>
+        </div>
+        <div class="meta-item">
+          <span class="meta-label">Platform ID</span>
+          <span class="meta-value mono">{{escHtml .ChannelDetail.ChannelID}}</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="channel-status-group">
+      {{if eq .ChannelDetail.Status "live"}}
+        <span class="live-badge">🔴 Live now</span>
+      {{else if .ChannelDetail.IsActive}}
+        <span class="offline-badge">Offline</span>
+      {{else}}
+        <span class="paused-badge">Paused</span>
+      {{end}}
+    </div>
+
+    <div class="channel-edit">
+      <div class="channel-detail-toggle">
+        <label class="toggle-switch">
+          <input type="checkbox" {{if .ChannelDetail.IsActive}}checked{{end}} onchange="toggleChannel('{{.ChannelDetail.ID}}', this)">
+          <span class="toggle-slider"></span>
+        </label>
+        <span class="watch-toggle-label {{if not .ChannelDetail.IsActive}}paused{{end}}">
+          {{if .ChannelDetail.IsActive}}Watching{{else}}Paused{{end}}
+        </span>
+      </div>
+      <button class="action-btn filter" onclick="openFilterModal('{{.ChannelDetail.ID}}')">
+        <svg width="1em" height="1em" viewBox="0 0 512 512" xmlns="http://www.w3.org/2000/svg">
+          <path fill="#ffffff" stroke="black" stroke-width="6%" d="M296,464a23.88,23.88,0,0,1-7.55-1.23l-80.15-26.67A23.92,23.92,0,0,1,192,413.32V294.11a.44.44,0,0,0-.09-.13L23.26,97.54A30,30,0,0,1,46.05,48H466a30,30,0,0,1,22.79,49.54L320.09,294a.77.77,0,0,0-.09.13V440a23.93,23.93,0,0,1-24,24Z"></path>
+        </svg> Filter
+      </button>
+      <button class="action-btn delete" onclick="deleteChannel('{{.ChannelDetail.ID}}')">🗑Remove</button>
+    </div>
+  </div>
+
+  <div style="display:flex; gap:0.5rem;">
+    <button class="btn btn-secondary" onclick="openTestAllConditionsModal()">🧪 Test Conditions</button>
+  </div>
+
+  <div class="detail-section">
+    <div class="detail-section-header" onclick="navigate('/channels/{{.ChannelDetail.ID}}/conditions')">
+      <div>
+        <h2>⚙️ Conditions <span class="conditions-count-badge">{{len .ChannelDetailConditions}}</span></h2>
+        <p>Events to react to on <strong>{{escHtml .ChannelDetail.Name}}</strong>.</p>
+      </div>
+      <div class="btn btn-primary">
+        Manage Conditions →
+      </div>
+    </div>
+    <div class="conditions-preview">
+      {{if eq (len .ChannelDetailConditions) 0}}
+        <p class="no-conditions-msg">No conditions yet.</p>
+      {{else}}
+        {{range $i, $condition := .ChannelDetailConditions}}
+          {{if lt $i 3}}
+          {{$badgeClass := index $.EventBadgeClass $condition.EventType}}
+          <div class="condition-preview-row" onclick="navigate('/channels/{{$.ChannelDetail.ID}}/conditions/{{$condition.ID}}')">
+            <span class="event-badge {{if $badgeClass}}{{$badgeClass}}{{else}}stream{{end}}">
+              {{getEventLabel $condition.EventType $.ChannelDetail.Platform}}
+            </span>
+            <span class="cond-preview-name">{{escHtml $condition.Name}}</span>
+            <span class="rule-status {{if $condition.IsEnabled}}enabled{{else}}disabled{{end}}">
+              {{if $condition.IsEnabled}}On{{else}}Off{{end}}
+            </span>
+            <span>
+              <div class="btn btn-primary">
+                Edit Condition →
+              </div>
+            </span>
+          </div>
+          {{end}}
+        {{end}}
+        {{if gt (len .ChannelDetailConditions) 3}}
+        <div class="more-conditions-link">
+          <a href="/channels/{{.ChannelDetail.ID}}/conditions">+ {{sub (len .ChannelDetailConditions) 3}} more...</a>
+        </div>
+        {{end}}
+      {{end}}
+    </div>
+  </div>
+</div>
+{{end}}
+
+{{define "scripts"}}
+<script src="/js/channel-detail.js"></script>
+{{end}}
+

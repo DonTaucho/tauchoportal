@@ -1,0 +1,212 @@
+{{define "page"}}{{template "base" .}}{{end}}
+
+{{define "head"}}
+<link rel="stylesheet" href="/css/about.css">
+{{end}}
+
+{{define "content"}}
+<div class="about-page">
+        <div class="container">
+            <div class="header">
+                <h1>About Taucho</h1>
+            </div>
+
+            <div class="section lead-section">
+                <img src="/image/sunsetcrabs.png" width="449" height="375">
+                <p>The name "Taucho" is derived from *Taucho-gane*, a local dialect term from the Isahaya region of Japan for the fiddler crab. Fiddler crabs are known for a distinctive movement in which they wave one of their claws as if beckoning toward the setting sun.</p>
+                <p>We named this service with the hope that, even if individual actions are small, their collective impact will create a powerful synergy within influencer content—much</p>
+                <p> ..like the fiddler crab, whose Japanese name literally translates to "one that beckons the tide."</p>
+            </div>
+
+            <div class="section intro">
+                <p>Taucho is a live stream automation platform. It watches your YouTube, Twitch, and NicoNico channels around the clock, and when viewers interact — sending a Super Chat, gifting, cheering with Bits, or triggering emotion effects — your smart home devices respond instantly.</p>
+                <p>No scripts to run. No browser tab to keep open. The cloud service handles all detection and device control automatically.</p>
+            </div>
+
+            <div class="section">
+                <h2>🎯 How It Works</h2>
+                <div class="steps">
+                    <div class="step">
+                        <div class="step-num">1</div>
+                        <div>
+                            <strong>Add Watched Channels</strong>
+                            <p>Register your streaming account handles (YouTube, Twitch, NicoNico). The polling service detects when you go live automatically — nothing to trigger manually.</p>
+                        </div>
+                    </div>
+                    <div class="step">
+                        <div class="step-num">2</div>
+                        <div>
+                            <strong>Define Event Conditions</strong>
+                            <p>For each channel, set rules tied to platform-specific events: comments, Super Chats, Bits, gifts, Nicoru reactions, hype trains, raids, and more.</p>
+                        </div>
+                    </div>
+                    <div class="step">
+                        <div class="step-num">3</div>
+                        <div>
+                            <strong>Register Your Devices</strong>
+                            <p>Add your smart home devices — Govee, Philips Hue, LIFX, WLED, TP-Link Kasa, and others. Configure API credentials once; reuse devices across any number of conditions.</p>
+                        </div>
+                    </div>
+                    <div class="step">
+                        <div class="step-num">4</div>
+                        <div>
+                            <strong>Stream and React</strong>
+                            <p>When a condition fires, the cloud service calls the device API directly. Lights change color, plugs switch, LEDs animate — in real time, while you stream.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="section">
+                <h2>✨ Supported Platforms</h2>
+                <div class="platform-grid">
+                    <div class="platform-card">
+                        <div class="platform-icon">{{platformIcon "youtube"}}</div>
+                        <strong>YouTube</strong>
+                        <ul>
+                            <li>Live chat comments</li>
+                            <li>Super Chat / Super Sticker</li>
+                            <li>Channel memberships</li>
+                            <li>Stream start / end</li>
+                        </ul>
+                    </div>
+                    <div class="platform-card">
+                        <div class="platform-icon">{{platformIcon "twitch"}}</div>
+                        <strong>Twitch</strong>
+                        <ul>
+                            <li>Chat comments</li>
+                            <li>Cheering (Bits)</li>
+                            <li>Subscriptions &amp; follows</li>
+                            <li>Hype Train / Raid</li>
+                        </ul>
+                    </div>
+                    <div class="platform-card">
+                        <div class="platform-icon">{{platformIcon "niconico"}}</div>
+                        <strong>NicoNico</strong>
+                        <ul>
+                            <li>Live comments</li>
+                            <li>Nicoru reactions</li>
+                            <li>Gifts</li>
+                            <li>Emotion effects</li>
+                        </ul>
+                    </div>
+                    <div class="platform-card">
+                        <div class="platform-icon">{{platformIcon "instagram"}}</div>
+                        <strong>Instagram</strong>
+                        <ul>
+                            <li>Live comments</li>
+                            <li>Hearts / reactions</li>
+                            <li>Stream start / end</li>
+                            <li><em>Coming soon</em></li>
+                        </ul>
+                    </div>
+                    <div class="platform-card">
+                        <div class="platform-icon">{{platformIcon "tiktok"}}</div>
+                        <strong>TikTok</strong>
+                        <ul>
+                            <li>Live comments</li>
+                            <li>Gifts</li>
+                            <li>Follows</li>
+                            <li><em>Coming soon</em></li>
+                        </ul>
+                    </div>
+                    <div class="platform-card">
+                        <div class="platform-icon">{{platformIcon "kick"}}</div>
+                        <strong>Kick</strong>
+                        <ul>
+                            <li>Chat comments</li>
+                            <li>Subscriptions</li>
+                            <li>Gifts</li>
+                            <li><em>Coming soon</em></li>
+                        </ul>
+                    </div>
+                    <div class="platform-card">
+                        <div class="platform-icon">{{platformIcon "facebook"}}</div>
+                        <strong>Facebook</strong>
+                        <ul>
+                            <li>Live comments</li>
+                            <li>Reactions</li>
+                            <li>Stars</li>
+                            <li><em>Coming soon</em></li>
+                        </ul>
+                    </div>
+                    <div class="platform-card">
+                        <div class="platform-icon">{{platformIcon "x"}}</div>
+                        <strong>X</strong>
+                        <ul>
+                            <li>Live comments</li>
+                            <li>Tips</li>
+                            <li>Stream start / end</li>
+                            <li><em>Coming soon</em></li>
+                        </ul>
+                    </div>
+                    <div class="platform-card">
+                        <div class="platform-icon">{{platformIcon "bilibili"}}</div>
+                        <strong>Bilibili</strong>
+                        <ul>
+                            <li>Live comments</li>
+                            <li>Gifts</li>
+                            <li>Follows</li>
+                            <li><em>Coming soon</em></li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+
+            <div class="section">
+                <h2>💡 Supported Devices</h2>
+                <p>TauchoPortal works with popular smart home brands out of the box:</p>
+                <div class="device-tags">
+                    <span class="dtag">Govee</span>
+                    <span class="dtag">Philips Hue</span>
+                    <span class="dtag">LIFX</span>
+                    <span class="dtag">WLED</span>
+                    <span class="dtag">TP-Link Kasa</span>
+                    <span class="dtag">Nanoleaf</span>
+                    <span class="dtag">Tuya</span>
+                    <span class="dtag">Yeelight</span>
+                    <span class="dtag">Meross</span>
+                    <span class="dtag">SwitchBot</span>
+                </div>
+                <p>Actions include power on/off, color, brightness, LED effects, and scenes — depending on what each device supports.</p>
+            </div>
+
+            <div class="section">
+                <h2>🏗️ Technology Stack</h2>
+                <div class="tech-stack">
+                    <div class="tech-item">
+                        <strong>Go 1.22</strong>
+                        <p>Backend & web server</p>
+                    </div>
+                    <div class="tech-item">
+                        <strong>Google Cloud Run</strong>
+                        <p>Hosting &amp; scaling</p>
+                    </div>
+                    <div class="tech-item">
+                        <strong>Cloud Functions</strong>
+                        <p>Event polling &amp; dispatch</p>
+                    </div>
+                    <div class="tech-item">
+                        <strong>Firestore</strong>
+                        <p>User &amp; config storage</p>
+                    </div>
+                </div>
+            </div>
+
+            {{if .User}}{{else}}
+            <div class="section cta-section">
+                <h2>🚀 Get Started</h2>
+                <p>Create a free account and connect your first streaming channel in minutes.</p>
+                <div class="cta-row">
+                    <a href="/register" class="btn btn-primary">Create Account</a>
+                    <a href="/login" class="btn btn-secondary">Sign In</a>
+                </div>
+            </div>
+            {{end}}
+
+            <div class="footer">
+                <p>TauchoPortal © 2026 | <a href="/">Home</a> | <a href="/login">Sign In</a> | <a href="/register">Sign Up</a> | <a href="https://github.com/DonTaucho/tauchoportal" target="_blank">GitHub</a></p>
+            </div>
+        </div>
+    </div>
+{{end}}
