@@ -155,6 +155,7 @@
     try {
 		refreshSummary();
 		refreshRequest();
+		visualizeFormula();
     } catch {
 // some message
     }
@@ -303,7 +304,7 @@ function addNewButton(){
   ]}</textarea>
 <hr>
 <div class="editor-actions">
-<button class="btn btn-secondary" onclick="goBack()">Cancel</button><button class="btn btn-primary" id="saveBtn" onclick="saveConditionLogic()">Save Condition Logic</button></div></div><div class="editor-sidebar"><div class="sidebar-card"><h3>Condition Info</h3><dl><dt>Condition ID</dt><dd><code>cond_1781324936169105600</code></dd><dt>Name</dt><dd>Condition 2 Testestes</dd><dt>Event Type</dt><dd><code>comment</code></dd><dt>Status</dt><dd><span class="badge badge-success">Enabled</span></dd></dl></div><div class="sidebar-card"><h3>Quick Reference</h3><ul><li>AND, OR, NOT</li><li>EQUALS, GREATER_THAN, LESS_THAN</li><li>INCLUDES, REGEX_MATCH</li><li>ADD, SUBTRACT, MULTIPLY, DIVIDE</li><li>PARAM</li></ul></div></div></div><div id="validateResult" class="validate-result" style="display:none"></div></div>
+<button class="btn btn-secondary" onclick="goBack()">Cancel</button><button class="btn btn-primary" id="saveBtn" onclick="saveConditionLogic()">Save Condition Logic</button></div></div><div class="editor-sidebar"><div class="sidebar-card"><h3>Condition Info</h3><dl><dt>Condition ID</dt><dd><code>cond_1781324936169105600</code></dd><dt>Name</dt><dd>Condition 2 Testestes</dd><dt>Event Type</dt><dd><code>comment</code></dd><dt>Status</dt><dd><span class="badge badge-success">Enabled</span></dd></dl></div><div class="sidebar-card"><h3>Quick Reference</h3><ul><li>AND, OR, NOT</li><li>EQUALS, GREATER_THAN, LESS_THAN</li><li>INCLUDES, REGEX_MATCH</li><li>PLUS, SUBTRACT, MULTIPLY, DIVIDE</li><li>PARAM</li></ul></div></div></div><div id="validateResult" class="validate-result" style="display:none"></div></div>
     </div>
 </div>
 
@@ -378,7 +379,7 @@ var translations = {
   "LAST": "文の末尾",
   "COUNT": "集合の個数",
   "SUM": "集合の合計",
-  "ADD": "足し算",
+  "PLUS": "足し算",
   "SUBTRACT": "引き算",
   "MULTIPLY": "掛け算",
   "DIVIDE": "割り算",
@@ -429,7 +430,7 @@ var translations = {
   "regex-missingvalue": "未設定",
   "regex-sentense": "{0}の値が{1}に整合する",
   "calc-missingvalue": "未設定",
-  "add-joint": " 足す ",
+  "plus-joint": " 足す ",
   "subtract-joint": " 引く ",
   "multiply-joint": " かける ",
   "divide-joint": " 割る ",
@@ -454,7 +455,7 @@ var translations = {
   "valueof-joint": "、",
   "valueof-sentense": "{0}の値",
   "event_message" : "メッセージ",
-  "event_amount" : "Donation/superchat amount (numeric)",
+  "event_amount" : "ぎふと",
   "event_amount_currency" : "Currency code (e.g., \"USD\")",
   "event_amount_display" : "Formatted amount display",
   "event_sender_name" : "Sender display name",
@@ -605,11 +606,11 @@ var translations = {
 			  </div>
 			  <span id="calccursor">|</span>
 		      <div id="calctoolarea">
-		        <div class="calcoperator" onclick="visualizeFormula()">＋</div>
-		        <div class="calcoperator">－</div>
-		        <div class="calcoperator">×</div>
-		        <div class="calcoperator">÷</div>
-		        <div class="calcoperator">≡</div>
+		        <div class="calcoperator" onclick='appendCalcOperator("PLUS")'>＋</div>
+		        <div class="calcoperator" onclick='appendCalcOperator("MINUS")'>－</div>
+		        <div class="calcoperator" onclick='appendCalcOperator("MULTIPLY")'>×</div>
+		        <div class="calcoperator" onclick='appendCalcOperator("DEVITION")'>÷</div>
+		        <div class="calcoperator" onclick='appendCalcOperator("PLUS")'>≡</div>
 				<hr />
 				<div><a onclick="inputText(null, null, null, null, true, true, function (dispval, val, type, exttype, extval){
 					var x = document.createElement('div');
@@ -618,7 +619,8 @@ var translations = {
 				})">Select Item</a></div>
 		      </div>
 		    </div>
-			<input type="hidden" id="calcformula" value='{"Operator":"PLUS", "SubConditions":[{"Operator": "PARAM", "SubConditions":null, "Variables":["event_amount"]}], "Variables": ["2", "3"]}'/>
+			<input type="hidden" id="calcformula" value='{"Operator":"PLUS", "SubConditions":[{"Operator": "MULTIPLY", "SubConditions":[{"Operator": "PARAM", "SubConditions":null, "Variables":["event_amount"]},{"Operator": "PLUS", "SubConditions":null, "Variables":["1", "7"]},{"Operator": "PARAM", "SubConditions":null, "Variables":["event_amount"]}], "Variables":["4", "515", "6"]}], "Variables": ["2", "3", "66"]}'/>
+			<input type="hidden" id="calccursorpos" value="/sub:0/var:2" />
 		    <div id="calcdisplay">
 		    
 		    </div>

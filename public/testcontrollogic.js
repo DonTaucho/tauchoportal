@@ -4,11 +4,11 @@ const compoperators = ["EQUIVALENT", "GREATER_THAN", "GREATER_OR_EQUAL", "LESS_T
 const textoperators = ["EQUALS", "INCLUDES", "REGEX_MATCH"];
 const textextractors = ["WHOLEWORD", "REGEX_EXTRACT", "SUBSTRING", "FIRST", "LAST"];
 const groupoperators = ["COUNT", "SUM"];
-const calcoperators = ["ADD", "SUBTRACT", "MULTIPLY", "DIVIDE", "MODULO"];
+const calcoperators = ["PLUS", "SUBTRACT", "MULTIPLY", "DIVIDE", "MODULO"];
 const convoperators = ["PARSEINT", "EXCHANGE"];
-const namingmap = {"AND":"and", "OR":"or", "NOT":"not", "SOME":"some", "EQUIVALENT":"equivalent", "GREATER_THAN":"geater_than", "GREATER_OR_EQUAL":"greater_or_equal", "LESS_THAN":"less_than", "LESS_OR_EQUAL":"less_or_equal" , "EQUALS":"equals", "INCLUDES":"includes", "REGEX_MATCH":"regex_match", "COUNT":"count", "SUM":"sum", "WHOLEWORD":"wholeword", "REGEX_EXTRACT": "regex_extract", "SUBSTRING": "substring", "FIRST": "first", "LAST": "last", "ADD":"add", "SUBTRACT":"subtract", "MULTIPLY":"multiply", "DIVIDE":"divide", "MODULO":"modulo", "PARSEINT":"parseint", "EXCHANGE":"exchange", "PARAM":"param"};
-const operatormap = {"and":"AND", "or":"OR", "not":"NOT", "some":"SOME", "equivalent":"EQUIVALENT", "geater_than":"GREATER_THAN", "greater_or_equal":"GREATER_OR_EQUAL", "less_than":"LESS_THAN", "less_or_equal":"LESS_OR_EQUAL", "equals":"EQUALS", "includes":"INCLUDES", "regex_match":"REGEX_MATCH", "count":"COUNT", "sum":"SUM", "wholeword":"WHOLEWORD", "regex_extract": "REGEX_EXTRACT", "substring": "SUBSTRING", "first": "FIRST", "last": "LAST", "add":"ADD", "subtract":"SUBTRACT", "multiply":"MULTIPLY", "divide":"DIVIDE", "modulo":"MODULO", "parseint":"PARSEINT", "exchange":"EXCHANGE", "param":"PARAM"};
-const reverselookuptype = {"AND":"boolean", "OR":"boolean", "NOT":"boolean", "SOME":"boolean", "EQUIVALENT":"comp", "GREATER_THAN":"comp", "LESS_THAN":"comp", "EQUALS":"optext", "INCLUDES":"optext", "REGEX_MATCH":"optext", "COUNT":"group", "SUM":"group", "ADD":"calc","SUBTRACT":"calc","MULTIPLY":"calc","DIVIDE":"calc","MODULO":"calc", "PARSEINT":"conv","EXCHANGE":"conv", "PARAM":"extract"};
+const namingmap = {"AND":"and", "OR":"or", "NOT":"not", "SOME":"some", "EQUIVALENT":"equivalent", "GREATER_THAN":"geater_than", "GREATER_OR_EQUAL":"greater_or_equal", "LESS_THAN":"less_than", "LESS_OR_EQUAL":"less_or_equal" , "EQUALS":"equals", "INCLUDES":"includes", "REGEX_MATCH":"regex_match", "COUNT":"count", "SUM":"sum", "WHOLEWORD":"wholeword", "REGEX_EXTRACT": "regex_extract", "SUBSTRING": "substring", "FIRST": "first", "LAST": "last", "PLUS":"plus", "SUBTRACT":"subtract", "MULTIPLY":"multiply", "DIVIDE":"divide", "MODULO":"modulo", "PARSEINT":"parseint", "EXCHANGE":"exchange", "PARAM":"param"};
+const operatormap = {"and":"AND", "or":"OR", "not":"NOT", "some":"SOME", "equivalent":"EQUIVALENT", "geater_than":"GREATER_THAN", "greater_or_equal":"GREATER_OR_EQUAL", "less_than":"LESS_THAN", "less_or_equal":"LESS_OR_EQUAL", "equals":"EQUALS", "includes":"INCLUDES", "regex_match":"REGEX_MATCH", "count":"COUNT", "sum":"SUM", "wholeword":"WHOLEWORD", "regex_extract": "REGEX_EXTRACT", "substring": "SUBSTRING", "first": "FIRST", "last": "LAST", "plus":"PLUS", "subtract":"SUBTRACT", "multiply":"MULTIPLY", "divide":"DIVIDE", "modulo":"MODULO", "parseint":"PARSEINT", "exchange":"EXCHANGE", "param":"PARAM"};
+const reverselookuptype = {"AND":"boolean", "OR":"boolean", "NOT":"boolean", "SOME":"boolean", "EQUIVALENT":"comp", "GREATER_THAN":"comp", "LESS_THAN":"comp", "EQUALS":"optext", "INCLUDES":"optext", "REGEX_MATCH":"optext", "COUNT":"group", "SUM":"group", "PLUS":"calc","SUBTRACT":"calc","MULTIPLY":"calc","DIVIDE":"calc","MODULO":"calc", "PARSEINT":"conv","EXCHANGE":"conv", "PARAM":"extract"};
 
 function jsonLoader(jsonnode, area, path){
     path = path??"0";
@@ -497,7 +497,7 @@ function summarize(node){
 			    return translations["textextract-last"].replace("{0}", target).replace("{1}", length);
 			}
 			break;
-		case "ADD":
+		case "PLUS":
 		    var items = [];
 			for (i in node.SubConditions) {
 				items.push(summarize(node.SubConditions[i]));
@@ -506,7 +506,7 @@ function summarize(node){
                 items.push(node.Variables[i]);
             }
 			if (items.length) {
-				return items.join(translations["add-joint"]);
+				return items.join(translations["plus-joint"]);
 			} else {
 				return translations["calc-missingvalue"];
 			}
@@ -1061,12 +1061,197 @@ function visualizeFormula(val){
 		formula = {};
 	}
 	var elem = document.createElement("div");
-	for (var property in formula) {
-		var child = document.createElement("span");
-		child.innerText = child;
-		elem.append(child);
+    document.getElementById("visualizedcalc").after(document.getElementById("calccursor"));
+    document.getElementById("visualizedcalc").replaceChildren();
+	appendCalcElem(formula, document.getElementById("visualizedcalc"), "");
+	setCursor(formula);
+}
+
+function appendCalcElem(node, base, path) {
+	if (node) {
+		switch(node.Operator) {
+			case "PLUS":
+				for (var i in node.SubConditions) {
+					if (base.childNodes.length) {
+						var plussign = document.createElement("span");
+						plussign.innerText = "+";
+						plussign.setAttribute("path",  path + "/sub:" + i + ":pre");
+						plussign.onclick = function(e){document.getElementById("calccursorpos").value = e.target.getAttribute("path"); setCursor(JSON.parse(document.getElementById("calcformula").value))};
+						plussign.classList.add("plussign");
+						base.append(plussign);
+					}
+					var child = document.createElement("span");
+					child.classList.add("plusbracket");
+					child.classList.add("sub");
+					child.setAttribute("path",  path + "/sub:" + i);
+					child.onclick = function(e){document.getElementById("calccursorpos").value = e.target.getAttribute("path"); setCursor(JSON.parse(document.getElementById("calcformula").value))};
+					appendCalcElem(node.SubConditions[i], child, path + "/sub:" + i);
+					base.append(child);
+				}
+				for (var i in node.Variables) {
+					if (base.childNodes.length) {
+						var plussign = document.createElement("span");
+						plussign.classList.add("plussign");
+						plussign.setAttribute("path",  path + "/var:" + i + ":pre");
+						plussign.onclick = function(e){document.getElementById("calccursorpos").value = e.target.getAttribute("path"); setCursor(JSON.parse(document.getElementById("calcformula").value))};
+						plussign.innerText = "+";
+						base.append(plussign);
+					}
+					var prependelem = document.createElement("span");
+					prependelem.setAttribute("path",  path + "/var:" + i);
+					prependelem.onclick = function(e){document.getElementById("calccursorpos").value = e.target.getAttribute("path"); setCursor(JSON.parse(document.getElementById("calcformula").value))};
+					prependelem.classList.add("prepend");
+					base.append(prependelem);
+					var variableelem = document.createElement("span");
+					variableelem.classList.add("var");
+					variableelem.classList.add("plus");
+					variableelem.setAttribute("path",  path + "/var:" + i);
+					variableelem.onclick = function(e){document.getElementById("calccursorpos").value = e.target.getAttribute("path"); setCursor(JSON.parse(document.getElementById("calcformula").value))};
+					variableelem.innerText = node.Variables[i];
+					base.append(variableelem);
+					var appendelem = document.createElement("span");
+					appendelem.classList.add("append");
+					appendelem.setAttribute("path",  path + "/var:" + i);
+					appendelem.onclick = function(e){document.getElementById("calccursorpos").value = e.target.getAttribute("path"); setCursor(JSON.parse(document.getElementById("calcformula").value))};
+					base.append(appendelem);
+				}
+				break;
+			case "MULTIPLY":
+				for (var i in node.SubConditions) {
+					if (base.childNodes.length) {
+						var multiplysign = document.createElement("span");
+						multiplysign.innerText = "*";
+						multiplysign.classList.add("multiplysign");
+						multiplysign.setAttribute("path",  path + "/sub:" + i + ":pre");
+						multiplysign.onclick = function(e){document.getElementById("calccursorpos").value = e.target.getAttribute("path"); setCursor(JSON.parse(document.getElementById("calcformula").value))};
+						base.append(multiplysign);
+					}
+					var child = document.createElement("span");
+					child.classList.add("multiplybracket");
+					child.classList.add("sub");
+					appendCalcElem(node.SubConditions[i], child, path + "/sub:" + i);
+					if (child.childNodes.length && node.SubConditions[i].Operator != "PARAM") {
+						var bracketbegin = document.createElement("span");
+						bracketbegin.innerText = "(";
+						bracketbegin.setAttribute("path",  path + "/sub:" + i + ":pre");
+						bracketbegin.onclick = function(e){document.getElementById("calccursorpos").value = e.target.getAttribute("path"); setCursor(JSON.parse(document.getElementById("calcformula").value))};
+						child.prepend(bracketbegin);
+						var bracketend = document.createElement("span");
+						bracketend.innerText = ")";
+						bracketend.setAttribute("path",  path + "/sub:" + i);
+						bracketend.onclick = function(e){document.getElementById("calccursorpos").value = e.target.getAttribute("path"); setCursor(JSON.parse(document.getElementById("calcformula").value))};
+						child.append(bracketend);
+					}
+					child.setAttribute("path",  path + "/sub:" + i);
+					child.onclick = function(e){document.getElementById("calccursorpos").value = e.target.getAttribute("path"); setCursor(JSON.parse(document.getElementById("calcformula").value))};
+					base.append(child);
+				}
+				for (var i in node.Variables) {
+					if (base.childNodes.length) {
+						var multiplysign = document.createElement("span");
+						multiplysign.classList.add("multiplysign");
+						multiplysign.innerText = "*";
+						multiplysign.setAttribute("path",  path + "/var:" + i+ ":pre");
+						multiplysign.onclick = function(e){document.getElementById("calccursorpos").value = e.target.getAttribute("path"); setCursor(JSON.parse(document.getElementById("calcformula").value))};
+						base.append(multiplysign);
+					}
+					var prependelem = document.createElement("span");
+					prependelem.classList.add("prepend");
+					prependelem.setAttribute("path",  path + "/var:" + i);
+					prependelem.onclick = function(e){document.getElementById("calccursorpos").value = e.target.getAttribute("path"); setCursor(JSON.parse(document.getElementById("calcformula").value))};
+					base.append(prependelem);
+					var variableelem = document.createElement("span");
+					variableelem.classList.add("var");
+					variableelem.classList.add("multiply");
+					variableelem.innerText = node.Variables[i];
+					variableelem.setAttribute("path",  path + "/var:" + i);
+					variableelem.onclick = function(e){document.getElementById("calccursorpos").value = e.target.getAttribute("path"); setCursor(JSON.parse(document.getElementById("calcformula").value))};
+					base.append(variableelem);
+					var appendelem = document.createElement("span");
+					appendelem.classList.add("append");
+					appendelem.setAttribute("path",  path + "/var:" + i);
+					appendelem.onclick = function(e){document.getElementById("calccursorpos").value = e.target.getAttribute("path"); setCursor(JSON.parse(document.getElementById("calcformula").value))};
+					base.append(appendelem);
+				}
+				break;
+			case "MINUS":
+				var elem = document.createElement("span");
+				elem.classList.add("minusbracket");
+				for (var i in node.SubConditions) {
+					appendCalcElem(node.SubConditios[i], elem, path + "/sub:" + i);
+				}
+				for (var i in node.Variables) {
+					appendCalcElem(node.Variables[i], elem, path + "/sub:" + i);
+				}
+				base.append(elem);
+				break;
+			case "PARAM":
+				for (var i in node.Variables) {
+					var param = document.createElement("span");
+					param.classList.add("param");
+					param.classList.add("var");
+					param.innerText = translations[node.Variables[i]];
+					param.setAttribute("path",  path + "/param:" + i);
+					param.onclick = function(e){document.getElementById("calccursorpos").value = e.target.getAttribute("path"); setCursor(JSON.parse(document.getElementById("calcformula").value))};
+					base.append(param);
+				}
+				break;
+		}
 	}
-    document.getElementById("visualizedcalc").replaceChildren(elem);
+}
+function setCursor(node) {
+	var cursorpath = document.getElementById("calccursorpos").value;
+	var targetelement = document.getElementById("visualizedcalc");
+	var prepending = false;
+	for (var i in cursorpath.split("/")) {
+		var address = cursorpath.split("/")[i];
+		if (!address) {
+			continue;
+		}
+		var type = address.split(":")[0];
+		var index = address.split(":")[1];
+		prepending = address.split(":").length > 2 && address.split(":")[2] == "pre";
+		const directChildren = Array.from(targetelement.children).filter(child => child.classList.contains(type));
+		targetelement = directChildren[index];
+	}
+	if (prepending) {
+		targetelement.prepend(document.getElementById("calccursor"));
+	} else {
+		targetelement.append(document.getElementById("calccursor"));
+	}
+}
+
+function appendCalcOperator (operator) {
+	var appendingoperator = {"Operator": operator, SubConditions: null, Variables: null};
+	var cursorpath = document.getElementById("calccursorpos").value;
+	var formula = JSON.parse(document.getElementById("calcformula").value);
+	var targetcontainer = formula;
+	if (cursorpath.split("/").length>2) {
+		for (var i in cursorpath.split("/").slice(cursorpath.split("/").length-2)) {
+			var address = cursorpath.split("/")[i];
+			if (!address) {
+				continue;
+			}
+			var type = address.split(":")[0];
+			var index = address.split(":")[1];
+			if (type=="sub") {
+				targetcontainer = targetcontainer.SubConditions[index];
+			} else if (type == "var") {
+				targetcontainer = targetcontainer.Variables[index];
+			}
+		}
+	}
+	var address = cursorpath.split("/")[cursorpath.split("/").length-1];
+	var type = address.split(":")[0];
+	var index = address.split(":")[1];
+	var prepending = address.split(":").length > 2 && address.split(":")[2] == "pre";
+	if (type == "sub") {
+		targetcontainer.SubConditions.splice(index + (prepending?0:1), 0, appendingoperator);
+	} else if (type == "var") { // even if the cursor is on "variable", cannot splice between variables since the appendance is SubCondition anyway. Append to the last of SubConditions
+		targetcontainer.SubConditions.push(appendingoperator);
+	}
+	document.getElementById("calcformula").value = JSON.stringify(formula);
+	visualizeFormula();
 }
 
 function editItem(ev){
