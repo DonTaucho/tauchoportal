@@ -820,7 +820,7 @@ function editBoolItem(ev, path){
     document.getElementById("boolModal").style["display"] = "none";
     reloadJson(json);
 }
-function inputText(currentvalue, currenttype, currentextractor, currentextractorval, includeenv, includeenter, callback){
+function inputText(currentvalue, currenttype, currentextractor, currentextractorval, includeenv, includeenter, callback, validator){
     document.getElementById("textBody").className = "";
     document.getElementById("textBody").classList.add("modal-body");
     document.getElementById("textBody").classList.add("textselection");
@@ -828,6 +828,7 @@ function inputText(currentvalue, currenttype, currentextractor, currentextractor
     document.getElementById("textEnvSelect").value = currenttype == "env" ? currentvalue : "event_message";
     document.getElementById("textenterradio").checked = currenttype == "variable";
     document.getElementById("textEnter").value = currenttype == "variable" ? currentvalue : "";
+    document.getElementById("textValidator").value = validator;
 
     document.getElementById('textEnterArea').classList.remove('available');
     document.getElementById('textEnvArea').classList.remove('available');
@@ -986,6 +987,9 @@ function textDialogValidator() {
 		}
 	} else if (document.getElementById("textenterradio").checked) {
         valid = document.getElementById("textEnter").value;
+		if (document.getElementById("textValidator").value) {
+			valid &&= document.getElementById("textEnter").value.match(document.getElementById("textValidator").value);
+		}
 	}
 	
     document.getElementById("textSubmitButton").disabled = valid ? "" : "disabled";
@@ -1060,10 +1064,13 @@ function visualizeFormula(val){
 	} catch {
 		formula = {};
 	}
-	var elem = document.createElement("div");
     document.getElementById("visualizedcalc").after(document.getElementById("calccursor"));
     document.getElementById("visualizedcalc").replaceChildren();
 	appendCalcElem(formula, document.getElementById("visualizedcalc"), "");
+	var insertTopPlaceHolder = document.createElement("span");
+	insertTopPlaceHolder.innerText = " ";
+	insertTopPlaceHolder.onclick = function(e){document.getElementById("calccursorpos").value = "/sub:0:pre"; setCursor(JSON.parse(document.getElementById("calcformula").value))};
+	document.getElementById("visualizedcalc").prepend(insertTopPlaceHolder);
 	setCursor(formula);
 }
 
@@ -1115,6 +1122,25 @@ function appendCalcElem(node, base, path) {
 					appendelem.onclick = function(e){document.getElementById("calccursorpos").value = e.target.getAttribute("path"); setCursor(JSON.parse(document.getElementById("calcformula").value))};
 					base.append(appendelem);
 				}
+				if ((!node.SubConditions || node.SubConditions.length < 2) && (!node.Variables || node.Variables.length < 2)) {
+					if ((!node.SubConditions || node.SubConditions.length < 1) && (!node.Variables || node.Variables.length < 1)){
+						var placeholder = document.createElement("span");
+						placeholder.classList.add("placeholder");
+						placeholder.innerText = translations["calc-missingvalue"];
+						placeholder.setAttribute("path",  path + "/placeholder:0");
+						placeholder.onclick = function() { document.getElementById("calccursorpos").value = event.target.getAttribute("path"); appendCalcValue() };
+						base.append(placeholder);
+					}
+					var plussign = document.createElement("span");
+					plussign.innerText = "+";
+					base.append(plussign);
+					var placeholder = document.createElement("span");
+					placeholder.classList.add("placeholder");
+					placeholder.innerText = translations["calc-missingvalue"];
+					placeholder.setAttribute("path",  path + "/placeholder:0");
+					placeholder.onclick = function() { document.getElementById("calccursorpos").value = event.target.getAttribute("path"); appendCalcValue() };
+					base.append(placeholder);
+				}
 				break;
 			case "MULTIPLY":
 				for (var i in node.SubConditions) {
@@ -1130,7 +1156,7 @@ function appendCalcElem(node, base, path) {
 					child.classList.add("multiplybracket");
 					child.classList.add("sub");
 					appendCalcElem(node.SubConditions[i], child, path + "/sub:" + i);
-					if (child.childNodes.length && node.SubConditions[i].Operator != "PARAM") {
+					if (child.childNodes.length && node.SubConditions[i].Operator != "PARAM" && node.SubConditions[i].Operator != "PARSEINT") {
 						var bracketbegin = document.createElement("span");
 						bracketbegin.innerText = "(";
 						bracketbegin.setAttribute("path",  path + "/sub:" + i + ":pre");
@@ -1173,6 +1199,11 @@ function appendCalcElem(node, base, path) {
 					appendelem.onclick = function(e){document.getElementById("calccursorpos").value = e.target.getAttribute("path"); setCursor(JSON.parse(document.getElementById("calcformula").value))};
 					base.append(appendelem);
 				}
+				if ((!node.SubConditions || node.SubConditions.length < 2) && (!node.Variables || !node.Variables.length < 2)) {
+					var multiplysign = document.createElement("span");
+					multiplysign.innerText = "*";
+					base.append(multiplysign);
+				}
 				break;
 			case "MINUS":
 				var elem = document.createElement("span");
@@ -1195,6 +1226,22 @@ function appendCalcElem(node, base, path) {
 					param.onclick = function(e){document.getElementById("calccursorpos").value = e.target.getAttribute("path"); setCursor(JSON.parse(document.getElementById("calcformula").value))};
 					base.append(param);
 				}
+				break;
+			case "PARSEINT":
+				var items = [];
+				for (var i in node.SubConditions) {
+					items.push(summarize(node.SubConditions[i]));
+				}
+				for (var i in node.Variables) {
+					items.push(node.Variables[i]);
+				}
+				var param = document.createElement("span");
+				param.classList.add("parseint");
+				param.classList.add("var");
+				param.innerHTML = translations["translations-value"].replace("{0}", items.join(translations["valueof-joint"]));
+				param.setAttribute("path",  path + "/var:" + i);
+				param.onclick = function(e){document.getElementById("calccursorpos").value = e.target.getAttribute("path"); setCursor(JSON.parse(document.getElementById("calcformula").value))};
+				base.append(param);
 				break;
 		}
 	}
@@ -1220,11 +1267,9 @@ function setCursor(node) {
 		targetelement.append(document.getElementById("calccursor"));
 	}
 }
-
-function appendCalcOperator (operator) {
-	var appendingoperator = {"Operator": operator, SubConditions: null, Variables: null};
+function appendItemToFormula (elem) {
 	var cursorpath = document.getElementById("calccursorpos").value;
-	var formula = JSON.parse(document.getElementById("calcformula").value);
+	var formula = JSON.parse(document.getElementById("calcformula").value?document.getElementById("calcformula").value:'{"Operator": "PLUS", "SubConditions":null, "Variables": null}');
 	var targetcontainer = formula;
 	if (cursorpath.split("/").length>2) {
 		for (var i in cursorpath.split("/").slice(cursorpath.split("/").length-2)) {
@@ -1245,13 +1290,45 @@ function appendCalcOperator (operator) {
 	var type = address.split(":")[0];
 	var index = address.split(":")[1];
 	var prepending = address.split(":").length > 2 && address.split(":")[2] == "pre";
-	if (type == "sub") {
-		targetcontainer.SubConditions.splice(index + (prepending?0:1), 0, appendingoperator);
-	} else if (type == "var") { // even if the cursor is on "variable", cannot splice between variables since the appendance is SubCondition anyway. Append to the last of SubConditions
-		targetcontainer.SubConditions.push(appendingoperator);
+	if (type == "sub" || type == "placeholder") {
+		if (targetcontainer.SubConditions) {
+			targetcontainer.SubConditions.splice(index + (prepending?0:1), 0, elem);
+		} else {
+			targetcontainer.SubConditions = [elem];
+		}
+		document.getElementById("calccursorpos").value = document.getElementById("calccursorpos").value.replace("placeholder", "sub");
+	} else if (type == "var" || type == "param") { // even if the cursor is on "variable", cannot splice between variables since the appendance is SubCondition anyway. Append to the last of SubConditions
+		if (targetcontainer.SubConditions) {
+			targetcontainer.SubConditions.push(elem);
+		} else {
+			targetcontainer.SubConditions = [elem];
+		}
 	}
 	document.getElementById("calcformula").value = JSON.stringify(formula);
 	visualizeFormula();
+}
+function appendCalcOperator (operatortype) {
+	appendItemToFormula({"Operator": operatortype, SubConditions: null, Variables: null});
+}
+
+function appendCalcValue () {
+	inputText(null, null, null, null, true, true, function(dispval, val, type, exttype, extval){
+		var formula = JSON.parse(document.getElementById("calcformula").value);
+		var cursorpath = document.getElementById("calccursorpos").value;
+		var appendnode;
+		if (type == "env") {
+			if (exttype && exttype != "wholeword" && extval) {
+				appendnode = {"Operator": "PARSEINT", "SubConditions": [{"Operator": operatormap[exttype], "SubConditions": [{"Operator": "PARAM", "SubConditions": null, "Variables": [val]}], "Variables": [extval]}], "Variables": null };
+			} else {
+				appendnode = {"Operator": "PARSEINT", "SubConditions": [{"Operator": "PARAM", "SubConditions": null, "Variables": [val]}], "Variables": null };
+			}
+		} else if (type == "variable") {
+			appendnode = {"Operator": "PARSEINT", "SubConditions": null, "Variables": [val]};
+		}
+		if (appendnode) {
+			appendItemToFormula(appendnode);
+		}
+	}, "^[0-9]+(\\.[0-9]+)?$");
 }
 
 function editItem(ev){

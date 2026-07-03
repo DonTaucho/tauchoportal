@@ -452,6 +452,7 @@ var translations = {
   "textcondition-rangeto": "{0}が{1}個以下含まれる",
   "textcondition-rangefromto": "{0}が{1}～{2}個だけ含まれる",
   "textcondition-regex": "正規表現/{0}/に整合する",
+  "translations-value": "【{0}】",
   "valueof-joint": "、",
   "valueof-sentense": "{0}の値",
   "event_message" : "メッセージ",
@@ -560,6 +561,7 @@ var translations = {
             <div id="textEnterArea" class="selector entervalue" onclick="document.getElementById('textenterradio').checked=true;getElementById('textEnterArea').classList.add('available');document.getElementById('textEnvArea').classList.remove('available');document.getElementById('textExtArea').classList.remove('available');document.getElementById('textExtSelect').disabled='';textDialogValidator();">
               <h4><input id="textenterradio" type="radio" name="inputtextradio"> Static Value</h4>
               <input id="textEnter" onchange="textDialogValidator()" type="text" >
+              <input id="textValidator" type="hidden" >
             </div>
           </div>
           <div class="extractorselection">
@@ -612,15 +614,11 @@ var translations = {
 		        <div class="calcoperator" onclick='appendCalcOperator("DEVITION")'>÷</div>
 		        <div class="calcoperator" onclick='appendCalcOperator("PLUS")'>≡</div>
 				<hr />
-				<div><a onclick="inputText(null, null, null, null, true, true, function (dispval, val, type, exttype, extval){
-					var x = document.createElement('div');
-					x.innerHTML = dispval;
-					document.getElmentById('calcarea').append(x);
-				})">Select Item</a></div>
+				<div class="calcvalinputbutton"><a onclick='appendCalcValue()'>Select Item</a></div>
 		      </div>
 		    </div>
-			<input type="hidden" id="calcformula" value='{"Operator":"PLUS", "SubConditions":[{"Operator": "MULTIPLY", "SubConditions":[{"Operator": "PARAM", "SubConditions":null, "Variables":["event_amount"]},{"Operator": "PLUS", "SubConditions":null, "Variables":["1", "7"]},{"Operator": "PARAM", "SubConditions":null, "Variables":["event_amount"]}], "Variables":["4", "515", "6"]}], "Variables": ["2", "3", "66"]}'/>
-			<input type="hidden" id="calccursorpos" value="/sub:0/var:2" />
+			<input type="hidden" id="calcformula" value=''/>
+			<input type="hidden" id="calccursorpos" value="" />
 		    <div id="calcdisplay">
 		    
 		    </div>
