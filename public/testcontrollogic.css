@@ -833,6 +833,23 @@ fieldset.item.param>div.icons{
 	animation: retro-blink 1s step-start infinite;
 }
 
+#visualizedcalc .sub {
+    background-color: #f7f8ff;
+    padding: 0.1rem;
+}
+#visualizedcalc .sub .sub {
+    background-color: #e6e9ff;
+}
+#visualizedcalc .sub .sub .sub {
+    background-color: #d3d7f9;
+}
+#visualizedcalc .sub .sub .sub .sub {
+    background-color: #b7bef9;
+}
+#visualizedcalc .sub .sub .sub .sub .sub{
+    background-color: #acace7;
+}
+
 @keyframes retro-blink {
   50% {
     opacity: 0;

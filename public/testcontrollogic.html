@@ -453,6 +453,7 @@ var translations = {
   "textcondition-rangefromto": "{0}が{1}～{2}個だけ含まれる",
   "textcondition-regex": "正規表現/{0}/に整合する",
   "translations-value": "【{0}】",
+  "translations-set": "〔{0}〕",
   "valueof-joint": "、",
   "valueof-sentense": "{0}の値",
   "event_message" : "メッセージ",
@@ -611,13 +612,13 @@ var translations = {
 		        <div class="calcoperator" onclick='appendCalcOperator("PLUS")'>＋</div>
 		        <div class="calcoperator" onclick='appendCalcOperator("MINUS")'>－</div>
 		        <div class="calcoperator" onclick='appendCalcOperator("MULTIPLY")'>×</div>
-		        <div class="calcoperator" onclick='appendCalcOperator("DEVITION")'>÷</div>
-		        <div class="calcoperator" onclick='appendCalcOperator("PLUS")'>≡</div>
+		        <div class="calcoperator" onclick='appendCalcOperator("DIVIDE")'>÷</div>
+		        <div class="calcoperator" onclick='appendCalcOperator("MODULO")'>≡</div>
 				<hr />
 				<div class="calcvalinputbutton"><a onclick='appendCalcValue()'>Select Item</a></div>
 		      </div>
 		    </div>
-			<input type="hidden" id="calcformula" value=''/>
+			<input type="hidden" id="calcformula" value='{"Operator":"PLUS","SubConditions":[{"Operator":"PARSEINT","SubConditions":null,"Variables":["5"]},{"Operator":"PARSEINT","SubConditions":null,"Variables":["5"]},{"Operator":"PLUS","SubConditions":[{"Operator":"PARSEINT","SubConditions":null,"Variables":["5"]},{"Operator":"PARSEINT","SubConditions":null,"Variables":["7"]}],"Variables":null},{"Operator":"PARSEINT","SubConditions":[{"Operator":"FIRST","SubConditions":[{"Operator":"PARAM","SubConditions":null,"Variables":["event_message"]}],"Variables":["2"]}],"Variables":null},{"Operator":"PLUS","SubConditions":[{"Operator":"PARSEINT","SubConditions":null,"Variables":["55"]},{"Operator":"PARSEINT","SubConditions":null,"Variables":["12"]},{"Operator":"PARSEINT","SubConditions":null,"Variables":["45"]},{"Operator":"PARSEINT","SubConditions":null,"Variables":["7428"]},{"Operator":"MULTIPLY","SubConditions":null,"Variables":null},{"Operator":"PARSEINT","SubConditions":[{"Operator":"SUBSTRING","SubConditions":[{"Operator":"PARAM","SubConditions":null,"Variables":["event_message"]}],"Variables":["2-3"]}],"Variables":null}],"Variables":null}],"Variables":null}'/>
 			<input type="hidden" id="calccursorpos" value="" />
 		    <div id="calcdisplay">
 		    

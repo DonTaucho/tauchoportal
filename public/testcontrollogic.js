@@ -1068,10 +1068,25 @@ function visualizeFormula(val){
     document.getElementById("visualizedcalc").replaceChildren();
 	appendCalcElem(formula, document.getElementById("visualizedcalc"), "");
 	var insertTopPlaceHolder = document.createElement("span");
-	insertTopPlaceHolder.innerText = " ";
+	insertTopPlaceHolder.innerHTML = "&nbsp;";
+	insertTopPlaceHolder.style["display"] = "inline-block";
+	insertTopPlaceHolder.style["width"] = "0.3rem";
+	insertTopPlaceHolder.style["height"] = "1.5rem";
 	insertTopPlaceHolder.onclick = function(e){document.getElementById("calccursorpos").value = "/sub:0:pre"; setCursor(JSON.parse(document.getElementById("calcformula").value))};
 	document.getElementById("visualizedcalc").prepend(insertTopPlaceHolder);
 	setCursor(formula);
+}
+
+function updateCursor(e){
+	document.getElementById("calccursorpos").value = e.target.getAttribute("path");
+	setCursor(JSON.parse(document.getElementById("calcformula").value));
+	event.stopPropagation();
+}
+
+function fillPlaceHolder(e) {
+	document.getElementById("calccursorpos").value = e.target.getAttribute("path");
+	appendCalcValue();
+	event.stopPropagation();
 }
 
 function appendCalcElem(node, base, path) {
@@ -1081,9 +1096,9 @@ function appendCalcElem(node, base, path) {
 				for (var i in node.SubConditions) {
 					if (base.childNodes.length) {
 						var plussign = document.createElement("span");
-						plussign.innerText = "+";
+						plussign.innerText = "＋";
 						plussign.setAttribute("path",  path + "/sub:" + i + ":pre");
-						plussign.onclick = function(e){document.getElementById("calccursorpos").value = e.target.getAttribute("path"); setCursor(JSON.parse(document.getElementById("calcformula").value))};
+						plussign.onclick = updateCursor;
 						plussign.classList.add("plussign");
 						base.append(plussign);
 					}
@@ -1091,7 +1106,7 @@ function appendCalcElem(node, base, path) {
 					child.classList.add("plusbracket");
 					child.classList.add("sub");
 					child.setAttribute("path",  path + "/sub:" + i);
-					child.onclick = function(e){document.getElementById("calccursorpos").value = e.target.getAttribute("path"); setCursor(JSON.parse(document.getElementById("calcformula").value))};
+					child.onclick = updateCursor;
 					appendCalcElem(node.SubConditions[i], child, path + "/sub:" + i);
 					base.append(child);
 				}
@@ -1100,26 +1115,26 @@ function appendCalcElem(node, base, path) {
 						var plussign = document.createElement("span");
 						plussign.classList.add("plussign");
 						plussign.setAttribute("path",  path + "/var:" + i + ":pre");
-						plussign.onclick = function(e){document.getElementById("calccursorpos").value = e.target.getAttribute("path"); setCursor(JSON.parse(document.getElementById("calcformula").value))};
-						plussign.innerText = "+";
+						plussign.onclick = updateCursor;
+						plussign.innerText = "＋";
 						base.append(plussign);
 					}
 					var prependelem = document.createElement("span");
 					prependelem.setAttribute("path",  path + "/var:" + i);
-					prependelem.onclick = function(e){document.getElementById("calccursorpos").value = e.target.getAttribute("path"); setCursor(JSON.parse(document.getElementById("calcformula").value))};
+					prependelem.onclick = updateCursor;
 					prependelem.classList.add("prepend");
 					base.append(prependelem);
 					var variableelem = document.createElement("span");
 					variableelem.classList.add("var");
 					variableelem.classList.add("plus");
 					variableelem.setAttribute("path",  path + "/var:" + i);
-					variableelem.onclick = function(e){document.getElementById("calccursorpos").value = e.target.getAttribute("path"); setCursor(JSON.parse(document.getElementById("calcformula").value))};
+					variableelem.onclick = updateCursor;
 					variableelem.innerText = node.Variables[i];
 					base.append(variableelem);
 					var appendelem = document.createElement("span");
 					appendelem.classList.add("append");
 					appendelem.setAttribute("path",  path + "/var:" + i);
-					appendelem.onclick = function(e){document.getElementById("calccursorpos").value = e.target.getAttribute("path"); setCursor(JSON.parse(document.getElementById("calcformula").value))};
+					appendelem.onclick = updateCursor;
 					base.append(appendelem);
 				}
 				if ((!node.SubConditions || node.SubConditions.length < 2) && (!node.Variables || node.Variables.length < 2)) {
@@ -1128,17 +1143,17 @@ function appendCalcElem(node, base, path) {
 						placeholder.classList.add("placeholder");
 						placeholder.innerText = translations["calc-missingvalue"];
 						placeholder.setAttribute("path",  path + "/placeholder:0");
-						placeholder.onclick = function() { document.getElementById("calccursorpos").value = event.target.getAttribute("path"); appendCalcValue() };
+						placeholder.onclick = fillPlaceHolder;
 						base.append(placeholder);
 					}
 					var plussign = document.createElement("span");
-					plussign.innerText = "+";
+					plussign.innerText = "＋";
 					base.append(plussign);
 					var placeholder = document.createElement("span");
 					placeholder.classList.add("placeholder");
 					placeholder.innerText = translations["calc-missingvalue"];
 					placeholder.setAttribute("path",  path + "/placeholder:0");
-					placeholder.onclick = function() { document.getElementById("calccursorpos").value = event.target.getAttribute("path"); appendCalcValue() };
+					placeholder.onclick = fillPlaceHolder;
 					base.append(placeholder);
 				}
 				break;
@@ -1146,10 +1161,10 @@ function appendCalcElem(node, base, path) {
 				for (var i in node.SubConditions) {
 					if (base.childNodes.length) {
 						var multiplysign = document.createElement("span");
-						multiplysign.innerText = "*";
-						multiplysign.classList.add("multiplysign");
+						multiplysign.innerText = "×";
 						multiplysign.setAttribute("path",  path + "/sub:" + i + ":pre");
-						multiplysign.onclick = function(e){document.getElementById("calccursorpos").value = e.target.getAttribute("path"); setCursor(JSON.parse(document.getElementById("calcformula").value))};
+						multiplysign.onclick = updateCursor;
+						multiplysign.classList.add("multiplysign");
 						base.append(multiplysign);
 					}
 					var child = document.createElement("span");
@@ -1160,61 +1175,266 @@ function appendCalcElem(node, base, path) {
 						var bracketbegin = document.createElement("span");
 						bracketbegin.innerText = "(";
 						bracketbegin.setAttribute("path",  path + "/sub:" + i + ":pre");
-						bracketbegin.onclick = function(e){document.getElementById("calccursorpos").value = e.target.getAttribute("path"); setCursor(JSON.parse(document.getElementById("calcformula").value))};
+						bracketbegin.onclick = updateCursor;
 						child.prepend(bracketbegin);
 						var bracketend = document.createElement("span");
 						bracketend.innerText = ")";
 						bracketend.setAttribute("path",  path + "/sub:" + i);
-						bracketend.onclick = function(e){document.getElementById("calccursorpos").value = e.target.getAttribute("path"); setCursor(JSON.parse(document.getElementById("calcformula").value))};
+						bracketend.onclick = updateCursor;
 						child.append(bracketend);
 					}
 					child.setAttribute("path",  path + "/sub:" + i);
-					child.onclick = function(e){document.getElementById("calccursorpos").value = e.target.getAttribute("path"); setCursor(JSON.parse(document.getElementById("calcformula").value))};
+					child.onclick = updateCursor;
 					base.append(child);
 				}
 				for (var i in node.Variables) {
 					if (base.childNodes.length) {
 						var multiplysign = document.createElement("span");
 						multiplysign.classList.add("multiplysign");
-						multiplysign.innerText = "*";
-						multiplysign.setAttribute("path",  path + "/var:" + i+ ":pre");
-						multiplysign.onclick = function(e){document.getElementById("calccursorpos").value = e.target.getAttribute("path"); setCursor(JSON.parse(document.getElementById("calcformula").value))};
+						multiplysign.setAttribute("path",  path + "/var:" + i + ":pre");
+						multiplysign.onclick = updateCursor;
+						multiplysign.innerText = "×";
 						base.append(multiplysign);
 					}
 					var prependelem = document.createElement("span");
-					prependelem.classList.add("prepend");
 					prependelem.setAttribute("path",  path + "/var:" + i);
-					prependelem.onclick = function(e){document.getElementById("calccursorpos").value = e.target.getAttribute("path"); setCursor(JSON.parse(document.getElementById("calcformula").value))};
+					prependelem.onclick = updateCursor;
+					prependelem.classList.add("prepend");
 					base.append(prependelem);
 					var variableelem = document.createElement("span");
 					variableelem.classList.add("var");
 					variableelem.classList.add("multiply");
-					variableelem.innerText = node.Variables[i];
 					variableelem.setAttribute("path",  path + "/var:" + i);
-					variableelem.onclick = function(e){document.getElementById("calccursorpos").value = e.target.getAttribute("path"); setCursor(JSON.parse(document.getElementById("calcformula").value))};
+					variableelem.onclick = updateCursor;
+					variableelem.innerText = node.Variables[i];
 					base.append(variableelem);
 					var appendelem = document.createElement("span");
 					appendelem.classList.add("append");
 					appendelem.setAttribute("path",  path + "/var:" + i);
-					appendelem.onclick = function(e){document.getElementById("calccursorpos").value = e.target.getAttribute("path"); setCursor(JSON.parse(document.getElementById("calcformula").value))};
+					appendelem.onclick = updateCursor;
 					base.append(appendelem);
 				}
-				if ((!node.SubConditions || node.SubConditions.length < 2) && (!node.Variables || !node.Variables.length < 2)) {
+				if ((!node.SubConditions || node.SubConditions.length < 2) && (!node.Variables || node.Variables.length < 2)) {
+					if ((!node.SubConditions || node.SubConditions.length < 1) && (!node.Variables || node.Variables.length < 1)){
+						var placeholder = document.createElement("span");
+						placeholder.classList.add("placeholder");
+						placeholder.innerText = translations["calc-missingvalue"];
+						placeholder.setAttribute("path",  path + "/placeholder:0");
+						placeholder.onclick = fillPlaceHolder;
+						base.append(placeholder);
+					}
 					var multiplysign = document.createElement("span");
-					multiplysign.innerText = "*";
+					multiplysign.innerText = "×";
 					base.append(multiplysign);
+					var placeholder = document.createElement("span");
+					placeholder.classList.add("placeholder");
+					placeholder.innerText = translations["calc-missingvalue"];
+					placeholder.setAttribute("path",  path + "/placeholder:0");
+					placeholder.onclick = fillPlaceHolder;
+					base.append(placeholder);
 				}
 				break;
 			case "MINUS":
-				var elem = document.createElement("span");
-				elem.classList.add("minusbracket");
 				for (var i in node.SubConditions) {
-					appendCalcElem(node.SubConditios[i], elem, path + "/sub:" + i);
+					if (base.childNodes.length) {
+						var minussign = document.createElement("span");
+						minussign.innerText = "－";
+						minussign.setAttribute("path",  path + "/sub:" + i + ":pre");
+						minussign.onclick = updateCursor;
+						minussign.classList.add("minussign");
+						base.append(minussign);
+					}
+					var child = document.createElement("span");
+					child.classList.add("plusbracket");
+					child.classList.add("sub");
+					child.setAttribute("path",  path + "/sub:" + i);
+					child.onclick = updateCursor;
+					appendCalcElem(node.SubConditions[i], child, path + "/sub:" + i);
+					base.append(child);
 				}
 				for (var i in node.Variables) {
-					appendCalcElem(node.Variables[i], elem, path + "/sub:" + i);
+					if (base.childNodes.length) {
+						var minussign = document.createElement("span");
+						minussign.classList.add("minussign");
+						minussign.setAttribute("path",  path + "/var:" + i + ":pre");
+						minussign.onclick = updateCursor;
+						minussign.innerText = "－";
+						base.append(minussign);
+					}
+					var prependelem = document.createElement("span");
+					prependelem.setAttribute("path",  path + "/var:" + i);
+					prependelem.onclick = updateCursor;
+					prependelem.classList.add("prepend");
+					base.append(prependelem);
+					var variableelem = document.createElement("span");
+					variableelem.classList.add("var");
+					variableelem.classList.add("plus");
+					variableelem.setAttribute("path",  path + "/var:" + i);
+					variableelem.onclick = updateCursor;
+					variableelem.innerText = node.Variables[i];
+					base.append(variableelem);
+					var appendelem = document.createElement("span");
+					appendelem.classList.add("append");
+					appendelem.setAttribute("path",  path + "/var:" + i);
+					appendelem.onclick = updateCursor;
+					base.append(appendelem);
 				}
-				base.append(elem);
+				if ((!node.SubConditions || node.SubConditions.length < 2) && (!node.Variables || node.Variables.length < 2)) {
+					if ((!node.SubConditions || node.SubConditions.length < 1) && (!node.Variables || node.Variables.length < 1)){
+						var placeholder = document.createElement("span");
+						placeholder.classList.add("placeholder");
+						placeholder.innerText = translations["calc-missingvalue"];
+						placeholder.setAttribute("path",  path + "/placeholder:0");
+						placeholder.onclick = fillPlaceHolder;
+						base.append(placeholder);
+					}
+					var minussign = document.createElement("span");
+					minussign.innerText = "－";
+					base.append(minussign);
+					var placeholder = document.createElement("span");
+					placeholder.classList.add("placeholder");
+					placeholder.innerText = translations["calc-missingvalue"];
+					placeholder.setAttribute("path",  path + "/placeholder:0");
+					placeholder.onclick = fillPlaceHolder;
+					base.append(placeholder);
+				}
+				break;
+			case "DIVIDE":
+				for (var i in node.SubConditions) {
+					if (base.childNodes.length) {
+						var divisionsign = document.createElement("span");
+						divisionsign.innerText = "÷";
+						divisionsign.setAttribute("path",  path + "/sub:" + i + ":pre");
+						divisionsign.onclick = updateCursor;
+						divisionsign.classList.add("divisionsign");
+						base.append(divisionsign);
+					}
+					var child = document.createElement("span");
+					child.classList.add("multiplybracket");
+					child.classList.add("sub");
+					appendCalcElem(node.SubConditions[i], child, path + "/sub:" + i);
+					if (child.childNodes.length && node.SubConditions[i].Operator != "PARAM" && node.SubConditions[i].Operator != "PARSEINT") {
+						var bracketbegin = document.createElement("span");
+						bracketbegin.innerText = "(";
+						bracketbegin.setAttribute("path",  path + "/sub:" + i + ":pre");
+						bracketbegin.onclick = updateCursor;
+						child.prepend(bracketbegin);
+						var bracketend = document.createElement("span");
+						bracketend.innerText = ")";
+						bracketend.setAttribute("path",  path + "/sub:" + i);
+						bracketend.onclick = updateCursor;
+						child.append(bracketend);
+					}
+					child.setAttribute("path",  path + "/sub:" + i);
+					child.onclick = updateCursor;
+					base.append(child);
+				}
+				for (var i in node.Variables) {
+					if (base.childNodes.length) {
+						var divisionsign = document.createElement("span");
+						divisionsign.classList.add("divisionsign");
+						divisionsign.setAttribute("path",  path + "/var:" + i + ":pre");
+						divisionsign.onclick = updateCursor;
+						divisionsign.innerText = "÷";
+						base.append(divisionsign);
+					}
+					var prependelem = document.createElement("span");
+					prependelem.setAttribute("path",  path + "/var:" + i);
+					prependelem.onclick = updateCursor;
+					prependelem.classList.add("prepend");
+					base.append(prependelem);
+					var variableelem = document.createElement("span");
+					variableelem.classList.add("var");
+					variableelem.classList.add("multiply");
+					variableelem.setAttribute("path",  path + "/var:" + i);
+					variableelem.onclick = updateCursor;
+					variableelem.innerText = node.Variables[i];
+					base.append(variableelem);
+					var appendelem = document.createElement("span");
+					appendelem.classList.add("append");
+					appendelem.setAttribute("path",  path + "/var:" + i);
+					appendelem.onclick = updateCursor;
+					base.append(appendelem);
+				}
+				if ((!node.SubConditions || node.SubConditions.length < 2) && (!node.Variables || node.Variables.length < 2)) {
+					if ((!node.SubConditions || node.SubConditions.length < 1) && (!node.Variables || node.Variables.length < 1)){
+						var placeholder = document.createElement("span");
+						placeholder.classList.add("placeholder");
+						placeholder.innerText = translations["calc-missingvalue"];
+						placeholder.setAttribute("path",  path + "/placeholder:0");
+						placeholder.onclick = fillPlaceHolder;
+						base.append(placeholder);
+					}
+					var divisionsign = document.createElement("span");
+					divisionsign.innerText = "÷";
+					base.append(divisionsign);
+					var placeholder = document.createElement("span");
+					placeholder.classList.add("placeholder");
+					placeholder.innerText = translations["calc-missingvalue"];
+					placeholder.setAttribute("path",  path + "/placeholder:0");
+					placeholder.onclick = fillPlaceHolder;
+					base.append(placeholder);
+				}
+				break;
+			case "MODULO":
+				var items = [];
+				for (var i in node.SubConditions) {
+					var child = document.createElement("span");
+					child.classList.add("multiplybracket");
+					child.classList.add("sub");
+					appendCalcElem(node.SubConditions[i], child, path + "/sub:" + i);
+					if (child.childNodes.length && node.SubConditions[i].Operator != "PARAM" && node.SubConditions[i].Operator != "PARSEINT") {
+						var bracketbegin = document.createElement("span");
+						bracketbegin.innerText = "(";
+						bracketbegin.setAttribute("path",  path + "/sub:" + i + ":pre");
+						bracketbegin.onclick = updateCursor;
+						child.prepend(bracketbegin);
+						var bracketend = document.createElement("span");
+						bracketend.innerText = ")";
+						bracketend.setAttribute("path",  path + "/sub:" + i);
+						bracketend.onclick = updateCursor;
+						child.append(bracketend);
+					}
+					child.setAttribute("path",  path + "/sub:" + i);
+					child.onclick = updateCursor;
+					items.push(child);
+				}
+				for (var i in node.Variables) {
+					var variableelem = document.createElement("span");
+					variableelem.classList.add("var");
+					variableelem.classList.add("multiply");
+					variableelem.setAttribute("path",  path + "/var:" + i);
+					variableelem.onclick = updateCursor;
+					variableelem.innerText = node.Variables[i];
+					items.push(variableelem);
+				}
+				if ((!node.SubConditions || node.SubConditions.length < 2) && (!node.Variables || node.Variables.length < 2)) {
+					if ((!node.SubConditions || node.SubConditions.length < 1) && (!node.Variables || node.Variables.length < 1)){
+						var placeholder = document.createElement("span");
+						placeholder.classList.add("placeholder");
+						placeholder.innerText = translations["calc-missingvalue"];
+						placeholder.setAttribute("path",  path + "/placeholder:0");
+						placeholder.onclick = fillPlaceHolder;
+						items.push(placeholder);
+					}
+					var placeholder = document.createElement("span");
+					placeholder.classList.add("placeholder");
+					placeholder.innerText = translations["calc-missingvalue"];
+					placeholder.setAttribute("path",  path + "/placeholder:0");
+					placeholder.onclick = fillPlaceHolder;
+					items.push(placeholder);
+				}
+				var modulosentense = document.createElement("span");
+				modulosentense.innerHTML = translations["modulo-sentense"].replace("{0}", '<span></span>').replace("{1}", '<span></span>');
+				base.append(modulosentense);
+				var span1 = modulosentense.children[0];
+				var span2 = modulosentense.children[1];
+				span1.replaceWith(items[0]);
+				var dividedby = document.createElement("span");
+				for(var i in items.slice(1)) {
+					dividedby.append(items.slice(1)[i]);
+				}
+				span2.replaceWith(dividedby);
 				break;
 			case "PARAM":
 				for (var i in node.Variables) {
@@ -1223,7 +1443,7 @@ function appendCalcElem(node, base, path) {
 					param.classList.add("var");
 					param.innerText = translations[node.Variables[i]];
 					param.setAttribute("path",  path + "/param:" + i);
-					param.onclick = function(e){document.getElementById("calccursorpos").value = e.target.getAttribute("path"); setCursor(JSON.parse(document.getElementById("calcformula").value))};
+					param.onclick = updateCursor;
 					base.append(param);
 				}
 				break;
@@ -1239,8 +1459,8 @@ function appendCalcElem(node, base, path) {
 				param.classList.add("parseint");
 				param.classList.add("var");
 				param.innerHTML = translations["translations-value"].replace("{0}", items.join(translations["valueof-joint"]));
-				param.setAttribute("path",  path + "/var:" + i);
-				param.onclick = function(e){document.getElementById("calccursorpos").value = e.target.getAttribute("path"); setCursor(JSON.parse(document.getElementById("calcformula").value))};
+				param.setAttribute("path",  path);
+				param.onclick = updateCursor;
 				base.append(param);
 				break;
 		}
@@ -1272,14 +1492,14 @@ function appendItemToFormula (elem) {
 	var formula = JSON.parse(document.getElementById("calcformula").value?document.getElementById("calcformula").value:'{"Operator": "PLUS", "SubConditions":null, "Variables": null}');
 	var targetcontainer = formula;
 	if (cursorpath.split("/").length>2) {
-		for (var i in cursorpath.split("/").slice(cursorpath.split("/").length-2)) {
+		for (var i in cursorpath.split("/").slice(0, cursorpath.split("/").length-1)) {
 			var address = cursorpath.split("/")[i];
 			if (!address) {
 				continue;
 			}
 			var type = address.split(":")[0];
 			var index = address.split(":")[1];
-			if (type=="sub") {
+			if (type=="sub" || type == "placeholder") {
 				targetcontainer = targetcontainer.SubConditions[index];
 			} else if (type == "var") {
 				targetcontainer = targetcontainer.Variables[index];
@@ -1290,22 +1510,29 @@ function appendItemToFormula (elem) {
 	var type = address.split(":")[0];
 	var index = address.split(":")[1];
 	var prepending = address.split(":").length > 2 && address.split(":")[2] == "pre";
-	if (type == "sub" || type == "placeholder") {
+	if (type == "sub") {
 		if (targetcontainer.SubConditions) {
 			targetcontainer.SubConditions.splice(index + (prepending?0:1), 0, elem);
 		} else {
 			targetcontainer.SubConditions = [elem];
 		}
-		document.getElementById("calccursorpos").value = document.getElementById("calccursorpos").value.replace("placeholder", "sub");
 	} else if (type == "var" || type == "param") { // even if the cursor is on "variable", cannot splice between variables since the appendance is SubCondition anyway. Append to the last of SubConditions
 		if (targetcontainer.SubConditions) {
 			targetcontainer.SubConditions.push(elem);
 		} else {
 			targetcontainer.SubConditions = [elem];
 		}
+	} else if (type == "placeholder") {
+		if (targetcontainer.SubConditions) {
+			targetcontainer.SubConditions.push(elem);
+		} else {
+			targetcontainer.SubConditions = [elem];
+		}
+		document.getElementById("calccursorpos").value = document.getElementById("calccursorpos").value.replace("placeholder", "sub");
 	}
 	document.getElementById("calcformula").value = JSON.stringify(formula);
 	visualizeFormula();
+	document.getElementById("calccursorpos").value = document.getElementById("calccursorpos").value.replace("placeholder", "sub");
 }
 function appendCalcOperator (operatortype) {
 	appendItemToFormula({"Operator": operatortype, SubConditions: null, Variables: null});
