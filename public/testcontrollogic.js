@@ -4,11 +4,11 @@ const compoperators = ["EQUIVALENT", "GREATER_THAN", "GREATER_OR_EQUAL", "LESS_T
 const textoperators = ["EQUALS", "INCLUDES", "REGEX_MATCH"];
 const textextractors = ["WHOLEWORD", "REGEX_EXTRACT", "SUBSTRING", "FIRST", "LAST"];
 const groupoperators = ["COUNT", "SUM"];
-const calcoperators = ["PLUS", "SUBTRACT", "MULTIPLY", "DIVIDE", "MODULO"];
+const calcoperators = ["ADD", "SUBTRACT", "MULTIPLY", "DIVIDE", "MODULO"];
 const convoperators = ["PARSEINT", "EXCHANGE"];
-const namingmap = {"AND":"and", "OR":"or", "NOT":"not", "SOME":"some", "EQUIVALENT":"equivalent", "GREATER_THAN":"geater_than", "GREATER_OR_EQUAL":"greater_or_equal", "LESS_THAN":"less_than", "LESS_OR_EQUAL":"less_or_equal" , "EQUALS":"equals", "INCLUDES":"includes", "REGEX_MATCH":"regex_match", "COUNT":"count", "SUM":"sum", "WHOLEWORD":"wholeword", "REGEX_EXTRACT": "regex_extract", "SUBSTRING": "substring", "FIRST": "first", "LAST": "last", "PLUS":"plus", "SUBTRACT":"subtract", "MULTIPLY":"multiply", "DIVIDE":"divide", "MODULO":"modulo", "PARSEINT":"parseint", "EXCHANGE":"exchange", "PARAM":"param"};
-const operatormap = {"and":"AND", "or":"OR", "not":"NOT", "some":"SOME", "equivalent":"EQUIVALENT", "geater_than":"GREATER_THAN", "greater_or_equal":"GREATER_OR_EQUAL", "less_than":"LESS_THAN", "less_or_equal":"LESS_OR_EQUAL", "equals":"EQUALS", "includes":"INCLUDES", "regex_match":"REGEX_MATCH", "count":"COUNT", "sum":"SUM", "wholeword":"WHOLEWORD", "regex_extract": "REGEX_EXTRACT", "substring": "SUBSTRING", "first": "FIRST", "last": "LAST", "plus":"PLUS", "subtract":"SUBTRACT", "multiply":"MULTIPLY", "divide":"DIVIDE", "modulo":"MODULO", "parseint":"PARSEINT", "exchange":"EXCHANGE", "param":"PARAM"};
-const reverselookuptype = {"AND":"boolean", "OR":"boolean", "NOT":"boolean", "SOME":"boolean", "EQUIVALENT":"comp", "GREATER_THAN":"comp", "LESS_THAN":"comp", "EQUALS":"optext", "INCLUDES":"optext", "REGEX_MATCH":"optext", "COUNT":"group", "SUM":"group", "PLUS":"calc","SUBTRACT":"calc","MULTIPLY":"calc","DIVIDE":"calc","MODULO":"calc", "PARSEINT":"conv","EXCHANGE":"conv", "PARAM":"extract"};
+const namingmap = {"AND":"and", "OR":"or", "NOT":"not", "SOME":"some", "EQUIVALENT":"equivalent", "GREATER_THAN":"geater_than", "GREATER_OR_EQUAL":"greater_or_equal", "LESS_THAN":"less_than", "LESS_OR_EQUAL":"less_or_equal" , "EQUALS":"equals", "INCLUDES":"includes", "REGEX_MATCH":"regex_match", "COUNT":"count", "SUM":"sum", "WHOLEWORD":"wholeword", "REGEX_EXTRACT": "regex_extract", "SUBSTRING": "substring", "FIRST": "first", "LAST": "last", "ADD":"add", "SUBTRACT":"subtract", "MULTIPLY":"multiply", "DIVIDE":"divide", "MODULO":"modulo", "PARSEINT":"parseint", "EXCHANGE":"exchange", "PARAM":"param"};
+const operatormap = {"and":"AND", "or":"OR", "not":"NOT", "some":"SOME", "equivalent":"EQUIVALENT", "geater_than":"GREATER_THAN", "greater_or_equal":"GREATER_OR_EQUAL", "less_than":"LESS_THAN", "less_or_equal":"LESS_OR_EQUAL", "equals":"EQUALS", "includes":"INCLUDES", "regex_match":"REGEX_MATCH", "count":"COUNT", "sum":"SUM", "wholeword":"WHOLEWORD", "regex_extract": "REGEX_EXTRACT", "substring": "SUBSTRING", "first": "FIRST", "last": "LAST", "add":"ADD", "subtract":"SUBTRACT", "multiply":"MULTIPLY", "divide":"DIVIDE", "modulo":"MODULO", "parseint":"PARSEINT", "exchange":"EXCHANGE", "param":"PARAM"};
+const reverselookuptype = {"AND":"boolean", "OR":"boolean", "NOT":"boolean", "SOME":"boolean", "EQUIVALENT":"comp", "GREATER_THAN":"comp", "LESS_THAN":"comp", "EQUALS":"optext", "INCLUDES":"optext", "REGEX_MATCH":"optext", "COUNT":"group", "SUM":"group", "ADD":"calc","SUBTRACT":"calc","MULTIPLY":"calc","DIVIDE":"calc","MODULO":"calc", "PARSEINT":"conv","EXCHANGE":"conv", "PARAM":"extract"};
 
 function jsonLoader(jsonnode, area, path){
     path = path??"0";
@@ -497,7 +497,7 @@ function summarize(node){
 			    return translations["textextract-last"].replace("{0}", target).replace("{1}", length);
 			}
 			break;
-		case "PLUS":
+		case "ADD":
 		    var items = [];
 			for (i in node.SubConditions) {
 				items.push(summarize(node.SubConditions[i]));
@@ -1045,15 +1045,45 @@ function textConditionDialogValidator(){
     document.getElementById("textConditionModalButton").disabled = "disabled";
 }
 function inputNumber(currentformula, callback){
+	document.getElementById("calcformula").value = currentformula;
+	try {
+		var formula = JSON.parse(currentformula);
+		visualizeFormula(formula);
+	} catch {
+		visualizeFormula({});
+	}
     document.getElementById("numModal").style["display"] = "block";
 	numDialogValidator();
 	document.getElementById("numModalButton").onclick = function(){
 		callback(document.getElementById("calcformula").value, document.getElementById("calcdisplay").innerText);
+		document.getElementById("numModal").style["display"] = "none";
 	}
 }
 
-function numDialogValidator(){
-    document.getElementById("numModalButton").disabled="disabled";
+function numDialogValidator(formula){
+	if (!formula) {
+		var current = document.getElementById("calcformula").value;
+		try {
+			formula = JSON.parse(current);
+			document.getElementById("numModalButton").disabled= checkNumValid(formula) ? "" : "disabled";
+		} catch {
+			document.getElementById("numModalButton").disabled="disabled";
+		}
+	}
+}
+
+function checkNumValid (formula) {
+	if ((!formula.SubConditions || !formula.SubConditions.length) && (!formula.Variables || !formula.Variables.length)){
+		return false;
+	}
+	if (calcoperators.includes(formula.Operator) && (formula.SubConditions ? formula.SubConditions.length : 0 + formula.Variables ? formula.Variables.length : 0) < 2) {
+		return false;
+	}
+	var subcheck = true;
+	for (var i in formula.SubConditions) {
+		subcheck &&= checkNumValid(formula.SubConditions[i]);
+	}
+	return subcheck;
 }
 
 function visualizeFormula(val){
@@ -1092,7 +1122,7 @@ function fillPlaceHolder(e) {
 function appendCalcElem(node, base, path) {
 	if (node) {
 		switch(node.Operator) {
-			case "PLUS":
+			case "ADD":
 				for (var i in node.SubConditions) {
 					if (base.childNodes.length) {
 						var plussign = document.createElement("span");
@@ -1126,7 +1156,7 @@ function appendCalcElem(node, base, path) {
 					base.append(prependelem);
 					var variableelem = document.createElement("span");
 					variableelem.classList.add("var");
-					variableelem.classList.add("plus");
+					variableelem.classList.add("add");
 					variableelem.setAttribute("path",  path + "/var:" + i);
 					variableelem.onclick = updateCursor;
 					variableelem.innerText = node.Variables[i];
@@ -1234,7 +1264,7 @@ function appendCalcElem(node, base, path) {
 					base.append(placeholder);
 				}
 				break;
-			case "MINUS":
+			case "SUBTRACT":
 				for (var i in node.SubConditions) {
 					if (base.childNodes.length) {
 						var minussign = document.createElement("span");
@@ -1245,7 +1275,7 @@ function appendCalcElem(node, base, path) {
 						base.append(minussign);
 					}
 					var child = document.createElement("span");
-					child.classList.add("plusbracket");
+					child.classList.add("minusbracket");
 					child.classList.add("sub");
 					child.setAttribute("path",  path + "/sub:" + i);
 					child.onclick = updateCursor;
@@ -1268,7 +1298,7 @@ function appendCalcElem(node, base, path) {
 					base.append(prependelem);
 					var variableelem = document.createElement("span");
 					variableelem.classList.add("var");
-					variableelem.classList.add("plus");
+					variableelem.classList.add("subtract");
 					variableelem.setAttribute("path",  path + "/var:" + i);
 					variableelem.onclick = updateCursor;
 					variableelem.innerText = node.Variables[i];
@@ -1425,6 +1455,7 @@ function appendCalcElem(node, base, path) {
 					items.push(placeholder);
 				}
 				var modulosentense = document.createElement("span");
+				modulosentense.classList.add("modulobracket", "sub");
 				modulosentense.innerHTML = translations["modulo-sentense"].replace("{0}", '<span></span>').replace("{1}", '<span></span>');
 				base.append(modulosentense);
 				var span1 = modulosentense.children[0];
@@ -1489,7 +1520,7 @@ function setCursor(node) {
 }
 function appendItemToFormula (elem) {
 	var cursorpath = document.getElementById("calccursorpos").value;
-	var formula = JSON.parse(document.getElementById("calcformula").value?document.getElementById("calcformula").value:'{"Operator": "PLUS", "SubConditions":null, "Variables": null}');
+	var formula = JSON.parse(document.getElementById("calcformula").value?document.getElementById("calcformula").value:'{"Operator": "ADD", "SubConditions":null, "Variables": null}');
 	var targetcontainer = formula;
 	if (cursorpath.split("/").length>2) {
 		for (var i in cursorpath.split("/").slice(0, cursorpath.split("/").length-1)) {
@@ -1510,6 +1541,9 @@ function appendItemToFormula (elem) {
 	var type = address.split(":")[0];
 	var index = address.split(":")[1];
 	var prepending = address.split(":").length > 2 && address.split(":")[2] == "pre";
+	if (cursorpath == "") {
+		targetcontainer.SubConditions = [elem];
+	}
 	if (type == "sub") {
 		if (targetcontainer.SubConditions) {
 			targetcontainer.SubConditions.splice(index + (prepending?0:1), 0, elem);
@@ -1533,6 +1567,7 @@ function appendItemToFormula (elem) {
 	document.getElementById("calcformula").value = JSON.stringify(formula);
 	visualizeFormula();
 	document.getElementById("calccursorpos").value = document.getElementById("calccursorpos").value.replace("placeholder", "sub");
+	numDialogValidator();
 }
 function appendCalcOperator (operatortype) {
 	appendItemToFormula({"Operator": operatortype, SubConditions: null, Variables: null});
@@ -1540,8 +1575,6 @@ function appendCalcOperator (operatortype) {
 
 function appendCalcValue () {
 	inputText(null, null, null, null, true, true, function(dispval, val, type, exttype, extval){
-		var formula = JSON.parse(document.getElementById("calcformula").value);
-		var cursorpath = document.getElementById("calccursorpos").value;
 		var appendnode;
 		if (type == "env") {
 			if (exttype && exttype != "wholeword" && extval) {

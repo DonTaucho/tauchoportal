@@ -304,7 +304,7 @@ function addNewButton(){
   ]}</textarea>
 <hr>
 <div class="editor-actions">
-<button class="btn btn-secondary" onclick="goBack()">Cancel</button><button class="btn btn-primary" id="saveBtn" onclick="saveConditionLogic()">Save Condition Logic</button></div></div><div class="editor-sidebar"><div class="sidebar-card"><h3>Condition Info</h3><dl><dt>Condition ID</dt><dd><code>cond_1781324936169105600</code></dd><dt>Name</dt><dd>Condition 2 Testestes</dd><dt>Event Type</dt><dd><code>comment</code></dd><dt>Status</dt><dd><span class="badge badge-success">Enabled</span></dd></dl></div><div class="sidebar-card"><h3>Quick Reference</h3><ul><li>AND, OR, NOT</li><li>EQUALS, GREATER_THAN, LESS_THAN</li><li>INCLUDES, REGEX_MATCH</li><li>PLUS, SUBTRACT, MULTIPLY, DIVIDE</li><li>PARAM</li></ul></div></div></div><div id="validateResult" class="validate-result" style="display:none"></div></div>
+<button class="btn btn-secondary" onclick="goBack()">Cancel</button><button class="btn btn-primary" id="saveBtn" onclick="saveConditionLogic()">Save Condition Logic</button></div></div><div class="editor-sidebar"><div class="sidebar-card"><h3>Condition Info</h3><dl><dt>Condition ID</dt><dd><code>cond_1781324936169105600</code></dd><dt>Name</dt><dd>Condition 2 Testestes</dd><dt>Event Type</dt><dd><code>comment</code></dd><dt>Status</dt><dd><span class="badge badge-success">Enabled</span></dd></dl></div><div class="sidebar-card"><h3>Quick Reference</h3><ul><li>AND, OR, NOT</li><li>EQUALS, GREATER_THAN, LESS_THAN</li><li>INCLUDES, REGEX_MATCH</li><li>ADD, SUBTRACT, MULTIPLY, DIVIDE</li><li>PARAM</li></ul></div></div></div><div id="validateResult" class="validate-result" style="display:none"></div></div>
     </div>
 </div>
 
@@ -379,7 +379,7 @@ var translations = {
   "LAST": "文の末尾",
   "COUNT": "集合の個数",
   "SUM": "集合の合計",
-  "PLUS": "足し算",
+  "ADD": "足し算",
   "SUBTRACT": "引き算",
   "MULTIPLY": "掛け算",
   "DIVIDE": "割り算",
@@ -519,13 +519,13 @@ var translations = {
             </div>
             <div id="boolmodal_numeric" class="selector" onclick="document.getElementById('boolnumericradio').checked=true;document.getElementById('boolmodal_text').classList.remove('available');document.getElementById('boolmodal_numeric').classList.add('available');document.getElementById('boolmodal_bool').classList.remove('available');boolDialogValidator()">
               <div><input id="boolnumericradio" type="radio" name="addboolradio" />Comparison?</div>
-                <span class="numselector" onclick="inputNumber(document.getElementById('numericcomparebase').value, function(val,disp){document.getElementById('numericcomparebaseplacedisp').value=disp;document.getElementById('numericcomparebaseplacedisp').style['display']='inline';document.getElementById('numericcomparebaseplaceholder').style['display']='none';document.getElementById('numericcomparebase').value=val})">
+                <span class="numselector" onclick="inputNumber(document.getElementById('numericcomparebase').value, function(val,disp){document.getElementById('numericcomparebase').value = val; document.getElementById('numericcomparebaseplacedisp').innerHTML=disp;document.getElementById('numericcomparebaseplacedisp').style['display']='inline';document.getElementById('numericcomparebaseplaceholder').style['display']='none';document.getElementById('numericcomparebase').value=val})">
 					<span id="numericcomparebaseplaceholder" class="placeholder">Enter Value</span>
 					<span id="numericcomparebaseplacedisp" style="display:none"></span>
 				</span>
                 <input id="numericcomparebase" type="hidden" />
                 <select id="numericcompareoperator"><option value=">">&gt;</option><option value=">">&gt;=</option><option value="==">=</option><option value="<=">&lt;=</option><option value="<">&lt;</option></select>
-                <span class="numselector" onclick="inputNumber(document.getElementById('numericcomparetarget').value, function(val,disp){document.getElementById('numericcomparetargetplacedisp').value=disp;document.getElementById('numericcomparetargetplacedisp').style['display']='inline';document.getElementById('numericcomparetargetplaceholder').style['display']='none';document.getElementById('numericcomparetarget').value=val})">
+                <span class="numselector" onclick="inputNumber(document.getElementById('numericcomparetarget').value, function(val,disp){document.getElementById('numericcomparetarget').value = val;document.getElementById('numericcomparetargetplacedisp').innerHTML=disp;document.getElementById('numericcomparetargetplacedisp').style['display']='inline';document.getElementById('numericcomparetargetplaceholder').style['display']='none';document.getElementById('numericcomparetarget').value=val})">
 					<span id="numericcomparetargetplaceholder" class="placeholder">Enter Value</span>
 					<span id="numericcomparetargetplacedisp" style="display:none"></span>
 				</span>
@@ -609,8 +609,8 @@ var translations = {
 			  </div>
 			  <span id="calccursor">|</span>
 		      <div id="calctoolarea">
-		        <div class="calcoperator" onclick='appendCalcOperator("PLUS")'>＋</div>
-		        <div class="calcoperator" onclick='appendCalcOperator("MINUS")'>－</div>
+		        <div class="calcoperator" onclick='appendCalcOperator("ADD")'>＋</div>
+		        <div class="calcoperator" onclick='appendCalcOperator("SUBTRACT")'>－</div>
 		        <div class="calcoperator" onclick='appendCalcOperator("MULTIPLY")'>×</div>
 		        <div class="calcoperator" onclick='appendCalcOperator("DIVIDE")'>÷</div>
 		        <div class="calcoperator" onclick='appendCalcOperator("MODULO")'>≡</div>
@@ -618,7 +618,7 @@ var translations = {
 				<div class="calcvalinputbutton"><a onclick='appendCalcValue()'>Select Item</a></div>
 		      </div>
 		    </div>
-			<input type="hidden" id="calcformula" value='{"Operator":"PLUS","SubConditions":[{"Operator":"PARSEINT","SubConditions":null,"Variables":["5"]},{"Operator":"PARSEINT","SubConditions":null,"Variables":["5"]},{"Operator":"PLUS","SubConditions":[{"Operator":"PARSEINT","SubConditions":null,"Variables":["5"]},{"Operator":"PARSEINT","SubConditions":null,"Variables":["7"]}],"Variables":null},{"Operator":"PARSEINT","SubConditions":[{"Operator":"FIRST","SubConditions":[{"Operator":"PARAM","SubConditions":null,"Variables":["event_message"]}],"Variables":["2"]}],"Variables":null},{"Operator":"PLUS","SubConditions":[{"Operator":"PARSEINT","SubConditions":null,"Variables":["55"]},{"Operator":"PARSEINT","SubConditions":null,"Variables":["12"]},{"Operator":"PARSEINT","SubConditions":null,"Variables":["45"]},{"Operator":"PARSEINT","SubConditions":null,"Variables":["7428"]},{"Operator":"MULTIPLY","SubConditions":null,"Variables":null},{"Operator":"PARSEINT","SubConditions":[{"Operator":"SUBSTRING","SubConditions":[{"Operator":"PARAM","SubConditions":null,"Variables":["event_message"]}],"Variables":["2-3"]}],"Variables":null}],"Variables":null}],"Variables":null}'/>
+			<input type="hidden" id="calcformula" value=''/>
 			<input type="hidden" id="calccursorpos" value="" />
 		    <div id="calcdisplay">
 		    
