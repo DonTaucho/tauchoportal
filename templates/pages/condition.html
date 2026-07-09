@@ -188,13 +188,19 @@
             </div>
             <div id="boolmodal_numeric" class="selector" onclick="document.getElementById('boolnumericradio').checked=true;document.getElementById('boolmodal_text').classList.remove('available');document.getElementById('boolmodal_numeric').classList.add('available');document.getElementById('boolmodal_bool').classList.remove('available');boolDialogValidator()">
               <div><input id="boolnumericradio" type="radio" name="addboolradio" />Comparison?</div>
-                <span class="numselector" onclick="inputNumber(document.getElementById('numericcomparebase').value, function(val,disp){document.getElementById('numericcomparebase').value = val; document.getElementById('numericcomparebaseplacedisp').innerHTML=disp;document.getElementById('numericcomparebaseplacedisp').style['display']='inline';document.getElementById('numericcomparebaseplaceholder').style['display']='none';document.getElementById('numericcomparebase').value=val})">
+                <span class="numselector" onclick="inputNumber(document.getElementById('numericcomparebase').value, function(val,disp){document.getElementById('numericcomparebase').value = val; document.getElementById('numericcomparebaseplacedisp').innerHTML=disp;document.getElementById('numericcomparebaseplacedisp').style['display']='inline';document.getElementById('numericcomparebaseplaceholder').style['display']='none';document.getElementById('numericcomparebase').value=val;boolDialogValidator()})">
                   <span id="numericcomparebaseplaceholder" class="placeholder">Enter Value</span>
                   <span id="numericcomparebaseplacedisp" class="value" style="display:none"></span>
                 </span>
                 <input id="numericcomparebase" type="hidden" />
-                <select id="numericcompareoperator"><option value=">">&gt;</option><option value=">">&gt;=</option><option value="==">=</option><option value="<=">&lt;=</option><option value="<">&lt;</option></select>
-                <span class="numselector" onclick="inputNumber(document.getElementById('numericcomparetarget').value, function(val,disp){document.getElementById('numericcomparetarget').value = val;document.getElementById('numericcomparetargetplacedisp').innerHTML=disp;document.getElementById('numericcomparetargetplacedisp').style['display']='inline';document.getElementById('numericcomparetargetplaceholder').style['display']='none';document.getElementById('numericcomparetarget').value=val})">
+                <select id="numericcompareoperator">
+                  <option value="greater_than">&gt;</option>
+                  <option value="greater_or_equal" selected>&gt;=</option>
+                  <option value="equivalent">=</option>
+                  <option value="less_or_equal">&lt;=</option>
+                  <option value="less_than">&lt;</option>
+                </select>
+                <span class="numselector" onclick="inputNumber(document.getElementById('numericcomparetarget').value, function(val,disp){document.getElementById('numericcomparetarget').value = val;document.getElementById('numericcomparetargetplacedisp').innerHTML=disp;document.getElementById('numericcomparetargetplacedisp').style['display']='inline';document.getElementById('numericcomparetargetplaceholder').style['display']='none';document.getElementById('numericcomparetarget').value=val;boolDialogValidator()})">
                   <span id="numericcomparetargetplaceholder" class="placeholder">Enter Value</span>
                   <span id="numericcomparetargetplacedisp" class="value" style="display:none"></span>
                 </span>

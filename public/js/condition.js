@@ -8,8 +8,8 @@
     const groupoperators = ["COUNT", "SUM"];
     const calcoperators = ["ADD", "SUBTRACT", "MULTIPLY", "DIVIDE", "MODULO"];
     const convoperators = ["PARSEINT", "EXCHANGE"];
-    const namingmap = {"AND":"and", "OR":"or", "NOT":"not", "SOME":"some", "EQUIVALENT":"equivalent", "GREATER_THAN":"geater_than", "GREATER_OR_EQUAL":"greater_or_equal", "LESS_THAN":"less_than", "LESS_OR_EQUAL":"less_or_equal" , "EQUALS":"equals", "INCLUDES":"includes", "REGEX_MATCH":"regex_match", "COUNT":"count", "SUM":"sum", "WHOLEWORD":"wholeword", "REGEX_EXTRACT": "regex_extract", "SUBSTRING": "substring", "FIRST": "first", "LAST": "last", "ADD":"add", "SUBTRACT":"subtract", "MULTIPLY":"multiply", "DIVIDE":"divide", "MODULO":"modulo", "PARSEINT":"parseint", "EXCHANGE":"exchange", "PARAM":"param"};
-    const operatormap = {"and":"AND", "or":"OR", "not":"NOT", "some":"SOME", "equivalent":"EQUIVALENT", "geater_than":"GREATER_THAN", "greater_or_equal":"GREATER_OR_EQUAL", "less_than":"LESS_THAN", "less_or_equal":"LESS_OR_EQUAL", "equals":"EQUALS", "includes":"INCLUDES", "regex_match":"REGEX_MATCH", "count":"COUNT", "sum":"SUM", "wholeword":"WHOLEWORD", "regex_extract": "REGEX_EXTRACT", "substring": "SUBSTRING", "first": "FIRST", "last": "LAST", "add":"ADD", "subtract":"SUBTRACT", "multiply":"MULTIPLY", "divide":"DIVIDE", "modulo":"MODULO", "parseint":"PARSEINT", "exchange":"EXCHANGE", "param":"PARAM"};
+    const namingmap = {"AND":"and", "OR":"or", "NOT":"not", "SOME":"some", "EQUIVALENT":"equivalent", "GREATER_THAN":"greater_than", "GREATER_OR_EQUAL":"greater_or_equal", "LESS_THAN":"less_than", "LESS_OR_EQUAL":"less_or_equal" , "EQUALS":"equals", "INCLUDES":"includes", "REGEX_MATCH":"regex_match", "COUNT":"count", "SUM":"sum", "WHOLEWORD":"wholeword", "REGEX_EXTRACT": "regex_extract", "SUBSTRING": "substring", "FIRST": "first", "LAST": "last", "ADD":"add", "SUBTRACT":"subtract", "MULTIPLY":"multiply", "DIVIDE":"divide", "MODULO":"modulo", "PARSEINT":"parseint", "EXCHANGE":"exchange", "PARAM":"param"};
+    const operatormap = {"and":"AND", "or":"OR", "not":"NOT", "some":"SOME", "equivalent":"EQUIVALENT", "greater_than":"GREATER_THAN", "greater_or_equal":"GREATER_OR_EQUAL", "less_than":"LESS_THAN", "less_or_equal":"LESS_OR_EQUAL", "equals":"EQUALS", "includes":"INCLUDES", "regex_match":"REGEX_MATCH", "count":"COUNT", "sum":"SUM", "wholeword":"WHOLEWORD", "regex_extract": "REGEX_EXTRACT", "substring": "SUBSTRING", "first": "FIRST", "last": "LAST", "add":"ADD", "subtract":"SUBTRACT", "multiply":"MULTIPLY", "divide":"DIVIDE", "modulo":"MODULO", "parseint":"PARSEINT", "exchange":"EXCHANGE", "param":"PARAM"};
     const reverselookuptype = {"AND":"boolean", "OR":"boolean", "NOT":"boolean", "SOME":"boolean", "EQUIVALENT":"comp", "GREATER_THAN":"comp", "LESS_THAN":"comp", "EQUALS":"optext", "INCLUDES":"optext", "REGEX_MATCH":"optext", "COUNT":"group", "SUM":"group", "ADD":"calc","SUBTRACT":"calc","MULTIPLY":"calc","DIVIDE":"calc","MODULO":"calc", "PARSEINT":"conv","EXCHANGE":"conv", "PARAM":"extract"};
 
     function jsonLoader(jsonnode, area, path){
@@ -718,7 +718,7 @@
         document.getElementById("numericcomparebaseplaceholder").style["display"] = "inline-block";
         document.getElementById("numericcomparebaseplacedisp").style["display"] = "none";
         document.getElementById("numericcomparebase").value = "";
-        document.getElementById("numericcompareoperator").value = ">";
+        document.getElementById("numericcompareoperator").value = "greater_or_equal";
         document.getElementById("numericcomparetargetplaceholder").style["display"] = "inline-block";
         document.getElementById("numericcomparetargetplacedisp").style["display"] = "none";
         document.getElementById("numericcomparetarget").value = "";
@@ -812,7 +812,11 @@
                     break;
             }
         } else if (document.getElementById("boolnumericradio").checked) {
-            //currentnode = {"aa": {"aa":123}};
+            const numericcomparebasevalue = document.getElementById("numericcomparebase").value,
+                numericcompareoperator = document.getElementById("numericcompareoperator").value,
+                numericcomparetarget = document.getElementById("numericcomparetarget").value;
+            currentnode["Operator"] = operatormap[numericcompareoperator];
+            currentnode["SubConditions"] = [JSON.parse(numericcomparebasevalue), JSON.parse(numericcomparetarget)];
         } else if (document.getElementById("boolconditionradio").checked) {
             currentnode["Operator"] = document.getElementById("boolcondition").value;
             currentnode["Variables"] = [];
