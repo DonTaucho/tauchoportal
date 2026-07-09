@@ -439,7 +439,7 @@ func (s *Server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	data := PageData{Title: cfg.Title, User: user, Page: cfg.Name, Lang: lang, I18n: s.i18n.Translator(lang), API: &api}
 
 	// Fetch conditions page data if on /conditions page
-	if cfg.Name == "conditions" {
+	if cfg.Name == "conditions" || cfg.Name == "condition" {
 		parts := strings.Split(strings.TrimPrefix(r.URL.Path, "/"), "/")
 		if len(parts) >= 3 && parts[0] == "channels" && parts[2] == "conditions" {
 			channelID := parts[1]
