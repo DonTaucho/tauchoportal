@@ -1,3 +1,29 @@
+/**
+ * Legacy condition.js - Being refactored
+ * 
+ * NOTE: This file is being gradually migrated to use the new ConditionEditor class.
+ * New code should use condition-editor.js which provides a reusable class-based approach.
+ * 
+ * The ConditionEditor class:
+ * - Accepts elements as constructor parameters instead of hardcoding IDs
+ * - Supports multiple instances for different textareas
+ * - Can be used for different form elements (condition logic, device params, etc.)
+ * 
+ * Usage example:
+ *   const editor = new ConditionEditor('conditionLogicInput', {
+ *       drawingArea: document.getElementById('drawingArea'),
+ *       logicDescriptionArea: document.getElementById('logictotaldescription')
+ *   });
+ *   editor.refresh();
+ * 
+ * To sync a second textarea:
+ *   const deviceParamsSync = {
+ *       getElement: () => document.getElementById('sendingparamjson'),
+ *       getJSON: () => JSON.parse(deviceParamsSync.getElement().value),
+ *       setJSON: (json) => { deviceParamsSync.getElement().value = JSON.stringify(json, null, 2); }
+ *   };
+ */
+
 (function () {
     'use strict';
     const extractionoperators = ["PARAM"];
@@ -1683,19 +1709,19 @@
         return currentnode;
     }
     function refreshSummary(){
-        //try {
+        try {
             // to make really sure having not difference between what is shown and the actual data, load from object not the json just made
             jsonLoader(JSON.parse(document.getElementById("conditionLogicInput").value), document.getElementById("drawingArea"));
             document.getElementById("logictotaldescription").innerHTML = summarize(JSON.parse(document.getElementById("conditionLogicInput").value));
-        //} catch {
-        //    document.getElementById("logictotaldescription").innerHTML = "";
-        //    document.getElementById("drawingArea").replaceChildren();
-        //    const jsonerror = document.createElement("div");
-        //    jsonerror.classList.add("jsonerror");
-        //    jsonerror.innerText = translations["failedjsonparse"];
-        //    document.getElementById("logictotaldescription").append(jsonerror.cloneNode(true));
-        //    document.getElementById("drawingArea").append(jsonerror.cloneNode(true));
-        //}
+        } catch {
+            document.getElementById("logictotaldescription").innerHTML = "";
+            document.getElementById("drawingArea").replaceChildren();
+            const jsonerror = document.createElement("div");
+            jsonerror.classList.add("jsonerror");
+            jsonerror.innerText = translations["failedjsonparse"];
+            document.getElementById("logictotaldescription").append(jsonerror.cloneNode(true));
+            document.getElementById("drawingArea").append(jsonerror.cloneNode(true));
+        }
     }
     function reloadJson (json){
         document.getElementById("conditionLogicInput").value = JSON.stringify(json, null, 2);

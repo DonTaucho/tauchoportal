@@ -1,6 +1,7 @@
 package controller
 
 import (
+	"encoding/json"
 	"html"
 	"sort"
 	"time"
@@ -32,11 +33,12 @@ type ConditionForTemplate struct {
 	Name               string
 	EventType          string
 	Filter             string
+	ConditionLogic     string
 	IsEnabled          bool
 	LastTriggeredAt    string
 	DeviceID           string
 	DeviceAction       string
-	DeviceActionParams map[string]interface{}
+	DeviceActionParams string
 }
 
 // PageData contains all data needed to render a page
@@ -191,19 +193,22 @@ func PrepareConditionsPageData(channelID string) *ConditionsPageData {
 	// Convert to template format
 	conditions := make([]ConditionForTemplate, 0)
 	for _, c := range condList {
+		condLogicJSON, _ := json.Marshal(c.ConditionLogic)
+		deviceActionParamsJSON, _ := json.Marshal(map[string]interface{}{
+			"color":       c.DeviceActionParams.Color,
+			"duration_ms": c.DeviceActionParams.DurationMs,
+		})
 		conditions = append(conditions, ConditionForTemplate{
-			ID:              c.Id,
-			Name:            c.Name,
-			EventType:       c.EventType,
-			Filter:          c.Filter,
-			IsEnabled:       c.IsEnabled,
-			LastTriggeredAt: c.LastTriggeredAt,
-			DeviceID:        c.DeviceId,
-			DeviceAction:    c.DeviceAction,
-			DeviceActionParams: map[string]interface{}{
-				"color":       c.DeviceActionParams.Color,
-				"duration_ms": c.DeviceActionParams.DurationMs,
-			},
+			ID:                 c.Id,
+			Name:               c.Name,
+			EventType:          c.EventType,
+			Filter:             c.Filter,
+			ConditionLogic:     string(condLogicJSON),
+			IsEnabled:          c.IsEnabled,
+			LastTriggeredAt:    c.LastTriggeredAt,
+			DeviceID:           c.DeviceId,
+			DeviceAction:       c.DeviceAction,
+			DeviceActionParams: string(deviceActionParamsJSON),
 		})
 	}
 
@@ -472,5 +477,57 @@ func PrepareChannelsPageData() *ChannelsPageData {
 	return &ChannelsPageData{
 		Watches:      watchesForTemplate,
 		PlatformMeta: GetPlatformMetadata(),
+	}
+}
+
+// ConditionPageData contains all data needed to render the condition logic page
+type ConditionPageData struct {
+	CurrentChannel *ChannelForTemplate
+	Condition      *ConditionForTemplate
+	PlatformMeta   map[string]map[string]interface{}
+}
+
+// PrepareConditionPageData prepares all data needed to render a single condition logic page
+func PrepareConditionPageData(channelID, conditionID string) *ConditionPageData {
+	// Fetch current channel
+	watches := Watches{}.ListWatches()
+	var currentChannel *ChannelForTemplate
+	for _, w := range watches {
+		if w.Id == channelID {
+			currentChannel = &ChannelForTemplate{
+				ID:       w.Id,
+				Name:     w.Name,
+				Platform: w.Platform,
+			}
+			break
+		}
+	}
+
+	// Fetch specific condition
+	cond := Conditions{}
+	condition := cond.GetCondition(conditionID)
+
+	condLogicJSON, _ := json.Marshal(condition.ConditionLogic)
+	deviceActionParamsJSON, _ := json.Marshal(map[string]interface{}{
+		"color":       condition.DeviceActionParams.Color,
+		"duration_ms": condition.DeviceActionParams.DurationMs,
+	})
+	condForTemplate := &ConditionForTemplate{
+		ID:                 condition.Id,
+		Name:               condition.Name,
+		EventType:          condition.EventType,
+		Filter:             condition.Filter,
+		ConditionLogic:     string(condLogicJSON),
+		IsEnabled:          condition.IsEnabled,
+		LastTriggeredAt:    condition.LastTriggeredAt,
+		DeviceID:           condition.DeviceId,
+		DeviceAction:       condition.DeviceAction,
+		DeviceActionParams: string(deviceActionParamsJSON),
+	}
+
+	return &ConditionPageData{
+		CurrentChannel: currentChannel,
+		Condition:      condForTemplate,
+		PlatformMeta:   GetPlatformMetadata(),
 	}
 }

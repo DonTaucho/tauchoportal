@@ -45,7 +45,7 @@
   </div>
 
   <div id="jsonarea"><div id="jsontab"><img src="/image/jsonareaedge.png" width="43" height="27"><a onclick="if(document.getElementById('jsonarea').classList.contains('active')){document.getElementById('jsonarea').classList.remove('active');}else {document.getElementById('jsonarea').classList.add('active')};if(document.getElementById('jsonarea').classList.contains('active')){document.getElementById('upperarea').classList.add('hide')}else {document.getElementById('upperarea').classList.remove('hide')};return false">JSON</a></div>
-  <div id="jsonareawrapper"><textarea id="conditionLogicInput" class="condition-textarea" onchange="refreshSummary()">{{.Condition.ConditionLogic}}</textarea></div>
+  <div id="jsonareawrapper"><textarea id="conditionLogicInput" class="condition-textarea">{{.Condition.ConditionLogic}}</textarea></div>
   </div>
 
   <div id="logictotaldescription"></div>
@@ -427,123 +427,56 @@
 {{end}}
 
 {{define "scripts"}}
+<script id="conditionTranslationsData" type="application/json">
+{{.I18n.TByPrefix "condition" | jsonMarshal}}
+</script>
 <script>
-var translations = {
-  "AND": "全ての条件を満たす",
-  "OR": "いずれかの条件を満たす",
-  "NOT": "満たさない",
-  "SOME": "一定数のみ条件を満たす",
-  "EQUIVALENT": "一致（数値比較）",
-  "GREATER_THAN": "大きい",
-  "GREATER_OR_EQUAL": "以上",
-  "LESS_THAN": "小さい",
-  "LESS_OR_EQUAL": "以下",
-  "EQUALS": "同一（文字比較）",
-  "INCLUDES": "含む",
-  "REGEX_MATCH": "正規表現による一致",
-  "WHOLEWORD": "文全体",
-  "REGEX_EXTRACT": "正規表現による抜き出し",
-  "SUBSTRING": "文章中の部分（文字数指定）",
-  "FIRST": "文頭",
-  "LAST": "文の末尾",
-  "COUNT": "集合の個数",
-  "SUM": "集合の合計",
-  "ADD": "足し算",
-  "SUBTRACT": "引き算",
-  "MULTIPLY": "掛け算",
-  "DIVIDE": "割り算",
-  "MODULO": "割り算の余り",
-  "PARSEINT": "数値化",
-  "EXCHANGE": "通貨換算",
-  "PARAM": "配信からのデータ",
-  
-  "generic-notset": "未設定",
-  "failedjsonparse": "JSONの読み取りに失敗しました",
-  "staticvalue": "「{0}」",
-  "and-joint": " かつ ",
-  "and-notset": "条件が未設定です",
-  "or-joint": " もしくは ",
-  "or-notset": "条件が未設定です",
-  "not-sentense": "{0}ではない",
-  "not-notset": "条件が未設定です",
-  "some-sentense_prefix": "",
-  "some-sentense_joint": "～",
-  "some-sentense": "{0}が条件を満たす",
-  "some-sentense_suffix": "のみが条件を満たす",
-  "some-sentense_from": "{0}のうち、{1}個以上が条件を満たす",
-  "some-sentense_to": "{0}のうち、{1}個以下だけ条件を満たす",
-  "some-sentense_fromto": "{0}のうち、{1}個以上{2}個以下だけ条件を満たす",
-  "some-joint": " 、 ",
-  "some-notset": "条件が未設定です",
-  "compare-novalue": "未設定",
-  "compare-missingvalue": "未設定",
-  "equivalent-joint": " と ",
-  "equivalent-sentense": "{0}が同値",
-  "equivalent-novalue": "条件が未設定です",
-  "equivalent-missingvalue": "未設定",
-  "greaterthan-sentense": "{0}が{1}より多い",
-  "greaterorequal-sentense": "{0}が{1}以上",
-  "lessthan-sentense": "{0}が{1}より少ない",
-  "lessorequal-sentense": "{0}が{1}以下",
-  "equals-joint": " と ",
-  "equals-sentense": "{0}が一致",
-  "equals-novalue": "条件が未設定です",
-  "equals-missingvalue": "未設定",
-  "includes-novalue": "未設定",
-  "includes-missingvalue": "未設定",
-  "includes-sentense-one": "{0}に{1}が含まれる",
-  "includes-sentense-rangefrom": "{0}に{1}が{2}個以上含まれる",
-  "includes-sentense-rangeto": "{0}に{1}が{2}個以下含まれる",
-  "includes-sentense-rangefromto": "{0}に{1}が{2}～{3}個だけ含まれる",
-  "regexparam": "正規表現/{0}/",
-  "regex-missingvalue": "未設定",
-  "regex-sentense": "{0}の値が{1}に整合する",
-  "calc-missingvalue": "未設定",
-  "plus-joint": " 足す ",
-  "subtract-joint": " 引く ",
-  "multiply-joint": " かける ",
-  "divide-joint": " 割る ",
-  "modulo-sentense": "{0}を{1}で割った余り",
-  "exchange-sentense": "{0}を{1}換算した値",
-  "textextract-whole": "{0}",
-  "textextract-regex": "{0}を正規表現/{1}/によって抜き出した文字列",
-  "textextract-sub_missingvalue": "未設定",
-  "textextract-sub_from": "{0}の{1}文字目以降",
-  "textextract-sub_to": "{0}の{1}文字目まで",
-  "textextract-sub_fromto": "{0}の{1}文字目から{2}文字目まで",
-  "textextract-first": "{0}の最初の{1}文字分",
-  "textextract-last": "{0}の最後の{1}文字分",
-  "textcondition-novalue": "未設定",
-  "textcondition-missingvalue": "[未設定の値]",
-  "textcondition-equals": "{0}と完全一致する",
-  "textcondition-one": "{0}が含まれる",
-  "textcondition-rangefrom": "{0}が{1}個以上含まれる",
-  "textcondition-rangeto": "{0}が{1}個以下含まれる",
-  "textcondition-rangefromto": "{0}が{1}～{2}個だけ含まれる",
-  "textcondition-regex": "正規表現/{0}/に整合する",
-  "translations-value": "{0}",
-  "translations-set": "〔{0}〕",
-  "valueof-joint": "、",
-  "valueof-sentense": "{0}の値",
-  "event_message" : "メッセージ",
-  "event_amount" : "ぎふと",
-  "event_amount_currency" : "Currency code (e.g., \"USD\")",
-  "event_amount_display" : "Formatted amount display",
-  "event_sender_name" : "Sender display name",
-  "event_sender_id" : "Sender user ID",
-  "event_sender_avatar" : "Sender avatar URL",
-  "event_is_member" : "Is channel member (boolean)",
-  "event_is_mod" : "Is moderator (boolean)",
-  "event_badges" : "Array of badge strings",
-  "event_type" : "Event type (e.g., \"comment\", \"superchat\", \"gift\")",
-  "event_platform" : "Platform name (e.g., \"twitch\", \"youtube\")",
-  "event_id" : "Event ID",
-  "event_watch_id" : "Associated watch ID",
-  "event_user_id" : "User ID (owner of the watch)",
-  "event_stream_id" : "Stream ID",
-  "event_received_at" : "Timestamp when received",
-  "event_created_at" : "Timestamp when event occurred"
+var translations = JSON.parse(document.getElementById('conditionTranslationsData').textContent);
+</script>
+<script src="/js/condition-editor.js"></script>
+<script>
+// Initialize the condition logic editor
+let conditionEditor = null;
+
+document.addEventListener('DOMContentLoaded', function() {
+    // Initialize main condition logic editor
+    conditionEditor = new ConditionEditor('conditionLogicInput', {
+        drawingArea: document.getElementById('drawingArea'),
+        logicDescriptionArea: document.getElementById('logictotaldescription')
+    });
+
+    // Initial refresh to display current condition
+    conditionEditor.refresh();
+});
+
+// For device action parameters - create a simple helper
+const deviceActionParams = {
+    getElement: function() {
+        return document.getElementById('sendingparamjson');
+    },
+    getJSON: function() {
+        try {
+            return JSON.parse(this.getElement().value);
+        } catch (e) {
+            console.error('Failed to parse device action params:', e);
+            return null;
+        }
+    },
+    setJSON: function(json) {
+        this.getElement().value = JSON.stringify(json, null, 2);
+    },
+    update: function(key, value) {
+        const json = this.getJSON() || {};
+        json[key] = value;
+        this.setJSON(json);
+    }
 };
+
+function refreshSummary() {
+    if (conditionEditor) {
+        conditionEditor.refresh();
+    }
+}
 </script>
 <script src="/js/condition.js"></script>
 {{end}}
