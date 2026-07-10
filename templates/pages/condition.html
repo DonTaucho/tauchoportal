@@ -17,13 +17,13 @@
       <span class="breadcrumb-sep">›</span>
       <a href="/channels/{{.CurrentChannel.ID}}/conditions">Conditions</a>
       <span class="breadcrumb-sep">›</span>
-      <span>Condition</span>
+      <span>{{.Condition.Name}}</span>
     </nav>
     <div class="page-header-top">
       <div>
         <h1>
           <span class="platform-icon-sm {{.CurrentChannel.Platform}}">{{$platformMeta := index .PlatformMeta .CurrentChannel.Platform}}{{if $platformMeta}}{{index $platformMeta "icon"}}{{end}}</span>
-          <span>{{.CurrentChannel.Name}}</span> — Conditions
+          <span>{{.CurrentChannel.Name}}</span> — Condition <span id="conditionName">{{.Condition.Name}}</span>
         </h1>
       </div>
     </div>
@@ -45,80 +45,12 @@
   </div>
 
   <div id="jsonarea"><div id="jsontab"><img src="/image/jsonareaedge.png" width="43" height="27"><a onclick="if(document.getElementById('jsonarea').classList.contains('active')){document.getElementById('jsonarea').classList.remove('active');}else {document.getElementById('jsonarea').classList.add('active')};if(document.getElementById('jsonarea').classList.contains('active')){document.getElementById('upperarea').classList.add('hide')}else {document.getElementById('upperarea').classList.remove('hide')};return false">JSON</a></div>
-  <div id="jsonareawrapper"><textarea id="conditionLogicInput" class="condition-textarea" onchange="refreshSummary()">{
-    "Operator": "OR",
-    "Variables": null,
-    "SubConditions": [
-      {
-        "Operator": "INCLUDES",
-        "Variables": [
-          "aaa",
-          "7-11"
-        ],
-        "SubConditions": [
-          {
-            "Operator": "SUBSTRING",
-            "SubConditions": [
-              {
-                "Operator": "PARAM",
-                "Variables": [
-                  "event_amount"
-                ]
-              }
-            ],
-            "Variables": [
-              "2-4"
-            ]
-          }
-        ]
-      },
-      {
-        "Operator": "EQUALS",
-        "Variables": [
-          "yay"
-        ],
-        "SubConditions": [
-          {
-            "Operator": "PARAM",
-            "Variables": [
-              "event_message"
-            ],
-            "SubConditions": null
-          }
-        ]
-      },
-      {
-        "Operator": "EQUALS",
-        "Variables": [
-          "TestUser1"
-        ],
-        "SubConditions": [
-          {
-            "Operator": "PARAM",
-            "Variables": [
-              "event_sender_id"
-            ],
-            "SubConditions": null
-          }
-        ]
-      }
-    ]
-  }</textarea></div>
+  <div id="jsonareawrapper"><textarea id="conditionLogicInput" class="condition-textarea" onchange="refreshSummary()">{{.Condition.ConditionLogic}}</textarea></div>
   </div>
 
   <div id="logictotaldescription"></div>
   <div id="sendingParameterArea">SendingParameter:none</div>
-  <textarea id="sendingparamjson">{"Operator": "WHOLEWORD",
-    "Variables": null,
-    "SubConditions": [
-      {
-        "Operator": "PARAM",
-        "Variables": [
-          "event_sender_id"
-        ],
-        "SubConditions": null
-      }
-    ]}</textarea>
+  <textarea id="sendingparamjson">{{.Condition.DeviceActionParams}}</textarea>
   <hr>
 
   <div class="confirm-overlay" id="confirmOverlay" style="display:none" onclick="cancelConfirm()"></div>

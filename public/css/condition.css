@@ -1,4 +1,6 @@
-
+* {
+    transition: all 0.4s ease-in-out;
+}
 .toolbox div{
 padding: 1rem 2rem;
 border: 1px solid grey;
@@ -110,6 +112,7 @@ display:none;
 	display:inline-block;
 	border-radius: 3px 0px 0px 0px;
 	cursor: pointer;
+    background-color: rgba(255, 255, 255, 0.8);
 }
 
 body.fullscreen .channels-panel{
@@ -891,6 +894,10 @@ fieldset.item.param>div.icons{
 }
 #visualizedcalc .sub .sub .sub .sub .sub{
     background-color: #acace7;
+}
+#visualizedcalc span.placeholder {
+    background-color: rgba(255, 104, 0, 0.4);
+    color: gray;
 }
 
 #visualizedcalc span.plusbracket{

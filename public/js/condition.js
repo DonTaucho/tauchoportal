@@ -293,7 +293,7 @@
                 if (node.SubConditions.length>0) {
                     target_compare = summarize(node.SubConditions[0]);
                     for (const i in node.SubConditions.slice(1)) {
-                        items_compare.push(summarize(node.SubConditions[i]));
+                        items_compare.push(summarize(node.SubConditions.slice(1)[i]));
                     }
                 } else {
                     target_compare = "<span class='novalue'>" + translations["compare-missingvalue"] + "</span>";
@@ -304,7 +304,7 @@
                 if (!items_compare.length) {
                     items_compare.push("<span class='novalue'>" + translations["compare-novalue"] + "</span>");
                 }
-                return translations[sentense].replace("{0}", target_compare).replace("{0}", items_compare.join(translations["equals-joint"]));
+                return translations[sentense].replace("{0}", target_compare).replace("{1}", items_compare.join(translations["equals-joint"]));
                 break;
             case "EQUALS":
                 const items_equals = [];
@@ -1186,15 +1186,17 @@
                             placeholder.onclick = fillPlaceHolder;
                             base.append(placeholder);
                         }
-                        const plussign = document.createElement("span");
-                        plussign.innerText = "＋";
-                        base.append(plussign);
-                        const placeholder = document.createElement("span");
-                        placeholder.classList.add("placeholder");
-                        placeholder.innerText = translations["calc-missingvalue"];
-                        placeholder.setAttribute("path",  path + "/placeholder:0");
-                        placeholder.onclick = fillPlaceHolder;
-                        base.append(placeholder);
+                        if (path != "") {
+                            const plussign = document.createElement("span");
+                            plussign.innerText = "＋";
+                            base.append(plussign);
+                            const placeholder = document.createElement("span");
+                            placeholder.classList.add("placeholder");
+                            placeholder.innerText = translations["calc-missingvalue"];
+                            placeholder.setAttribute("path",  path + "/placeholder:0");
+                            placeholder.onclick = fillPlaceHolder;
+                            base.append(placeholder);
+                        }
                     }
                     break;
                 case "MULTIPLY":
@@ -1558,7 +1560,7 @@
         const type = address.split(":")[0];
         const index = address.split(":")[1];
         const prepending = address.split(":").length > 2 && address.split(":")[2] == "pre";
-        if (cursorpath == "") {
+        if (cursorpath.length < 2) {
             targetcontainer.SubConditions = [elem];
         }
         if (type == "sub") {
