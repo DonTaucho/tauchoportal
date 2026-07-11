@@ -45,7 +45,7 @@
   </div>
 
   <div id="jsonarea"><div id="jsontab"><img src="/image/jsonareaedge.png" width="43" height="27"><a onclick="if(document.getElementById('jsonarea').classList.contains('active')){document.getElementById('jsonarea').classList.remove('active');}else {document.getElementById('jsonarea').classList.add('active')};if(document.getElementById('jsonarea').classList.contains('active')){document.getElementById('upperarea').classList.add('hide')}else {document.getElementById('upperarea').classList.remove('hide')};return false">JSON</a></div>
-  <div id="jsonareawrapper"><textarea id="conditionLogicInput" class="condition-textarea">{{.Condition.ConditionLogic}}</textarea></div>
+  <div id="jsonareawrapper"><textarea id="conditionLogicInput" class="condition-textarea" onchange="refreshSummary()">{{.Condition.ConditionLogic}}</textarea></div>
   </div>
 
   <div id="logictotaldescription"></div>
@@ -86,7 +86,7 @@
         </div>
         <div id="boolBody" class="modal-body">
             <input id="boolPath" type="hidden" value="">
-            <div id="boolmodal_text" class="selector" onclick="document.getElementById('booltextradio').checked=true;getElementById('boolmodal_text').classList.add('available');document.getElementById('boolmodal_numeric').classList.remove('available');document.getElementById('boolmodal_bool').classList.remove('available');boolDialogValidator()">
+            <div id="boolmodal_text" class="selector" onclick="document.getElementById('booltextradio').checked=true;document.getElementById('boolmodal_text').classList.add('available');document.getElementById('boolmodal_numeric').classList.remove('available');document.getElementById('boolmodal_bool').classList.remove('available');boolDialogValidator()">
               <h4><input id="booltextradio" type="radio" name="addboolradio" /> Values Matches/Includes</h4>
               <span class="textselector" onclick="inputText(document.getElementById('textcomparebasevalue').value, document.getElementById('textcomparebasetype').value,document.getElementById('textcomparebaseexttype').value, document.getElementById('textcomparebaseextvalue').value,true, false, function(disp,val,type,exttype,extval){
                 document.getElementById('textcomparebasedisplay').innerHTML=disp;
@@ -158,7 +158,7 @@
         </div>
         <div id="textBody" class="modal-body textselection">
           <div>
-            <div id="textEnvArea" class="selector envselection" onclick="document.getElementById('textenvradio').checked=true;getElementById('textEnvArea').classList.add('available');document.getElementById('textEnterArea').classList.remove('available');document.getElementById('textExtArea').classList.add('available');document.getElementById('textExtSelect').disabled='';textDialogValidator();">
+            <div id="textEnvArea" class="selector envselection" onclick="document.getElementById('textenvradio').checked=true;document.getElementById('textEnvArea').classList.add('available');document.getElementById('textEnterArea').classList.remove('available');document.getElementById('textExtArea').classList.add('available');document.getElementById('textExtSelect').disabled='';textDialogValidator();">
               <h4><input id="textenvradio" type="radio" name="inputtextradio"> Select Input Parameter</h4>
               <select id="textEnvSelect" onchange="textDialogValidator()">
 				<option value="event_message">comment</option>
@@ -166,14 +166,14 @@
 				<option value="event_amount">amount</option>
 			  </select>
             </div>
-            <div id="textEnterArea" class="selector entervalue" onclick="document.getElementById('textenterradio').checked=true;getElementById('textEnterArea').classList.add('available');document.getElementById('textEnvArea').classList.remove('available');document.getElementById('textExtArea').classList.remove('available');document.getElementById('textExtSelect').disabled='';textDialogValidator();">
+            <div id="textEnterArea" class="selector entervalue" onclick="document.getElementById('textenterradio').checked=true;document.getElementById('textEnterArea').classList.add('available');document.getElementById('textEnvArea').classList.remove('available');document.getElementById('textExtArea').classList.remove('available');document.getElementById('textExtSelect').disabled='';textDialogValidator();">
               <h4><input id="textenterradio" type="radio" name="inputtextradio"> Static Value</h4>
               <input id="textEnter" onchange="textDialogValidator()" type="text" >
               <input id="textValidator" type="hidden" >
             </div>
           </div>
           <div class="extractorselection">
-            <div id="textExtArea" class="selector textextractor" onclick="document.getElementById('textenvradio').checked=true;getElementById('textEnvArea').classList.add('available');document.getElementById('textExtArea').classList.add('available');textDialogValidator();">
+            <div id="textExtArea" class="selector textextractor" onclick="document.getElementById('textenvradio').checked=true;document.getElementById('textEnvArea').classList.add('available');document.getElementById('textExtArea').classList.add('available');textDialogValidator();">
               <h4>Extract</h4>
               <select id="textExtSelect" onchange="textDialogValidator();
 			  document.getElementById('textExtRegex').style['display']=this.value=='regex_extract'?'inline-block':'none';
@@ -435,49 +435,37 @@ var translations = JSON.parse(document.getElementById('conditionTranslationsData
 </script>
 <script src="/js/condition-editor.js"></script>
 <script>
-// Initialize the condition logic editor
 let conditionEditor = null;
+let deviceParamsEditor = null;
 
 document.addEventListener('DOMContentLoaded', function() {
-    // Initialize main condition logic editor
+    // Initialize condition logic editor
     conditionEditor = new ConditionEditor('conditionLogicInput', {
         drawingArea: document.getElementById('drawingArea'),
         logicDescriptionArea: document.getElementById('logictotaldescription')
     });
-
-    // Initial refresh to display current condition
     conditionEditor.refresh();
+
+    // Initialize device action parameters editor
+    deviceParamsEditor = new ConditionEditor('sendingparamjson', {
+        drawingArea: document.getElementById('sendingParameterArea'),
+        logicDescriptionArea: null
+    });
+    deviceParamsEditor.refresh();
 });
 
-// For device action parameters - create a simple helper
-const deviceActionParams = {
-    getElement: function() {
-        return document.getElementById('sendingparamjson');
-    },
-    getJSON: function() {
-        try {
-            return JSON.parse(this.getElement().value);
-        } catch (e) {
-            console.error('Failed to parse device action params:', e);
-            return null;
-        }
-    },
-    setJSON: function(json) {
-        this.getElement().value = JSON.stringify(json, null, 2);
-    },
-    update: function(key, value) {
-        const json = this.getJSON() || {};
-        json[key] = value;
-        this.setJSON(json);
-    }
-};
-
+// Global refreshSummary for any external code that still calls it
 function refreshSummary() {
     if (conditionEditor) {
         conditionEditor.refresh();
     }
 }
+
+function refreshRequest() {
+    if (deviceParamsEditor) {
+        deviceParamsEditor.refresh();
+    }
+}
 </script>
-<script src="/js/condition.js"></script>
 {{end}}
 
