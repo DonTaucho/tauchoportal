@@ -41,6 +41,8 @@ type Product struct {
 	Name             string   `json:"name"`
 	Category         string   `json:"category"`
 	ThumbnailUrl     string   `json:"thumbnail_url"`
+	Price            string   `json:"price"`
+	PriceRange       string   `json:"priceRange"`
 	SupportedActions []string `json:"supported_actions"`
 	IsActive         bool     `json:"is_active"`
 	CreatedAt        string   `json:"created_at"`
