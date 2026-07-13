@@ -314,6 +314,9 @@ func loadTemplates() map[string]*template.Template {
 	headerPath := filepath.Join("templates", "partials", "header.html")
 	nologinheaderPath := filepath.Join("templates", "partials", "nologinheader.html")
 	loginPath := filepath.Join("templates", "partials", "login.html")
+	catalogPath_base := filepath.Join("templates", "partials", "catalogs", "catalog-base.html")
+	catalogPath_govee := filepath.Join("templates", "partials", "catalogs", "govee.html")
+	catalogPath_smart_devices := filepath.Join("templates", "partials", "catalogs", "smart-devices.html")
 	funcMap := template.FuncMap{
 		"userJSON": userJSON,
 		"toJSON":   toJSON,
@@ -345,7 +348,7 @@ func loadTemplates() map[string]*template.Template {
 
 	for _, pagePath := range pages {
 		name := strings.TrimSuffix(filepath.Base(pagePath), filepath.Ext(pagePath))
-		tmpl, err := template.New(name).Funcs(funcMap).ParseFiles(baseLayoutPath, channelLayoutPath, headerPath, nologinheaderPath, loginPath, pagePath)
+		tmpl, err := template.New(name).Funcs(funcMap).ParseFiles(baseLayoutPath, channelLayoutPath, headerPath, nologinheaderPath, loginPath, pagePath, catalogPath_base, catalogPath_govee, catalogPath_smart_devices)
 		if err != nil {
 			log.Fatalf("failed to parse template %s: %v", pagePath, err)
 		}

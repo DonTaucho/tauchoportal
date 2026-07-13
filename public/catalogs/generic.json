@@ -1,0 +1,97 @@
+{
+  "id": "generic",
+  "name": "General Smart Devices",
+  "description": "Common smart home devices across multiple brands.",
+  "logo": "📱",
+  "products": [
+    {
+      "id": "generic-smartplug",
+      "name": "WiFi Smart Plug",
+      "description": "Remote on/off control, energy monitoring, and scheduling.",
+      "category": "Power",
+      "icon": "🔌",
+      "priceRange": "$12.99 - $24.99",
+      "features": [
+        "Remote control via app",
+        "Energy usage monitoring",
+        "Timer and scheduling",
+        "Voice assistant compatible"
+      ],
+      "supported_actions": ["on", "off", "toggle"],
+      "buyUrl": "https://www.amazon.com/s?k=WiFi+Smart+Plug",
+      "imageUrl": null
+    },
+    {
+      "id": "generic-smartswitch",
+      "name": "WiFi Smart Light Switch",
+      "description": "Control existing lights without rewiring. Works with standard switches.",
+      "category": "Lights",
+      "icon": "🔆",
+      "priceRange": "$19.99 - $39.99",
+      "features": [
+        "No rewiring needed",
+        "Dimmer support",
+        "Remote and voice control",
+        "Scheduling and automation",
+        "Works with existing switches"
+      ],
+      "supported_actions": ["on", "off", "brightness"],
+      "buyUrl": "https://www.amazon.com/s?k=Smart+Light+Switch",
+      "imageUrl": null
+    },
+    {
+      "id": "generic-motion-sensor",
+      "name": "WiFi Motion Sensor",
+      "description": "Detect movement and trigger automations based on activity.",
+      "category": "Sensors",
+      "icon": "👁️",
+      "priceRange": "$15.99 - $29.99",
+      "features": [
+        "WiFi connectivity",
+        "Motion detection",
+        "Adjustable sensitivity",
+        "Day/night mode",
+        "Automations & alerts"
+      ],
+      "supported_actions": ["brightness"],
+      "buyUrl": "https://www.amazon.com/s?k=WiFi+Motion+Sensor",
+      "imageUrl": null
+    },
+    {
+      "id": "generic-speaker",
+      "name": "WiFi Smart Speaker",
+      "description": "Voice control hub with music streaming and smart home control.",
+      "category": "Hubs & Speakers",
+      "icon": "🔊",
+      "priceRange": "$49.99 - $199.99",
+      "features": [
+        "Voice assistant integration",
+        "Music streaming",
+        "Smart home hub",
+        "Far-field microphones",
+        "Customizable settings"
+      ],
+      "supported_actions": ["on", "off", "brightness"],
+      "buyUrl": "https://www.amazon.com/s?k=Smart+Speaker",
+      "imageUrl": null
+    },
+    {
+      "id": "generic-thermostat",
+      "name": "Smart WiFi Thermostat",
+      "description": "Remote temperature control with learning capabilities and energy savings.",
+      "category": "Climate Control",
+      "icon": "🌡️",
+      "priceRange": "$99.99 - $249.99",
+      "features": [
+        "Remote temperature control",
+        "Energy usage reports",
+        "Learning algorithm",
+        "Geofencing support",
+        "Multiple schedule options"
+      ],
+      "supported_actions": ["brightness"],
+      "buyUrl": "https://www.amazon.com/s?k=Smart+Thermostat",
+      "imageUrl": null
+    }
+  ]
+}
