@@ -433,7 +433,7 @@
 <script>
 var translations = JSON.parse(document.getElementById('conditionTranslationsData').textContent);
 </script>
-<script src="/js/condition-editor.js"></script>
+<script src="/js/condition.js"></script>
 <script>
 let conditionEditor = null;
 let deviceParamsEditor = null;
@@ -441,6 +441,7 @@ let deviceParamsEditor = null;
 document.addEventListener('DOMContentLoaded', function() {
     // Initialize condition logic editor
     conditionEditor = new ConditionEditor('conditionLogicInput', {
+        baseType: 'OR',
         drawingArea: document.getElementById('drawingArea'),
         logicDescriptionArea: document.getElementById('logictotaldescription')
     });
@@ -448,6 +449,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
     // Initialize device action parameters editor
     deviceParamsEditor = new ConditionEditor('sendingparamjson', {
+        baseType: 'WHOLEWORD',
         drawingArea: document.getElementById('sendingParameterArea'),
         logicDescriptionArea: null
     });

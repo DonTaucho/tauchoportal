@@ -76,7 +76,9 @@ display:none;
 }
 
 #drawingArea>legend,
-#drawingArea>.icons {
+#drawingArea>.icons,
+#sendingParameterArea>legend,
+#sendingParameterArea>.icons{
   display: none;
 }
 #drawingAreaContainer{
