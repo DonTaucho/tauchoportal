@@ -564,8 +564,30 @@ class ConditionEditor {
      * Helper to get sub-condition by path
      * @private
      */
-     }
+    _getSubCondition(json, pathstring) {
+        const paths = pathstring.split("/");
+        let currentnode = json;
+        for (const i in paths.slice(1)){ // top node (0) is the base. not included in json
+            currentnode = currentnode.SubConditions[paths.slice(1)[i]];
+        }
+        return currentnode;
+    }
  }
+
+// Global operator maps for use in dialog and formula functions
+const operatormap = {
+    "and": "AND", "or": "OR", "not": "NOT", "some": "SOME",
+    "equivalent": "EQUIVALENT", "greater_than": "GREATER_THAN",
+    "greater_or_equal": "GREATER_OR_EQUAL", "less_than": "LESS_THAN",
+    "less_or_equal": "LESS_OR_EQUAL", "equals": "EQUALS",
+    "includes": "INCLUDES", "regex_match": "REGEX_MATCH",
+    "count": "COUNT", "sum": "SUM", "wholeword": "WHOLEWORD",
+    "regex_extract": "REGEX_EXTRACT", "substring": "SUBSTRING",
+    "first": "FIRST", "last": "LAST", "add": "ADD",
+    "subtract": "SUBTRACT", "multiply": "MULTIPLY",
+    "divide": "DIVIDE", "modulo": "MODULO",
+    "parseint": "PARSEINT", "exchange": "EXCHANGE", "param": "PARAM"
+};
 
 // ============================================
 // Dialog and Helper Functions
@@ -673,31 +695,42 @@ function textDialogValidator() {
  * Validator for text condition dialog form
  */
 function textConditionDialogValidator() {
-    let valid = false;
-    document.getElementById("textconditionSubmitButton").disabled = "disabled";
-    if (document.getElementById("textcomparebasetype").value == "env") {
-        valid = document.getElementById("textcomparebasevalue").value &&
-                document.getElementById("textcomparebasetype").value && 
-                document.getElementById("textconditionselectvalue").value && 
-                document.getElementById("textconditionselecttype").value;
-    } else if (document.getElementById("textcomparebasetype").value == "variable") {
-        valid = document.getElementById("textcomparebaseextvalue").value &&
-                document.getElementById("textcomparebasevalue").value && 
-                document.getElementById("textconditionselectvalue").value;
+    if (document.getElementById("textConditionEqualradio").checked) {
+        document.getElementById("textConditionModalButton").disabled = 
+document.getElementById("textconditionequals").value?"":"disabled";
+        return;
+    } else if (document.getElementById("textconditionrangeradio").checked) {
+        document.getElementById("textConditionModalButton").disabled = 
+document.getElementById("textconditionrangetext").value && (!document.getElementById("textconditionrange-from").value 
+|| !document.getElementById("textconditionrange-to").value || 
+parseInt(document.getElementById("textconditionrange-to").value) > 
+parseInt(document.getElementById("textconditionrange-from").value)) ? "" : "disabled";
+        return;
+    } else if (document.getElementById("textconditionregexradio").checked) {
+        try {
+            RegExp(document.getElementById("textconditionregex").value);
+            document.getElementById("textConditionModalButton").disabled = "";
+        } catch {
+            document.getElementById("textConditionModalButton").disabled = "disabled";
+        }
+        return;
     }
-    document.getElementById("textconditionSubmitButton").disabled = !valid ? "disabled" : "";
+    document.getElementById("textConditionModalButton").disabled = "disabled";
 }
 
 /**
  * Validator for numeric dialog form
  */
-function numDialogValidator() {
-    let valid = false;
-    document.getElementById("numSubmitButton").disabled = "disabled";
-    if (document.getElementById("numCalcInput").value) {
-        valid = true;
+function numDialogValidator(formula){
+    if (!formula) {
+        const current = document.getElementById("calcformula").value;
+        try {
+            formula = JSON.parse(current);
+            document.getElementById("numModalButton").disabled= checkNumValid(formula) ? "" : "disabled";
+        } catch {
+            document.getElementById("numModalButton").disabled="disabled";
+        }
     }
-    document.getElementById("numSubmitButton").disabled = !valid ? "disabled" : "";
 }
 
 /**
@@ -794,73 +827,56 @@ function inputText(currentvalue, currenttype, currentextractor, currentextractor
 /**
  * Opens text condition input dialog
  */
-function inputTextCondition(currentvalue, currenttype, currentextractor, currentextractorval, callback){
-    document.getElementById("textconditionBody").className = "";
-    document.getElementById("textconditionBody").classList.add("modal-body");
-    document.getElementById("textconditionBody").classList.add("textconditionselection");
-    document.getElementById("textcomparebasetype").value = currenttype;
-    if (currenttype == "env") {
-        document.getElementById("textcomparebasevalue").value = currentvalue;
-        document.getElementById("textcomparebasetype").value = "env";
-        document.getElementById('textconditionenvArea').classList.add('available');
-        document.getElementById('textconditionenterArea').classList.remove('available');
-    } else if (currenttype == "variable") {
-        document.getElementById("textcomparebasevalue").value = currentvalue;
-        document.getElementById("textcomparebasetype").value = "variable";
-        document.getElementById('textconditionenterArea').classList.add('available');
-        document.getElementById('textconditionenvArea').classList.remove('available');
-    }
-    document.getElementById('textconditionExtArea').classList.remove('available');
-    document.getElementById('textconditionExtSelect').disabled = currenttype == "variable" ? "disabled" : "";
-    document.getElementById('textconditionExtSelect').value=currentextractor??"wholeword";
-    document.getElementById('textconditionExtRegex').style['display']= currentextractor=="regex_extract" ? "inline-block":"none";
-    document.getElementById('textconditionExtRegex').value=currentextractor=="regex_extract"?currentextractorval:"";
-    document.getElementById('textconditionExtSubFrom').style['display']= currentextractor=="substring" ? "inline-block":"none";
-    document.getElementById('textconditionExtSubFrom').value=currentextractor=="substring"?currentextractorval?.split("-")[0]:"";
-    document.getElementById('textconditionExtSubTo').style['display']= currentextractor=="substring" ? "inline-block":"none";
-    document.getElementById('textconditionExtSubTo').value=currentextractor=="substring"&&currentextractorval?.length>1?currentextractorval.split("-")[1]:"";
-    
+function inputTextCondition(currenttype, currentrange, currentval, callback){
+    document.getElementById("textConditionEqualradio").checked = currenttype == "equals";
+    document.getElementById("textconditionrangeradio").checked = currenttype == "includes";
+    document.getElementById("textconditionregexradio").checked = currenttype == "regex_match";
+    document.getElementById("textconditionrange-from").value = currenttype == "includes" ? currentrange.split("-")[0] : "";
+    document.getElementById("textconditionrange-to").value = currenttype == "includes" && currentrange.indexOf("-") && currentrange !== "-" ? currentrange.split("-")[1] : "";
+    document.getElementById("textconditionequals").value = currenttype == "equals" ? currentval : "";
+    document.getElementById("textconditionrangetext").value = currenttype == "includes" ? currentval : "";
+    document.getElementById("textconditionregex").value = currenttype == "regex_match" ? currentval : "";
     textConditionDialogValidator();
-    document.getElementById("textconditionModal").style["display"] = "block";
-    document.getElementById("textconditionSubmitButton").onclick = ()=>{
-        let val,type,exttype,extval;
-        if (document.getElementById("textcomparebasetype").value == "variable") {
-            val = document.getElementById("textcomparebasevalue").value;
-            type = "variable";
-        } else if (document.getElementById("textcomparebasetype").value == "env") {
-            val = document.getElementById("textcomparebasevalue").value;
-            type = "env";
-            exttype = document.getElementById("textconditionExtSelect").value;
-            switch (exttype) {
-                case "regex_extract":
-                    extval = document.getElementById("textconditionExtRegex").value;
-                    break;
-                case "substring":
-                    extval = `${document.getElementById('textconditionExtSubFrom').value}-${document.getElementById('textconditionExtSubTo').value}`;
-                    break;
-                default:
-                    extval = "";
-                    exttype = "wholeword";
-                    break;
-            }
+    document.getElementById("textConditionModalButton").onclick = () => {
+        let dispval, type, range, val;
+        if (document.getElementById("textConditionEqualradio").checked) {
+            type = "equals";
+            val = document.getElementById("textconditionequals").value;
+            dispval = generageDisplayText("input", "equals", val);
+        } else if (document.getElementById("textconditionrangeradio").checked) {
+            type = "includes";
+            val = document.getElementById("textconditionrangetext").value;
+            range = `${document.getElementById("textconditionrange-from").value}-${document.getElementById("textconditionrange-to").value}`;
+            dispval = generageDisplayText("input", "includes", val, document.getElementById("textconditionrange-from").value, document.getElementById("textconditionrange-to").value);
+        } else if (document.getElementById("textconditionregexradio").checked) {
+            type = "regex_match";
+            val = document.getElementById("textconditionregex").value;
+            dispval = generageDisplayText("input", "regex_match", val);
         }
-        callback(val, type, exttype, extval);
-        document.getElementById("textconditionModal").style["display"] = "none";
-    };
+        callback(dispval, type, range, val);
+        document.getElementById("textConditionModal").style["display"] = "none";
+    }
+    document.getElementById("textConditionModal").style["display"] = "block";
 }
 
 /**
  * Opens numeric input dialog
  */
-function inputNumber(currentvalue, callback) {
-    document.getElementById("numCalcInput").value = currentvalue ? JSON.stringify(currentvalue) : "";
-    numDialogValidator();
+function inputNumber(currentformula, callback){
+    document.getElementById("calcformula").value = currentformula;
+    document.getElementById("calccursorpos").value = "/";
+    try {
+        const formula = JSON.parse(currentformula);
+        visualizeFormula(formula);
+    } catch {
+        visualizeFormula({});
+    }
     document.getElementById("numModal").style["display"] = "block";
-    document.getElementById("numSubmitButton").onclick = ()=>{
-        const val = document.getElementById("numCalcInput").value;
-        callback(val ? JSON.parse(val) : null);
+    numDialogValidator();
+    document.getElementById("numModalButton").onclick = function(){
+        callback(document.getElementById("calcformula").value, document.getElementById("calcdisplay").innerText);
         document.getElementById("numModal").style["display"] = "none";
-    };
+    }
 }
 
 /**
@@ -880,57 +896,224 @@ function closeModal(modalId) {
 /**
  * Appends a calculation operator to the formula
  */
-function appendCalcOperator(op) {
-    console.log('appendCalcOperator:', op);
-    // TODO: Implement formula building
+function appendCalcOperator(operatortype) {
+    appendItemToFormula({"Operator": operatortype, SubConditions: null, Variables: null});
 }
 
 /**
  * Appends a value to the calculation formula
  */
 function appendCalcValue() {
-    console.log('appendCalcValue called');
-    // TODO: Implement value selection for calculation
+    inputText(null, null, null, null, true, true, function(dispval, val, type, exttype, extval){
+        let appendnode;
+        if (type == "env") {
+            if (exttype && exttype != "wholeword" && extval) {
+                appendnode = {"Operator": "PARSEINT", "SubConditions": [{"Operator": operatormap[exttype], "SubConditions": [{"Operator": "PARAM", "SubConditions": null, "Variables": [val]}], "Variables": [extval]}], "Variables": null };
+            } else {
+                appendnode = {"Operator": "PARSEINT", "SubConditions": [{"Operator": "PARAM", "SubConditions": null, "Variables": [val]}], "Variables": null };
+            }
+        } else if (type == "variable") {
+            appendnode = {"Operator": "PARSEINT", "SubConditions": null, "Variables": [val]};
+        }
+        if (appendnode) {
+            appendItemToFormula(appendnode);
+        }
+    }, "^[0-9]+(\\.[0-9]+)?$");
 }
 
 /**
  * Visualizes the calculation formula
  */
-function visualizeFormula(formula) {
-    console.log('visualizeFormula:', formula);
-    // TODO: Implement formula visualization
+function visualizeFormula(val){
+    const current = document.getElementById("calcformula").value;
+    let formula;
+    try {
+        formula = JSON.parse(current);
+    } catch {
+        formula = {};
+    }
+    document.getElementById("visualizedcalc").after(document.getElementById("calccursor"));
+    document.getElementById("visualizedcalc").replaceChildren();
+    appendCalcElem(formula, document.getElementById("visualizedcalc"), "");
+    document.getElementById("calcdisplay").innerText = document.getElementById("visualizedcalc").innerText;
+    const insertTopPlaceHolder = document.createElement("span");
+    insertTopPlaceHolder.innerHTML = "&nbsp;";
+    insertTopPlaceHolder.style["display"] = "inline-block";
+    insertTopPlaceHolder.style["width"] = "0.3rem";
+    insertTopPlaceHolder.style["height"] = "1.5rem";
+    insertTopPlaceHolder.onclick = function(e){document.getElementById("calccursorpos").value = "/sub:0:pre"; setCursor(JSON.parse(document.getElementById("calcformula").value))};
+    document.getElementById("visualizedcalc").prepend(insertTopPlaceHolder);
+    setCursor(formula);
 }
 
 /**
  * Updates cursor position in the formula editor
  */
-function updateCursor(e) {
-    console.log('updateCursor:', e.target);
-    // TODO: Implement cursor movement
+function updateCursor(e){
+    document.getElementById("calccursorpos").value = e.target.getAttribute("path");
+    setCursor(JSON.parse(document.getElementById("calcformula").value));
+    event.stopPropagation();
 }
 
 /**
  * Fills a placeholder in the calculation formula
  */
 function fillPlaceHolder(e) {
-    console.log('fillPlaceHolder:', e.target);
-    // TODO: Implement placeholder filling
+    document.getElementById("calccursorpos").value = e.target.getAttribute("path");
+    appendCalcValue();
+    event.stopPropagation();
 }
 
 /**
  * Sets the cursor position in the formula
  */
-function setCursor(path) {
-    console.log('setCursor:', path);
-    // TODO: Implement cursor setting
+function setCursor(node) {
+    const cursorpath = document.getElementById("calccursorpos").value;
+    let targetelement = document.getElementById("visualizedcalc");
+    let prepending = false;
+    for (const i in cursorpath.split("/")) {
+        const address = cursorpath.split("/")[i];
+        if (!address) {
+            continue;
+        }
+        const type = address.split(":")[0];
+        const index = address.split(":")[1];
+        prepending = address.split(":").length > 2 && address.split(":")[2] == "pre";
+        const directChildren = Array.from(targetelement.children).filter(child => child.classList.contains(type));
+        targetelement = directChildren[index];
+    }
+    if (prepending) {
+        targetelement.prepend(document.getElementById("calccursor"));
+    } else {
+        targetelement.append(document.getElementById("calccursor"));
+    }
 }
 
 /**
  * Appends a calculation element to the UI
  */
 function appendCalcElem(node, base, path) {
-    console.log('appendCalcElem:', node, path);
-    // TODO: Implement element appending
+    if (node) {
+        switch(node.Operator) {
+            case "ADD":
+                for (const i in node.SubConditions) {
+                    if (base.childNodes.length) {
+                        const plussign = document.createElement("span");
+                        plussign.innerText = "＋";
+                        plussign.setAttribute("path",  path + "/sub:" + i + ":pre");
+                        plussign.onclick = updateCursor;
+                        plussign.classList.add("plussign");
+                        base.append(plussign);
+                    }
+                    const child = document.createElement("span");
+                    child.classList.add("sub");
+                    if (node.SubConditions[i].SubConditions && node.SubConditions[i].SubConditions.length > 1) {
+                        child.classList.add("plusbracket");
+                    }
+                    child.setAttribute("path",  path + "/sub:" + i);
+                    child.onclick = updateCursor;
+                    appendCalcElem(node.SubConditions[i], child, path + "/sub:" + i);
+                    base.append(child);
+                }
+                for (const i in node.Variables) {
+                    if (base.childNodes.length) {
+                        const plussign = document.createElement("span");
+                        plussign.classList.add("plussign");
+                        plussign.setAttribute("path",  path + "/const:" + i + ":pre");
+                        plussign.onclick = updateCursor;
+                        plussign.innerText = "＋";
+                        base.append(plussign);
+                    }
+                    const prependelem = document.createElement("span");
+                    prependelem.setAttribute("path",  path + "/const:" + i);
+                    prependelem.onclick = updateCursor;
+                    prependelem.classList.add("prepend");
+                    base.append(prependelem);
+                    const variableelem = document.createElement("span");
+                    variableelem.classList.add("const");
+                    variableelem.classList.add("add");
+                    variableelem.setAttribute("path",  path + "/const:" + i);
+                    variableelem.onclick = updateCursor;
+                    variableelem.innerText = node.Variables[i];
+                    base.append(variableelem);
+                    const appendelem = document.createElement("span");
+                    appendelem.classList.add("append");
+                    appendelem.setAttribute("path",  path + "/const:" + i);
+                    appendelem.onclick = updateCursor;
+                    base.append(appendelem);
+                }
+                if ((!node.SubConditions || node.SubConditions.length < 2) && (!node.Variables || node.Variables.length < 2)) {
+                    if ((!node.SubConditions || node.SubConditions.length < 1) && (!node.Variables || node.Variables.length < 1)){
+                        const placeholder = document.createElement("span");
+                        placeholder.classList.add("placeholder");
+                        placeholder.innerText = translations["calc-missingvalue"];
+                        placeholder.setAttribute("path",  path + "/placeholder:0");
+                        placeholder.onclick = fillPlaceHolder;
+                        base.append(placeholder);
+                    }
+                    if (path != "") {
+                        const plussign = document.createElement("span");
+                        plussign.innerText = "＋";
+                        base.append(plussign);
+                        const placeholder = document.createElement("span");
+                        placeholder.classList.add("placeholder");
+                        placeholder.innerText = translations["calc-missingvalue"];
+                        placeholder.setAttribute("path",  path + "/placeholder:0");
+                        placeholder.onclick = fillPlaceHolder;
+                        base.append(placeholder);
+                    }
+                }
+                break;
+        }
+    }
+}
+
+/**
+ * Appends an item to the calculation formula
+ */
+function appendItemToFormula(elem) {
+    const cursorpath = document.getElementById("calccursorpos").value;
+    const formula = JSON.parse(document.getElementById("calcformula").value?document.getElementById("calcformula").value:'{"Operator": "ADD", "SubConditions":null, "Variables": null}');
+    let targetcontainer = formula;
+    if (cursorpath.split("/").length>2) {
+        for (const i in cursorpath.split("/").slice(0, cursorpath.split("/").length-1)) {
+            const address = cursorpath.split("/")[i];
+            if (!address) {
+                continue;
+            }
+            const type = address.split(":")[0];
+            const index = address.split(":")[1];
+            if (type=="sub" || type == "placeholder") {
+                targetcontainer = targetcontainer.SubConditions[index];
+            } else if (type == "const") {
+                targetcontainer = targetcontainer.Variables[index];
+            }
+        }
+    }
+    const address = cursorpath.split("/")[cursorpath.split("/").length-1];
+    const type = address.split(":")[0];
+    const index = address.split(":")[1];
+    
+    if (type == "sub" || type == "placeholder") {
+        if (!targetcontainer.SubConditions) targetcontainer.SubConditions = [];
+        targetcontainer.SubConditions[index] = elem;
+    } else if (type == "const") {
+        if (!targetcontainer.Variables) targetcontainer.Variables = [];
+        targetcontainer.Variables[index] = elem;
+    }
+    document.getElementById("calcformula").value = JSON.stringify(formula);
+    visualizeFormula(formula);
+    numDialogValidator(formula);
+}
+
+/**
+ * Validates numeric formula
+ */
+function checkNumValid(formula) {
+    if ((!formula.SubConditions || !formula.SubConditions.length) && (!formula.Variables || !formula.Variables.length)){
+        return false;
+    }
+    return true;
 }
 
 // ============================================
