@@ -223,12 +223,8 @@
                                     <div class="section-divider">Available to Add</div>
                                     {{end}}
                                     
-                                    <!-- Include brand-specific catalog partial -->
-                                    {{if eq $brandId "govee"}}
-                                        {{template "catalog-govee" .}}
-                                    {{else if eq $brandId "generic"}}
-                                        {{template "catalog-devices" .}}
-                                    {{end}}
+                                    <!-- Include brand-specific catalog partial using dynamic rendering -->
+                                    {{renderCatalog $brandId .}}
                                 </div>
                             </div>
                         {{end}}
