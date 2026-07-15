@@ -36,7 +36,7 @@ class ConditionEditor {
         this.booleanoperators = ["AND", "OR", "NOT", "SOME"];
         this.compoperators = ["EQUIVALENT", "GREATER_THAN", "GREATER_OR_EQUAL", "LESS_THAN", "LESS_OR_EQUAL"];
         this.textoperators = ["EQUALS", "INCLUDES", "REGEX_MATCH"];
-        this.textextractors = ["WHOLEWORD", "REGEX_EXTRACT", "SUBSTRING", "FIRST", "LAST"];
+        this.textextractors = ["WHOLESENTENCE", "REGEX_EXTRACT", "SUBSTRING", "FIRST", "LAST"];
         this.groupoperators = ["COUNT", "SUM"];
         this.calcoperators = ["ADD", "SUBTRACT", "MULTIPLY", "DIVIDE", "MODULO"];
         this.convoperators = ["PARSEINT", "EXCHANGE"];
@@ -47,7 +47,7 @@ class ConditionEditor {
             "GREATER_OR_EQUAL": "greater_or_equal", "LESS_THAN": "less_than",
             "LESS_OR_EQUAL": "less_or_equal", "EQUALS": "equals",
             "INCLUDES": "includes", "REGEX_MATCH": "regex_match",
-            "COUNT": "count", "SUM": "sum", "WHOLEWORD": "wholeword",
+            "COUNT": "count", "SUM": "sum", "WHOLESENTENCE": "wholesentence",
             "REGEX_EXTRACT": "regex_extract", "SUBSTRING": "substring",
             "FIRST": "first", "LAST": "last", "ADD": "add",
             "SUBTRACT": "subtract", "MULTIPLY": "multiply",
@@ -61,7 +61,7 @@ class ConditionEditor {
             "greater_or_equal": "GREATER_OR_EQUAL", "less_than": "LESS_THAN",
             "less_or_equal": "LESS_OR_EQUAL", "equals": "EQUALS",
             "includes": "INCLUDES", "regex_match": "REGEX_MATCH",
-            "count": "COUNT", "sum": "SUM", "wholeword": "WHOLEWORD",
+            "count": "COUNT", "sum": "SUM", "wholesentence": "WHOLESENTENCE",
             "regex_extract": "REGEX_EXTRACT", "substring": "SUBSTRING",
             "first": "FIRST", "last": "LAST", "add": "ADD",
             "subtract": "SUBTRACT", "multiply": "MULTIPLY",
@@ -292,11 +292,11 @@ class ConditionEditor {
                     }
                 }
                 if (items_and.length) {
-                    return items_and.join(translations["and-joint"] || " AND ");
+                    return items_and.join(translations["and-joint"]);
                 } else {
-                    return translations["and-notset"] || "AND not set";
+                    return translations["and-notset"];
                 }
-
+                break;
             case "OR":
                 const items_or = [];
                 if (node.SubConditions) {
@@ -305,11 +305,11 @@ class ConditionEditor {
                     }
                 }
                 if (items_or.length) {
-                    return items_or.join(translations["or-joint"] || " OR ");
+                    return items_or.join(translations["or-joint"]);
                 } else {
-                    return translations["or-notset"] || "OR not set";
+                    return translations["or-notset"];
                 }
-
+                break;
             case "NOT":
                 const items_not = [];
                 if (node.SubConditions) {
@@ -318,48 +318,399 @@ class ConditionEditor {
                     }
                 }
                 if (items_not.length) {
-                    return (translations["not-sentense"] || "NOT {0}").replace("{0}", items_not.join(translations["or-joint"] || " OR "));
+                    return translations["not-sentense"].replace("{0}", items_not.join(translations["or-joint"]));
+                }else {
+                    return translations["not-notset"];
+                }
+                break;
+            case "SOME":
+                const items_some = [],
+                    range_some_from = node.Variables&&node.Variables[0]?parseInt(node.Variables[0].split("-")[0]):null,
+                    range_some_to = node.Variables&&node.Variables[0]&&node.Variables[0].split("-").length>1?parseInt(node.Variables[0].split("-")[1]):null;
+                for (const i in node.SubConditions) {
+                    items_some.push("<span class='or'>" + this._summarize(node.SubConditions[i]) + "</span>");
+                }
+                if (items_some.length) {
+                    if (!range_some_from&&!range_some_to || range_some_from==1&&!range_some_to) {
+                        return translations["some-notset"];
+                    } else if (range_some_from&&!range_some_to) {
+                        return translations["some-sentense_from"].replace("{0}", items_some.join(translations["or-joint"])).replace("{1}", range_some_from);
+                    } else if (!range_some_from&&range_some_to) {
+                        return translations["some-sentense_to"].replace("{0}", items_some.join(translations["or-joint"])).replace("{1}", range_some_to);
+                    } else if (range_some_from&&range_some_to) {
+                        return translations["some-sentense_fromto"].replace("{0}", items_some.join(translations["or-joint"])).replace("{1}", range_some_from).replace("{2}", range_some_to);
+                    }
+                    return translations["some-sentense"].replace("{0}", items_some.join(translations["or-joint"]));
+                }else {
+                    return translations["some-notset"];
+                }
+                break;
+            case "EQUIVALENT":
+                const items_equivalent = [];
+                for (const i in node.SubConditions) {
+                    items_equivalent.push(this._summarize(node.SubConditions[i]));
+                }
+                for (const i in node.Variables) {
+                    items_equivalent.push("<span class='static'>" + translations["staticvalue"].replace("{0}", node.Variables[i]) + "</span>");
+                }
+                if (!items_equivalent.length) {
+                    return "<span class='novalue'>" + translations["equivalent-novalue"] + "</span>";
+                } else if (items_equivalent.length == 1) {
+                    items_equivalent.push("<span class='missingvalue'>" + translations["equivalent-missingvalue"] + "</span>");
+                    return translations["equivalent-sentense"].replace("{0}", items_equivalent.join(translations["equivalent-joint"]));
                 } else {
-                    return translations["not-notset"] || "NOT not set";
+                    return translations["equivalent-sentense"].replace("{0}", items_equivalent.join(translations["equivalent-joint"]));
                 }
-
-            case "WHOLEWORD":
+                break;
+            case "GREATER_THAN":
+            case "GREATER_OR_EQUAL":
+            case "LESS_THAN":
+            case "LESS_OR_EQUAL":
+                let target_compare;
+                const items_compare = [];
+                const sentense = 
+                    node.Operator=="GREATER_THAN"?"greaterthan-sentense":
+                    node.Operator=="GREATER_OR_EQUAL"?"greaterorequal-sentense":
+                    node.Operator=="LESS_THAN"?"lessthan-sentense":
+                    node.Operator=="LESS_OR_EQUAL"?"lessorequal-sentense":"";
+                if (node.SubConditions.length>0) {
+                    target_compare = this._summarize(node.SubConditions[0]);
+                    for (const i in node.SubConditions.slice(1)) {
+                        items_compare.push(this._summarize(node.SubConditions.slice(1)[i]));
+                    }
+                } else {
+                    target_compare = "<span class='novalue'>" + translations["compare-missingvalue"] + "</span>";
+                }
+                for (const i in node.Variables) {
+                    items_compare.push("<span class='static'>" + translations["staticvalue"].replace("{0}", node.Variables[i]) + "</span>");
+                }
+                if (!items_compare.length) {
+                    items_compare.push("<span class='novalue'>" + translations["compare-novalue"] + "</span>");
+                }
+                return translations[sentense].replace("{0}", target_compare).replace("{1}", items_compare.join(translations["equals-joint"]));
+                break;
+            case "EQUALS":
+                const items_equals = [];
+                for (const i in node.SubConditions) {
+                    items_equals.push(this._summarize(node.SubConditions[i]));
+                }
+                for (const i in node.Variables) {
+                    items_equals.push("<span class='static'>" + translations["staticvalue"].replace("{0}", node.Variables[i]) + "</span>");
+                }
+                if (!items_equals.length) {
+                    return "<span class='novalue'>" + translations["equals-novalue"] + "</span>";
+                } else if (items_equals.length == 1) {
+                    items_equals.push("<span class='missingvalue'>" + translations["equals-missingvalue"] + "</span>");
+                    return translations["equals-sentense"].replace("{0}", items_equals.join(translations["equals-joint"]));
+                } else {
+                    return translations["equals-sentense"].replace("{0}", items_equals.join(translations["equals-joint"]));
+                }
+                break;
+            case "INCLUDES":
+                let target_includes;
+                let range_includes_from = "";
+                let range_includes_to = "";
+                const items_includes = [];
+                if (node.SubConditions.length>0) {
+                    target_includes = this._summarize(node.SubConditions[0]);
+                    for (const i in node.SubConditions.slice(1)) {
+                        items_includes.push(translations["staticvalue"].replace("{0}", this._summarize(node.SubConditions[i])));
+                    }
+                } else {
+                    target_includes = "<span class='novalue'>" + translations["includes-novalue"] + "</span>";
+                }
+                if (node.Variables.length > 0) {
+                    items_includes.push("<span class='static'>" + translations["staticvalue"].replace("{0}", node.Variables[0]) + "</span>");
+                }
+                if (node.Variables.length > 1) {
+                    if (node.Variables[1].split("-")[0]&&parseInt(node.Variables[1].split("-")[0])) {
+                        range_includes_from = parseInt(node.Variables[1].split("-")[0]);
+                    }
+                    if (node.Variables[1].split("-")[0]&&node.Variables[1].split("-").length>1&&parseInt(node.Variables[1].split("-")[1])){
+                        range_includes_to = parseInt(node.Variables[1].split("-")[1]);
+                    }
+                }
+                let comparar;
+                if (items_includes?.length) {
+                    comparar = items_includes.join(translations["valueof-joint"]);
+                } else {
+                    comparar = "<span class='novalue'>" + translations["includes-missingvalue"] + "</span>";
+                }
+                if (!range_includes_from&&!range_includes_to || range_includes_from==1&&!range_includes_to) {
+                    return translations["includes-sentense-one"].replace("{0}", target_includes).replace("{1}", comparar);
+                } else if (range_includes_from&&!range_includes_to) {
+                    return translations["includes-sentense-rangefrom"].replace("{0}", target_includes).replace("{1}", comparar).replace("{2}", range_includes_from);
+                } else if (!range_includes_from&&range_includes_to) {
+                    return translations["includes-sentense-rangeto"].replace("{0}", target_includes).replace("{1}", comparar).replace("{2}", range_includes_to);
+                } else if (range_includes_from&&range_includes_to) {
+                    return translations["includes-sentense-rangefromto"].replace("{0}", target_includes).replace("{1}", comparar).replace("{2}", range_includes_from).replace("{3}", range_includes_to);
+                }
+                break;
+            case "REGEX_MATCH":
+                const items_regex = [];
+                const regexs = [];
+                for (const i in node.SubConditions) {
+                    items_regex.push(this._summarize(node.SubConditions[i]));
+                }
+                for (const i in node.Variables) {
+                    regexs.push("<span class='regexparam'>" + translations["regexparam"].replace("{0}", node.Variables[i]) + "</span>");
+                }
+                let target_regex;
+                if (items_regex.length) {
+                    target_regex = items_regex.join(translations["valueof-joint"]);
+                } else {
+                    target_regex = "<span class='novalue'>" + translations["regex-missingvalue"] + "</span>";
+                }
+                let regex;
+                if (regexs.length) {
+                    regex = regexs.join(translations["valueof-joint"]);
+                } else {
+                    regex = "<span class='novalue'>" + translations["regex-missingvalue"] + "</span>";
+                }
+                
+                return translations["regex-sentense"].replace("{0}", target_regex).replace("{1}", regex);
+                break;
+            case "WHOLESENTENCE":
                 const items_whole = [];
-                if (node.SubConditions) {
-                    for (const i in node.SubConditions) {
-                        items_whole.push(this._summarize(node.SubConditions[i]));
+                for (const i in node.SubConditions) {
+                    items_whole.push(this._summarize(node.SubConditions[i]));
+                }
+                for (const i in node.Variables) {
+                    items_whole.push(node.Variables[i]);
+                }
+                return translations["textextract-whole"].replace("{0}", items_whole.join(translations["valueof-joint"]));
+                break;
+            case "REGEX_EXTRACT":
+                const items_regex_extract = [];
+                const regexs_extract = [];
+                for (const i in node.SubConditions) {
+                    items_regex_extract.push(this._summarize(node.SubConditions[i]));
+                }
+                for (const i in node.Variables) {
+                    regexs_extract.push("<span class='regexparam'>" + node.Variables[i] + "</span>");
+                }
+                let target_regex_extract;
+                if (items_regex_extract.length) {
+                    target_regex_extract = items_regex_extract.join(translations["valueof-joint"]);
+                } else {
+                    target_regex_extract = "<span class='novalue'>" + translations["regex-missingvalue"] + "</span>";
+                }
+                let regex_extract;
+                if (regexs_extract.length) {
+                    regex_extract = regexs_extract.join(translations["valueof-joint"]);
+                } else {
+                    regex_extract = "<span class='novalue'>" + translations["regex-missingvalue"] + "</span>";
+                }
+                
+                return translations["textextract-regex"].replace("{0}", target_regex_extract).replace("{1}", regex_extract);
+                break;
+            case "SUBSTRING":
+                let target_substring;
+                let range_substring_from = "";
+                let range_substring_to = "";
+                const items_substring = [];
+                if (node.SubConditions&&node.SubConditions.length>0) {
+                    target_substring = this._summarize(node.SubConditions[0]);
+                    for (const i in node.SubConditions.slice(1)) {
+                        items_substring.push(this._summarize(node.SubConditions[i]));
+                    }
+                } else {
+                    target_substring = "<span class='novalue'>" + translations["textextract-sub_missingvalue"] + "</span>";
+                }
+                for (const i in node.Variables) {
+                    items_substring.push(node.Variables[i]);
+                }
+                if (items_substring.length > 0) {
+                    if (items_substring[0].split("-")&&parseInt(items_substring[0].split("-")[0])) {
+                        range_substring_from = parseInt(items_substring[0].split("-")[0]);
+                    }
+                    if (items_substring[0].split("-")&&items_substring[0].split("-").length>1&&parseInt(items_substring[0].split("-")[1])){
+                        range_substring_to = parseInt(items_substring[0].split("-")[1]);
                     }
                 }
-                if (node.Variables) {
-                    for (const i in node.Variables) {
-                        items_whole.push(node.Variables[i]);
-                    }
+                if (!range_substring_from&&!range_substring_to) {
+                    return translations["textextract-sub_missingvalue"];
+                } else if (range_substring_from&&!range_substring_to) {
+                    return translations["textextract-sub_from"].replace("{0}", target_substring).replace("{1}", range_substring_from);
+                } else if (!range_substring_from&&range_substring_to) {
+                    return translations["textextract-sub_to"].replace("{0}", target_substring).replace("{1}", range_substring_to);
+                } else if (range_substring_from&&range_substring_to) {
+                    return translations["textextract-sub_fromto"].replace("{0}", target_substring).replace("{1}", range_substring_from).replace("{2}", range_substring_to);
                 }
-                return (translations["textextract-whole"] || "{0}").replace("{0}", items_whole.join(translations["valueof-joint"] || ", "));
-
+                break;
+            case "FIRST":
+                let target_first;
+                const items_first = [];
+                let length_first;
+                if (node.SubConditions.length>0) {
+                    target_first = this._summarize(node.SubConditions[0]);
+                    for (const i in node.SubConditions.slice(1)) {
+                        items_first.push(this._summarize(node.SubConditions[i]));
+                    }
+                } else {
+                    target_first = "<span class='novalue'>" + translations["textextract-sub_missingvalue"] + "</span>";
+                }
+                for (const i in node.Variables) {
+                    items_first.push(node.Variables[i]);
+                }
+                length_first = parseInt(items_first[0]);
+                if (!length_first) {
+                    return translations["textextract-sub_missingvalue"];
+                } else {
+                    return translations["textextract-first"].replace("{0}", target_first).replace("{1}", length_first);
+                }
+                break;
+            case "LAST":
+                let target_last;
+                const items_last = [];
+                let length_last;
+                if (node.SubConditions.length>0) {
+                    target_last = this._summarize(node.SubConditions[0]);
+                    for (const i in node.SubConditions.slice(1)) {
+                        items_last.push(this._summarize(node.SubConditions[i]));
+                    }
+                } else {
+                    target_last = "<span class='novalue'>" + translations["textextract-sub_missingvalue"] + "</span>";
+                }
+                for (const i in node.Variables) {
+                    items_last.push(node.Variables[i]);
+                }
+                length_last = parseInt(items_last[0]);
+                if (!length_last) {
+                    return translations["textextract-sub_missingvalue"];
+                } else {
+                    return translations["textextract-last"].replace("{0}", target_last).replace("{1}", length_last);
+                }
+                break;
+            case "ADD":
+                const items_add = [];
+                for (const i in node.SubConditions) {
+                    items_add.push(this._summarize(node.SubConditions[i]));
+                }
+                for (const i in node.Variables) {
+                    items_add.push(node.Variables[i]);
+                }
+                if (items_add.length) {
+                    return items_add.join(translations["plus-joint"]);
+                } else {
+                    return translations["calc-missingvalue"];
+                }
+                break;
+            case "SUBTRACT":
+                let orig_subtract;
+                const items_subtract = [];
+                if (node.SubConditions.length>0) {
+                    orig_subtract = this._summarize(node.SubConditions[0]);
+                    for (const i in node.SubConditions.slice(1)) {
+                        items_subtract.push(this._summarize(node.SubConditions[i]));
+                    }
+                } else {
+                    orig_subtract = translations["calc-missingvalue"];
+                }
+                for (const i in node.Variables) {
+                    items_subtract.push(node.Variables[i]);
+                }
+                if (items_subtract.length) {
+                    return orig_subtract + translations["subtract-joint"] + items_subtract.join(translations["subtract-joint"]);
+                } else {
+                    return orig_subtract + translations["subtract-joint"] + translations["calc-missingvalue"];
+                }
+                break;
+            case "MULTIPLY":
+                const items_multiply = [];
+                for (const i in node.SubConditions) {
+                    items_multiply.push(this._summarize(node.SubConditions[i]));
+                }
+                for (const i in node.Variables) {
+                    items_multiply.push(node.Variables[i]);
+                }
+                if (items_multiply.length) {
+                    return items_multiply.join(translations["multiply-joint"]);
+                } else {
+                    return translations["calc-missingvalue"];
+                }
+                break;
+            case "DIVIDE":
+                let orig_divide;
+                const items_divide = [];
+                if (node.SubConditions.length>0) {
+                    orig_divide = this._summarize(node.SubConditions[0]);
+                    for (const i in node.SubConditions.slice(1)) {
+                        items_divide.push(this._summarize(node.SubConditions[i]));
+                    }
+                } else {
+                    orig_divide = translations["calc-missingvalue"];
+                }
+                for (const i in node.Variables) {
+                    items_divide.push(node.Variables[i]);
+                }
+                if (items_divide.length) {
+                    return orig_divide + translations["divide-joint"] + items_divide.join(translations["subtract-joint"]);
+                } else {
+                    return orig_divide + translations["divide-joint"] + translations["calc-missingvalue"];
+                }
+                break;
+            case "MODULO":
+                let orig_modulo;
+                const items_modulo = [];
+                if (node.SubConditions.length>0) {
+                    orig_modulo = this._summarize(node.SubConditions[0]);
+                    for (const i in node.SubConditions.slice(1)) {
+                        items_modulo.push(this._summarize(node.SubConditions[i]));
+                    }
+                } else {
+                    orig_modulo = translations["calc-missingvalue"];
+                }
+                for (const i in node.Variables) {
+                    items_modulo.push(node.Variables[i]);
+                }
+                if (items_modulo.length) {
+                    return translations["modulo-sentense"].replace("{0}", orig_modulo).replace("{1}", items_modulo.join(translations["subtract-joint"]));
+                } else {
+                    return translations["modulo-sentense"].replace("{0}", orig_modulo).replace("{1}", translations["calc-missingvalue"]);
+                }
+                break;
+            case "PARSEINT":
+                const items_parseint = [];
+                for (const i in node.SubConditions) {
+                    items_parseint.push(this._summarize(node.SubConditions[i]));
+                }
+                for (const i in node.Variables) {
+                    items_parseint.push(node.Variables[i]);
+                }
+                if (items_parseint.length) {
+                    return "<span class='parseint'>" + items_parseint.join(translations["value-joint"]) + "</span>";
+                } else {
+                    return translations["calc-missingvalue"];
+                }
+                break;
+            case "EXCHANGE":
+                const items_exchange = [];
+                let currency;
+                for (const i in node.SubConditions) {
+                    items_exchange.push(this._summarize(node.SubConditions[i]));
+                }
+                if (node.Variables.length) {
+                    currency = node.Variables[0];
+                } else {
+                    currency = translations["calc-missingvalue"];
+                }
+                if (items_exchange.length) {
+                    return translations["exchange-sentense"].replace("{0}", items_exchange.join(translations["value-joint"])).replace("{1}", currency);
+                } else {
+                    return translations["calc-missingvalue"];
+                }
+                break;
             case "PARAM":
                 const items_param = [];
-                if (node.SubConditions) {
-                    for (const i in node.SubConditions) {
-                        items_param.push(this._summarize(node.SubConditions[i]));
-                    }
+                for (const i in node.SubConditions) {
+                    items_param.push(this._summarize(node.SubConditions[i]));
                 }
-                if (node.Variables) {
-                    for (const i in node.Variables) {
-                        items_param.push("<span class='param'>" + (translations[node.Variables[i]] || node.Variables[i]) + "</span>");
-                    }
+                for (const i in node.Variables) {
+                    items_param.push("<span class='param'>" + translations[node.Variables[i]] + "</span>");
                 }
-                return (translations["valueof-sentense"] || "{0}").replace("{0}", items_param.join(translations["valueof-joint"] || ", "));
-
-            default:
-                // Basic fallback for other operators
-                const items_default = [];
-                if (node.Variables) {
-                    for (const i in node.Variables) {
-                        items_default.push(node.Variables[i]);
-                    }
-                }
-                return items_default.length ? items_default.join(", ") : (translations[node.Operator] || node.Operator);
+                return translations["valueof-sentense"].replace("{0}", items_param.join(translations["valueof-joint"]));
+                break;
         }
     }
 
@@ -387,7 +738,7 @@ class ConditionEditor {
                 this._openBoolDialog(e);
             } else if (this.reverselookuptype[operator] == "extract") {
                 // Text extractors - open text input dialog
-                let extractor = "wholeword", extractorval = null;
+                let extractor = "wholesentence", extractorval = null;
                 if (currentnode.SubConditions && currentnode.SubConditions.length > 0 && currentnode.SubConditions[0].Variables) {
                     extractor = currentnode.SubConditions[0].Variables[0];
                     if (currentnode.SubConditions[0].Variables.length > 1) {
@@ -395,7 +746,7 @@ class ConditionEditor {
                     }
                 }
                 inputText(currentnode.Variables[0], "env", extractor, extractorval, true, false, function(dispval, val, type, exttype, extval) {
-                    if (exttype == "wholeword") {
+                    if (exttype == "wholesentence") {
                         currentnode.Operator = "PARAM";
                         currentnode.Variables = [val];
                         currentnode.SubConditions = [];
@@ -523,7 +874,7 @@ class ConditionEditor {
                     paramvariables.push(document.getElementById("textcomparebasevalue").value);
                 }
                 
-                if (document.getElementById("textcomparebaseexttype").value == "wholeword") {
+                if (document.getElementById("textcomparebaseexttype").value == "wholesentence") {
                     subconditions.push({"Operator": "PARAM", "Variables": paramvariables});
                 } else {
                     subconditions.push({
@@ -567,8 +918,14 @@ class ConditionEditor {
     _getSubCondition(json, pathstring) {
         const paths = pathstring.split("/");
         let currentnode = json;
-        for (const i in paths.slice(1)){ // top node (0) is the base. not included in json
-            currentnode = currentnode.SubConditions[paths.slice(1)[i]];
+        for (const i in paths){
+            if (currentnode.SubConditions && currentnode.SubConditions[paths[i]]) {
+                currentnode = currentnode.SubConditions[paths[i]];
+            } else {
+                currentnode.SubConditions = [];
+                currentnode.SubConditions.push({"Operator": this.baseType, "SubConditions": [], "Variables": []});
+                currentnode = currentnode.SubConditions[0];
+            }
         }
         return currentnode;
     }
@@ -581,7 +938,7 @@ const operatormap = {
     "greater_or_equal": "GREATER_OR_EQUAL", "less_than": "LESS_THAN",
     "less_or_equal": "LESS_OR_EQUAL", "equals": "EQUALS",
     "includes": "INCLUDES", "regex_match": "REGEX_MATCH",
-    "count": "COUNT", "sum": "SUM", "wholeword": "WHOLEWORD",
+    "count": "COUNT", "sum": "SUM", "wholesentence": "WHOLESENTENCE",
     "regex_extract": "REGEX_EXTRACT", "substring": "SUBSTRING",
     "first": "FIRST", "last": "LAST", "add": "ADD",
     "subtract": "SUBTRACT", "multiply": "MULTIPLY",
@@ -750,7 +1107,7 @@ function inputText(currentvalue, currenttype, currentextractor, currentextractor
     document.getElementById('textEnvArea').classList.remove('available');
     document.getElementById('textExtArea').classList.remove('available');
     document.getElementById('textExtSelect').disabled = currenttype == "variable" || !includeenv ? "disabled" : "";
-    document.getElementById('textExtSelect').value=currentextractor??"wholeword";
+    document.getElementById('textExtSelect').value=currentextractor??"wholesentence";
     document.getElementById('textExtRegex').style['display']= currentextractor=="regex_extract" ? "inline-block":"none";
     document.getElementById('textExtRegex').value=currentextractor=="regex_extract"?currentextractorval:"";
     document.getElementById('textExtSubFrom').style['display']= currentextractor=="substring" ? "inline-block":"none";
@@ -814,8 +1171,8 @@ function inputText(currentvalue, currenttype, currentextractor, currentextractor
                     break;
                 default:
                     extval = "";
-                    exttype = "wholeword";
-                    dispval = generageDisplayText("extract", "wholeword", val);
+                    exttype = "wholesentence";
+                    dispval = generageDisplayText("extract", "wholesentence", val);
                     break;
             }
         }
@@ -907,7 +1264,7 @@ function appendCalcValue() {
     inputText(null, null, null, null, true, true, function(dispval, val, type, exttype, extval){
         let appendnode;
         if (type == "env") {
-            if (exttype && exttype != "wholeword" && extval) {
+            if (exttype && exttype != "wholesentence" && extval) {
                 appendnode = {"Operator": "PARSEINT", "SubConditions": [{"Operator": operatormap[exttype], "SubConditions": [{"Operator": "PARAM", "SubConditions": null, "Variables": [val]}], "Variables": [extval]}], "Variables": null };
             } else {
                 appendnode = {"Operator": "PARSEINT", "SubConditions": [{"Operator": "PARAM", "SubConditions": null, "Variables": [val]}], "Variables": null };

@@ -44,14 +44,23 @@
     </div>
   </div>
 
-  <div id="jsonarea"><div id="jsontab"><img src="/image/jsonareaedge.png" width="43" height="27"><a onclick="if(document.getElementById('jsonarea').classList.contains('active')){document.getElementById('jsonarea').classList.remove('active');}else {document.getElementById('jsonarea').classList.add('active')};if(document.getElementById('jsonarea').classList.contains('active')){document.getElementById('upperarea').classList.add('hide')}else {document.getElementById('upperarea').classList.remove('hide')};return false">JSON</a></div>
+  <div id="jsonarea"><div class="jsontab"><img src="/image/jsonareaedge.png" width="43" height="27"><a onclick="if(document.getElementById('jsonarea').classList.contains('active')){document.getElementById('jsonarea').classList.remove('active');}else {document.getElementById('jsonarea').classList.add('active')};if(document.getElementById('jsonarea').classList.contains('active')){document.getElementById('upperarea').classList.add('hide')}else {document.getElementById('upperarea').classList.remove('hide')};return false">JSON</a></div>
   <div id="jsonareawrapper"><textarea id="conditionLogicInput" class="condition-textarea" onchange="refreshSummary()">{{.Condition.ConditionLogic}}</textarea></div>
   </div>
-
   <div id="logictotaldescription"></div>
-  <div id="sendingParameterArea">SendingParameter:none</div>
-  <textarea id="sendingparamjson">{{.Condition.DeviceActionParams}}</textarea>
-  <hr>
+
+  <div class="submitarea">
+    <div id="sendingParameterContainer">
+        <h3 id="sendingParameterTitle">Sending Parameters</h3>
+        <div id="sendingParameterArea">SendingParameter:none</div>
+        <div id="sendingParamJsonArea"><div class="jsontab"><img src="/image/jsonareaedge.png" width="43" height="27"><a onclick="if(document.getElementById('sendingParamJsonArea').classList.contains('active')){document.getElementById('sendingParamJsonArea').classList.remove('active');}else {document.getElementById('sendingParamJsonArea').classList.add('active')};if(document.getElementById('sendingParamJsonArea').classList.contains('active')){document.getElementById('sendingParameterArea').classList.add('hide')}else {document.getElementById('sendingParameterArea').classList.remove('hide')};return false">JSON</a></div>
+            <div id="sendingParameterJsonWrapper"><textarea id="sendingparamjson" onchange="refreshRequest()">{{.Condition.DeviceActionParams}}</textarea></div>
+        </div>
+    </div>
+    <div id="buttonsContainer">
+        <a><strong>Submit</strong></a>
+    </div>
+  </div>
 
   <div class="confirm-overlay" id="confirmOverlay" style="display:none" onclick="cancelConfirm()"></div>
   <div class="confirm-drawer" id="confirmDrawer">
@@ -107,11 +116,14 @@
               </span>
               <span class="textconditionselector" onclick="inputTextCondition(document.getElementById('textconditionselecttype').value, document.getElementById('textconditionselectrange').value, document.getElementById('textconditionselectvalue').value, function(disp,type,range,val){
                 document.getElementById('textconditionselectdisplay').innerText=disp;
+                document.getElementById('textconditionplaceholder').style['display']=val?'none':'inline';
+                document.getElementById('textconditionselectdisplay').style['display']=val?'inline':'none';
                 document.getElementById('textconditionselectvalue').value=val;
                 document.getElementById('textconditionselecttype').value=type;
                 document.getElementById('textconditionselectrange').value=range;
                 boolDialogValidator();
                 })">
+                <span id="textconditionplaceholder" class="placeholder"> - </span>
                 <span id="textconditionselectdisplay" class="value"> - </span>
                 <input id="textconditionselectrange" type="hidden" value="" />
                 <input id="textconditionselectvalue" type="hidden" value="" />
@@ -182,7 +194,7 @@
 			  document.getElementById('textExtFirst').style['display']=this.value=='first'?'inline-block':'none';
 			  document.getElementById('textExtLast').style['display']=this.value=='last'?'inline-block':'none';
 			  ">
-				<option value="wholeword">Wholeword</option>
+				<option value="wholesentence">Whole Sentence</option>
 				<option value="regex_extract">Regex</option>
 			    <option value="substring">Substring</option>
 			    <option value="first">First</option>
@@ -449,7 +461,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
     // Initialize device action parameters editor
     deviceParamsEditor = new ConditionEditor('sendingparamjson', {
-        baseType: 'WHOLEWORD',
+        baseType: 'WHOLESENTENCE',
         drawingArea: document.getElementById('sendingParameterArea'),
         logicDescriptionArea: null
     });

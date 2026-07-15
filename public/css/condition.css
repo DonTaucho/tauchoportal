@@ -1,6 +1,13 @@
 * {
     transition: all 0.4s ease-in-out;
 }
+.page-header,
+.page-header-top {
+    margin-bottom: unset !important;
+}
+.channels-panel {
+    background-color: rgba(255, 255, 255, 0.8);
+}
 .toolbox div{
 padding: 1rem 2rem;
 border: 1px solid grey;
@@ -969,14 +976,14 @@ fieldset.item.param>div.icons{
 #upperarea{
 	overflow: hidden;
 	height: 500px;
-    background-image: linear-gradient(0deg, rgba(255, 255, 255, 1) 0%, rgba(255, 255, 255, 0.8) 3%, rgba(255, 255, 255, 0.8) 100%);
+    background-image: linear-gradient(0deg, rgba(255, 255, 255, 1) 0%, rgba(255, 255, 255, 0.8) 3%, rgba(255, 255, 255, 0) 100%);
     padding-bottom: 1rem;
     display: flex;
 }
 #upperarea.hide{
 	height: 0px;
 }
-#jsontab {
+.jsontab {
 	text-align: right;
     background-color: white;
     margin: 0px 0px -1px 0px;
@@ -985,10 +992,10 @@ fieldset.item.param>div.icons{
     overflow-y: hidden;
     height: 26px;
 }
-#jsontab img{
+.jsontab img{
 	vertical-align: bottom;
 }
-#jsontab a{
+.jsontab a{
 	background-color: #ececec;
     margin: 0px;
     padding: 0px;
@@ -1011,13 +1018,56 @@ fieldset.item.param>div.icons{
 .active #jsonareawrapper {
 	height: unset;
 }
+#sendingParameterTitle {
+    margin-bottom: 0px !important;
+    margin-top: 12px;
+}
 #sendingParameterArea {
+	overflow: hidden;
 	width: 100%;
 	border: 1px solid orange;
-	min-height: 12em;
+	height: 12em;
 	padding: 1em;
+    background-color: white;
+}
+#sendingParameterArea.hide{
+    height: 0px;
+}
+#sendingParamJsonArea {
+    background-color: #ececec;
+}
+#sendingParamJsonArea textarea {
+	height: 0px;
+    width: 100%;
+    margin: -2px 0px 0px 0px;
+}
+#sendingParamJsonArea.active {
+	height: unset;
+}
+#sendingParamJsonArea.active textarea {
+	height: 12rem;
 }
 #sendingparamjson {
     width: 100%;
     height: 1rem;
+}
+
+#sendingParameterJsonWrapper {
+    border: 1px solid #d3d3d3;
+    height: 1em;
+    overflow: hidden;
+    border-radius: 6px 0px 6px 6px;
+    padding: 0.8rem;
+}
+.active #sendingParameterJsonWrapper {
+	height: unset;
+}
+.submitarea{
+    display: flex;
+}
+#sendingParameterContainer {
+    width: 100%;
+}
+#buttonsContainer {
+    width: 12rem;
 }
