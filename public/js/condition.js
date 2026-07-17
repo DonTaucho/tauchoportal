@@ -81,6 +81,12 @@ class ConditionEditor {
 
         // Initialize boolean dialog handler
         this.boolDialog = new BoolDialogHandler(this);
+        
+        // Initialize text condition dialog handler
+        this.textConditionDialog = new TextConditionDialogHandler(this);
+        
+        // Initialize numeric dialog handler
+        this.numericDialog = new NumericDialogHandler(this);
 
         // Setup change listener to sync between textarea and drawing area
         this.conditionInput.addEventListener('change', () => this.refresh());
@@ -1031,8 +1037,120 @@ class BoolDialogHandler {
     }
 }
 
+/**
+ * TextConditionDialogHandler - Manages the text condition dialog for the ConditionEditor
+ */
+class TextConditionDialogHandler {
+    constructor(editor) {
+        this.editor = editor;
+    }
 
-const operatormap = {
+    /**
+     * Open text condition dialog for editing text condition operators
+     */
+    open(currenttype, currentrange, currentval, callback) {
+        document.getElementById("textConditionEqualradio").checked = currenttype == "equals";
+        document.getElementById("textconditionrangeradio").checked = currenttype == "includes";
+        document.getElementById("textconditionregexradio").checked = currenttype == "regex_match";
+        document.getElementById("textconditionrange-from").value = currenttype == "includes" ? currentrange.split("-")[0] : "";
+        document.getElementById("textconditionrange-to").value = currenttype == "includes" && currentrange.indexOf("-") && currentrange !== "-" ? currentrange.split("-")[1] : "";
+        document.getElementById("textconditionequals").value = currenttype == "equals" ? currentval : "";
+        document.getElementById("textconditionrangetext").value = currenttype == "includes" ? currentval : "";
+        document.getElementById("textconditionregex").value = currenttype == "regex_match" ? currentval : "";
+        this.validate();
+        document.getElementById("textConditionModalButton").onclick = () => {
+            let dispval, type, range, val;
+            if (document.getElementById("textConditionEqualradio").checked) {
+                type = "equals";
+                val = document.getElementById("textconditionequals").value;
+                dispval = generageDisplayText("input", "equals", val);
+            } else if (document.getElementById("textconditionrangeradio").checked) {
+                type = "includes";
+                val = document.getElementById("textconditionrangetext").value;
+                range = `${document.getElementById("textconditionrange-from").value}-${document.getElementById("textconditionrange-to").value}`;
+                dispval = generageDisplayText("input", "includes", val, document.getElementById("textconditionrange-from").value, document.getElementById("textconditionrange-to").value);
+            } else if (document.getElementById("textconditionregexradio").checked) {
+                type = "regex_match";
+                val = document.getElementById("textconditionregex").value;
+                dispval = generageDisplayText("input", "regex_match", val);
+            }
+            callback(dispval, type, range, val);
+            document.getElementById("textConditionModal").style["display"] = "none";
+        }
+        document.getElementById("textConditionModal").style["display"] = "block";
+    }
+
+    /**
+     * Validate text condition dialog form inputs
+     */
+    validate() {
+        if (document.getElementById("textConditionEqualradio").checked) {
+            document.getElementById("textConditionModalButton").disabled = 
+document.getElementById("textconditionequals").value?"":"disabled";
+            return;
+        } else if (document.getElementById("textconditionrangeradio").checked) {
+            document.getElementById("textConditionModalButton").disabled = 
+document.getElementById("textconditionrangetext").value && (!document.getElementById("textconditionrange-from").value 
+|| !document.getElementById("textconditionrange-to").value || 
+parseInt(document.getElementById("textconditionrange-to").value) > 
+parseInt(document.getElementById("textconditionrange-from").value)) ? "" : "disabled";
+            return;
+        } else if (document.getElementById("textconditionregexradio").checked) {
+            try {
+                RegExp(document.getElementById("textconditionregex").value);
+                document.getElementById("textConditionModalButton").disabled = "";
+            } catch {
+                document.getElementById("textConditionModalButton").disabled = "disabled";
+            }
+            return;
+        }
+        document.getElementById("textConditionModalButton").disabled = "disabled";
+    }
+}
+
+/**
+ * NumericDialogHandler - Manages the numeric input dialog for the ConditionEditor
+ */
+class NumericDialogHandler {
+    constructor(editor) {
+        this.editor = editor;
+    }
+
+    /**
+     * Open numeric input dialog for editing numeric formulas
+     */
+    open(currentformula, callback) {
+        document.getElementById("calcformula").value = currentformula;
+        document.getElementById("calccursorpos").value = "/";
+        try {
+            const formula = JSON.parse(currentformula);
+            visualizeFormula(formula);
+        } catch {
+            visualizeFormula({});
+        }
+        document.getElementById("numModal").style["display"] = "block";
+        this.validate();
+        document.getElementById("numModalButton").onclick = function(){
+            callback(document.getElementById("calcformula").value, document.getElementById("calcdisplay").innerText);
+            document.getElementById("numModal").style["display"] = "none";
+        }
+    }
+
+    /**
+     * Validate numeric dialog form inputs
+     */
+    validate() {
+        const current = document.getElementById("calcformula").value;
+        try {
+            const formula = JSON.parse(current);
+            document.getElementById("numModalButton").disabled = checkNumValid(formula) ? "" : "disabled";
+        } catch {
+            document.getElementById("numModalButton").disabled = "disabled";
+        }
+    }
+}
+
+
     "and": "AND", "or": "OR", "not": "NOT", "some": "SOME",
     "equivalent": "EQUIVALENT", "greater_than": "GREATER_THAN",
     "greater_or_equal": "GREATER_OR_EQUAL", "less_than": "LESS_THAN",
@@ -1138,41 +1256,17 @@ function textDialogValidator() {
  * Validator for text condition dialog form
  */
 function textConditionDialogValidator() {
-    if (document.getElementById("textConditionEqualradio").checked) {
-        document.getElementById("textConditionModalButton").disabled = 
-document.getElementById("textconditionequals").value?"":"disabled";
-        return;
-    } else if (document.getElementById("textconditionrangeradio").checked) {
-        document.getElementById("textConditionModalButton").disabled = 
-document.getElementById("textconditionrangetext").value && (!document.getElementById("textconditionrange-from").value 
-|| !document.getElementById("textconditionrange-to").value || 
-parseInt(document.getElementById("textconditionrange-to").value) > 
-parseInt(document.getElementById("textconditionrange-from").value)) ? "" : "disabled";
-        return;
-    } else if (document.getElementById("textconditionregexradio").checked) {
-        try {
-            RegExp(document.getElementById("textconditionregex").value);
-            document.getElementById("textConditionModalButton").disabled = "";
-        } catch {
-            document.getElementById("textConditionModalButton").disabled = "disabled";
-        }
-        return;
+    if (conditionEditor && conditionEditor.textConditionDialog) {
+        conditionEditor.textConditionDialog.validate();
     }
-    document.getElementById("textConditionModalButton").disabled = "disabled";
 }
 
 /**
- * Validator for numeric dialog form
+ * Validator for numeric dialog form - wrapper for backward compatibility
  */
 function numDialogValidator(formula){
-    if (!formula) {
-        const current = document.getElementById("calcformula").value;
-        try {
-            formula = JSON.parse(current);
-            document.getElementById("numModalButton").disabled= checkNumValid(formula) ? "" : "disabled";
-        } catch {
-            document.getElementById("numModalButton").disabled="disabled";
-        }
+    if (conditionEditor && conditionEditor.numericDialog) {
+        conditionEditor.numericDialog.validate();
     }
 }
 
@@ -1268,57 +1362,20 @@ function inputText(currentvalue, currenttype, currentextractor, currentextractor
 }
 
 /**
- * Opens text condition input dialog
+ * Opens text condition input dialog - wrapper for backward compatibility with HTML onclick handlers
  */
 function inputTextCondition(currenttype, currentrange, currentval, callback){
-    document.getElementById("textConditionEqualradio").checked = currenttype == "equals";
-    document.getElementById("textconditionrangeradio").checked = currenttype == "includes";
-    document.getElementById("textconditionregexradio").checked = currenttype == "regex_match";
-    document.getElementById("textconditionrange-from").value = currenttype == "includes" ? currentrange.split("-")[0] : "";
-    document.getElementById("textconditionrange-to").value = currenttype == "includes" && currentrange.indexOf("-") && currentrange !== "-" ? currentrange.split("-")[1] : "";
-    document.getElementById("textconditionequals").value = currenttype == "equals" ? currentval : "";
-    document.getElementById("textconditionrangetext").value = currenttype == "includes" ? currentval : "";
-    document.getElementById("textconditionregex").value = currenttype == "regex_match" ? currentval : "";
-    textConditionDialogValidator();
-    document.getElementById("textConditionModalButton").onclick = () => {
-        let dispval, type, range, val;
-        if (document.getElementById("textConditionEqualradio").checked) {
-            type = "equals";
-            val = document.getElementById("textconditionequals").value;
-            dispval = generageDisplayText("input", "equals", val);
-        } else if (document.getElementById("textconditionrangeradio").checked) {
-            type = "includes";
-            val = document.getElementById("textconditionrangetext").value;
-            range = `${document.getElementById("textconditionrange-from").value}-${document.getElementById("textconditionrange-to").value}`;
-            dispval = generageDisplayText("input", "includes", val, document.getElementById("textconditionrange-from").value, document.getElementById("textconditionrange-to").value);
-        } else if (document.getElementById("textconditionregexradio").checked) {
-            type = "regex_match";
-            val = document.getElementById("textconditionregex").value;
-            dispval = generageDisplayText("input", "regex_match", val);
-        }
-        callback(dispval, type, range, val);
-        document.getElementById("textConditionModal").style["display"] = "none";
+    if (conditionEditor && conditionEditor.textConditionDialog) {
+        conditionEditor.textConditionDialog.open(currenttype, currentrange, currentval, callback);
     }
-    document.getElementById("textConditionModal").style["display"] = "block";
 }
 
 /**
- * Opens numeric input dialog
+ * Opens numeric input dialog - wrapper for backward compatibility with HTML onclick handlers
  */
 function inputNumber(currentformula, callback){
-    document.getElementById("calcformula").value = currentformula;
-    document.getElementById("calccursorpos").value = "/";
-    try {
-        const formula = JSON.parse(currentformula);
-        visualizeFormula(formula);
-    } catch {
-        visualizeFormula({});
-    }
-    document.getElementById("numModal").style["display"] = "block";
-    numDialogValidator();
-    document.getElementById("numModalButton").onclick = function(){
-        callback(document.getElementById("calcformula").value, document.getElementById("calcdisplay").innerText);
-        document.getElementById("numModal").style["display"] = "none";
+    if (conditionEditor && conditionEditor.numericDialog) {
+        conditionEditor.numericDialog.open(currentformula, callback);
     }
 }
 
