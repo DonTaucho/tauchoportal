@@ -614,7 +614,7 @@ div#logictotaldescription span.or .or .and:hover::after {
     background-color: #a8d1a2;
 }
 
-.textconditionselector {
+.textconditionselector .value {
     border: 2px solid #c7cedd;
     padding: 0.4em 1em;
     display: inline;
@@ -625,16 +625,37 @@ div#logictotaldescription span.or .or .and:hover::after {
     font-weight: bold;
 	line-height: 3rem;
 }
+.textconditionselector .placeholder {
+    border: 2px dotted #c7cedd;
+    padding: 0.4em 1em;
+    display: inline;
+    text-align: center;
+    border-radius: 4px;
+    background-color: #dde7eb;
+    cursor: pointer;
+    font-weight: unset;
+    font-weight: bold;
+	line-height: 3rem;
+}
 .textconditionselector:hover {
     border-color: #c7cedd;
     background-color: #dde7eb;
 }
-.available .textconditionselector {
+.available .textconditionselector .value {
     border-color: #e38d65;
     background-color: #eebaa2;
 }
-.available .textconditionselector:hover {
+.available .textconditionselector .value:hover {
     border-color: #d46f40;
+    background-color: #eca07d;
+}
+
+.available .textconditionselector .placeholder {
+    border: 2px dotted #e38d65;
+    background-color: #eebaa2;
+}
+.available .textconditionselector .placeholder:hover {
+    border: 2px dotted #d46f40;
     background-color: #eca07d;
 }
 
