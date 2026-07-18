@@ -1150,20 +1150,6 @@ class NumericDialogHandler {
     }
 }
 
-
-    "and": "AND", "or": "OR", "not": "NOT", "some": "SOME",
-    "equivalent": "EQUIVALENT", "greater_than": "GREATER_THAN",
-    "greater_or_equal": "GREATER_OR_EQUAL", "less_than": "LESS_THAN",
-    "less_or_equal": "LESS_OR_EQUAL", "equals": "EQUALS",
-    "includes": "INCLUDES", "regex_match": "REGEX_MATCH",
-    "count": "COUNT", "sum": "SUM", "wholesentence": "WHOLESENTENCE",
-    "regex_extract": "REGEX_EXTRACT", "substring": "SUBSTRING",
-    "first": "FIRST", "last": "LAST", "add": "ADD",
-    "subtract": "SUBTRACT", "multiply": "MULTIPLY",
-    "divide": "DIVIDE", "modulo": "MODULO",
-    "parseint": "PARSEINT", "exchange": "EXCHANGE", "param": "PARAM"
-};
-
 // ============================================
 // Dialog and Helper Functions
 // ============================================
