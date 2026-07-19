@@ -418,6 +418,7 @@
   "condition.regex-missingvalue": "Not set",
   "condition.regex-sentense": "{0} matches regex {1}",
   "condition.calc-missingvalue": "Not set",
+  "condition.calcvalinput": "ENTER VALUE",
   "condition.plus-joint": " plus ",
   "condition.subtract-joint": " minus ",
   "condition.multiply-joint": " times ",

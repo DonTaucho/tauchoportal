@@ -44,8 +44,12 @@ class ConditionEditor {
         this.namingmap = {"AND": "and", "OR": "or", "NOT": "not", "SOME": "some", "EQUIVALENT": "equivalent", "GREATER_THAN": "greater_than", "GREATER_OR_EQUAL": "greater_or_equal", "LESS_THAN": "less_than", "LESS_OR_EQUAL": "less_or_equal", "EQUALS": "equals", "INCLUDES": "includes", "REGEX_MATCH": "regex_match", "COUNT": "count", "SUM": "sum", "WHOLESENTENCE": "wholesentence", "REGEX_EXTRACT": "regex_extract", "SUBSTRING": "substring", "FIRST": "first", "LAST": "last", "ADD": "add", "SUBTRACT": "subtract", "MULTIPLY": "multiply", "DIVIDE": "divide", "MODULO": "modulo", "PARSEINT": "parseint", "EXCHANGE": "exchange", "PARAM": "param" };
         this.operatormap = { "and": "AND", "or": "OR", "not": "NOT", "some": "SOME", "equivalent": "EQUIVALENT", "greater_than": "GREATER_THAN", "greater_or_equal": "GREATER_OR_EQUAL", "less_than": "LESS_THAN", "less_or_equal": "LESS_OR_EQUAL", "equals": "EQUALS", "includes": "INCLUDES", "regex_match": "REGEX_MATCH", "count": "COUNT", "sum": "SUM", "wholesentence": "WHOLESENTENCE", "regex_extract": "REGEX_EXTRACT", "substring": "SUBSTRING", "first": "FIRST", "last": "LAST", "add": "ADD", "subtract": "SUBTRACT", "multiply": "MULTIPLY", "divide": "DIVIDE", "modulo": "MODULO", "parseint": "PARSEINT", "exchange": "EXCHANGE", "param": "PARAM" };
         this.reverselookuptype = { "AND": "boolean", "OR": "boolean", "NOT": "boolean", "SOME": "boolean", "EQUIVALENT": "comp", "GREATER_THAN": "comp", "LESS_THAN": "comp", "EQUALS": "optext", "INCLUDES": "optext", "REGEX_MATCH": "optext", "COUNT": "group", "SUM": "group", "ADD": "calc", "SUBTRACT": "calc", "MULTIPLY": "calc", "DIVIDE": "calc", "MODULO": "calc", "PARSEINT": "conv", "EXCHANGE": "conv", "PARAM": "extract" }; 
+        this.calcoperatorssign = {"ADD": "＋", "SUBTRACT": "－", "MULTIPLY": "×", "DIVIDE": "÷", "MODULO": "≡"};
         // Initialize boolean dialog handler
         this.boolDialog = new BoolDialogHandler(this);
+        
+        // Initialize text condition dialog handler
+        this.textDialog = new TextDialogHandler(this);
         
         // Initialize text condition dialog handler
         this.textConditionDialog = new TextConditionDialogHandler(this);
@@ -54,7 +58,7 @@ class ConditionEditor {
         this.numericDialog = new NumericDialogHandler(this);
 
         // Setup change listener to sync between textarea and drawing area
-        this.conditionInput.addEventListener('change', () => this.refresh());
+        this.conditionInput.addEventListener('change', this.refresh.bind(this));
     }
 
     /**
@@ -255,7 +259,7 @@ class ConditionEditor {
                 askenvbutton.innerText = "+";
                 askenvbutton.setAttribute("path", path);
                 askenvbutton.setAttribute("operator", operator);
-                askenvbutton.onclick = function(){inputText(null, null, null, null, true, false, function(disp,val,type,exttype,extval){
+                askenvbutton.onclick = function(){this.textDialog.open(null, null, null, null, true, false, function(disp,val,type,exttype,extval){
                     const parentjson = this.getJSON();
                     const currentnode = this._getSubCondition(parentjson, path);
                     if (type === "env") {
@@ -275,7 +279,7 @@ class ConditionEditor {
                 inputtextbutton.innerText = "+";
                 inputtextbutton.setAttribute("path", path);
                 inputtextbutton.setAttribute("operator", operator);
-                inputtextbutton.onclick = function(){inputText(null, null, null, null, true, true, function(disp,val,type,exttype,extval){
+                inputtextbutton.onclick = function(){this.textDialog.open(null, null, null, null, true, true, function(disp,val,type,exttype,extval){
                     const parentjson = this.getJSON();
                     const currentnode = this._getSubCondition(parentjson, path);
                     if (type === "env") {
@@ -295,7 +299,7 @@ class ConditionEditor {
             inputnumbutton.innerText = "+";
             inputnumbutton.setAttribute("path", path);
             inputnumbutton.setAttribute("operator", operator);
-            inputnumbutton.onclick = inputNumber;
+            inputnumbutton.onclick = this.numericDialog.open.bind(this.numericDialog);
             area.append(inputnumbutton);
         } else if (this.textextractors.includes(operator)) {
             if ((!jsonnode.SubConditions || jsonnode.SubConditions.length < 1) && (!jsonnode.Variables || jsonnode.Variables.length < 1)) {
@@ -304,7 +308,7 @@ class ConditionEditor {
                 inputtextbutton.innerText = "+";
                 inputtextbutton.setAttribute("path", path);
                 inputtextbutton.setAttribute("operator", operator);
-                inputtextbutton.onclick = function(){inputText(null, null, null, null, true, true, function(disp,val,type,exttype,extval){
+                inputtextbutton.onclick = function(){this.textDialog.open(null, null, null, null, true, true, function(disp,val,type,exttype,extval){
                     const parentjson = this.getJSON();
                     const currentnode = this._getSubCondition(parentjson, path);
                     if (type === "env") {
@@ -328,7 +332,7 @@ class ConditionEditor {
             inputtextbutton.innerText = "?";
             inputtextbutton.setAttribute("path", path);
             inputtextbutton.setAttribute("operator", operator);
-            inputtextbutton.onclick = function(){inputText(null, null, null, null, true, true, function(disp,val,type,exttype,extval){
+            inputtextbutton.onclick = function(){this.textDialog.open(null, null, null, null, true, true, function(disp,val,type,exttype,extval){
                 const parentjson = this.getJSON();
                 const currentnode = this._getSubCondition(parentjson, path);
                 if (type === "env") {
@@ -813,7 +817,7 @@ class ConditionEditor {
                         extractorval = currentnode.SubConditions[0].Variables[1];
                     }
                 }
-                inputText(currentnode.Variables[0], "env", extractor, extractorval, true, false, function(dispval, val, type, exttype, extval) {
+                this.textDialog.open(currentnode.Variables[0], "env", extractor, extractorval, true, false, function(dispval, val, type, exttype, extval) {
                     if (exttype == "wholesentence") {
                         currentnode.Operator = "PARAM";
                         currentnode.Variables = [val];
@@ -829,10 +833,10 @@ class ConditionEditor {
                 // Variable editing
                 const ind = e.target.getAttribute("index");
                 const current = e.target.innerText;
-                inputText(current, "variable", null, null, false, true, function(dispval, val) {
+                this.textDialog.open(current, "variable", null, null, false, true, function(dispval, val) {
                     currentnode.Variables[ind] = val;
                     finishupdating();
-                });
+                }.bind(this));
             }
         } catch (err) {
             console.error('Error in editItem:', err);
@@ -953,6 +957,68 @@ class ConditionEditor {
         }
         return currentnode;
     }
+
+    
+    /**
+     * Generates human-readable display text for text extraction/condition operations
+     */
+    _generateDisplayText(tasktype, operationtype, ...values) {
+        let dispval = translations["generic-notset"];
+        switch (tasktype) {
+            case "extract":
+                switch (operationtype) {
+                    case "regex_extract":
+                        dispval = translations["textextract-regex"].replace("{0}", translations[values[0]]).replace("{1}", values[1]);
+                        break;
+                    case "substring":
+                        const range_from = values[1], range_to = values[2];
+                        if (!range_from&&!range_to) {
+                            dispval = translations["textextract-sub_missingvalue"];
+                        } else if (range_from&&!range_to) {
+                            dispval = translations["textextract-sub_from"].replace("{0}",translations[values[0]]).replace("{1}", range_from);
+                        } else if (!range_from&&range_to) {
+                            dispval = translations["textextract-sub_to"].replace("{0}",translations[values[0]]).replace("{1}", range_to);
+                        } else if (range_from&&range_to) {
+                            dispval = translations["textextract-sub_fromto"].replace("{0}",translations[values[0]]).replace("{1}", range_from).replace("{2}", range_to);
+                        }
+                        break;
+                    case "first":
+                        dispval = translations["textextract-first"].replace("{0}", translations[values[0]]).replace("{1}", values[1]);
+                        break;
+                    case "last":
+                        dispval = translations["textextract-last"].replace("{0}", translations[values[0]]).replace("{1}", values[1]);
+                        break;
+                    default:
+                        dispval = translations["textextract-whole"].replace("{0}",translations[values[0]]);
+                        break;
+                }
+                break;
+            case "input":
+                const val = values[0] ? values[0] : translations["textcondition-missingvalue"];
+                switch (operationtype){
+                    case "equals":
+                        dispval = translations["textcondition-equals"].replace("{0}", val);
+                        break;
+                    case "includes":
+                        const range_includes_from = values[1], range_includes_to = values[2];
+                        if (!range_includes_from && !range_includes_to) {
+                            dispval = translations["textcondition-one"].replace("{0}", val);
+                        } else if (range_includes_from && !range_includes_to) {
+                            dispval = translations["textcondition-rangefrom"].replace("{0}", val).replace("{1}", range_includes_from);
+                        } else if (!range_includes_from && range_includes_to) {
+                            dispval = translations["textcondition-rangeto"].replace("{0}", val).replace("{1}", range_includes_to);
+                        } else if (range_includes_from && range_includes_to) {
+                            dispval = translations["textcondition-rangefromto"].replace("{0}", val).replace("{1}", range_includes_from).replace("{2}", range_includes_to);
+                        }
+                        break;
+                    case "regex_match":
+                        dispval = translations["textcondition-regex"].replace("{0}", val);
+                        break;
+                }
+                break;
+        }
+        return dispval
+    }
  }
 
 /**
@@ -980,7 +1046,7 @@ class BoolDialogHandler {
         }.bind(this);
 
         document.getElementById("textSelector").onclick = function(e) {
-            inputText(document.getElementById('textcomparebasevalue').value, document.getElementById('textcomparebasetype').value,document.getElementById('textcomparebaseexttype').value, document.getElementById('textcomparebaseextvalue').value,true, false, function(disp,val,type,exttype,extval){
+            this.editor.textDialog.open(document.getElementById('textcomparebasevalue').value, document.getElementById('textcomparebasetype').value,document.getElementById('textcomparebaseexttype').value, document.getElementById('textcomparebaseextvalue').value,true, false, function(disp,val,type,exttype,extval){
                 document.getElementById('textcomparebasedisplay').innerHTML=disp;
                 document.getElementById('textcomparebasevalue').value=val;
                 document.getElementById('textcomparebasetype').value=type;
@@ -993,7 +1059,7 @@ class BoolDialogHandler {
         }.bind(this);
 
         document.getElementById("textConditionSelector").onclick = function(e) {
-            inputTextCondition(document.getElementById('textconditionselecttype').value, document.getElementById('textconditionselectrange').value, document.getElementById('textconditionselectvalue').value, function(disp,type,range,val){
+            this.editor.textConditionDialog.open(document.getElementById('textconditionselecttype').value, document.getElementById('textconditionselectrange').value, document.getElementById('textconditionselectvalue').value, function(disp,type,range,val){
                 document.getElementById('textconditionselectdisplay').innerText=disp;
                 document.getElementById('textconditionplaceholder').style['display']=val?'none':'inline';
                 document.getElementById('textconditionselectdisplay').style['display']=val?'inline':'none';
@@ -1005,7 +1071,7 @@ class BoolDialogHandler {
         }.bind(this);
 
         document.getElementById("numericcomparebasedisp").onclick = function(e) {
-            inputNumber(
+            this.editor.numericDialog.open(
                 document.getElementById('numericcomparebase').value,
                 function(val,disp) {
                     document.getElementById('numericcomparebase').value = val;
@@ -1018,7 +1084,7 @@ class BoolDialogHandler {
         }.bind(this);
 
         document.getElementById("numericcomparetargetdisp").onclick = function(e) {
-            inputNumber(
+            this.editor.numericDialog.open(
                 document.getElementById('numericcomparetarget').value,
                 function(val,disp){
                     document.getElementById('numericcomparetarget').value = val;
@@ -1099,11 +1165,11 @@ class BoolDialogHandler {
                     extvar2 = currentnode.Variables&&currentnode.Variables.length&&currentnode.Variables[1]?currentnode.Variables[1].split("-")[0]:currentnode.Variables[1];
                     extvar3 = currentnode.Variables&&currentnode.Variables.length>1&&currentnode.Variables[1].split("-").length>1?currentnode.Variables[1].split("-")[1]:currentnode.Variables[2];
                     operator = currentnode.Operator;
-                    document.getElementById("textcomparebasedisplay").innerText = generageDisplayText("extract", taropr, targetbase, targetvar1, targetvar2);
+                    document.getElementById("textcomparebasedisplay").innerText = this.editor._generateDisplayText("extract", taropr, targetbase, targetvar1, targetvar2);
                     document.getElementById("textcomparebaseexttype").value = taropr=="param"?"wholesentence":taropr;
                     document.getElementById("textcomparebasevalue").value = targetbase;
                     document.getElementById("textcomparebasetype").value = "env";
-                    document.getElementById("textconditionselectdisplay").innerHTML = generageDisplayText("input", extopr, extvar1, extvar2, extvar3);
+                    document.getElementById("textconditionselectdisplay").innerHTML = this.editor._generateDisplayText("input", extopr, extvar1, extvar2, extvar3);
                     document.getElementById("textconditionplaceholder").style["display"] = "none";
                     document.getElementById("textconditionselectdisplay").style["display"] = "inline";
                     document.getElementById("textconditionselectvalue").value = extvar1;
@@ -1122,11 +1188,11 @@ class BoolDialogHandler {
                     extvar2 = currentnode.Variables&&currentnode.Variables.length&&currentnode.Variables[1]?currentnode.Variables[1].split("-")[0]:currentnode.Variables[1];
                     extvar3 = currentnode.Variables&&currentnode.Variables.length>1&&currentnode.Variables[1].split("-").length>1?currentnode.Variables[1].split("-")[1]:currentnode.Variables[2];
                     operator = currentnode.Operator;
-                    document.getElementById("textcomparebasedisplay").innerText = generageDisplayText("extract", taropr, targetbase, targetvar1, targetvar2);
+                    document.getElementById("textcomparebasedisplay").innerText = this.editor._generateDisplayText("extract", taropr, targetbase, targetvar1, targetvar2);
                     document.getElementById("textcomparebaseexttype").value = taropr=="param"?"wholesentence":taropr;
                     document.getElementById("textcomparebasevalue").value = targetbase;
                     document.getElementById("textcomparebasetype").value = "env";
-                    document.getElementById("textconditionselectdisplay").innerHTML = generageDisplayText("input", extopr, extvar1, extvar2, extvar3);
+                    document.getElementById("textconditionselectdisplay").innerHTML = this.editor._generateDisplayText("input", extopr, extvar1, extvar2, extvar3);
                     document.getElementById("textconditionplaceholder").style["display"] = "none";
                     document.getElementById("textconditionselectdisplay").style["display"] = "inline";
                     document.getElementById("textconditionselectvalue").value = extvar1;
@@ -1203,12 +1269,218 @@ class BoolDialogHandler {
     }
 }
 
+class TextDialogHandler {
+    constructor(editor) {
+        this.editor = editor;
+        document.getElementById("textEnvArea").onclick = function(e) {
+            document.getElementById('textenvradio').checked=true;
+            document.getElementById('textEnvArea').classList.add('available');
+            document.getElementById('textEnterArea').classList.remove('available');
+            document.getElementById('textExtArea').classList.add('available');
+            document.getElementById('textExtSelect').disabled='';
+            this.validate();
+        }.bind(this);
+
+        document.getElementById("textEnvSelect").onchange = this.validate;
+
+        document.getElementById("textEnterArea").onclick = function (){
+            document.getElementById('textenterradio').checked=true;
+            document.getElementById('textEnterArea').classList.add('available');
+            document.getElementById('textEnvArea').classList.remove('available');
+            document.getElementById('textExtArea').classList.remove('available');
+            document.getElementById('textExtSelect').disabled='';
+            this.validate();
+        }.bind(this);
+
+        document.getElementById("textEnter").onchange = this.validate;
+
+        document.getElementById("textExtArea").onchange = function(e) {
+            document.getElementById('textenvradio').checked=true;
+            document.getElementById('textEnvArea').classList.add('available');
+            document.getElementById('textExtArea').classList.add('available');
+            this.validate();
+        }.bind(this);
+
+        document.getElementById("textExtSelect").onchange = function(e) {
+            this.validate();
+            document.getElementById('textExtRegex').style['display']=e.target.value=='regex_extract'?'inline-block':'none';
+            document.getElementById('textExtSubFrom').style['display']=e.target.value=='substring'?'inline-block':'none';
+            document.getElementById('textExtSubTo').style['display']=e.target.value=='substring'?'inline-block':'none';
+            document.getElementById('textExtFirst').style['display']=e.target.value=='first'?'inline-block':'none';
+            document.getElementById('textExtLast').style['display']=e.target.value=='last'?'inline-block':'none';
+        }.bind(this);
+
+        document.getElementById("textExtRegex").onchange = this.validate;
+        document.getElementById("textExtSubFrom").onchange = this.validate;
+        document.getElementById("textExtSubTo").onchange = this.validate;
+        document.getElementById("textExtFirst").onchange = this.validate;
+        document.getElementById("textExtLast").onchange = this.validate;
+    }
+
+    /**
+     * Open text dialog for editing text conditions
+     */
+    open(currentvalue, currenttype, currentextractor, currentextractorval, includeenv, includeenter, callback, validator){
+        document.getElementById("textBody").className = "";
+        document.getElementById("textBody").classList.add("modal-body");
+        document.getElementById("textBody").classList.add("textselection");
+        document.getElementById("textenvradio").checked = currenttype == "env";
+        document.getElementById("textEnvSelect").value = currenttype == "env" ? currentvalue : "event_message";
+        document.getElementById("textenterradio").checked = currenttype == "variable";
+        document.getElementById("textEnter").value = currenttype == "variable" ? currentvalue : "";
+        document.getElementById("textValidator").value = validator ?? "";
+
+        document.getElementById('textEnterArea').classList.remove('available');
+        document.getElementById('textEnvArea').classList.remove('available');
+        document.getElementById('textExtArea').classList.remove('available');
+        document.getElementById('textExtSelect').disabled = currenttype == "variable" || !includeenv ? "disabled" : "";
+        document.getElementById('textExtSelect').value=currentextractor??"wholesentence";
+        document.getElementById('textExtRegex').style['display']= currentextractor=="regex_extract" ? "inline-block":"none";
+        document.getElementById('textExtRegex').value=currentextractor=="regex_extract"?currentextractorval:"";
+        document.getElementById('textExtSubFrom').style['display']= currentextractor=="substring" ? "inline-block":"none";
+        document.getElementById('textExtSubFrom').value=currentextractor=="substring"?currentextractorval?.split("-")[0]:"";
+        document.getElementById('textExtSubTo').style['display']= currentextractor=="substring" ? "inline-block":"none";
+        document.getElementById('textExtSubTo').value=currentextractor=="substring"&&currentextractorval?.length>1?currentextractorval.split("-")[1]:"";
+        document.getElementById('textExtFirst').style['display']= currentextractor=="first" ? "inline-block":"none";
+        document.getElementById('textExtFirst').value=currentextractor=="first"?currentextractorval:"";
+        document.getElementById('textExtLast').style['display']= currentextractor=="last" ? "inline-block":"none";
+        document.getElementById('textExtLast').value=currentextractor=="last"?currentextractorval:"";
+        document.getElementById("textenterradio").style["display"]= includeenter ? "inline-block" : "none";
+        
+        if (currenttype == "env" || !includeenter) {
+            document.getElementById('textEnvArea').classList.add('available');
+            document.getElementById('textExtArea').classList.add('available');
+        } else if (currenttype == "variable" || !includeenv) {
+            document.getElementById('textEnterArea').classList.add('available');
+        }
+        if (includeenter) {
+            document.getElementById("textBody").classList.add("includeenter");
+            document.getElementById("textenvradio").style["display"]= "inline-block";
+        } else {
+            document.getElementById("textenvradio").checked = true;
+            document.getElementById("textenvradio").style["display"]= "none";
+        }
+        if (includeenv) {
+            document.getElementById("textBody").classList.add("includeenv");
+            document.getElementById("textenterradio").style["display"]= "inline-block";
+        } else {
+            document.getElementById("textenterradio").checked = true;
+            document.getElementById("textenterradio").style["display"]= "none";
+        }
+        this.validate();
+        document.getElementById("textModal").style["display"] = "block";
+        document.getElementById("textSubmitButton").onclick = function() {
+            let dispval,val,type,exttype,extval;
+            if (document.getElementById("textenterradio").checked) {
+                dispval = document.getElementById("textEnter").value;
+                val = document.getElementById("textEnter").value;
+                type = "variable";
+            } else if (document.getElementById("textenvradio").checked) {
+                val = document.getElementById("textEnvSelect").value;
+                type = "env";
+                exttype = document.getElementById("textExtSelect").value;
+                switch (exttype) {
+                    case "regex_extract":
+                        extval = document.getElementById("textExtRegex").value;
+                        dispval = this.editor._generateDisplayText("extract", "regex_extract", val, extval);
+                        break;
+                    case "substring":
+                        extval = `${document.getElementById('textExtSubFrom').value}-${document.getElementById('textExtSubTo').value}`;
+                        dispval = this.editor._generateDisplayText("extract", "substring", val, document.getElementById('textExtSubFrom').value, document.getElementById('textExtSubTo').value);
+                        break;
+                    case "first":
+                        extval = document.getElementById("textExtFirst").value;
+                        dispval = this.editor._generateDisplayText("extract", "first", val, extval);
+                        break;
+                    case "last":
+                        extval = document.getElementById("textExtLast").value;
+                        dispval = this.editor._generateDisplayText("extract", "last", val, extval);
+                        break;
+                    default:
+                        extval = "";
+                        exttype = "wholesentence";
+                        dispval = this.editor._generateDisplayText("extract", "wholesentence", val);
+                        break;
+                }
+            }
+            callback(dispval, val, type, exttype, extval);
+            document.getElementById("textModal").style["display"] = "none";
+        }.bind(this);
+    }
+
+    validate() {
+        let valid = false;
+        if (document.getElementById("textenvradio").checked) {
+            valid = document.getElementById("textEnvSelect").value;
+            if (document.getElementById("textExtSelect").value=="regex_extract") {
+            try {
+                RegExp(document.getElementById("textExtRegex").value);
+            } catch {
+                valid = false;
+            }
+            } else if (document.getElementById("textExtSelect").value=="substring") {
+                try {
+                    valid = isNaN(parseInt(document.getElementById("textExtSubTo").value)) ^ isNaN(parseInt(document.getElementById("textExtSubFrom").value)) || parseInt(document.getElementById("textExtSubTo").value) >= parseInt(document.getElementById("textExtSubFrom").value);
+                } catch {
+                    valid = false;
+                }
+            } else if (document.getElementById("textExtSelect").value=="first") {
+                valid = parseInt(document.getElementById("textExtFirst").value);
+            } else if (document.getElementById("textExtSelect").value=="last") {
+                valid = parseInt(document.getElementById("textExtLast").value);
+            }
+        } else if (document.getElementById("textenterradio").checked) {
+            valid = document.getElementById("textEnter").value;
+            if (document.getElementById("textValidator").value) {
+                valid &&= document.getElementById("textEnter").value.match(document.getElementById("textValidator").value);
+            }
+        }
+        
+        document.getElementById("textSubmitButton").disabled = valid ? "" : "disabled";
+    }
+}    
+
 /**
  * TextConditionDialogHandler - Manages the text condition dialog for the ConditionEditor
  */
 class TextConditionDialogHandler {
     constructor(editor) {
         this.editor = editor;
+
+        document.getElementById("ext_eq").onclick = function(e) {
+            document.getElementById('textConditionEqualradio').checked=true;
+            document.getElementById('ext_eq').classList.add('available');
+            document.getElementById('ext_range').classList.remove('available');
+            document.getElementById('ext_reg').classList.remove('available');
+            this.validate();
+        }.bind(this);
+
+        document.getElementById("textConditionEqualradio").onselect = this.validate;
+        document.getElementById("textconditionequals").onchange = this.validate;
+
+        document.getElementById("ext_range").onclick = function(e) {
+            document.getElementById('textconditionrangeradio').checked=true;
+            document.getElementById('ext_eq').classList.remove('available');
+            document.getElementById('ext_range').classList.add('available');
+            document.getElementById('ext_reg').classList.remove('available');
+            this.validate();
+        }.bind(this);
+
+        document.getElementById("textconditionrangeradio").onselect = this.validate;
+        document.getElementById("textconditionrangetext").onchange = this.validate;
+        document.getElementById("textconditionrange-from").onchange = this.validate;
+        document.getElementById("textconditionrange-to").onchange = this.validate;
+
+        document.getElementById("ext_reg").onclick = function(e) {
+            document.getElementById('textconditionregexradio').checked=true;
+            document.getElementById('ext_eq').classList.remove('available');
+            document.getElementById('ext_range').classList.remove('available');
+            document.getElementById('ext_reg').classList.add('available');
+            this.validate();
+        }.bind(this);
+
+        document.getElementById("textconditionregexradio").onselect = this.validate;
+        document.getElementById("textconditionregex").onchange = this.validate;
     }
 
     /**
@@ -1229,16 +1501,16 @@ class TextConditionDialogHandler {
             if (document.getElementById("textConditionEqualradio").checked) {
                 type = "equals";
                 val = document.getElementById("textconditionequals").value;
-                dispval = generageDisplayText("input", "equals", val);
+                dispval = this.editor._generateDisplayText("input", "equals", val);
             } else if (document.getElementById("textconditionrangeradio").checked) {
                 type = "includes";
                 val = document.getElementById("textconditionrangetext").value;
                 range = `${document.getElementById("textconditionrange-from").value}-${document.getElementById("textconditionrange-to").value}`;
-                dispval = generageDisplayText("input", "includes", val, document.getElementById("textconditionrange-from").value, document.getElementById("textconditionrange-to").value);
+                dispval = this.editor._generateDisplayText("input", "includes", val, document.getElementById("textconditionrange-from").value, document.getElementById("textconditionrange-to").value);
             } else if (document.getElementById("textconditionregexradio").checked) {
                 type = "regex_match";
                 val = document.getElementById("textconditionregex").value;
-                dispval = generageDisplayText("input", "regex_match", val);
+                dispval = this.editor._generateDisplayText("input", "regex_match", val);
             }
             callback(dispval, type, range, val);
             document.getElementById("textConditionModal").style["display"] = "none";
@@ -1251,15 +1523,13 @@ class TextConditionDialogHandler {
      */
     validate() {
         if (document.getElementById("textConditionEqualradio").checked) {
-            document.getElementById("textConditionModalButton").disabled = 
-document.getElementById("textconditionequals").value?"":"disabled";
+            document.getElementById("textConditionModalButton").disabled = document.getElementById("textconditionequals").value?"":"disabled";
             return;
         } else if (document.getElementById("textconditionrangeradio").checked) {
-            document.getElementById("textConditionModalButton").disabled = 
-document.getElementById("textconditionrangetext").value && (!document.getElementById("textconditionrange-from").value 
-|| !document.getElementById("textconditionrange-to").value || 
-parseInt(document.getElementById("textconditionrange-to").value) > 
-parseInt(document.getElementById("textconditionrange-from").value)) ? "" : "disabled";
+            document.getElementById("textConditionModalButton").disabled = document.getElementById("textconditionrangetext").value && (!document.getElementById("textconditionrange-from").value 
+            || !document.getElementById("textconditionrange-to").value || 
+            parseInt(document.getElementById("textconditionrange-to").value) > 
+            parseInt(document.getElementById("textconditionrange-from").value)) ? "" : "disabled";
             return;
         } else if (document.getElementById("textconditionregexradio").checked) {
             try {
@@ -1280,6 +1550,25 @@ parseInt(document.getElementById("textconditionrange-from").value)) ? "" : "disa
 class NumericDialogHandler {
     constructor(editor) {
         this.editor = editor;
+        if (!document.getElementById("calctoolarea").children.length) {
+            for (const i in this.editor.calcoperators) {
+                const operatorbutton = document.createElement("div"), operatortype = this.editor.calcoperators[i];
+                operatorbutton.innerHTML = this.editor.calcoperatorssign[operatortype];
+                operatorbutton.classList.add("calcoperator");
+                operatorbutton.setAttribute("operatortype", operatortype);
+                operatorbutton.onclick = function(e){
+                    this.appendOperator(e.target.getAttribute("operatortype"));
+                }.bind(this);
+                document.getElementById("calctoolarea").appendChild(operatorbutton);
+            }
+            const horizontalline = document.createElement("hr");
+            document.getElementById("calctoolarea").appendChild(horizontalline);
+            const calcvalinputbutton = document.createElement("div");
+            calcvalinputbutton.classList.add("calcvalinputbutton");
+            calcvalinputbutton.innerText = translations["calcvalinput"];
+            calcvalinputbutton.onclick = this.appendValue.bind(this);
+            document.getElementById("calctoolarea").appendChild(calcvalinputbutton);
+        }
     }
 
     /**
@@ -1290,9 +1579,9 @@ class NumericDialogHandler {
         document.getElementById("calccursorpos").value = "/";
         try {
             const formula = JSON.parse(currentformula);
-            visualizeFormula(formula);
+            this.visualizeFormula(formula);
         } catch {
-            visualizeFormula({});
+            this.visualizeFormula({});
         }
         document.getElementById("numModal").style["display"] = "block";
         this.validate();
@@ -1309,216 +1598,577 @@ class NumericDialogHandler {
         const current = document.getElementById("calcformula").value;
         try {
             const formula = JSON.parse(current);
-            document.getElementById("numModalButton").disabled = checkNumValid(formula) ? "" : "disabled";
-        } catch {
+            const singlevalue = (formula.Operator == "PARSEINT" && !formula.SubConditions) || (formula.SubConditions && formula.SubConditions.length == 1 && formula.SubConditions[0].Operator === "PARSEINT");
+            document.getElementById("numModalButton").disabled = singlevalue || this.checkNumValid(formula, true) ? "" : "disabled";
+        } catch (e) {
             document.getElementById("numModalButton").disabled = "disabled";
         }
     }
-}
-
-// ============================================
-// Dialog and Helper Functions
-// ============================================
-
-/**
- * Generates human-readable display text for text extraction/condition operations
- */
-function generageDisplayText(tasktype, operationtype, ...values) {
-    let dispval = translations["generic-notset"];
-    switch (tasktype) {
-        case "extract":
-            switch (operationtype) {
-                case "regex_extract":
-                    dispval = translations["textextract-regex"].replace("{0}", translations[values[0]]).replace("{1}", values[1]);
-                    break;
-                case "substring":
-                    const range_from = values[1], range_to = values[2];
-                    if (!range_from&&!range_to) {
-                        dispval = translations["textextract-sub_missingvalue"];
-                    } else if (range_from&&!range_to) {
-                        dispval = translations["textextract-sub_from"].replace("{0}",translations[values[0]]).replace("{1}", range_from);
-                    } else if (!range_from&&range_to) {
-                        dispval = translations["textextract-sub_to"].replace("{0}",translations[values[0]]).replace("{1}", range_to);
-                    } else if (range_from&&range_to) {
-                        dispval = translations["textextract-sub_fromto"].replace("{0}",translations[values[0]]).replace("{1}", range_from).replace("{2}", range_to);
-                    }
-                    break;
-                case "first":
-                    dispval = translations["textextract-first"].replace("{0}", translations[values[0]]).replace("{1}", values[1]);
-                    break;
-                case "last":
-                    dispval = translations["textextract-last"].replace("{0}", translations[values[0]]).replace("{1}", values[1]);
-                    break;
-                default:
-                    dispval = translations["textextract-whole"].replace("{0}",translations[values[0]]);
-                    break;
-            }
-            break;
-        case "input":
-            const val = values[0] ? values[0] : translations["textcondition-missingvalue"];
-            switch (operationtype){
-                case "equals":
-                    dispval = translations["textcondition-equals"].replace("{0}", val);
-                    break;
-                case "includes":
-                    const range_includes_from = values[1], range_includes_to = values[2];
-                    if (!range_includes_from && !range_includes_to) {
-                        dispval = translations["textcondition-one"].replace("{0}", val);
-                    } else if (range_includes_from && !range_includes_to) {
-                        dispval = translations["textcondition-rangefrom"].replace("{0}", val).replace("{1}", range_includes_from);
-                    } else if (!range_includes_from && range_includes_to) {
-                        dispval = translations["textcondition-rangeto"].replace("{0}", val).replace("{1}", range_includes_to);
-                    } else if (range_includes_from && range_includes_to) {
-                        dispval = translations["textcondition-rangefromto"].replace("{0}", val).replace("{1}", range_includes_from).replace("{2}", range_includes_to);
-                    }
-                    break;
-                case "regex_match":
-                    dispval = translations["textcondition-regex"].replace("{0}", val);
-                    break;
-            }
-            break;
-    }
-    return dispval
-}
-
-/**
- * Validator for text dialog form
- */
-function textDialogValidator() {
-    let valid = false;
-    document.getElementById("textSubmitButton").disabled = "disabled";
-    if (document.getElementById("textenterradio").checked) {
-        valid = document.getElementById("textEnter").value != "";
-    } else if (document.getElementById("textenvradio").checked) {
-        valid = document.getElementById("textEnvSelect").value != "";
-    }
-    document.getElementById("textSubmitButton").disabled = !valid ? "disabled" : "";
-}
-
-/**
- * Validator for text condition dialog form
- */
-function textConditionDialogValidator() {
-    if (conditionEditor && conditionEditor.textConditionDialog) {
-        conditionEditor.textConditionDialog.validate();
-    }
-}
-
-/**
- * Validator for numeric dialog form - wrapper for backward compatibility
- */
-function numDialogValidator(formula){
-    if (conditionEditor && conditionEditor.numericDialog) {
-        conditionEditor.numericDialog.validate();
-    }
-}
-
-/**
- * Opens text input dialog for variable/environment extraction
- */
-function inputText(currentvalue, currenttype, currentextractor, currentextractorval, includeenv, includeenter, callback, validator){
-    document.getElementById("textBody").className = "";
-    document.getElementById("textBody").classList.add("modal-body");
-    document.getElementById("textBody").classList.add("textselection");
-    document.getElementById("textenvradio").checked = currenttype == "env";
-    document.getElementById("textEnvSelect").value = currenttype == "env" ? currentvalue : "event_message";
-    document.getElementById("textenterradio").checked = currenttype == "variable";
-    document.getElementById("textEnter").value = currenttype == "variable" ? currentvalue : "";
-    document.getElementById("textValidator").value = validator ?? "";
-
-    document.getElementById('textEnterArea').classList.remove('available');
-    document.getElementById('textEnvArea').classList.remove('available');
-    document.getElementById('textExtArea').classList.remove('available');
-    document.getElementById('textExtSelect').disabled = currenttype == "variable" || !includeenv ? "disabled" : "";
-    document.getElementById('textExtSelect').value=currentextractor??"wholesentence";
-    document.getElementById('textExtRegex').style['display']= currentextractor=="regex_extract" ? "inline-block":"none";
-    document.getElementById('textExtRegex').value=currentextractor=="regex_extract"?currentextractorval:"";
-    document.getElementById('textExtSubFrom').style['display']= currentextractor=="substring" ? "inline-block":"none";
-    document.getElementById('textExtSubFrom').value=currentextractor=="substring"?currentextractorval?.split("-")[0]:"";
-    document.getElementById('textExtSubTo').style['display']= currentextractor=="substring" ? "inline-block":"none";
-    document.getElementById('textExtSubTo').value=currentextractor=="substring"&&currentextractorval?.length>1?currentextractorval.split("-")[1]:"";
-    document.getElementById('textExtFirst').style['display']= currentextractor=="first" ? "inline-block":"none";
-    document.getElementById('textExtFirst').value=currentextractor=="first"?currentextractorval:"";
-    document.getElementById('textExtLast').style['display']= currentextractor=="last" ? "inline-block":"none";
-    document.getElementById('textExtLast').value=currentextractor=="last"?currentextractorval:"";
-    document.getElementById("textenterradio").style["display"]= includeenter ? "inline-block" : "none";
     
-    if (currenttype == "env" || !includeenter) {
-        document.getElementById('textEnvArea').classList.add('available');
-        document.getElementById('textExtArea').classList.add('available');
-    } else if (currenttype == "variable" || !includeenv) {
-        document.getElementById('textEnterArea').classList.add('available');
+    /**
+     * Appends a calculation operator to the formula
+     */
+    appendOperator(operatortype) {
+        this.appendItemToFormula({"Operator": operatortype, SubConditions: null, Variables: null});
     }
-    if (includeenter) {
-        document.getElementById("textBody").classList.add("includeenter");
-        document.getElementById("textenvradio").style["display"]= "inline-block";
-    } else {
-        document.getElementById("textenvradio").checked = true;
-        document.getElementById("textenvradio").style["display"]= "none";
+
+    /**
+     * Appends a value to the calculation formula
+     */
+    appendValue() {
+        this.editor.textDialog.open(null, null, null, null, true, true, function(dispval, val, type, exttype, extval){
+            let appendnode;
+            if (type == "env") {
+                if (exttype && exttype != "wholesentence" && extval) {
+                    appendnode = {"Operator": "PARSEINT", "SubConditions": [{"Operator": this.editor.operatormap[exttype], "SubConditions": [{"Operator": "PARAM", "SubConditions": null, "Variables": [val]}], "Variables": [extval]}], "Variables": null };
+                } else {
+                    appendnode = {"Operator": "PARSEINT", "SubConditions": [{"Operator": "PARAM", "SubConditions": null, "Variables": [val]}], "Variables": null };
+                }
+            } else if (type == "variable") {
+                appendnode = {"Operator": "PARSEINT", "SubConditions": null, "Variables": [val]};
+            }
+            if (appendnode) {
+                this.appendItemToFormula(appendnode);
+            }
+        }.bind(this), "^[0-9]+(\\.[0-9]+)?$");
     }
-    if (includeenv) {
-        document.getElementById("textBody").classList.add("includeenv");
-        document.getElementById("textenterradio").style["display"]= "inline-block";
-    } else {
-        document.getElementById("textenterradio").checked = true;
-        document.getElementById("textenterradio").style["display"]= "none";
+
+    /**
+     * Visualizes the calculation formula
+     */
+    visualizeFormula(val){
+        const current = document.getElementById("calcformula").value;
+        let formula;
+        try {
+            formula = JSON.parse(current);
+        } catch {
+            formula = {};
+        }
+        document.getElementById("visualizedcalc").after(document.getElementById("calccursor"));
+        document.getElementById("visualizedcalc").replaceChildren();
+        this.appendElem(formula, document.getElementById("visualizedcalc"), "");
+        document.getElementById("calcdisplay").innerText = document.getElementById("visualizedcalc").innerText;
+        const insertTopPlaceHolder = document.createElement("span");
+        insertTopPlaceHolder.innerHTML = "&nbsp;";
+        insertTopPlaceHolder.style["display"] = "inline-block";
+        insertTopPlaceHolder.style["width"] = "0.3rem";
+        insertTopPlaceHolder.style["height"] = "1.5rem";
+        insertTopPlaceHolder.onclick = function(e){
+            document.getElementById("calccursorpos").value = "/sub:0:pre";
+            this.setCursor(JSON.parse(document.getElementById("calcformula").value));
+        }.bind(this);
+        document.getElementById("visualizedcalc").prepend(insertTopPlaceHolder);
+        this.setCursor(formula);
     }
-    textDialogValidator();
-    document.getElementById("textModal").style["display"] = "block";
-    document.getElementById("textSubmitButton").onclick = ()=>{
-        let dispval,val,type,exttype,extval;
-        if (document.getElementById("textenterradio").checked) {
-            dispval = document.getElementById("textEnter").value;
-            val = document.getElementById("textEnter").value;
-            type = "variable";
-        } else if (document.getElementById("textenvradio").checked) {
-            val = document.getElementById("textEnvSelect").value;
-            type = "env";
-            exttype = document.getElementById("textExtSelect").value;
-            switch (exttype) {
-                case "regex_extract":
-                    extval = document.getElementById("textExtRegex").value;
-                    dispval = generageDisplayText("extract", "regex_extract", val, extval);
+
+    /**
+     * Updates cursor position in the formula editor
+     */
+    updateCursor(e){
+        document.getElementById("calccursorpos").value = e.target.getAttribute("path");
+        this.setCursor(JSON.parse(document.getElementById("calcformula").value));
+        event.stopPropagation();
+    }
+
+    /**
+     * Sets the cursor position in the formula
+     */
+    setCursor(node) {
+        const cursorpath = document.getElementById("calccursorpos").value;
+        let targetelement = document.getElementById("visualizedcalc");
+        let prepending = false;
+        for (const i in cursorpath.split("/")) {
+            const address = cursorpath.split("/")[i];
+            if (!address) {
+                continue;
+            }
+            const type = address.split(":")[0];
+            const index = address.split(":")[1];
+            prepending = address.split(":").length > 2 && address.split(":")[2] == "pre";
+            const directChildren = Array.from(targetelement.children).filter(child => child.classList.contains(type));
+            targetelement = directChildren[index];
+        }
+        if (targetelement) {
+            if (prepending) {
+                targetelement.prepend(document.getElementById("calccursor"));
+            } else {
+                targetelement.append(document.getElementById("calccursor"));
+            }
+        } else {
+            document.getElementById("visualizedcalc").append(document.getElementById("calccursor"));
+        }
+    }
+
+    /**
+     * Appends a calculation element to the UI
+     */
+    appendElem(node, base, path) {
+        if (node) {
+            switch(node.Operator) {
+                case "ADD":
+                    for (const i in node.SubConditions) {
+                        if (base.childNodes.length) {
+                            const plussign = document.createElement("span");
+                            plussign.innerText = "＋";
+                            plussign.setAttribute("path",  path + "/sub:" + i + ":pre");
+                            plussign.onclick = this.updateCursor.bind(this);
+                            plussign.classList.add("plussign");
+                            base.append(plussign);
+                        }
+                        const child = document.createElement("span");
+                        child.classList.add("sub");
+                        if (node.SubConditions[i].SubConditions && node.SubConditions[i].SubConditions.length > 1) {
+                            child.classList.add("plusbracket");
+                        }
+                        child.setAttribute("path",  path + "/sub:" + i);
+                        child.onclick = this.updateCursor.bind(this);
+                        this.appendElem(node.SubConditions[i], child, path + "/sub:" + i);
+                        base.append(child);
+                    }
+                    for (const i in node.Variables) {
+                        if (base.childNodes.length) {
+                            const plussign = document.createElement("span");
+                            plussign.classList.add("plussign");
+                            plussign.setAttribute("path",  path + "/const:" + i + ":pre");
+                            plussign.onclick = this.updateCursor.bind(this);
+                            plussign.innerText = "＋";
+                            base.append(plussign);
+                        }
+                        const prependelem = document.createElement("span");
+                        prependelem.setAttribute("path",  path + "/const:" + i);
+                        prependelem.onclick = this.updateCursor.bind(this);
+                        prependelem.classList.add("prepend");
+                        base.append(prependelem);
+                        const variableelem = document.createElement("span");
+                        variableelem.classList.add("const");
+                        variableelem.classList.add("add");
+                        variableelem.setAttribute("path",  path + "/const:" + i);
+                        variableelem.onclick = this.updateCursor.bind(this);
+                        variableelem.innerText = node.Variables[i];
+                        base.append(variableelem);
+                        const appendelem = document.createElement("span");
+                        appendelem.classList.add("append");
+                        appendelem.setAttribute("path",  path + "/const:" + i);
+                        appendelem.onclick = this.updateCursor.bind(this);
+                        base.append(appendelem);
+                    }
+                    if ((!node.SubConditions || node.SubConditions.length < 2) && (!node.Variables || node.Variables.length < 2)) {
+                        if ((!node.SubConditions || node.SubConditions.length < 1) && (!node.Variables || node.Variables.length < 1)){
+                            const placeholder = document.createElement("span");
+                            placeholder.classList.add("placeholder");
+                            placeholder.innerText = translations["calc-missingvalue"];
+                            placeholder.setAttribute("path",  path + "/placeholder:0");
+                            placeholder.onclick = this.fillPlaceHolder.bind(this);
+                            base.append(placeholder);
+                        }
+                        if (path != "") {
+                            const plussign = document.createElement("span");
+                            plussign.innerText = "＋";
+                            base.append(plussign);
+                            const placeholder = document.createElement("span");
+                            placeholder.classList.add("placeholder");
+                            placeholder.innerText = translations["calc-missingvalue"];
+                            placeholder.setAttribute("path",  path + "/placeholder:0");
+                            placeholder.onclick = this.fillPlaceHolder.bind(this);
+                            base.append(placeholder);
+                        }
+                    }
                     break;
-                case "substring":
-                    extval = `${document.getElementById('textExtSubFrom').value}-${document.getElementById('textExtSubTo').value}`;
-                    dispval = generageDisplayText("extract", "substring", val, document.getElementById('textExtSubFrom').value, document.getElementById('textExtSubTo').value);
+                case "MULTIPLY":
+                    for (const i in node.SubConditions) {
+                        if (base.childNodes.length) {
+                            const multiplysign = document.createElement("span");
+                            multiplysign.innerText = "×";
+                            multiplysign.setAttribute("path",  path + "/sub:" + i + ":pre");
+                            multiplysign.onclick = this.updateCursor.bind(this);
+                            multiplysign.classList.add("multiplysign");
+                            base.append(multiplysign);
+                        }
+                        const child = document.createElement("span");
+                        if (node.SubConditions[i].SubConditions && node.SubConditions[i].SubConditions.length > 1) {
+                            child.classList.add("multiplybracket");
+                        }
+                        child.classList.add("sub");
+                        this.appendElem(node.SubConditions[i], child, path + "/sub:" + i);
+                        if (child.childNodes.length && node.SubConditions[i].Operator != "PARAM" && node.SubConditions[i].Operator != "PARSEINT") {
+                            const bracketbegin = document.createElement("span");
+                            bracketbegin.innerText = "(";
+                            bracketbegin.setAttribute("path",  path + "/sub:" + i + ":pre");
+                            bracketbegin.onclick = this.updateCursor.bind(this);
+                            child.prepend(bracketbegin);
+                            const bracketend = document.createElement("span");
+                            bracketend.innerText = ")";
+                            bracketend.setAttribute("path",  path + "/sub:" + i);
+                            bracketend.onclick = this.updateCursor.bind(this);
+                            child.append(bracketend);
+                        }
+                        child.setAttribute("path",  path + "/sub:" + i);
+                        child.onclick = this.updateCursor.bind(this);
+                        base.append(child);
+                    }
+                    for (const i in node.Variables) {
+                        if (base.childNodes.length) {
+                            const multiplysign = document.createElement("span");
+                            multiplysign.classList.add("multiplysign");
+                            multiplysign.setAttribute("path",  path + "/const:" + i + ":pre");
+                            multiplysign.onclick = this.updateCursor.bind(this);
+                            multiplysign.innerText = "×";
+                            base.append(multiplysign);
+                        }
+                        const prependelem = document.createElement("span");
+                        prependelem.setAttribute("path",  path + "/const:" + i);
+                        prependelem.onclick = this.updateCursor.bind(this);
+                        prependelem.classList.add("prepend");
+                        base.append(prependelem);
+                        const variableelem = document.createElement("span");
+                        variableelem.classList.add("const");
+                        variableelem.classList.add("multiply");
+                        variableelem.setAttribute("path",  path + "/const:" + i);
+                        variableelem.onclick = this.updateCursor.bind(this);
+                        variableelem.innerText = node.Variables[i];
+                        base.append(variableelem);
+                        const appendelem = document.createElement("span");
+                        appendelem.classList.add("append");
+                        appendelem.setAttribute("path",  path + "/const:" + i);
+                        appendelem.onclick = this.updateCursor.bind(this);
+                        base.append(appendelem);
+                    }
+                    if ((!node.SubConditions || node.SubConditions.length < 2) && (!node.Variables || node.Variables.length < 2)) {
+                        if ((!node.SubConditions || node.SubConditions.length < 1) && (!node.Variables || node.Variables.length < 1)){
+                            const placeholder = document.createElement("span");
+                            placeholder.classList.add("placeholder");
+                            placeholder.innerText = translations["calc-missingvalue"];
+                            placeholder.setAttribute("path",  path + "/placeholder:0");
+                            placeholder.onclick = this.fillPlaceHolder.bind(this);
+                            base.append(placeholder);
+                        }
+                        const multiplysign = document.createElement("span");
+                        multiplysign.innerText = "×";
+                        base.append(multiplysign);
+                        const placeholder = document.createElement("span");
+                        placeholder.classList.add("placeholder");
+                        placeholder.innerText = translations["calc-missingvalue"];
+                        placeholder.setAttribute("path",  path + "/placeholder:0");
+                        placeholder.onclick = this.fillPlaceHolder.bind(this);
+                        base.append(placeholder);
+                    }
                     break;
-                case "first":
-                    extval = document.getElementById("textExtFirst").value;
-                    dispval = generageDisplayText("extract", "first", val, extval);
+                case "SUBTRACT":
+                    for (const i in node.SubConditions) {
+                        if (base.childNodes.length) {
+                            const minussign = document.createElement("span");
+                            minussign.innerText = "－";
+                            minussign.setAttribute("path",  path + "/sub:" + i + ":pre");
+                            minussign.onclick = this.updateCursor.bind(this);
+                            minussign.classList.add("minussign");
+                            base.append(minussign);
+                        }
+                        const child = document.createElement("span");
+                        child.classList.add("sub");
+                        if (node.SubConditions[i].SubConditions && node.SubConditions[i].SubConditions.length > 1) {
+                            child.classList.add("minusbracket");
+                        }
+                        child.setAttribute("path",  path + "/sub:" + i);
+                        child.onclick = this.updateCursor.bind(this);
+                        this.appendElem(node.SubConditions[i], child, path + "/sub:" + i);
+                        base.append(child);
+                    }
+                    for (const i in node.Variables) {
+                        if (base.childNodes.length) {
+                            const minussign = document.createElement("span");
+                            minussign.classList.add("minussign");
+                            minussign.setAttribute("path",  path + "/const:" + i + ":pre");
+                            minussign.onclick = this.updateCursor.bind(this);
+                            minussign.innerText = "－";
+                            base.append(minussign);
+                        }
+                        const prependelem = document.createElement("span");
+                        prependelem.setAttribute("path",  path + "/const:" + i);
+                        prependelem.onclick = this.updateCursor.bind(this);
+                        prependelem.classList.add("prepend");
+                        base.append(prependelem);
+                        const variableelem = document.createElement("span");
+                        variableelem.classList.add("const");
+                        variableelem.classList.add("subtract");
+                        variableelem.setAttribute("path",  path + "/const:" + i);
+                        variableelem.onclick = this.updateCursor.bind(this);
+                        variableelem.innerText = node.Variables[i];
+                        base.append(variableelem);
+                        const appendelem = document.createElement("span");
+                        appendelem.classList.add("append");
+                        appendelem.setAttribute("path",  path + "/const:" + i);
+                        appendelem.onclick = this.updateCursor.bind(this);
+                        base.append(appendelem);
+                    }
+                    if ((!node.SubConditions || node.SubConditions.length < 2) && (!node.Variables || node.Variables.length < 2)) {
+                        if ((!node.SubConditions || node.SubConditions.length < 1) && (!node.Variables || node.Variables.length < 1)){
+                            const placeholder = document.createElement("span");
+                            placeholder.classList.add("placeholder");
+                            placeholder.innerText = translations["calc-missingvalue"];
+                            placeholder.setAttribute("path",  path + "/placeholder:0");
+                            placeholder.onclick = this.fillPlaceHolder.bind(this);
+                            base.append(placeholder);
+                        }
+                        const minussign = document.createElement("span");
+                        minussign.innerText = "－";
+                        base.append(minussign);
+                        const placeholder = document.createElement("span");
+                        placeholder.classList.add("placeholder");
+                        placeholder.innerText = translations["calc-missingvalue"];
+                        placeholder.setAttribute("path",  path + "/placeholder:0");
+                        placeholder.onclick = this.fillPlaceHolder.bind(this);
+                        base.append(placeholder);
+                    }
                     break;
-                case "last":
-                    extval = document.getElementById("textExtLast").value;
-                    dispval = generageDisplayText("extract", "last", val, extval);
+                case "DIVIDE":
+                    for (const i in node.SubConditions) {
+                        if (base.childNodes.length) {
+                            const divisionsign = document.createElement("span");
+                            divisionsign.innerText = "÷";
+                            divisionsign.setAttribute("path",  path + "/sub:" + i + ":pre");
+                            divisionsign.onclick = this.updateCursor.bind(this);
+                            divisionsign.classList.add("divisionsign");
+                            base.append(divisionsign);
+                        }
+                        const child = document.createElement("span");
+                        if (node.SubConditions[i].SubConditions && node.SubConditions[i].SubConditions.length > 1) {
+                            child.classList.add("divisionbracket");
+                        }
+                        child.classList.add("sub");
+                        this.appendElem(node.SubConditions[i], child, path + "/sub:" + i);
+                        if (child.childNodes.length && node.SubConditions[i].Operator != "PARAM" && node.SubConditions[i].Operator != "PARSEINT") {
+                            const bracketbegin = document.createElement("span");
+                            bracketbegin.innerText = "(";
+                            bracketbegin.setAttribute("path",  path + "/sub:" + i + ":pre");
+                            bracketbegin.onclick = this.updateCursor.bind(this);
+                            child.prepend(bracketbegin);
+                            const bracketend = document.createElement("span");
+                            bracketend.innerText = ")";
+                            bracketend.setAttribute("path",  path + "/sub:" + i);
+                            bracketend.onclick = this.updateCursor.bind(this);
+                            child.append(bracketend);
+                        }
+                        child.setAttribute("path",  path + "/sub:" + i);
+                        child.onclick = this.updateCursor.bind(this);
+                        base.append(child);
+                    }
+                    for (const i in node.Variables) {
+                        if (base.childNodes.length) {
+                            const divisionsign = document.createElement("span");
+                            divisionsign.classList.add("divisionsign");
+                            divisionsign.setAttribute("path",  path + "/const:" + i + ":pre");
+                            divisionsign.onclick = this.updateCursor.bind(this);
+                            divisionsign.innerText = "÷";
+                            base.append(divisionsign);
+                        }
+                        const prependelem = document.createElement("span");
+                        prependelem.setAttribute("path",  path + "/const:" + i);
+                        prependelem.onclick = this.updateCursor.bind(this);
+                        prependelem.classList.add("prepend");
+                        base.append(prependelem);
+                        const variableelem = document.createElement("span");
+                        variableelem.classList.add("const");
+                        variableelem.classList.add("division");
+                        variableelem.setAttribute("path",  path + "/const:" + i);
+                        variableelem.onclick = this.updateCursor.bind(this);
+                        variableelem.innerText = node.Variables[i];
+                        base.append(variableelem);
+                        const appendelem = document.createElement("span");
+                        appendelem.classList.add("append");
+                        appendelem.setAttribute("path",  path + "/const:" + i);
+                        appendelem.onclick = this.updateCursor.bind(this);
+                        base.append(appendelem);
+                    }
+                    if ((!node.SubConditions || node.SubConditions.length < 2) && (!node.Variables || node.Variables.length < 2)) {
+                        if ((!node.SubConditions || node.SubConditions.length < 1) && (!node.Variables || node.Variables.length < 1)){
+                            const placeholder = document.createElement("span");
+                            placeholder.classList.add("placeholder");
+                            placeholder.innerText = translations["calc-missingvalue"];
+                            placeholder.setAttribute("path",  path + "/placeholder:0");
+                            placeholder.onclick = this.fillPlaceHolder.bind(this);
+                            base.append(placeholder);
+                        }
+                        const divisionsign = document.createElement("span");
+                        divisionsign.innerText = "÷";
+                        base.append(divisionsign);
+                        const placeholder = document.createElement("span");
+                        placeholder.classList.add("placeholder");
+                        placeholder.innerText = translations["calc-missingvalue"];
+                        placeholder.setAttribute("path",  path + "/placeholder:0");
+                        placeholder.onclick = this.fillPlaceHolder.bind(this);
+                        base.append(placeholder);
+                    }
                     break;
-                default:
-                    extval = "";
-                    exttype = "wholesentence";
-                    dispval = generageDisplayText("extract", "wholesentence", val);
+                case "MODULO":
+                    const items_modulo = [];
+                    for (const i in node.SubConditions) {
+                        const child = document.createElement("span");
+                        if (node.SubConditions[i].SubConditions && node.SubConditions[i].SubConditions.length > 1) {
+                            child.classList.add("modulobracket");
+                        }
+                        child.classList.add("sub");
+                        this.appendElem(node.SubConditions[i], child, path + "/sub:" + i);
+                        if (child.childNodes.length && node.SubConditions[i].Operator != "PARAM" && node.SubConditions[i].Operator != "PARSEINT") {
+                            const bracketbegin = document.createElement("span");
+                            bracketbegin.innerText = "(";
+                            bracketbegin.setAttribute("path",  path + "/sub:" + i + ":pre");
+                            bracketbegin.onclick = this.updateCursor.bind(this);
+                            child.prepend(bracketbegin);
+                            const bracketend = document.createElement("span");
+                            bracketend.innerText = ")";
+                            bracketend.setAttribute("path",  path + "/sub:" + i);
+                            bracketend.onclick = this.updateCursor.bind(this);
+                            child.append(bracketend);
+                        }
+                        child.setAttribute("path",  path + "/sub:" + i);
+                        child.onclick = this.updateCursor.bind(this);
+                        items_modulo.push(child);
+                    }
+                    for (const i in node.Variables) {
+                        const variableelem = document.createElement("span");
+                        variableelem.classList.add("const");
+                        variableelem.classList.add("modulo");
+                        variableelem.setAttribute("path",  path + "/const:" + i);
+                        variableelem.onclick = this.updateCursor.bind(this);
+                        variableelem.innerText = node.Variables[i];
+                        items_modulo.push(variableelem);
+                    }
+                    if ((!node.SubConditions || node.SubConditions.length < 2) && (!node.Variables || node.Variables.length < 2)) {
+                        if ((!node.SubConditions || node.SubConditions.length < 1) && (!node.Variables || node.Variables.length < 1)){
+                            const placeholder = document.createElement("span");
+                            placeholder.classList.add("placeholder");
+                            placeholder.innerText = translations["calc-missingvalue"];
+                            placeholder.setAttribute("path",  path + "/placeholder:0");
+                            placeholder.onclick = this.fillPlaceHolder.bind(this);
+                            items_modulo.push(placeholder);
+                        }
+                        const placeholder = document.createElement("span");
+                        placeholder.classList.add("placeholder");
+                        placeholder.innerText = translations["calc-missingvalue"];
+                        placeholder.setAttribute("path",  path + "/placeholder:0");
+                        placeholder.onclick = this.fillPlaceHolder.bind(this);
+                        items_modulo.push(placeholder);
+                    }
+                    const modulosentense = document.createElement("span");
+                    modulosentense.classList.add("modulobracket", "sub");
+                    modulosentense.innerHTML = translations["modulo-sentense"].replace("{0}", '<span></span>').replace("{1}", '<span></span>');
+                    base.append(modulosentense);
+                    const span1 = modulosentense.children[0];
+                    const span2 = modulosentense.children[1];
+                    span1.replaceWith(items_modulo[0]);
+                    const dividedby = document.createElement("span");
+                    for(const i in items_modulo.slice(1)) {
+                        dividedby.append(items_modulo.slice(1)[i]);
+                    }
+                    span2.replaceWith(dividedby);
+                    break;
+                case "PARAM":
+                    for (const i in node.Variables) {
+                        const param = document.createElement("span");
+                        param.classList.add("param");
+                        param.classList.add("const");
+                        param.innerText = translations[node.Variables[i]];
+                        param.setAttribute("path",  path + "/param:" + i);
+                        param.onclick = this.updateCursor.bind(this);
+                        base.append(param);
+                    }
+                    break;
+                case "PARSEINT":
+                    const items_parseint = [];
+                    for (const i in node.SubConditions) {
+                        items_parseint.push(this.editor._summarize(node.SubConditions[i]));
+                    }
+                    for (const i in node.Variables) {
+                        items_parseint.push(node.Variables[i]);
+                    }
+                    const param = document.createElement("span");
+                    param.classList.add("parseint");
+                    param.innerHTML = translations["translations-value"].replace("{0}", items_parseint.join(translations["valueof-joint"]));
+                    param.setAttribute("path",  path);
+                    param.onclick = this.updateCursor.bind(this);
+                    base.append(param);
                     break;
             }
         }
-        callback(dispval, val, type, exttype, extval);
-        document.getElementById("textModal").style["display"] = "none";
-    };
-}
-
-/**
- * Opens text condition input dialog - wrapper for backward compatibility with HTML onclick handlers
- */
-function inputTextCondition(currenttype, currentrange, currentval, callback){
-    if (conditionEditor && conditionEditor.textConditionDialog) {
-        conditionEditor.textConditionDialog.open(currenttype, currentrange, currentval, callback);
     }
-}
 
-/**
- * Opens numeric input dialog - wrapper for backward compatibility with HTML onclick handlers
- */
-function inputNumber(currentformula, callback){
-    if (conditionEditor && conditionEditor.numericDialog) {
-        conditionEditor.numericDialog.open(currentformula, callback);
+    /**
+     * Appends an item to the calculation formula
+     */
+    appendItemToFormula(elem) {
+        const cursorpath = document.getElementById("calccursorpos").value;
+        const formula = JSON.parse(document.getElementById("calcformula").value?document.getElementById("calcformula").value:'{"Operator": "ADD", "SubConditions":null, "Variables": null}');
+        let targetcontainer = formula;
+        if (cursorpath.split("/").length>2) {
+            for (const i in cursorpath.split("/").slice(0, cursorpath.split("/").length-1)) {
+                const address = cursorpath.split("/")[i];
+                if (!address) {
+                    continue;
+                }
+                const type = address.split(":")[0];
+                const index = address.split(":")[1];
+                if (type=="sub" || type == "placeholder") {
+                    targetcontainer = targetcontainer.SubConditions[index];
+                } else if (type == "const") {
+                    targetcontainer = targetcontainer.Variables[index];
+                }
+            }
+        }
+        const address = cursorpath.split("/")[cursorpath.split("/").length-1];
+        const type = address.split(":")[0];
+        const index = address.split(":")[1];
+        const prepending = address.split(":").length > 2 && address.split(":")[2] == "pre";
+        if (cursorpath.length < 2 || type == "placeholder" || !address) {
+            if (targetcontainer.SubConditions) {
+                targetcontainer.SubConditions.push(elem);
+            } else {
+                targetcontainer.SubConditions = [elem];
+            }
+            document.getElementById("calccursorpos").value = document.getElementById("calccursorpos").value.replace("placeholder", "sub");
+        } else if (type == "sub") {
+            if (targetcontainer.SubConditions) {
+                targetcontainer.SubConditions.splice(index + (prepending?0:1), 0, elem);
+            } else {
+                targetcontainer.SubConditions = [elem];
+            }
+        } else if (type == "const" || type == "param") { // even if the cursor is on "variable", cannot splice between variables since the appendance is SubCondition anyway. Append to the last of SubConditions
+            if (targetcontainer.SubConditions) {
+                targetcontainer.SubConditions.push(elem);
+            } else {
+                targetcontainer.SubConditions = [elem];
+            }
+        }
+        document.getElementById("calcformula").value = JSON.stringify(formula);
+        this.visualizeFormula();
+        document.getElementById("calccursorpos").value = document.getElementById("calccursorpos").value.replace("placeholder", "sub");
+        this.validate();
+    }
+
+    /**
+     * Validates numeric formula
+     */
+    checkNumValid(formula, isRoot = false) {
+        if ((!formula.SubConditions || !formula.SubConditions.length) && (!formula.Variables || !formula.Variables.length)){
+            return false;
+        }
+        if (this.editor.calcoperators.includes(formula.Operator) && (formula.SubConditions ? formula.SubConditions.length : 0 + formula.Variables ? formula.Variables.length : 0) < (isRoot ? 1 : 2)) {
+            return false;
+        }
+        let subcheck = true;
+        for (const i in formula.SubConditions) {
+            subcheck &&= this.checkNumValid(formula.SubConditions[i]);
+        }
+        return subcheck;
+    }
+
+
+    /**
+     * Fills a placeholder in the calculation formula
+     */
+    fillPlaceHolder(e) {
+        document.getElementById("calccursorpos").value = e.target.getAttribute("path");
+        this.appendValue();
+        event.stopPropagation();
     }
 }
 
@@ -1530,233 +2180,6 @@ function closeModal(modalId) {
     if (modal) {
         modal.style.display = "none";
     }
-}
-
-// ============================================
-// Calculation Formula Functions
-// ============================================
-
-/**
- * Appends a calculation operator to the formula
- */
-function appendCalcOperator(operatortype) {
-    appendItemToFormula({"Operator": operatortype, SubConditions: null, Variables: null});
-}
-
-/**
- * Appends a value to the calculation formula
- */
-function appendCalcValue() {
-    inputText(null, null, null, null, true, true, function(dispval, val, type, exttype, extval){
-        let appendnode;
-        if (type == "env") {
-            if (exttype && exttype != "wholesentence" && extval) {
-                appendnode = {"Operator": "PARSEINT", "SubConditions": [{"Operator": operatormap[exttype], "SubConditions": [{"Operator": "PARAM", "SubConditions": null, "Variables": [val]}], "Variables": [extval]}], "Variables": null };
-            } else {
-                appendnode = {"Operator": "PARSEINT", "SubConditions": [{"Operator": "PARAM", "SubConditions": null, "Variables": [val]}], "Variables": null };
-            }
-        } else if (type == "variable") {
-            appendnode = {"Operator": "PARSEINT", "SubConditions": null, "Variables": [val]};
-        }
-        if (appendnode) {
-            appendItemToFormula(appendnode);
-        }
-    }, "^[0-9]+(\\.[0-9]+)?$");
-}
-
-/**
- * Visualizes the calculation formula
- */
-function visualizeFormula(val){
-    const current = document.getElementById("calcformula").value;
-    let formula;
-    try {
-        formula = JSON.parse(current);
-    } catch {
-        formula = {};
-    }
-    document.getElementById("visualizedcalc").after(document.getElementById("calccursor"));
-    document.getElementById("visualizedcalc").replaceChildren();
-    appendCalcElem(formula, document.getElementById("visualizedcalc"), "");
-    document.getElementById("calcdisplay").innerText = document.getElementById("visualizedcalc").innerText;
-    const insertTopPlaceHolder = document.createElement("span");
-    insertTopPlaceHolder.innerHTML = "&nbsp;";
-    insertTopPlaceHolder.style["display"] = "inline-block";
-    insertTopPlaceHolder.style["width"] = "0.3rem";
-    insertTopPlaceHolder.style["height"] = "1.5rem";
-    insertTopPlaceHolder.onclick = function(e){document.getElementById("calccursorpos").value = "/sub:0:pre"; setCursor(JSON.parse(document.getElementById("calcformula").value))};
-    document.getElementById("visualizedcalc").prepend(insertTopPlaceHolder);
-    setCursor(formula);
-}
-
-/**
- * Updates cursor position in the formula editor
- */
-function updateCursor(e){
-    document.getElementById("calccursorpos").value = e.target.getAttribute("path");
-    setCursor(JSON.parse(document.getElementById("calcformula").value));
-    event.stopPropagation();
-}
-
-/**
- * Fills a placeholder in the calculation formula
- */
-function fillPlaceHolder(e) {
-    document.getElementById("calccursorpos").value = e.target.getAttribute("path");
-    appendCalcValue();
-    event.stopPropagation();
-}
-
-/**
- * Sets the cursor position in the formula
- */
-function setCursor(node) {
-    const cursorpath = document.getElementById("calccursorpos").value;
-    let targetelement = document.getElementById("visualizedcalc");
-    let prepending = false;
-    for (const i in cursorpath.split("/")) {
-        const address = cursorpath.split("/")[i];
-        if (!address) {
-            continue;
-        }
-        const type = address.split(":")[0];
-        const index = address.split(":")[1];
-        prepending = address.split(":").length > 2 && address.split(":")[2] == "pre";
-        const directChildren = Array.from(targetelement.children).filter(child => child.classList.contains(type));
-        targetelement = directChildren[index];
-    }
-    if (prepending) {
-        targetelement.prepend(document.getElementById("calccursor"));
-    } else {
-        targetelement.append(document.getElementById("calccursor"));
-    }
-}
-
-/**
- * Appends a calculation element to the UI
- */
-function appendCalcElem(node, base, path) {
-    if (node) {
-        switch(node.Operator) {
-            case "ADD":
-                for (const i in node.SubConditions) {
-                    if (base.childNodes.length) {
-                        const plussign = document.createElement("span");
-                        plussign.innerText = "＋";
-                        plussign.setAttribute("path",  path + "/sub:" + i + ":pre");
-                        plussign.onclick = updateCursor;
-                        plussign.classList.add("plussign");
-                        base.append(plussign);
-                    }
-                    const child = document.createElement("span");
-                    child.classList.add("sub");
-                    if (node.SubConditions[i].SubConditions && node.SubConditions[i].SubConditions.length > 1) {
-                        child.classList.add("plusbracket");
-                    }
-                    child.setAttribute("path",  path + "/sub:" + i);
-                    child.onclick = updateCursor;
-                    appendCalcElem(node.SubConditions[i], child, path + "/sub:" + i);
-                    base.append(child);
-                }
-                for (const i in node.Variables) {
-                    if (base.childNodes.length) {
-                        const plussign = document.createElement("span");
-                        plussign.classList.add("plussign");
-                        plussign.setAttribute("path",  path + "/const:" + i + ":pre");
-                        plussign.onclick = updateCursor;
-                        plussign.innerText = "＋";
-                        base.append(plussign);
-                    }
-                    const prependelem = document.createElement("span");
-                    prependelem.setAttribute("path",  path + "/const:" + i);
-                    prependelem.onclick = updateCursor;
-                    prependelem.classList.add("prepend");
-                    base.append(prependelem);
-                    const variableelem = document.createElement("span");
-                    variableelem.classList.add("const");
-                    variableelem.classList.add("add");
-                    variableelem.setAttribute("path",  path + "/const:" + i);
-                    variableelem.onclick = updateCursor;
-                    variableelem.innerText = node.Variables[i];
-                    base.append(variableelem);
-                    const appendelem = document.createElement("span");
-                    appendelem.classList.add("append");
-                    appendelem.setAttribute("path",  path + "/const:" + i);
-                    appendelem.onclick = updateCursor;
-                    base.append(appendelem);
-                }
-                if ((!node.SubConditions || node.SubConditions.length < 2) && (!node.Variables || node.Variables.length < 2)) {
-                    if ((!node.SubConditions || node.SubConditions.length < 1) && (!node.Variables || node.Variables.length < 1)){
-                        const placeholder = document.createElement("span");
-                        placeholder.classList.add("placeholder");
-                        placeholder.innerText = translations["calc-missingvalue"];
-                        placeholder.setAttribute("path",  path + "/placeholder:0");
-                        placeholder.onclick = fillPlaceHolder;
-                        base.append(placeholder);
-                    }
-                    if (path != "") {
-                        const plussign = document.createElement("span");
-                        plussign.innerText = "＋";
-                        base.append(plussign);
-                        const placeholder = document.createElement("span");
-                        placeholder.classList.add("placeholder");
-                        placeholder.innerText = translations["calc-missingvalue"];
-                        placeholder.setAttribute("path",  path + "/placeholder:0");
-                        placeholder.onclick = fillPlaceHolder;
-                        base.append(placeholder);
-                    }
-                }
-                break;
-        }
-    }
-}
-
-/**
- * Appends an item to the calculation formula
- */
-function appendItemToFormula(elem) {
-    const cursorpath = document.getElementById("calccursorpos").value;
-    const formula = JSON.parse(document.getElementById("calcformula").value?document.getElementById("calcformula").value:'{"Operator": "ADD", "SubConditions":null, "Variables": null}');
-    let targetcontainer = formula;
-    if (cursorpath.split("/").length>2) {
-        for (const i in cursorpath.split("/").slice(0, cursorpath.split("/").length-1)) {
-            const address = cursorpath.split("/")[i];
-            if (!address) {
-                continue;
-            }
-            const type = address.split(":")[0];
-            const index = address.split(":")[1];
-            if (type=="sub" || type == "placeholder") {
-                targetcontainer = targetcontainer.SubConditions[index];
-            } else if (type == "const") {
-                targetcontainer = targetcontainer.Variables[index];
-            }
-        }
-    }
-    const address = cursorpath.split("/")[cursorpath.split("/").length-1];
-    const type = address.split(":")[0];
-    const index = address.split(":")[1];
-    
-    if (type == "sub" || type == "placeholder") {
-        if (!targetcontainer.SubConditions) targetcontainer.SubConditions = [];
-        targetcontainer.SubConditions[index] = elem;
-    } else if (type == "const") {
-        if (!targetcontainer.Variables) targetcontainer.Variables = [];
-        targetcontainer.Variables[index] = elem;
-    }
-    document.getElementById("calcformula").value = JSON.stringify(formula);
-    visualizeFormula(formula);
-    numDialogValidator(formula);
-}
-
-/**
- * Validates numeric formula
- */
-function checkNumValid(formula) {
-    if ((!formula.SubConditions || !formula.SubConditions.length) && (!formula.Variables || !formula.Variables.length)){
-        return false;
-    }
-    return true;
 }
 
 // ============================================

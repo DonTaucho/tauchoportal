@@ -130,30 +130,24 @@
             </div>
             <div id="textBody" class="modal-body textselection">
             <div>
-                <div id="textEnvArea" class="selector envselection" onclick="document.getElementById('textenvradio').checked=true;document.getElementById('textEnvArea').classList.add('available');document.getElementById('textEnterArea').classList.remove('available');document.getElementById('textExtArea').classList.add('available');document.getElementById('textExtSelect').disabled='';textDialogValidator();">
+                <div id="textEnvArea" class="selector envselection">
                 <h4><input id="textenvradio" type="radio" name="inputtextradio"> Select Input Parameter</h4>
-                <select id="textEnvSelect" onchange="textDialogValidator()">
+                <select id="textEnvSelect">
                     <option value="event_message">comment</option>
                     <option value="event_sender_id">senderid</option>
                     <option value="event_amount">amount</option>
                 </select>
                 </div>
-                <div id="textEnterArea" class="selector entervalue" onclick="document.getElementById('textenterradio').checked=true;document.getElementById('textEnterArea').classList.add('available');document.getElementById('textEnvArea').classList.remove('available');document.getElementById('textExtArea').classList.remove('available');document.getElementById('textExtSelect').disabled='';textDialogValidator();">
+                <div id="textEnterArea" class="selector entervalue">
                 <h4><input id="textenterradio" type="radio" name="inputtextradio"> Static Value</h4>
-                <input id="textEnter" onchange="textDialogValidator()" type="text" >
+                <input id="textEnter" type="text" >
                 <input id="textValidator" type="hidden" >
                 </div>
             </div>
             <div class="extractorselection">
-                <div id="textExtArea" class="selector textextractor" onclick="document.getElementById('textenvradio').checked=true;document.getElementById('textEnvArea').classList.add('available');document.getElementById('textExtArea').classList.add('available');textDialogValidator();">
+                <div id="textExtArea" class="selector textextractor">
                 <h4>Extract</h4>
-                <select id="textExtSelect" onchange="textDialogValidator();
-                document.getElementById('textExtRegex').style['display']=this.value=='regex_extract'?'inline-block':'none';
-                document.getElementById('textExtSubFrom').style['display']=this.value=='substring'?'inline-block':'none';
-                document.getElementById('textExtSubTo').style['display']=this.value=='substring'?'inline-block':'none';
-                document.getElementById('textExtFirst').style['display']=this.value=='first'?'inline-block':'none';
-                document.getElementById('textExtLast').style['display']=this.value=='last'?'inline-block':'none';
-                ">
+                <select id="textExtSelect">
                     <option value="wholesentence">Whole Sentence</option>
                     <option value="regex_extract">Regex</option>
                     <option value="substring">Substring</option>
@@ -161,10 +155,10 @@
                     <option value="last">Last</option>
                 </select>
                 <div>
-                    <input id="textExtRegex" type="text" style="display:none" onchange="textDialogValidator()"/>
-                    <input id="textExtSubFrom" type="number" inputmode="numeric" min="1" max="999" pattern="[0-9]*" class="numerictext" style="display:none" onchange="textDialogValidator()" /><input id="textExtSubTo" type="number" class="numerictext" inputmode="numeric" min="1" max="999" pattern="[0-9]*" style="display:none" onchange="textDialogValidator()" />
-                    <input id="textExtFirst" type="number" inputmode="numeric" min="1" max="999" pattern="[0-9]*" class="numerictext" style="display:none" onchange="textDialogValidator()" />
-                    <input id="textExtLast" type="number" inputmode="numeric" min="1" max="999" pattern="[0-9]*" class="numerictext" style="display:none" onchange="textDialogValidator()" />
+                    <input id="textExtRegex" type="text" style="display:none"/>
+                    <input id="textExtSubFrom" type="number" inputmode="numeric" min="1" max="999" pattern="[0-9]*" class="numerictext" style="display:none" /><input id="textExtSubTo" type="number" class="numerictext" inputmode="numeric" min="1" max="999" pattern="[0-9]*" style="display:none" />
+                    <input id="textExtFirst" type="number" inputmode="numeric" min="1" max="999" pattern="[0-9]*" class="numerictext" style="display:none" />
+                    <input id="textExtLast" type="number" inputmode="numeric" min="1" max="999" pattern="[0-9]*" class="numerictext" style="display:none" />
                 </div>
                 </div>
             </div>
@@ -188,13 +182,6 @@
                 </div>
                 <span id="calccursor">|</span>
                 <div id="calctoolarea">
-                    <div class="calcoperator" onclick='appendCalcOperator("ADD")'>＋</div>
-                    <div class="calcoperator" onclick='appendCalcOperator("SUBTRACT")'>－</div>
-                    <div class="calcoperator" onclick='appendCalcOperator("MULTIPLY")'>×</div>
-                    <div class="calcoperator" onclick='appendCalcOperator("DIVIDE")'>÷</div>
-                    <div class="calcoperator" onclick='appendCalcOperator("MODULO")'>≡</div>
-                    <hr />
-                    <div class="calcvalinputbutton"><a onclick='appendCalcValue()'>Select Item</a></div>
                 </div>
                 </div>
                 <input type="hidden" id="calcformula" value=''/>
@@ -217,16 +204,16 @@
                 <p>Condition of text.</p>
             </div>
             <div id="textConditionBody" class="modal-body">
-            <div id="ext_eq" class="selector" onclick="textConditionDialogValidator();document.getElementById('textConditionEqualradio').checked=true;document.getElementById('ext_eq').classList.add('available');document.getElementById('ext_range').classList.remove('available');document.getElementById('ext_reg').classList.remove('available');textConditionDialogValidator()">
+            <div id="ext_eq" class="selector">
                 <input id="textConditionEqualradio" type="radio" name="textconditionradio">
                 EQUALS(Exact Match)
-                <input id="textconditionequals" type="text" onchange="textConditionDialogValidator()" />
+                <input id="textconditionequals" type="text" />
             </div>
-            <div id="ext_range" class="selector" onclick="textConditionDialogValidator();document.getElementById('textconditionrangeradio').checked=true;document.getElementById('ext_eq').classList.remove('available');document.getElementById('ext_range').classList.add('available');document.getElementById('ext_reg').classList.remove('available');textConditionDialogValidator()">
+            <div id="ext_range" class="selector">
                 <div class="textconditionincludes">
                 <input id="textconditionrangeradio" type="radio" name="textconditionradio">
                 Includes
-                <input id="textconditionrangetext" type="text" onchange="textConditionDialogValidator()" />
+                <input id="textconditionrangetext" type="text" />
                 </div>
                 <div class="textrangeinput">
                     <h5>Specific Range?</h5>
@@ -235,10 +222,10 @@
                     </div>
                 </div>
             </div>
-            <div id="ext_reg" class="selector" onclick="textConditionDialogValidator();document.getElementById('textconditionregexradio').checked=true;document.getElementById('ext_eq').classList.remove('available');document.getElementById('ext_range').classList.remove('available');document.getElementById('ext_reg').classList.add('available');textConditionDialogValidator()">
+            <div id="ext_reg" class="selector">
                 <input id="textconditionregexradio" type="radio" name="textconditionradio">
                 REGEX
-                <input id="textconditionregex" type="text" onchange="textConditionDialogValidator()" />
+                <input id="textconditionregex" type="text" />
             </div>
             </div>
             <div class="modal-footer">

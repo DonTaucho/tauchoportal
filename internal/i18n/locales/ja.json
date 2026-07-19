@@ -269,6 +269,7 @@
   "condition.regex-missingvalue": "未設定",
   "condition.regex-sentense": "{0}の値が{1}に整合する",
   "condition.calc-missingvalue": "未設定",
+  "condition.calcvalinput": "値を入力",
   "condition.plus-joint": " 足す ",
   "condition.subtract-joint": " 引く ",
   "condition.multiply-joint": " かける ",
