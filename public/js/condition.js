@@ -41,44 +41,9 @@ class ConditionEditor {
         this.calcoperators = ["ADD", "SUBTRACT", "MULTIPLY", "DIVIDE", "MODULO"];
         this.convoperators = ["PARSEINT", "EXCHANGE"];
 
-        this.namingmap = {
-            "AND": "and", "OR": "or", "NOT": "not", "SOME": "some",
-            "EQUIVALENT": "equivalent", "GREATER_THAN": "greater_than",
-            "GREATER_OR_EQUAL": "greater_or_equal", "LESS_THAN": "less_than",
-            "LESS_OR_EQUAL": "less_or_equal", "EQUALS": "equals",
-            "INCLUDES": "includes", "REGEX_MATCH": "regex_match",
-            "COUNT": "count", "SUM": "sum", "WHOLESENTENCE": "wholesentence",
-            "REGEX_EXTRACT": "regex_extract", "SUBSTRING": "substring",
-            "FIRST": "first", "LAST": "last", "ADD": "add",
-            "SUBTRACT": "subtract", "MULTIPLY": "multiply",
-            "DIVIDE": "divide", "MODULO": "modulo",
-            "PARSEINT": "parseint", "EXCHANGE": "exchange", "PARAM": "param"
-        };
-
-        this.operatormap = {
-            "and": "AND", "or": "OR", "not": "NOT", "some": "SOME",
-            "equivalent": "EQUIVALENT", "greater_than": "GREATER_THAN",
-            "greater_or_equal": "GREATER_OR_EQUAL", "less_than": "LESS_THAN",
-            "less_or_equal": "LESS_OR_EQUAL", "equals": "EQUALS",
-            "includes": "INCLUDES", "regex_match": "REGEX_MATCH",
-            "count": "COUNT", "sum": "SUM", "wholesentence": "WHOLESENTENCE",
-            "regex_extract": "REGEX_EXTRACT", "substring": "SUBSTRING",
-            "first": "FIRST", "last": "LAST", "add": "ADD",
-            "subtract": "SUBTRACT", "multiply": "MULTIPLY",
-            "divide": "DIVIDE", "modulo": "MODULO",
-            "parseint": "PARSEINT", "exchange": "EXCHANGE", "param": "PARAM"
-        };
-
-        this.reverselookuptype = {
-            "AND": "boolean", "OR": "boolean", "NOT": "boolean", "SOME": "boolean",
-            "EQUIVALENT": "comp", "GREATER_THAN": "comp", "LESS_THAN": "comp",
-            "EQUALS": "optext", "INCLUDES": "optext", "REGEX_MATCH": "optext",
-            "COUNT": "group", "SUM": "group",
-            "ADD": "calc", "SUBTRACT": "calc", "MULTIPLY": "calc",
-            "DIVIDE": "calc", "MODULO": "calc",
-            "PARSEINT": "conv", "EXCHANGE": "conv", "PARAM": "extract"
-        };
-
+        this.namingmap = {"AND": "and", "OR": "or", "NOT": "not", "SOME": "some", "EQUIVALENT": "equivalent", "GREATER_THAN": "greater_than", "GREATER_OR_EQUAL": "greater_or_equal", "LESS_THAN": "less_than", "LESS_OR_EQUAL": "less_or_equal", "EQUALS": "equals", "INCLUDES": "includes", "REGEX_MATCH": "regex_match", "COUNT": "count", "SUM": "sum", "WHOLESENTENCE": "wholesentence", "REGEX_EXTRACT": "regex_extract", "SUBSTRING": "substring", "FIRST": "first", "LAST": "last", "ADD": "add", "SUBTRACT": "subtract", "MULTIPLY": "multiply", "DIVIDE": "divide", "MODULO": "modulo", "PARSEINT": "parseint", "EXCHANGE": "exchange", "PARAM": "param" };
+        this.operatormap = { "and": "AND", "or": "OR", "not": "NOT", "some": "SOME", "equivalent": "EQUIVALENT", "greater_than": "GREATER_THAN", "greater_or_equal": "GREATER_OR_EQUAL", "less_than": "LESS_THAN", "less_or_equal": "LESS_OR_EQUAL", "equals": "EQUALS", "includes": "INCLUDES", "regex_match": "REGEX_MATCH", "count": "COUNT", "sum": "SUM", "wholesentence": "WHOLESENTENCE", "regex_extract": "REGEX_EXTRACT", "substring": "SUBSTRING", "first": "FIRST", "last": "LAST", "add": "ADD", "subtract": "SUBTRACT", "multiply": "MULTIPLY", "divide": "DIVIDE", "modulo": "MODULO", "parseint": "PARSEINT", "exchange": "EXCHANGE", "param": "PARAM" };
+        this.reverselookuptype = { "AND": "boolean", "OR": "boolean", "NOT": "boolean", "SOME": "boolean", "EQUIVALENT": "comp", "GREATER_THAN": "comp", "LESS_THAN": "comp", "EQUALS": "optext", "INCLUDES": "optext", "REGEX_MATCH": "optext", "COUNT": "group", "SUM": "group", "ADD": "calc", "SUBTRACT": "calc", "MULTIPLY": "calc", "DIVIDE": "calc", "MODULO": "calc", "PARSEINT": "conv", "EXCHANGE": "conv", "PARAM": "extract" }; 
         // Initialize boolean dialog handler
         this.boolDialog = new BoolDialogHandler(this);
         
@@ -185,163 +150,197 @@ class ConditionEditor {
         editarea.appendChild(removetag);
         area.appendChild(editarea);
 
-        if (jsonnode.SubConditions || jsonnode.Variables) {
-            area.classList.add(this.namingmap[jsonnode.Operator]);
+        area.classList.add(this.namingmap[jsonnode.Operator]);
 
-            if (operator == "SOME") {
-                const somefield = document.createElement("div");
-                const prefix = document.createElement("span");
-                prefix.innerText = translations["some-sentense_prefix"] || "Some";
-                somefield.append(prefix);
-                const frombutton = document.createElement("input");
-                frombutton.type = "number";
-                frombutton.inputmode = "numeric";
-                frombutton.min = 1;
-                frombutton.max = 999;
-                frombutton.pattern = "[0-9]*";
-                frombutton.classList.add("numerictext");
-                frombutton.style["display"] = "inline-block";
-                frombutton.setAttribute("path", path);
-                frombutton.value = jsonnode.Variables && jsonnode.Variables.length > 0 ? jsonnode.Variables[0].split("-")[0] : "";
-                somefield.append(frombutton);
-                const joint = document.createElement("span");
-                joint.innerText = translations["some-sentense_joint"] || "to";
-                somefield.append(joint);
-                const tobutton = document.createElement("input");
-                tobutton.type = "number";
-                tobutton.inputmode = "numeric";
-                tobutton.min = 1;
-                tobutton.max = 999;
-                tobutton.pattern = "[0-9]*";
-                tobutton.classList.add("numerictext");
-                tobutton.style["display"] = "inline-block";
-                tobutton.value = jsonnode.Variables && jsonnode.Variables.length > 0 && jsonnode.Variables[0].indexOf("-") ? jsonnode.Variables[0].split("-")[1] : "";
-                somefield.append(tobutton);
-                const suffix = document.createElement("span");
-                suffix.innerText = translations["some-sentense_suffix"] || "conditions";
-                somefield.append(suffix);
-                area.append(somefield);
-            }
+        if (operator == "SOME") {
+            const somefield = document.createElement("div");
+            const prefix = document.createElement("span");
+            prefix.innerText = translations["some-sentense_prefix"] || "Some";
+            somefield.append(prefix);
+            const frombutton = document.createElement("input");
+            frombutton.type = "number";
+            frombutton.inputmode = "numeric";
+            frombutton.min = 1;
+            frombutton.max = 999;
+            frombutton.pattern = "[0-9]*";
+            frombutton.classList.add("numerictext");
+            frombutton.style["display"] = "inline-block";
+            frombutton.setAttribute("path", path);
+            frombutton.value = jsonnode.Variables && jsonnode.Variables.length > 0 ? jsonnode.Variables[0].split("-")[0] : "";
+            somefield.append(frombutton);
+            const joint = document.createElement("span");
+            joint.innerText = translations["some-sentense_joint"] || "to";
+            somefield.append(joint);
+            const tobutton = document.createElement("input");
+            tobutton.type = "number";
+            tobutton.inputmode = "numeric";
+            tobutton.min = 1;
+            tobutton.max = 999;
+            tobutton.pattern = "[0-9]*";
+            tobutton.classList.add("numerictext");
+            tobutton.style["display"] = "inline-block";
+            tobutton.value = jsonnode.Variables && jsonnode.Variables.length > 0 && jsonnode.Variables[0].indexOf("-") ? jsonnode.Variables[0].split("-")[1] : "";
+            somefield.append(tobutton);
+            const suffix = document.createElement("span");
+            suffix.innerText = translations["some-sentense_suffix"] || "conditions";
+            somefield.append(suffix);
+            area.append(somefield);
+        }
 
-            // Only for non-top-level (has "/"), show summary
-            if (path.split("/").length > 1) {
-                const summarized = document.createElement("div");
-                summarized.classList.add("summary");
-                if (jsonnode.SubConditions) {
-                    summarized.innerHTML = this._summarize(jsonnode);
-                }
-                area.appendChild(summarized);
+        // Only for non-top-level (has "/"), show summary
+        if (path.split("/").length > 1) {
+            const summarized = document.createElement("div");
+            summarized.classList.add("summary");
+            if (jsonnode.SubConditions) {
+                summarized.innerHTML = this._summarize(jsonnode);
             }
+            area.appendChild(summarized);
+        }
 
-            const detailarea = document.createElement("div");
-            detailarea.classList.add("detailarea");
-            if (jsonnode.SubConditions && jsonnode.SubConditions.length) {
-                const subconarea = document.createElement("div");
-                subconarea.classList.add("subcondition");
-                for (const is in jsonnode.SubConditions) {
-                    const childarea = document.createElement("fieldset");
-                    childarea.classList.add("item");
-                    childarea.onclick = function () { this.classList.toggle("focus") }
-                    this._jsonLoader(jsonnode.SubConditions[is], childarea, path + "/" + is);
-                    subconarea.append(childarea);
-                }
-                detailarea.appendChild(subconarea);
+        const detailarea = document.createElement("div");
+        detailarea.classList.add("detailarea");
+        if (jsonnode.SubConditions && jsonnode.SubConditions.length) {
+            const subconarea = document.createElement("div");
+            subconarea.classList.add("subcondition");
+            for (const is in jsonnode.SubConditions) {
+                const childarea = document.createElement("fieldset");
+                childarea.classList.add("item");
+                childarea.onclick = function () { this.classList.toggle("focus") }
+                this._jsonLoader(jsonnode.SubConditions[is], childarea, path + "/" + is);
+                subconarea.append(childarea);
             }
-            if (jsonnode.Variables) {
-                for (const iv in jsonnode.Variables) {
-                    const variableitem = document.createElement("div");
-                    variableitem.classList.add("variable");
-                    variableitem.innerText = jsonnode.Variables[iv];
-                    if (jsonnode.Operator != "PARAM") {
-                        variableitem.setAttribute("operator", "_variable");
-                        variableitem.setAttribute("path", path);
-                        variableitem.setAttribute("index", iv);
-                        variableitem.onclick = (e) => this._editItem(e);
-                    }
-                    detailarea.appendChild(variableitem);
+            detailarea.appendChild(subconarea);
+        }
+        if (jsonnode.Variables) {
+            for (const iv in jsonnode.Variables) {
+                const variableitem = document.createElement("div");
+                variableitem.classList.add("variable");
+                variableitem.innerText = jsonnode.Variables[iv];
+                if (jsonnode.Operator != "PARAM") {
+                    variableitem.setAttribute("operator", "_variable");
+                    variableitem.setAttribute("path", path);
+                    variableitem.setAttribute("index", iv);
+                    variableitem.onclick = (e) => this._editItem(e);
                 }
+                detailarea.appendChild(variableitem);
             }
-            area.appendChild(detailarea);
+        }
+        area.appendChild(detailarea);
 
-            if (this.booleanoperators.includes(operator)) {
-                if (operator != "NOT" || !jsonnode.SubConditions || jsonnode.SubConditions.length < 1) {
-                    const addbutton = document.createElement("div");
-                    addbutton.classList.add("addbutton");
-                    addbutton.innerText = "+";
-                    addbutton.setAttribute("path", path);
-                    addbutton.setAttribute("operator", operator);
-                    addbutton.onclick = (e) => this.boolDialog.open(e);
-                    area.append(addbutton);
-                }
-            } else if (this.compoperators.includes(operator) && (
-                (!jsonnode.Variables || jsonnode.Variables.length < 1)||
-                (!jsonnode.SubConditions || jsonnode.SubConditions.length < 1)
-            )) {
-                var addcompbutton = document.createElement("div");
-                addcompbutton.classList.add("addcompbutton");
-                addcompbutton.innerText = "+";
-                addcompbutton.setAttribute("path", path);
-                addcompbutton.setAttribute("operator", operator);
-                addcompbutton.onclick = numModal;
-                area.append(addcompbutton);
-            } else if (this.textoperators.includes(operator)) {
-                if (!jsonnode.SubConditions || jsonnode.SubConditions.length < 1) {
-                    var askenvbutton = document.createElement("div");
-                    askenvbutton.classList.add("askenvbutton");
-                    askenvbutton.innerText = "+";
-                    askenvbutton.setAttribute("path", path);
-                    askenvbutton.setAttribute("operator", operator);
-                    askenvbutton.onclick = function(){inputText(null, null, null, null, true, false, function(disp, type){
-                        var parentjson = JSON.parse(document.getElementById("conditionLogicInput").value);
-                        var currentnode = this._getSubCondition(parentjson, path);
+        if (this.booleanoperators.includes(operator)) {
+            if (operator != "NOT" || !jsonnode.SubConditions || jsonnode.SubConditions.length < 1) {
+                const addbutton = document.createElement("div");
+                addbutton.classList.add("addbutton");
+                addbutton.innerText = "+";
+                addbutton.setAttribute("path", path + "/" + (jsonnode.SubConditions ? jsonnode.SubConditions.length : "0"));
+                addbutton.setAttribute("operator", operator);
+                addbutton.onclick = (e) => this.boolDialog.open(e);
+                area.append(addbutton);
+            }
+        } else if (this.compoperators.includes(operator) && (
+            (!jsonnode.Variables || jsonnode.Variables.length < 1)||
+            (!jsonnode.SubConditions || jsonnode.SubConditions.length < 1)
+        )) {
+            const addcompbutton = document.createElement("div");
+            addcompbutton.classList.add("addcompbutton");
+            addcompbutton.innerText = "+";
+            addcompbutton.setAttribute("path", path);
+            addcompbutton.setAttribute("operator", operator);
+            addcompbutton.onclick = numModal;
+            area.append(addcompbutton);
+        } else if (this.textoperators.includes(operator)) {
+            if (!jsonnode.SubConditions || jsonnode.SubConditions.length < 1) {
+                const askenvbutton = document.createElement("div");
+                askenvbutton.classList.add("askenvbutton");
+                askenvbutton.innerText = "+";
+                askenvbutton.setAttribute("path", path);
+                askenvbutton.setAttribute("operator", operator);
+                askenvbutton.onclick = function(){inputText(null, null, null, null, true, false, function(disp,val,type,exttype,extval){
+                    const parentjson = this.getJSON();
+                    const currentnode = this._getSubCondition(parentjson, path);
+                    if (type === "env") {
                         currentnode.SubConditions = [];
-                        currentnode.SubConditions.push({"Operator": "PARAM", "Variables": [type],"SubConditions": null});
-                        reloadJson(parentjson);
-                    })};
-                    area.append(askenvbutton);
-                }
-                if (!jsonnode.Variables || !jsonnode.Variables.length) {
-                    var inputtextbutton = document.createElement("div");
-                    inputtextbutton.classList.add("inputtextbutton");
-                    inputtextbutton.innerText = "+";
-                    inputtextbutton.setAttribute("path", path);
-                    inputtextbutton.setAttribute("operator", operator);
-                    inputtextbutton.onclick = function(){inputText(null, null,null, null, true, function(){
-                        
-                    })};
-                    area.append(inputtextbutton);
-                }
-            } else if (this.calcoperators.includes(operator)) {
-                var inputnumbutton = document.createElement("div");
-                inputnumbutton.classList.add("asknumbutton");
-                inputnumbutton.innerText = "+";
-                inputnumbutton.setAttribute("path", path);
-                inputnumbutton.setAttribute("operator", operator);
-                inputnumbutton.onclick = inputNumber;
-                area.append(inputnumbutton);
-            } else if (this.textextractors.includes(operator)) {
-            
-            } else if ((this.extractionoperators.includes(operator) ||
-                this.textoperators.includes(operator) ||
-                this.convoperators.includes(operator))
-                &&!jsonnode.Variables
-            ) {
-                var inputtextbutton = document.createElement("div");
+                        currentnode.SubConditions.push({"Operator": this.operatormap[exttype], "Variables": [extval],"SubConditions": [{"Operator": "PARAM", "Variables": [val],"SubConditions": null}]});
+                    } else if (type == "variable") {
+                        currentnode.Variables = [];
+                        currentnode.Variables.push(val);
+                    }
+                    this.setJSON(parentjson);
+                }.bind(this))}.bind(this);
+                area.append(askenvbutton);
+            }
+            if (!jsonnode.Variables || !jsonnode.Variables.length) {
+                const inputtextbutton = document.createElement("div");
                 inputtextbutton.classList.add("inputtextbutton");
-                inputtextbutton.innerText = "?";
+                inputtextbutton.innerText = "+";
                 inputtextbutton.setAttribute("path", path);
                 inputtextbutton.setAttribute("operator", operator);
-                inputtextbutton.onclick = function(){inputText(null, null, null, null, true, true)};
+                inputtextbutton.onclick = function(){inputText(null, null, null, null, true, true, function(disp,val,type,exttype,extval){
+                    const parentjson = this.getJSON();
+                    const currentnode = this._getSubCondition(parentjson, path);
+                    if (type === "env") {
+                        currentnode.SubConditions = [];
+                        currentnode.SubConditions.push({"Operator": this.operatormap[exttype], "Variables": [extval],"SubConditions": [{"Operator": "PARAM", "Variables": [val],"SubConditions": null}]});
+                    } else if (type == "variable") {
+                        currentnode.Variables = [];
+                        currentnode.Variables.push(val);
+                    }
+                    this.setJSON(parentjson);
+                }.bind(this))}.bind(this);
                 area.append(inputtextbutton);
             }
-        } else {
-            const addtoemptybutton = document.createElement("div");
-            addtoemptybutton.classList.add("addbutton");
-            addtoemptybutton.innerText = "+";
-            addtoemptybutton.setAttribute("path", path);
-            addtoemptybutton.setAttribute("operator", operator);
-            addtoemptybutton.onclick = (e) => this.boolDialog.open(e);
-            area.append(addtoemptybutton);
+        } else if (this.calcoperators.includes(operator)) {
+            const inputnumbutton = document.createElement("div");
+            inputnumbutton.classList.add("asknumbutton");
+            inputnumbutton.innerText = "+";
+            inputnumbutton.setAttribute("path", path);
+            inputnumbutton.setAttribute("operator", operator);
+            inputnumbutton.onclick = inputNumber;
+            area.append(inputnumbutton);
+        } else if (this.textextractors.includes(operator)) {
+            if ((!jsonnode.SubConditions || jsonnode.SubConditions.length < 1) && (!jsonnode.Variables || jsonnode.Variables.length < 1)) {
+                const inputtextbutton = document.createElement("div");
+                inputtextbutton.classList.add("inputtextbutton");
+                inputtextbutton.innerText = "+";
+                inputtextbutton.setAttribute("path", path);
+                inputtextbutton.setAttribute("operator", operator);
+                inputtextbutton.onclick = function(){inputText(null, null, null, null, true, true, function(disp,val,type,exttype,extval){
+                    const parentjson = this.getJSON();
+                    const currentnode = this._getSubCondition(parentjson, path);
+                    if (type === "env") {
+                        currentnode.SubConditions = [];
+                        currentnode.SubConditions.push({"Operator": this.operatormap[exttype], "Variables": [extval],"SubConditions": [{"Operator": "PARAM", "Variables": [val],"SubConditions": null}]});
+                    } else if (type == "variable") {
+                        currentnode.Variables = [];
+                        currentnode.Variables.push(val);
+                    }
+                    this.setJSON(parentjson);
+                }.bind(this))}.bind(this);
+                area.append(inputtextbutton);
+            }
+        } else if ((this.extractionoperators.includes(operator) ||
+            this.textoperators.includes(operator) ||
+            this.convoperators.includes(operator))
+            &&!jsonnode.Variables
+        ) {
+            const inputtextbutton = document.createElement("div");
+            inputtextbutton.classList.add("inputtextbutton");
+            inputtextbutton.innerText = "?";
+            inputtextbutton.setAttribute("path", path);
+            inputtextbutton.setAttribute("operator", operator);
+            inputtextbutton.onclick = function(){inputText(null, null, null, null, true, true, function(disp,val,type,exttype,extval){
+                const parentjson = this.getJSON();
+                const currentnode = this._getSubCondition(parentjson, path);
+                if (type === "env") {
+                    currentnode.SubConditions = [];
+                    currentnode.SubConditions.push({"Operator": this.operatormap[exttype], "Variables": [extval],"SubConditions": [{"Operator": "PARAM", "Variables": [val],"SubConditions": null}]});
+                } else if (type == "variable") {
+                    currentnode.Variables = [];
+                    currentnode.Variables.push(val);
+                }
+                this.setJSON(parentjson);
+            }.bind(this))}.bind(this);
+            area.append(inputtextbutton);
         }
     }
 
@@ -936,11 +935,16 @@ class ConditionEditor {
      * @private
      */
     _getSubCondition(json, pathstring) {
-        const paths = pathstring.split("/");
+        const paths = pathstring.split("/").splice(1); // Remove the first empty string from split
         let currentnode = json;
         for (const i in paths){
-            if (currentnode.SubConditions && currentnode.SubConditions[paths[i]]) {
-                currentnode = currentnode.SubConditions[paths[i]];
+            if (currentnode.SubConditions) {
+                if (currentnode.SubConditions[paths[i]]) {
+                    currentnode = currentnode.SubConditions[paths[i]];
+                } else {
+                    currentnode.SubConditions[paths[i]] = {"Operator": this.baseType, "SubConditions": [], "Variables": []};
+                    currentnode = currentnode.SubConditions[paths[i]];
+                }
             } else {
                 currentnode.SubConditions = [];
                 currentnode.SubConditions.push({"Operator": this.baseType, "SubConditions": [], "Variables": []});
@@ -957,6 +961,99 @@ class ConditionEditor {
 class BoolDialogHandler {
     constructor(editor) {
         this.editor = editor;
+        this.elem = document.getElementById("boolBody");
+
+        document.getElementById("boolmodal_text").onclick = function(e) {
+            document.getElementById('booltextradio').checked=true;
+            document.getElementById('boolmodal_text').classList.add('available');
+            document.getElementById('boolmodal_numeric').classList.remove('available');
+            document.getElementById('boolmodal_bool').classList.remove('available');
+            this.validate();
+        }.bind(this);
+
+        document.getElementById("boolmodal_numeric").onclick = function(e) {
+            document.getElementById('boolnumericradio').checked=true;
+            document.getElementById('boolmodal_text').classList.remove('available');
+            document.getElementById('boolmodal_numeric').classList.add('available');
+            document.getElementById('boolmodal_bool').classList.remove('available');
+            this.validate();
+        }.bind(this);
+
+        document.getElementById("textSelector").onclick = function(e) {
+            inputText(document.getElementById('textcomparebasevalue').value, document.getElementById('textcomparebasetype').value,document.getElementById('textcomparebaseexttype').value, document.getElementById('textcomparebaseextvalue').value,true, false, function(disp,val,type,exttype,extval){
+                document.getElementById('textcomparebasedisplay').innerHTML=disp;
+                document.getElementById('textcomparebasevalue').value=val;
+                document.getElementById('textcomparebasetype').value=type;
+                document.getElementById('textcomparebaseexttype').value=exttype;
+                document.getElementById('textcomparebaseextvalue').value=extval;
+                document.getElementById('textcomparebaseplaceholder').style['display']=val?'none':'inline';
+                document.getElementById('textcomparebasedisplay').style['display']=val?'inline':'none';
+                this.validate();
+            }.bind(this));
+        }.bind(this);
+
+        document.getElementById("textConditionSelector").onclick = function(e) {
+            inputTextCondition(document.getElementById('textconditionselecttype').value, document.getElementById('textconditionselectrange').value, document.getElementById('textconditionselectvalue').value, function(disp,type,range,val){
+                document.getElementById('textconditionselectdisplay').innerText=disp;
+                document.getElementById('textconditionplaceholder').style['display']=val?'none':'inline';
+                document.getElementById('textconditionselectdisplay').style['display']=val?'inline':'none';
+                document.getElementById('textconditionselectvalue').value=val;
+                document.getElementById('textconditionselecttype').value=type;
+                document.getElementById('textconditionselectrange').value=range;
+                this.validate();
+            }.bind(this));
+        }.bind(this);
+
+        document.getElementById("numericcomparebasedisp").onclick = function(e) {
+            inputNumber(
+                document.getElementById('numericcomparebase').value,
+                function(val,disp) {
+                    document.getElementById('numericcomparebase').value = val;
+                    document.getElementById('numericcomparebaseplacedisp').innerHTML=disp;
+                    document.getElementById('numericcomparebaseplacedisp').style['display']='inline';
+                    document.getElementById('numericcomparebaseplaceholder').style['display']='none';
+                    document.getElementById('numericcomparebase').value=val;
+                    this.validate();
+            }.bind(this));
+        }.bind(this);
+
+        document.getElementById("numericcomparetargetdisp").onclick = function(e) {
+            inputNumber(
+                document.getElementById('numericcomparetarget').value,
+                function(val,disp){
+                    document.getElementById('numericcomparetarget').value = val;
+                    document.getElementById('numericcomparetargetplacedisp').innerHTML=disp;
+                    document.getElementById('numericcomparetargetplacedisp').style['display']='inline';
+                    document.getElementById('numericcomparetargetplaceholder').style['display']='none';
+                    document.getElementById('numericcomparetarget').value=val;
+                    this.validate();
+            }.bind(this));
+        }.bind(this);
+
+        document.getElementById("boolmodal_bool").onclick= function(e) {
+            document.getElementById('boolconditionradio').checked=true;
+            document.getElementById('boolmodal_text').classList.remove('available');
+            document.getElementById('boolmodal_numeric').classList.remove('available');
+            document.getElementById('boolmodal_bool').classList.add('available');
+            this.validate();
+        }.bind(this);
+
+        document.getElementById("boolcondition").onchange = function(e) {
+            this.validate();
+        }.bind(this);
+
+        if (document.getElementById("boolcondition").options.length === 0) {
+            const emptyoption = document.createElement("option");
+            emptyoption.value = "";
+            emptyoption.text = "";
+            document.getElementById("boolcondition").appendChild(emptyoption);
+            for (const i in editor.booleanoperators) {
+                const option = document.createElement("option");
+                option.value = editor.booleanoperators[i];
+                option.text = editor.booleanoperators[i];
+                document.getElementById("boolcondition").appendChild(option);
+            }
+        }
     }
 
     /**
@@ -970,10 +1067,10 @@ class BoolDialogHandler {
             const currentnode = this.editor._getSubCondition(json, path);
             
             // Reset boolean dialog state
-            document.getElementById("boolBody").className = "";
-            document.getElementById("boolBody").classList.add("modal-body");
-            document.getElementById("boolBody").classList.add(this.editor.namingmap[operator]);
-            document.getElementById("boolBody").classList.add(this.editor.reverselookuptype[operator]);
+            this.elem.className = "";
+            this.elem.classList.add("modal-body");
+            this.elem.classList.add(this.editor.namingmap[operator]);
+            this.elem.classList.add(this.editor.reverselookuptype[operator]);
             
             document.getElementById("boolmodal_text").style["display"] = "block";
             document.getElementById("boolmodal_numeric").style["display"] = "block";
@@ -989,16 +1086,85 @@ class BoolDialogHandler {
                 document.getElementById("booltextradio").style["display"] = "none";
                 document.getElementById("booltextradio").checked = true;
                 document.getElementById("boolmodal_text").classList.add("available");
+                document.getElementById("textcomparebaseplaceholder").style["display"] = currentnode.SubConditions&&currentnode.SubConditions.length ? "none":"inline-block";
+                document.getElementById("textcomparebasedisplay").style["display"] = currentnode.SubConditions&&currentnode.SubConditions.length ? "inline":"none";
+                let extopr, taropr, targetbase, targetvar, targetvar1, targetvar2, extvar1, extvar2,  extvar3, operator;
+                if (currentnode.SubConditions&&currentnode.SubConditions[0]&&currentnode.SubConditions[0].Operator == "PARAM") {
+                    taropr = namingmap[currentnode.SubConditions[0].Operator];
+                    targetbase = currentnode.SubConditions[0].Variables[0];
+                    targetvar1 = currentnode.SubConditions[0].Variables[1];
+                    targetvar2 = currentnode.SubConditions[0].Variables[2];
+                    extopr = namingmap[currentnode.Operator];
+                    extvar1 = currentnode.Variables[0];
+                    extvar2 = currentnode.Variables&&currentnode.Variables.length&&currentnode.Variables[1]?currentnode.Variables[1].split("-")[0]:currentnode.Variables[1];
+                    extvar3 = currentnode.Variables&&currentnode.Variables.length>1&&currentnode.Variables[1].split("-").length>1?currentnode.Variables[1].split("-")[1]:currentnode.Variables[2];
+                    operator = currentnode.Operator;
+                    document.getElementById("textcomparebasedisplay").innerText = generageDisplayText("extract", taropr, targetbase, targetvar1, targetvar2);
+                    document.getElementById("textcomparebaseexttype").value = taropr=="param"?"wholesentence":taropr;
+                    document.getElementById("textcomparebasevalue").value = targetbase;
+                    document.getElementById("textcomparebasetype").value = "env";
+                    document.getElementById("textconditionselectdisplay").innerHTML = generageDisplayText("input", extopr, extvar1, extvar2, extvar3);
+                    document.getElementById("textconditionplaceholder").style["display"] = "none";
+                    document.getElementById("textconditionselectdisplay").style["display"] = "inline";
+                    document.getElementById("textconditionselectvalue").value = extvar1;
+                    document.getElementById("textconditionselecttype").value = extopr;
+                    document.getElementById("textcomparebaseextvalue").value = "";
+                    document.getElementById("textconditionselectrange").value = currentnode.Variables[1];
+                } else {
+                    taropr = namingmap[currentnode.SubConditions[0].Operator];
+                    let paramcondition = currentnode.SubConditions[0];
+                    targetbase = paramcondition.SubConditions&&paramcondition.SubConditions[0]&&paramcondition.SubConditions[0].Variables?paramcondition.SubConditions[0].Variables[0]:null;
+                    targetvar = paramcondition&&paramcondition.Variables?paramcondition.Variables[0]:null;
+                    targetvar1 = targetvar?targetvar.split("-")[0]:targetvar;
+                    targetvar2 = targetvar&&targetvar.split("-").length>1?targetvar.split("-")[1]:paramcondition.Variables[1];
+                    extopr = namingmap[currentnode.Operator];
+                    extvar1 = currentnode.Variables[0];
+                    extvar2 = currentnode.Variables&&currentnode.Variables.length&&currentnode.Variables[1]?currentnode.Variables[1].split("-")[0]:currentnode.Variables[1];
+                    extvar3 = currentnode.Variables&&currentnode.Variables.length>1&&currentnode.Variables[1].split("-").length>1?currentnode.Variables[1].split("-")[1]:currentnode.Variables[2];
+                    operator = currentnode.Operator;
+                    document.getElementById("textcomparebasedisplay").innerText = generageDisplayText("extract", taropr, targetbase, targetvar1, targetvar2);
+                    document.getElementById("textcomparebaseexttype").value = taropr=="param"?"wholesentence":taropr;
+                    document.getElementById("textcomparebasevalue").value = targetbase;
+                    document.getElementById("textcomparebasetype").value = "env";
+                    document.getElementById("textconditionselectdisplay").innerHTML = generageDisplayText("input", extopr, extvar1, extvar2, extvar3);
+                    document.getElementById("textconditionplaceholder").style["display"] = "none";
+                    document.getElementById("textconditionselectdisplay").style["display"] = "inline";
+                    document.getElementById("textconditionselectvalue").value = extvar1;
+                    document.getElementById("textconditionselecttype").value = extopr;
+                    document.getElementById("textcomparebaseextvalue").value = targetvar;
+                    document.getElementById("textconditionselectrange").value = currentnode.Variables[1];
+                }
             } else {
                 document.getElementById("booltextradio").checked = false;
                 document.getElementById("boolmodal_text").classList.remove("available");
+                document.getElementById("textcomparebaseplaceholder").style["display"] = "inline-block";
+                document.getElementById("textcomparebasedisplay").style["display"] = "none";
+                document.getElementById("textcomparebasedisplay").innerText = "";
+                document.getElementById("textcomparebasevalue").value = "";
+                document.getElementById("textcomparebasetype").value = "";
+                document.getElementById("textcomparebaseexttype").value = "";
+                document.getElementById("textcomparebaseextvalue").value = "";
+                document.getElementById("textconditionplaceholder").style["display"] = "inline";
+                document.getElementById("textconditionselectdisplay").style["display"] = "none";
+                document.getElementById("textconditionselectdisplay").innerText = translations["compare-novalue"];
+                document.getElementById("textconditionselectvalue").value = "";
+                document.getElementById("textconditionselecttype").value = "";
+                document.getElementById("textconditionselectrange").value = "";
             }
             
             document.getElementById("boolnumericradio").checked = false;
             document.getElementById("boolmodal_numeric").classList.remove("available");
+            document.getElementById("numericcomparebaseplaceholder").style["display"] = "inline-block";
+            document.getElementById("numericcomparebaseplacedisp").style["display"] = "none";
+            document.getElementById("numericcomparebase").value = "";
+            document.getElementById("numericcompareoperator").value = ">";
+            document.getElementById("numericcomparetargetplaceholder").style["display"] = "inline-block";
+            document.getElementById("numericcomparetargetplacedisp").style["display"] = "none";
+            document.getElementById("numericcomparetarget").value = "";
             document.getElementById("boolconditionradio").checked = false;
             document.getElementById("boolmodal_bool").classList.remove("available");
             document.getElementById("boolSubmitButton").disabled = "disabled";
+            document.getElementById("boolcondition").value = "";
 
             document.getElementById("boolModal").style["display"] = "block";
             document.getElementById("boolPath").value = path;
@@ -1153,15 +1319,6 @@ class NumericDialogHandler {
 // ============================================
 // Dialog and Helper Functions
 // ============================================
-
-/**
- * Validator for boolean dialog form
- */
-function boolDialogValidator() {
-    if (conditionEditor && conditionEditor.boolDialog) {
-        conditionEditor.boolDialog.validate();
-    }
-}
 
 /**
  * Generates human-readable display text for text extraction/condition operations

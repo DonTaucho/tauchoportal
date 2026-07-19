@@ -351,7 +351,7 @@
   "condition.AND": "All conditions must be met",
   "condition.OR": "Any condition may be met",
   "condition.NOT": "Does not satisfy",
-  "condition.SOME": "Some conditions are met",
+  "condition.SOME": "Certain number of conditions are met",
   "condition.EQUIVALENT": "Equivalent (numeric comparison)",
   "condition.GREATER_THAN": "Greater than",
   "condition.GREATER_OR_EQUAL": "Greater than or equal",

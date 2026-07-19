@@ -445,6 +445,13 @@ body {
 
 .btn-secondary:hover { background: #e0e0e0; }
 
+.btn-attempt {
+    background: #b4ad4a;
+    color: white;
+}
+
+.btn-attempt:hover { background: #d6cd53; }
+
 /* =============================================
    Breadcrumb
    ============================================= */

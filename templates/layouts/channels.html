@@ -95,7 +95,7 @@
                             {{ end }}
                             
                             <div class="acc-section-label">Add by ID / URL</div>
-                            <form class="acc-manual" id="acc-manual-{{$platformId}}" onsubmit="submitAccManual(event, '{{$platformId}}')"><input type="text" placeholder="Channel ID or URL" required><button type="submit" class="acc-manual-submit">Add</button></form>
+                            <form class="acc-manual" id="acc-manual-{{$platformId}}" onsubmit="submitAccManual(event, '{{$platformId}}')"><input id="search-{{$platformId}}" type="text" placeholder="Channel ID or URL" required><button type="submit" class="acc-manual-submit">Add</button></form>
                         </div>
                     </div>
                 </div>
@@ -121,7 +121,7 @@
         <div class="confirm-channel-preview" id="confirmPreview"></div>
         <div class="confirm-form">
             <div class="cf-row">
-                <label>Display Name</label>
+                <label for="confirmName">Display Name</label>
                 <input type="text" id="confirmName" placeholder="e.g., Gaming Stream">
             </div>
             <label class="cf-check">
@@ -219,7 +219,7 @@
                             <select id="condActionSelect" onchange="updateCondActionParams()"><option value="">Select action...</option></select>
                         </div>
                         <div class="form-group" id="condColorGroup" style="display:none">
-                            <label>Color</label>
+                            <h5>Color</h5>
                             <div class="color-presets">
                                 <button type="button" class="color-preset selected" style="background:#ff2020" data-color="#ff2020" onclick="selectCondColor(this)" title="Red"></button>
                                 <button type="button" class="color-preset" style="background:#ff7700" data-color="#ff7700" onclick="selectCondColor(this)" title="Orange"></button>

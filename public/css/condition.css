@@ -21,6 +21,13 @@ input[type="number"] {
     line-height: 3rem;
     font-size: x-large;
 }
+.btn {
+    margin: 0.5rem;
+    min-width: 6rem;
+}
+.toolbox {
+    overflow-y: auto;
+}
 .item {
 display:block;
 min-width: 4em;
@@ -575,7 +582,7 @@ div#logictotaldescription span.or .or .and:hover::after {
   color: black;
   border-color: black;
 }
-.textselector .value {
+#textSelector .value {
     padding: 0.4em 1em;
     display: none;
     width: 8em;
@@ -586,7 +593,7 @@ div#logictotaldescription span.or .or .and:hover::after {
     font-weight: bold;
     border: 2px solid #c7cedd;
 }
-.textselector .placeholder {
+#textSelector .placeholder {
     padding: 0.4em 1em;
     display: inline-block;
     width: 8em;
@@ -597,24 +604,24 @@ div#logictotaldescription span.or .or .and:hover::after {
     font-weight: unset;
     border: 2px dotted #c7cedd;
 }
-.available .textselector .value {
+.available #textSelector .value {
     border-color: #2f8525;
     background-color: #c6efc1;
 }
-.available .textselector .value:hover {
+.available #textSelector .value:hover {
     border-color: #26651e;
     background-color: #a8d1a2;
 }
-.available .textselector .placeholder {
+.available #textSelector .placeholder {
     border: 2px dotted #2f8525;
     background-color: #c6efc1;
 }
-.available .textselector .placeholder:hover {
+.available #textSelector     .placeholder:hover {
     border-color: #26651e;
     background-color: #a8d1a2;
 }
 
-.textconditionselector .value {
+#textConditionSelector .value {
     border: 2px solid #c7cedd;
     padding: 0.4em 1em;
     display: inline;
@@ -625,7 +632,7 @@ div#logictotaldescription span.or .or .and:hover::after {
     font-weight: bold;
 	line-height: 3rem;
 }
-.textconditionselector .placeholder {
+#textConditionSelector .placeholder {
     border: 2px dotted #c7cedd;
     padding: 0.4em 1em;
     display: inline;
@@ -637,24 +644,24 @@ div#logictotaldescription span.or .or .and:hover::after {
     font-weight: bold;
 	line-height: 3rem;
 }
-.textconditionselector:hover {
+#textConditionSelector:hover {
     border-color: #c7cedd;
     background-color: #dde7eb;
 }
-.available .textconditionselector .value {
+.available #textConditionSelector .value {
     border-color: #e38d65;
     background-color: #eebaa2;
 }
-.available .textconditionselector .value:hover {
+.available #textConditionSelector .value:hover {
     border-color: #d46f40;
     background-color: #eca07d;
 }
 
-.available .textconditionselector .placeholder {
+.available #textConditionSelector .placeholder {
     border: 2px dotted #e38d65;
     background-color: #eebaa2;
 }
-.available .textconditionselector .placeholder:hover {
+.available #textConditionSelector .placeholder:hover {
     border: 2px dotted #d46f40;
     background-color: #eca07d;
 }
@@ -1090,5 +1097,6 @@ fieldset.item.param>div.icons{
     width: 100%;
 }
 #buttonsContainer {
-    width: 12rem;
+    width: 14rem;
+    padding: 1rem;
 }
