@@ -35,6 +35,7 @@ type PageData struct {
 	I18n                    *i18n.Translator
 	API                     *controller.API
 	CurrentChannel          *controller.ChannelForTemplate
+	Condition               *controller.ConditionForTemplate
 	Conditions              []controller.ConditionForTemplate
 	EventTypes              []string
 	ChannelDetail           *controller.ChannelDetailForTemplate
@@ -43,6 +44,7 @@ type PageData struct {
 	Channels                *controller.ChannelsPageData
 	PlatformMeta            map[string]map[string]interface{}
 	EventBadgeClass         map[string]string
+	EventFieldOptions       []controller.EventFieldOption
 }
 
 type UserProfile struct {
@@ -332,6 +334,9 @@ func loadTemplates() map[string]*template.Template {
 	funcMap := template.FuncMap{
 		"userJSON": userJSON,
 		"toJSON":   toJSON,
+		"jsonMarshal": func(v interface{}) template.JS {
+			return toJSON(v)
+		},
 		"i18nJSON": func(t *i18n.Translator) template.JS {
 			if t == nil {
 				return template.JS("{}")
@@ -475,16 +480,29 @@ func (s *Server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	data := PageData{Title: cfg.Title, User: user, Page: cfg.Name, Lang: lang, I18n: s.i18n.Translator(lang), API: &api}
 
 	// Fetch conditions page data if on /conditions page
-	if cfg.Name == "conditions" {
+	if cfg.Name == "conditions" || cfg.Name == "condition" {
 		parts := strings.Split(strings.TrimPrefix(r.URL.Path, "/"), "/")
 		if len(parts) >= 3 && parts[0] == "channels" && parts[2] == "conditions" {
 			channelID := parts[1]
-			pageData := controller.PrepareConditionsPageData(channelID)
-			data.CurrentChannel = pageData.CurrentChannel
-			data.Conditions = pageData.Conditions
-			data.EventTypes = pageData.EventTypes
-			data.PlatformMeta = pageData.PlatformMeta
-			data.EventBadgeClass = pageData.EventBadgeClass
+			
+			// Check if this is a single condition page (has condition_id)
+			if len(parts) >= 4 {
+				conditionID := parts[3]
+				pageData := controller.PrepareConditionPageData(channelID, conditionID)
+				data.CurrentChannel = pageData.CurrentChannel
+				data.Condition = pageData.Condition
+				data.PlatformMeta = pageData.PlatformMeta
+				data.EventFieldOptions = pageData.EventFieldOptions
+			} else {
+				// This is the conditions list page
+				pageData := controller.PrepareConditionsPageData(channelID)
+				data.CurrentChannel = pageData.CurrentChannel
+				data.Conditions = pageData.Conditions
+				data.EventTypes = pageData.EventTypes
+				data.PlatformMeta = pageData.PlatformMeta
+				data.EventBadgeClass = pageData.EventBadgeClass
+				data.EventFieldOptions = pageData.EventFieldOptions
+			}
 		}
 	}
 

@@ -2378,3 +2378,174 @@ Returns all supported device action types with their UI metadata (icons, labels)
 **Purpose:** Replace hardcoded `ACTION_META` in JavaScript. Frontend embeds this data server-side in template or as JSON blob.
 
 **Status:** 🔲 Not yet implemented — currently hardcoded in frontend JavaScript as `ACTION_META`.
+
+---
+
+## Event Metadata Discovery — ✅ Implemented
+
+Frontend needs to know which events are available per provider and what fields are in each event.
+
+### GET /event-metadata
+
+Returns metadata about available providers and supported event types.
+
+**No authentication required.**
+
+**Response:**
+```json
+{
+  "providers": {
+    "youtube": {
+      "events": ["comment", "superchat", "sticker", "member"]
+    },
+    "twitch": {
+      "events": ["comment", "gift", "cheer", "member", "follow", "sub", "raid", "hype_train"]
+    },
+    "niconico": {
+      "events": ["comment"]
+      // NOTE: Real monetization via NicoNico points:
+      // - nicoad (広告): User advertisement system
+      // - gift (ギフト): Gift/item system
+      // スーパーチャット does NOT exist on NicoNico
+      // Actual event types and field names require verification with production data
+    },
+    "bilibili": {
+      "events": ["comment", "superchat", "member", "gift", "viewer_join"]
+    },
+    "tiktok": {
+      "events": ["comment", "gift", "like", "viewer_join", "follow"]
+    },
+    "instagram": {
+      "events": ["comment"]
+      // NOTE: Instagram does NOT have official real-time API for gifts, reactions, or other live events.
+      // Only comments supported via unofficial methods (violates ToS).
+    },
+    "facebook": {
+      "events": ["comment", "reaction"]
+    },
+    "kick": {
+      "events": ["comment", "gift", "member", "follow"]
+    },
+    "twitcasting": {
+      "events": ["comment", "gift"]
+    },
+    "x": {
+      "events": ["comment"]
+    }
+  }
+}
+```
+
+**Use case:**
+- Frontend calls this once at startup to learn which providers support which events
+- When creating a condition, filter event type options based on the selected provider
+
+---
+
+### GET /event-metadata/{platform}
+
+Returns the list of event types supported by a specific platform.
+
+**Path parameters:**
+- `platform` (string): Provider name (e.g., `youtube`, `twitch`, `niconico`)
+
+**No authentication required.**
+
+**Response (example: GET /event-metadata/youtube):**
+```json
+{
+  "platform": "youtube",
+  "events": ["comment", "superchat", "sticker", "member"]
+}
+```
+
+**Response (example: GET /event-metadata/twitch):**
+```json
+{
+  "platform": "twitch",
+  "events": ["comment", "gift", "cheer", "member", "follow", "sub", "raid", "hype_train"]
+}
+```
+
+**Error responses:**
+- 404: If the platform is not supported
+
+**Use case:**
+- Frontend calls this after user selects a platform
+- Returns the available event types for that platform
+- Used to populate the event type dropdown/filter in the UI
+
+---
+
+### GET /event-metadata/{platform}/{event}
+
+Returns platform-specific event schema. Each platform and event type has unique fields available.
+
+**Path parameters:**
+- `platform` (string): Provider name (e.g., `youtube`, `twitch`, `niconico`)
+- `event` (string): Event type (e.g., `comment`, `superchat`)
+
+**No authentication required.**
+
+**Response (example: GET /event-metadata/youtube/comment):**
+```json
+{
+  "platform": "youtube",
+  "event_type": "comment",
+  "fields": {
+    "id": {"name": "id", "type": "string", "description": "Unique identifier (UUID) for this event", "optional": false},
+    "user_id": {"name": "user_id", "type": "number", "description": "ID of the user who owns the watch target", "optional": false},
+    "watch_target_id": {"name": "watch_target_id", "type": "string", "description": "ID of the watch target this event came from", "optional": false},
+    "stream_event_id": {"name": "stream_event_id", "type": "string", "description": "ID of the parent stream_event", "optional": false},
+    "platform": {"name": "platform", "type": "string", "description": "Platform name", "optional": false},
+    "event_type": {"name": "event_type", "type": "string", "description": "Always 'comment' for this endpoint", "optional": false},
+    "sender_id": {"name": "sender_id", "type": "string", "description": "YouTube channel ID of the commenter", "optional": false},
+    "sender_name": {"name": "sender_name", "type": "string", "description": "Display name of the commenter", "optional": false},
+    "sender_avatar": {"name": "sender_avatar", "type": "string", "description": "URL to the commenter's profile picture", "optional": true},
+    "message": {"name": "message", "type": "string", "description": "Comment text", "optional": false},
+    "is_member": {"name": "is_member", "type": "boolean", "description": "Whether the sender is a channel member", "optional": true},
+    "badges": {"name": "badges", "type": "array", "description": "YouTube badges (e.g., 'member', 'moderator')", "optional": true},
+    "received_at": {"name": "received_at", "type": "timestamp", "description": "When the event was received from the platform", "optional": false},
+    "created_at": {"name": "created_at", "type": "timestamp", "description": "When the event record was created in our database", "optional": false}
+  }
+}
+```
+
+**Response (example: GET /event-metadata/niconico/comment):**
+```json
+{
+  "platform": "niconico",
+  "event_type": "comment",
+  "fields": {
+    "id": {"name": "id", "type": "string", "description": "Unique identifier (UUID) for this event", "optional": false},
+    "user_id": {"name": "user_id", "type": "number", "description": "ID of the user who owns the watch target", "optional": false},
+    "watch_target_id": {"name": "watch_target_id", "type": "string", "description": "ID of the watch target this event came from", "optional": false},
+    "stream_event_id": {"name": "stream_event_id", "type": "string", "description": "ID of the parent stream_event", "optional": false},
+    "platform": {"name": "platform", "type": "string", "description": "Platform name", "optional": false},
+    "event_type": {"name": "event_type", "type": "string", "description": "Always 'comment' for this endpoint", "optional": false},
+    "sender_id": {"name": "sender_id", "type": "string", "description": "NicoNico user ID (optional; can be anonymous)", "optional": true},
+    "sender_name": {"name": "sender_name", "type": "string", "description": "Display name of the commenter", "optional": false},
+    "message": {"name": "message", "type": "string", "description": "Comment text", "optional": false},
+    "color": {"name": "color", "type": "string", "description": "Comment text color (e.g., 'white', 'red', 'green')", "optional": true},
+    "size": {"name": "size", "type": "string", "description": "Comment text size (e.g., 'small', 'medium', 'large')", "optional": true},
+    "position": {"name": "position", "type": "string", "description": "Screen position (e.g., 'top', 'center', 'bottom')", "optional": true},
+    "received_at": {"name": "received_at", "type": "timestamp", "description": "When the event was received from the platform", "optional": false},
+    "created_at": {"name": "created_at", "type": "timestamp", "description": "When the event record was created in our database", "optional": false}
+  }
+}
+```
+
+**Key differences by platform:**
+- **YouTube comments**: Include `is_member` flag; no color/position fields
+- **NicoNico comments**: Include `color`, `size`, `position` (danmaku styling); `sender_id` is optional
+- **Twitch comments**: Include `is_mod`, `badges`, channel-specific badges
+- **Bilibili comments** (danmaku): Include `color`, `size`, `position` like NicoNico
+- **TikTok/Instagram/Facebook comments**: Minimal field set (sender, message only)
+
+**Error responses:**
+- 404: If the platform or event type is not supported, returns an empty field set or HTTP 404
+
+**Use case:**
+- Frontend calls this when user is building a condition for a specific platform and event
+- Display only the available fields for that platform-event combination
+- Fields with `"optional": false` are always present; `"optional": true` fields may be absent for some events

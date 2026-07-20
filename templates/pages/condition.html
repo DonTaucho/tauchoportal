@@ -1,14 +1,625 @@
 {{define "page"}}{{template "channels" .}}{{end}}
 
 {{define "channelshead"}}
+<link rel="stylesheet" href="/css/modals.css">
+<link rel="stylesheet" href="/css/channels.css">
 <link rel="stylesheet" href="/css/condition.css">
 {{end}}
 
-{{define "content"}}
-<div id="condition-view" class="view channels-view condition-container"></div>
+{{define "channelscontent"}}
+<div id="condition-view" class="view channels-view condition-container">
+  <div class="page-header">
+    <nav class="breadcrumb">
+      <img src="/image/channels_s.png">
+      <a href="/channels">Watched Channels</a>
+      <span class="breadcrumb-sep">›</span>
+      <a href="/channels/{{.CurrentChannel.ID}}">{{.CurrentChannel.Name}}</a>
+      <span class="breadcrumb-sep">›</span>
+      <a href="/channels/{{.CurrentChannel.ID}}/conditions">Conditions</a>
+      <span class="breadcrumb-sep">›</span>
+      <span>{{.Condition.Name}}</span>
+    </nav>
+    <div class="page-header-top">
+      <div>
+        <h1>
+          <span class="platform-icon-sm {{.CurrentChannel.Platform}}">{{platformIcon .CurrentChannel.Platform}}</span>
+          <span>{{.CurrentChannel.Name}}</span> — Condition <span id="conditionName">{{.Condition.Name}}</span>
+        </h1>
+      </div>
+    </div>
+  </div>
+
+  <div id="upperarea">
+    <div class="toolbox" style="display:inline-block; vertical-align:top; width: 20%">
+      <h3 style="border-bottom: 2px solid blue">ToolBox</h3>
+      <h4>Templates</h4>
+      <div>Template1</div><div>Template2</div><div>Template3</div><div>Template4</div><div>Template5</div><div>Template6</div>
+      <h4>Tool</h4>
+      <div>Tool1</div><div>Tool2</div><div>Tool3</div><div>Tool4</div><div>Tool5</div><div>Tool6</div>
+    </div>
+    <div id="drawingAreaContainer">
+      <div id="drawingArea" style="border:1px solid grey; height: 100%;">
+      </div>
+      <div id="fullscreenbuttonarea"><div id="fullscreenbutton" onclick="document.getElementsByTagName('body')[0].classList.toggle('fullscreen');"><img src="/image/fullscreenicon.png"></div></div>
+    </div>
+  </div>
+
+  <div id="jsonarea"><div class="jsontab"><img src="/image/jsonareaedge.png" width="43" height="27"><a onclick="if(document.getElementById('jsonarea').classList.contains('active')){document.getElementById('jsonarea').classList.remove('active');}else {document.getElementById('jsonarea').classList.add('active')};if(document.getElementById('jsonarea').classList.contains('active')){document.getElementById('upperarea').classList.add('hide')}else {document.getElementById('upperarea').classList.remove('hide')};return false">JSON</a></div>
+  <div id="jsonareawrapper"><textarea id="conditionLogicInput" class="condition-textarea" onchange="refreshSummary()">{{.Condition.ConditionLogic}}</textarea></div>
+  </div>
+  <div id="logictotaldescription"></div>
+
+  <div class="submitarea">
+    <div id="sendingParameterContainer">
+        <h3 id="sendingParameterTitle">Sending Parameters</h3>
+        <div id="sendingParameterArea">SendingParameter:none</div>
+        <div id="sendingParamJsonArea"><div class="jsontab"><img src="/image/jsonareaedge.png" width="43" height="27"><a onclick="if(document.getElementById('sendingParamJsonArea').classList.contains('active')){document.getElementById('sendingParamJsonArea').classList.remove('active');}else {document.getElementById('sendingParamJsonArea').classList.add('active')};if(document.getElementById('sendingParamJsonArea').classList.contains('active')){document.getElementById('sendingParameterArea').classList.add('hide')}else {document.getElementById('sendingParameterArea').classList.remove('hide')};return false">JSON</a></div>
+            <div id="sendingParameterJsonWrapper"><textarea id="sendingparamjson" onchange="refreshRequest()">{{.Condition.DeviceActionParams}}</textarea></div>
+        </div>
+    </div>
+    <div id="buttonsContainer">
+        <div class="btn btn-attempt" id="testConditionButton" onclick="openTestModal()">TEST</div>
+        <div class="btn btn-primary" id="submitConditionButton" onclick="submitCondition()">SUBMIT</div>
+    </div>
+  </div>
+
+    <div id="boolModal" class="modal lower">
+        <div class="modal-content modal-large">
+            <div class="modal-header">
+                <span class="close" onclick="closeModal('boolModal')">×</span>
+                <h2><svg width="1em" height="1em" viewBox="0 0 512 512" xmlns="http://www.w3.org/2000/svg"><path fill="#ffffff" stroke="black" stroke-width="6%" d="M296,464a23.88,23.88,0,0,1-7.55-1.23l-80.15-26.67A23.92,23.92,0,0,1,192,413.32V294.11a.44.44,0,0,0-.09-.13L23.26,97.54A30,30,0,0,1,46.05,48H466a30,30,0,0,1,22.79,49.54L320.09,294a.77.77,0,0,0-.09.13V440a23.93,23.93,0,0,1-24,24Z"></path></svg> Add Item</h2>
+                <p>Add Item.</p>
+            </div>
+            <div id="boolBody" class="modal-body">
+                <input id="boolPath" type="hidden" value="">
+                <div id="boolmodal_text" class="selector">
+                <h4><input id="booltextradio" type="radio" name="addboolradio" /> Values Matches/Includes</h4>
+                <span id="textSelector">
+                    <span id="textcomparebaseplaceholder" class="placeholder">Enter Value</span>
+                    <span id="textcomparebasedisplay" class="value" style="display:none"></span>
+                    <input id="textcomparebasevalue" type="hidden" />
+                    <input id="textcomparebasetype" type="hidden" />
+                    <input id="textcomparebaseexttype" type="hidden" />
+                    <input id="textcomparebaseextvalue" value="none" type="hidden" />
+                </span>
+                <span id="textConditionSelector">
+                    <span id="textconditionplaceholder" class="placeholder"> - </span>
+                    <span id="textconditionselectdisplay" class="value" style="display:none"> - </span>
+                    <input id="textconditionselectrange" type="hidden" value="" />
+                    <input id="textconditionselectvalue" type="hidden" value="" />
+                    <input id="textconditionselecttype" type="hidden" value="" />
+                </span>
+                </div>
+                <div id="boolmodal_numeric" class="selector">
+                <div><input id="boolnumericradio" type="radio" name="addboolradio" />Comparison?</div>
+                    <span id="numericcomparebasedisp" class="numselector">
+                        <span id="numericcomparebaseplaceholder" class="placeholder">Enter Value</span>
+                        <span id="numericcomparebaseplacedisp" class="value" style="display:none"></span>
+                    </span>
+                    <input id="numericcomparebase" type="hidden" />
+                    <select id="numericcompareoperator">
+                    <option value="greater_than">&gt;</option>
+                    <option value="greater_or_equal" selected>&gt;=</option>
+                    <option value="equivalent">=</option>
+                    <option value="less_or_equal">&lt;=</option>
+                    <option value="less_than">&lt;</option>
+                    </select>
+                    <span id="numericcomparetargetdisp" class="numselector">
+                        <span id="numericcomparetargetplaceholder" class="placeholder">Enter Value</span>
+                        <span id="numericcomparetargetplacedisp" class="value" style="display:none"></span>
+                    </span>
+                    <input id="numericcomparetarget" type="hidden" />
+                </div>
+                <div id="boolmodal_bool" class="selector">
+                <div><input id="boolconditionradio" type="radio" name="addboolradio" />Add more condition?</div>
+                <select id="boolcondition"></select>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" onclick="closeModal('boolModal')">Cancel</button>
+                <button id="boolSubmitButton" type="button" class="btn btn-primary" onclick="">Add Item</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="textModal" class="modal">
+        <div class="modal-content modal-middle">
+            <div class="modal-header">
+                <span class="close" onclick="closeModal('textModal')">×</span>
+                <p>Value.</p>
+            </div>
+            <div id="textBody" class="modal-body textselection">
+            <div>
+                <div id="textEnvArea" class="selector envselection">
+                <h4><input id="textenvradio" type="radio" name="inputtextradio"> Select Input Parameter</h4>
+                <select id="textEnvSelect">
+                    {{range .EventFieldOptions}}
+                    <option value="{{.Name}}">{{.Label}}</option>
+                    {{end}}
+                </select>
+                </div>
+                <div id="textEnterArea" class="selector entervalue">
+                <h4><input id="textenterradio" type="radio" name="inputtextradio"> Static Value</h4>
+                <input id="textEnter" type="text" >
+                <input id="textValidator" type="hidden" >
+                </div>
+            </div>
+            <div class="extractorselection">
+                <div id="textExtArea" class="selector textextractor">
+                <h4>Extract</h4>
+                <select id="textExtSelect">
+                    <option value="wholesentence">Whole Sentence</option>
+                    <option value="regex_extract">Regex</option>
+                    <option value="substring">Substring</option>
+                    <option value="first">First</option>
+                    <option value="last">Last</option>
+                </select>
+                <div>
+                    <input id="textExtRegex" type="text" style="display:none"/>
+                    <input id="textExtSubFrom" type="number" inputmode="numeric" min="1" max="999" pattern="[0-9]*" class="numerictext" style="display:none" /><input id="textExtSubTo" type="number" class="numerictext" inputmode="numeric" min="1" max="999" pattern="[0-9]*" style="display:none" />
+                    <input id="textExtFirst" type="number" inputmode="numeric" min="1" max="999" pattern="[0-9]*" class="numerictext" style="display:none" />
+                    <input id="textExtLast" type="number" inputmode="numeric" min="1" max="999" pattern="[0-9]*" class="numerictext" style="display:none" />
+                </div>
+                </div>
+            </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" onclick="closeModal('textModal')">Cancel</button>
+                <button id="textSubmitButton" type="button" class="btn btn-primary" onclick="">Okay</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="numModal" class="modal middle">
+        <div class="modal-content modal-big">
+            <div class="modal-header">
+                <span class="close" onclick="closeModal('numModal')">×</span>
+                <p>Numeric.</p>
+            </div>
+            <div id="numBody" class="modal-body numselection">
+                <div id="calcarea">
+                <div id="visualizedcalc">
+                </div>
+                <span id="calccursor">|</span>
+                <div id="calctoolarea">
+                </div>
+                </div>
+                <input type="hidden" id="calcformula" value=''/>
+                <input type="hidden" id="calccursorpos" value="" />
+                <div id="calcdisplay">
+                
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" onclick="closeModal('numModal')">Cancel</button>
+                <button id="numModalButton" type="button" class="btn btn-primary" onclick="">Okay</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="textConditionModal" class="modal">
+        <div class="modal-content modal-small">
+            <div class="modal-header">
+                <span class="close" onclick="closeModal('textConditionModal')">×</span>
+                <p>Condition of text.</p>
+            </div>
+            <div id="textConditionBody" class="modal-body">
+            <div id="ext_eq" class="selector">
+                <input id="textConditionEqualradio" type="radio" name="textconditionradio">
+                EQUALS(Exact Match)
+                <input id="textconditionequals" type="text" />
+            </div>
+            <div id="ext_range" class="selector">
+                <div class="textconditionincludes">
+                <input id="textconditionrangeradio" type="radio" name="textconditionradio">
+                Includes
+                <input id="textconditionrangetext" type="text" />
+                </div>
+                <div class="textrangeinput">
+                    <h5>Specific Range?</h5>
+                    <div class="rangearea">
+                    <input id="textconditionrange-from" type="number" class="number" type="tel" inputmode="numeric" min="1" max="999">~<input id="textconditionrange-to" type="number" class="number" type="tel" inputmode="numeric" min="1" max="999">
+                    </div>
+                </div>
+            </div>
+            <div id="ext_reg" class="selector">
+                <input id="textconditionregexradio" type="radio" name="textconditionradio">
+                REGEX
+                <input id="textconditionregex" type="text" />
+            </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" onclick="closeModal('textConditionModal')">Cancel</button>
+                <button id="textConditionModalButton" type="button" class="btn btn-primary" onclick="">Okay</button>
+            </div>
+        </div>
+    </div>
+</div>
 {{end}}
 
 {{define "scripts"}}
+<script id="conditionTranslationsData" type="application/json">
+{{.I18n.TByPrefix "condition" | jsonMarshal}}
+</script>
+<script>
+var translations = JSON.parse(document.getElementById('conditionTranslationsData').textContent);
+</script>
 <script src="/js/condition.js"></script>
+<script>
+let conditionEditor = null;
+let deviceParamsEditor = null;
+
+// Get condition data from page
+function getConditionData() {
+    const conditionLogic = document.getElementById('conditionLogicInput').value;
+    const deviceActionParams = document.getElementById('sendingparamjson').value;
+    return {
+        logic: conditionLogic,
+        params: deviceActionParams
+    };
+}
+
+// Parse JSON safely
+function parseJSON(str) {
+    try {
+        return JSON.parse(str);
+    } catch (e) {
+        console.error('JSON parse error:', e);
+        return null;
+    }
+}
+
+// Open test modal and populate event types
+async function openTestModal() {
+    const eventTypeSelect = document.getElementById('testEventType');
+    const eventTypeValue = '{{.Condition.EventType}}';
+    let platform = '{{.CurrentChannel.Platform}}';
+    
+    // Fallback: extract platform from the platform icon span if template didn't render
+    if (!platform || platform.includes('{')) {
+        const platformSpan = document.querySelector('.platform-icon-sm');
+        if (platformSpan) {
+            platform = platformSpan.className.split(' ')[1]; // Get second class name
+        }
+    }
+    
+    // Clear existing options
+    eventTypeSelect.innerHTML = '<option value="">Select event type...</option>';
+    
+    // Fetch event types from API
+    try {
+        const events = await window.getEventsForPlatform(platform);
+        events.forEach(event => {
+            const option = document.createElement('option');
+            option.value = event.value;
+            option.textContent = event.value;
+            eventTypeSelect.appendChild(option);
+        });
+    } catch (e) {
+        console.error('Failed to load events:', e);
+    }
+    
+    if (eventTypeValue) {
+        eventTypeSelect.value = eventTypeValue;
+        updateTestEventParams();
+    }
+    
+    // Disable event type selection on this page - the event type is fixed to the condition's type
+    eventTypeSelect.disabled = true;
+    
+    openModal('testConditionModal');
+}
+
+// Close test modal and re-enable event type selector
+function closeTestModal() {
+    const eventTypeSelect = document.getElementById('testEventType');
+    eventTypeSelect.disabled = false;
+    closeModal('testConditionModal');
+}
+
+// Update test event parameters form
+async function updateTestEventParams() {
+    const eventType = document.getElementById('testEventType').value;
+    const container = document.getElementById('testEventParamsContainer');
+    let platform = '{{.CurrentChannel.Platform}}';
+    
+    // Fallback: extract platform from the platform icon span if template didn't render
+    if (!platform || platform.includes('{')) {
+        const platformSpan = document.querySelector('.platform-icon-sm');
+        if (platformSpan) {
+            platform = platformSpan.className.split(' ')[1];
+        }
+    }
+    
+    if (!eventType) {
+        container.innerHTML = '';
+        return;
+    }
+    
+    // Fetch parameters for this event type from API
+    try {
+        const params = await window.getEventParameters(platform, eventType);
+        
+        if (!params || params.length === 0) {
+            container.innerHTML = '<p style="color: #666; font-size: 0.9rem;">No custom parameters for this event type</p>';
+            return;
+        }
+        
+        let html = '';
+        params.forEach(param => {
+            if (param.type === 'checkbox') {
+                html += `<div class="form-group">
+                    <label class="checkbox-label">
+                        <input type="checkbox" id="testParam_${param.name}" value="${param.name}">
+                        <span>${param.label}</span>
+                    </label>
+                </div>`;
+            } else {
+                html += `<div class="form-group">
+                    <label for="testParam_${param.name}">${param.label}</label>
+                    <input type="${param.type}" id="testParam_${param.name}" value="${param.value}">
+                </div>`;
+            }
+        });
+        
+        container.innerHTML = html;
+    } catch (e) {
+        console.error('Failed to load event parameters:', e);
+        container.innerHTML = '<p style="color: #999;">Failed to load parameters</p>';
+    }
+}
+
+// Collect test event parameters from form
+function getTestEventParams() {
+    const container = document.getElementById('testEventParamsContainer');
+    const customParams = {};
+    
+    // Collect all form inputs with testParam_ prefix
+    const inputs = container.querySelectorAll('input[id^="testParam_"]');
+    inputs.forEach(input => {
+        const name = input.id.replace('testParam_', '');
+        if (input.type === 'checkbox') {
+            customParams[name] = input.checked;
+        } else {
+            customParams[name] = input.value;
+        }
+    });
+    
+    return customParams;
+}
+
+// Run the condition test
+function runConditionTest() {
+    const eventType = document.getElementById('testEventType').value;
+    const triggerRealDevice = document.getElementById('testTriggerRealDevice').checked;
+    
+    if (!eventType) {
+        alert('Please select an event type');
+        return;
+    }
+    
+    const data = getConditionData();
+    const conditionLogic = parseJSON(data.logic);
+    const deviceActionParams = parseJSON(data.params) || {};
+    
+    if (!conditionLogic) {
+        alert('Invalid condition logic JSON');
+        return;
+    }
+    
+    // Use the shared buildTestEvent function if available
+    let sampleEvent;
+    if (window.buildTestEvent) {
+        const customParams = getTestEventParams();
+        sampleEvent = window.buildTestEvent(eventType, '{{.CurrentChannel.Platform}}', customParams);
+    } else {
+        alert('Test event builder not available');
+        return;
+    }
+    
+    const testRequest = {
+        condition_logic: conditionLogic,
+        test_event: sampleEvent,
+        device_id: '{{.Condition.DeviceID}}' || '',
+        device_action: '{{.Condition.DeviceAction}}' || '',
+        device_action_params: deviceActionParams,
+        trigger_real_device: triggerRealDevice
+    };
+    
+    // Show loading state
+    const resultsContainer = document.getElementById('testResultsContainer');
+    const resultsContent = document.getElementById('testResultsContent');
+    resultsContent.innerHTML = '<div style="text-align: center;"><p>Testing...</p></div>';
+    resultsContainer.style.display = 'block';
+    
+    // Call the test endpoint
+    fetch('/api/conditions/test-draft', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(testRequest)
+    })
+    .then(response => {
+        if (!response.ok) {
+            throw new Error('Test failed: ' + response.status);
+        }
+        return response.json();
+    })
+    .then(result => {
+        // Display results
+        let resultHTML = '<pre style="max-height: 300px; overflow-y: auto; background: #fff; padding: 0.5rem; border-radius: 3px; font-size: 0.85rem;">' + JSON.stringify(result, null, 2) + '</pre>';
+        resultHTML += '<div style="margin-top: 1rem; padding: 1rem; background: #fff; border-left: 4px solid ' + (result.matched ? '#28a745' : '#dc3545') + ';">';
+        resultHTML += '<strong>Matched:</strong> <span style="color:' + (result.matched ? 'green' : 'red') + ';">' + (result.matched ? '✓ Yes' : '✗ No') + '</span><br>';
+        if (result.matched) {
+            resultHTML += '<strong>Would Trigger:</strong> <span style="color:' + (result.would_trigger ? 'green' : 'red') + ';">' + (result.would_trigger ? '✓ Yes' : '✗ No') + '</span><br>';
+            if (result.computed_values && result.computed_values.length > 0) {
+                resultHTML += '<strong>Computed Values:</strong> <code>' + result.computed_values.join(', ') + '</code><br>';
+            }
+        }
+        if (result.execution_error) {
+            resultHTML += '<br><strong style="color:red;">Error:</strong> ' + result.execution_error + '<br>';
+        }
+        if (result.execution_result) {
+            resultHTML += '<br><strong style="color:green;">Success:</strong> ' + result.execution_result + '<br>';
+        }
+        resultHTML += '</div>';
+        
+        resultsContent.innerHTML = resultHTML;
+    })
+    .catch(error => {
+        console.error('Test error:', error);
+        resultsContent.innerHTML = '<div style="color:red; padding: 1rem; background: #f8d7da; border-radius: 3px;"><strong>Error:</strong> ' + error.message + '</div>';
+    });
+}
+
+// Submit the condition (create or update)
+function submitCondition() {
+    const conditionID = '{{.Condition.ID}}';
+    const channelID = '{{.CurrentChannel.ID}}';
+    const conditionName = '{{.Condition.Name}}';
+    
+    const data = getConditionData();
+    const conditionLogic = parseJSON(data.logic);
+    const deviceActionParams = parseJSON(data.params);
+    
+    if (!conditionLogic) {
+        alert('Invalid condition logic JSON');
+        return;
+    }
+    
+    if (!conditionName || !conditionName.trim()) {
+        alert('Condition name cannot be empty');
+        return;
+    }
+    
+    const conditionData = {
+        name: conditionName,
+        event_type: '{{.Condition.EventType}}',
+        is_enabled: true,
+        condition_logic: conditionLogic,
+        device_id: '{{.Condition.DeviceID}}' || null,
+        device_action: '{{.Condition.DeviceAction}}' || null,
+        device_action_params: deviceActionParams || null
+    };
+    
+    // Determine if this is a create or update
+    const isUpdate = conditionID && conditionID.length > 0;
+    const method = isUpdate ? 'PATCH' : 'POST';
+    const endpoint = isUpdate ? '/api/conditions/update?id=' + encodeURIComponent(conditionID) : '/api/conditions';
+    
+    // For POST requests, we need to include watch_id
+    if (!isUpdate) {
+        conditionData.watch_id = channelID;
+    }
+    
+    // Show loading state
+    const submitBtn = document.getElementById('submitConditionButton');
+    const originalText = submitBtn.textContent;
+    submitBtn.textContent = 'Saving...';
+    submitBtn.disabled = true;
+    
+    fetch(endpoint, {
+        method: method,
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(conditionData)
+    })
+    .then(response => {
+        if (!response.ok) {
+            return response.json().then(err => {
+                throw new Error(err.message || 'Failed to save condition');
+            }).catch(() => {
+                throw new Error('HTTP ' + response.status);
+            });
+        }
+        return response.json();
+    })
+    .then(result => {
+        console.log('Condition saved:', result);
+        console.log('Device action params saved:', result.device_action_params);
+        alert('Condition saved successfully!');
+        // Redirect back to conditions list
+        window.location.href = '/channels/' + encodeURIComponent(channelID) + '/conditions';
+    })
+    .catch(error => {
+        console.error('Save error:', error);
+        alert('Error saving condition: ' + error.message);
+        submitBtn.textContent = originalText;
+        submitBtn.disabled = false;
+    });
+}
+
+document.addEventListener('DOMContentLoaded', function() {
+    // Initialize condition logic editor
+    conditionEditor = new ConditionEditor('conditionLogicInput', {
+        baseType: 'OR',
+        drawingArea: document.getElementById('drawingArea'),
+        logicDescriptionArea: document.getElementById('logictotaldescription')
+    });
+    
+    // Pretty-print conditionLogicInput if it has content
+    const conditionLogicTextarea = document.getElementById('conditionLogicInput');
+    if (conditionLogicTextarea.value.trim()) {
+        try {
+            const parsed = JSON.parse(conditionLogicTextarea.value);
+            conditionLogicTextarea.value = JSON.stringify(parsed, null, 2);
+        } catch (e) {
+            console.warn('Could not parse condition logic JSON:', e);
+        }
+    }
+    
+    conditionEditor.refresh();
+
+    // Initialize device action parameters editor
+    const sendingParamTextarea = document.getElementById('sendingparamjson');
+    
+    // Pretty-print sendingparamjson if it has content
+    if (sendingParamTextarea.value.trim()) {
+        try {
+            const parsed = JSON.parse(sendingParamTextarea.value);
+            sendingParamTextarea.value = JSON.stringify(parsed, null, 2);
+        } catch (e) {
+            console.warn('Could not parse sending params JSON:', e);
+        }
+    }
+    
+    // Only create the editor if there's actual content, otherwise just let the textarea be
+    deviceParamsEditor = new ConditionEditor('sendingparamjson', {
+        baseType: 'WHOLESENTENCE',
+        drawingArea: document.getElementById('sendingParameterArea'),
+        logicDescriptionArea: null
+    });
+    // Don't refresh immediately if there's saved content - let the textarea content take precedence
+    if (!sendingParamTextarea.value || sendingParamTextarea.value.trim() === '') {
+        deviceParamsEditor.refresh();
+    }
+    
+    // Override test modal close buttons to use custom closeTestModal function
+    const testModal = document.getElementById('testConditionModal');
+    if (testModal) {
+        const closeButtons = testModal.querySelectorAll('.close, .btn-secondary');
+        closeButtons.forEach(btn => {
+            if (btn.getAttribute('onclick') && btn.getAttribute('onclick').includes('testConditionModal')) {
+                btn.setAttribute('onclick', 'closeTestModal()');
+            }
+        });
+    }
+});
+
+// Global refreshSummary for any external code that still calls it
+function refreshSummary() {
+    if (conditionEditor) {
+        conditionEditor.refresh();
+    }
+}
+
+function refreshRequest() {
+    if (deviceParamsEditor) {
+        deviceParamsEditor.refresh();
+    }
+}
+</script>
 {{end}}
 

@@ -1,6 +1,6 @@
 (function () {
     'use strict';
-    const { PLATFORM_META, PLATFORM_EVENTS, EVENT_PARAMETERS, apiRequest, escHtml, hasActiveFilter, openModal, closeModal, buildTestEvent } = window;
+    const { PLATFORM_META, PLATFORM_EVENTS, apiRequest, escHtml, hasActiveFilter, openModal, closeModal, buildTestEvent, getEventParameters } = window;
     let filteringChannelId = null;
     const getChannelIdFromURL = () => {
         const match = window.location.pathname.match(/^\/channels\/([^\/]+)\/?$/);
@@ -131,21 +131,43 @@
             button.disabled = false; 
         } 
     }
-    function openTestAllConditionsModal() { 
+    async function openTestAllConditionsModal() { 
         const select = document.getElementById('testEventType'); 
-        select.innerHTML = '<option value="">Select event type...</option>' + (PLATFORM_EVENTS[document.querySelector('.platform-tag').className.split(' ')[1]] || []).map((eventType) => `<option value="${eventType.value}">${eventType.label}</option>`).join(''); 
+        const platformTag = document.querySelector('.platform-tag');
+        const platform = platformTag ? platformTag.className.split(' ')[1] : 'unknown';
+        console.log('[openTestAllConditionsModal] Platform:', platform);
+        try {
+            const events = await window.getEventsForPlatform(platform);
+            console.log('[openTestAllConditionsModal] Events returned:', events);
+            select.innerHTML = '<option value="">Select event type...</option>' + (events || []).map((evt) => {
+                console.log('[openTestAllConditionsModal] Mapping event:', evt);
+                return `<option value="${evt.value}">${evt.value}</option>`;
+            }).join('');
+            console.log('[openTestAllConditionsModal] Select innerHTML updated');
+        } catch (e) {
+            console.error('[openTestAllConditionsModal] Failed to populate events:', e);
+        }
         document.getElementById('testConditionTitle').textContent = 'Test All Conditions'; 
         document.getElementById('testTriggerRealDevice').checked = false; 
         document.getElementById('testResultsContainer').style.display = 'none'; 
-        updateTestEventParams(); 
+        await updateTestEventParams(); 
         openModal('testConditionModal'); 
     }
-    function updateTestEventParams() { 
+    async function updateTestEventParams() { 
         const eventType = document.getElementById('testEventType').value; 
         const container = document.getElementById('testEventParamsContainer'); 
         container.innerHTML = ''; 
-        if (!eventType) return; 
-        (EVENT_PARAMETERS[eventType] || []).forEach((param) => { 
+        if (!eventType) {
+            console.log('[updateTestEventParams] No event type selected');
+            return; 
+        }
+        
+        const platformTag = document.querySelector('.platform-tag');
+        const platform = platformTag ? platformTag.className.split(' ')[1] : 'unknown';
+        console.log('[updateTestEventParams] Fetching params for platform:', platform, 'eventType:', eventType);
+        const params = await window.getEventParameters(platform, eventType);
+        console.log('[updateTestEventParams] Params returned:', params);
+        (params || []).forEach((param) => { 
             const group = document.createElement('div'); 
             group.className = 'form-group'; 
             group.innerHTML = param.type === 'checkbox' ? `<label class="checkbox-label"><input type="checkbox" id="param_${param.name}" ${param.value ? 'checked' : ''}><span>${param.label}</span></label>` : `<label>${param.label}</label><input type="${param.type === 'number' ? 'number' : 'text'}" id="param_${param.name}" value="${param.value}">`; 
@@ -162,10 +184,13 @@
             const channelId = getChannelIdFromURL();
             const platformTag = document.querySelector('.platform-tag');
             const platform = platformTag ? platformTag.className.split(' ')[1] : 'unknown';
-            (EVENT_PARAMETERS[eventType] || []).forEach((param) => { 
+            console.log('[runConditionTest] Testing with platform:', platform, 'eventType:', eventType);
+            const params = await window.getEventParameters(platform, eventType);
+            (params || []).forEach((param) => { 
                 const input = document.getElementById(`param_${param.name}`); 
                 if (input) customParams[param.name] = param.type === 'checkbox' ? input.checked : input.value; 
             }); 
+            console.log('[runConditionTest] Built custom params:', customParams);
             displayTestResults(await apiRequest('POST', '/conditions/test-all', { 
                 watch_target_id: channelId, 
                 test_event: buildTestEvent(eventType, platform, customParams), 
