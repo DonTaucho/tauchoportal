@@ -1,5 +1,5 @@
 /**
- * Reusable UI Components for TauchoPortal
+ * Reusable UI Components for Taucho
  * Load components into pages without repeating HTML
  */
 
