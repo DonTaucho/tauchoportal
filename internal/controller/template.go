@@ -27,6 +27,12 @@ type ChannelForTemplate struct {
 	Platform string
 }
 
+// EventFieldOption represents a single field from the event schema
+type EventFieldOption struct {
+	Name  string
+	Label string
+}
+
 // ConditionForTemplate represents a condition as prepared for template rendering
 type ConditionForTemplate struct {
 	ID                 string
@@ -43,11 +49,12 @@ type ConditionForTemplate struct {
 
 // PageData contains all data needed to render a page
 type PageData struct {
-	CurrentChannel  *ChannelForTemplate
-	Conditions      []ConditionForTemplate
-	EventTypes      []string
-	PlatformMeta    map[string]map[string]interface{}
-	EventBadgeClass map[string]string
+	CurrentChannel     *ChannelForTemplate
+	Conditions         []ConditionForTemplate
+	EventTypes         []string
+	PlatformMeta       map[string]map[string]interface{}
+	EventBadgeClass    map[string]string
+	EventFieldOptions  []EventFieldOption
 }
 
 // GetEventLabel returns the human-readable label for an event type on a platform
@@ -96,15 +103,34 @@ func EscapeHTML(s string) string {
 }
 
 // GetPlatformMetadata returns metadata for all supported platforms
-func GetPlatformMetadata() map[string]map[string]interface{} {
-	return map[string]map[string]interface{}{
-		"youtube": {"icon": "▶", "label": "YouTube"},
-		"twitch":  {"icon": "◆", "label": "Twitch"},
+// Icon data is fetched from the SVG files via icons.Get() in templates
+func GetPlatformMetadata(cond Conditions) map[string]map[string]interface{} {
+	platforms := []string{
+		"youtube",
+		"twitch",
+		"niconico",
+		"bilibili",
+		"tiktok",
+		"instagram",
+		"facebook",
+		"kick",
+		"twitcasting",
+		"x",
 	}
+	
+	platformMeta := make(map[string]map[string]interface{})
+	for _, platform := range platforms {
+		platformMeta[platform] = map[string]interface{}{
+			"label": capitalize(platform),
+		}
+	}
+	
+	return platformMeta
 }
 
-// GetEventBadgeClasses returns CSS class mapping for event badge styling
-func GetEventBadgeClasses() map[string]string {
+// GetEventBadgeClasses returns CSS class mapping for event badge styling (hardcoded)
+func GetEventBadgeClasses(cond Conditions) map[string]string {
+	// Event badge classes are hardcoded since the API doesn't provide a general mapping
 	return map[string]string{
 		"comment":      "comment",
 		"superchat":    "gift",
@@ -119,7 +145,69 @@ func GetEventBadgeClasses() map[string]string {
 		"raid":         "stream",
 		"stream_start": "stream",
 		"stream_end":   "stream",
+		"like":         "comment",
+		"reaction":     "comment",
+		"viewer_join":  "follow",
 	}
+}
+
+// GetEventFieldOptions returns available fields from the event schema as template options
+func GetEventFieldOptions(cond Conditions, platform, eventType string) []EventFieldOption {
+	metadata := cond.GetEventMetadata(platform, eventType)
+	
+	var options []EventFieldOption
+	
+	if metadata.Fields != nil {
+		// Convert map to sorted slice for consistent ordering
+		type fieldEntry struct {
+			name  string
+			field EventSchemaField
+		}
+		var entries []fieldEntry
+		
+		for name, field := range metadata.Fields {
+			entries = append(entries, fieldEntry{name, field})
+		}
+		
+		// Sort by name for consistent ordering
+		sort.Slice(entries, func(i, j int) bool {
+			return entries[i].name < entries[j].name
+		})
+		
+		for _, entry := range entries {
+			label := entry.name
+			if entry.field.Description != "" {
+				label = entry.name + " — " + entry.field.Description
+			}
+			options = append(options, EventFieldOption{
+				Name:  entry.name,
+				Label: label,
+			})
+		}
+	}
+	
+	// Fallback if no metadata available
+	if len(options) == 0 {
+		options = []EventFieldOption{
+			{Name: "message", Label: "message — Message content for comments, gifts, or subs"},
+			{Name: "sender_id", Label: "sender_id — Platform user ID of the sender"},
+			{Name: "sender_name", Label: "sender_name — Display name of the sender"},
+			{Name: "amount_value", Label: "amount_value — Numeric amount for monetary events"},
+			{Name: "amount_display", Label: "amount_display — Formatted display string"},
+			{Name: "is_member", Label: "is_member — Whether the sender is a channel member"},
+			{Name: "is_mod", Label: "is_mod — Whether the sender is a moderator"},
+		}
+	}
+	
+	return options
+}
+
+// capitalize returns a capitalized version of a string
+func capitalize(s string) string {
+	if len(s) == 0 {
+		return s
+	}
+	return string(s[0]-32) + s[1:]
 }
 
 // ChannelDetailForTemplate represents a watch channel with all detail info
@@ -154,11 +242,12 @@ type ChannelDetailPageData struct {
 
 // ConditionsPageData contains all data needed to render a conditions page
 type ConditionsPageData struct {
-	CurrentChannel  *ChannelForTemplate
-	Conditions      []ConditionForTemplate
-	EventTypes      []string
-	PlatformMeta    map[string]map[string]interface{}
-	EventBadgeClass map[string]string
+	CurrentChannel    *ChannelForTemplate
+	Conditions        []ConditionForTemplate
+	EventTypes        []string
+	PlatformMeta      map[string]map[string]interface{}
+	EventBadgeClass   map[string]string
+	EventFieldOptions []EventFieldOption
 }
 
 // PrepareConditionsPageData prepares all data needed to render the conditions page
@@ -213,11 +302,12 @@ func PrepareConditionsPageData(channelID string) *ConditionsPageData {
 	}
 
 	return &ConditionsPageData{
-		CurrentChannel:  currentChannel,
-		Conditions:      conditions,
-		EventTypes:      eventTypes,
-		PlatformMeta:    GetPlatformMetadata(),
-		EventBadgeClass: GetEventBadgeClasses(),
+		CurrentChannel:    currentChannel,
+		Conditions:        conditions,
+		EventTypes:        eventTypes,
+		PlatformMeta:      GetPlatformMetadata(cond),
+		EventBadgeClass:   GetEventBadgeClasses(cond),
+		EventFieldOptions: []EventFieldOption{}, // Not used on conditions list page
 	}
 }
 
@@ -235,9 +325,10 @@ func PrepareChannelDetailPageData(channelID string) *ChannelDetailPageData {
 	}
 
 	if currentWatch == nil {
+		cond := Conditions{}
 		return &ChannelDetailPageData{
-			PlatformMeta:    GetPlatformMetadata(),
-			EventBadgeClass: GetEventBadgeClasses(),
+			PlatformMeta:    GetPlatformMetadata(cond),
+			EventBadgeClass: GetEventBadgeClasses(cond),
 		}
 	}
 
@@ -273,8 +364,8 @@ func PrepareChannelDetailPageData(channelID string) *ChannelDetailPageData {
 			},
 			Conditions: conditions,
 		},
-		PlatformMeta:    GetPlatformMetadata(),
-		EventBadgeClass: GetEventBadgeClasses(),
+		PlatformMeta:    GetPlatformMetadata(cond),
+		EventBadgeClass: GetEventBadgeClasses(cond),
 	}
 }
 
@@ -476,15 +567,16 @@ func PrepareChannelsPageData() *ChannelsPageData {
 
 	return &ChannelsPageData{
 		Watches:      watchesForTemplate,
-		PlatformMeta: GetPlatformMetadata(),
+		PlatformMeta: GetPlatformMetadata(Conditions{}),
 	}
 }
 
 // ConditionPageData contains all data needed to render the condition logic page
 type ConditionPageData struct {
-	CurrentChannel *ChannelForTemplate
-	Condition      *ConditionForTemplate
-	PlatformMeta   map[string]map[string]interface{}
+	CurrentChannel    *ChannelForTemplate
+	Condition         *ConditionForTemplate
+	PlatformMeta      map[string]map[string]interface{}
+	EventFieldOptions []EventFieldOption
 }
 
 // PrepareConditionPageData prepares all data needed to render a single condition logic page
@@ -526,8 +618,9 @@ func PrepareConditionPageData(channelID, conditionID string) *ConditionPageData 
 	}
 
 	return &ConditionPageData{
-		CurrentChannel: currentChannel,
-		Condition:      condForTemplate,
-		PlatformMeta:   GetPlatformMetadata(),
+		CurrentChannel:    currentChannel,
+		Condition:         condForTemplate,
+		PlatformMeta:      GetPlatformMetadata(cond),
+		EventFieldOptions: GetEventFieldOptions(cond, currentChannel.Platform, condition.EventType),
 	}
 }

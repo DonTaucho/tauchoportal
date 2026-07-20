@@ -22,7 +22,7 @@
     <div class="page-header-top">
       <div>
         <h1>
-          <span class="platform-icon-sm {{.CurrentChannel.Platform}}">{{$platformMeta := index .PlatformMeta .CurrentChannel.Platform}}{{if $platformMeta}}{{index $platformMeta "icon"}}{{end}}</span>
+          <span class="platform-icon-sm {{.CurrentChannel.Platform}}">{{platformIcon .CurrentChannel.Platform}}</span>
           <span>{{.CurrentChannel.Name}}</span> — Condition <span id="conditionName">{{.Condition.Name}}</span>
         </h1>
       </div>
@@ -58,8 +58,8 @@
         </div>
     </div>
     <div id="buttonsContainer">
-        <div class="btn btn-attempt">TEST</div>
-        <div class="btn btn-primary">SUBMIT</div>
+        <div class="btn btn-attempt" id="testConditionButton" onclick="openTestModal()">TEST</div>
+        <div class="btn btn-primary" id="submitConditionButton" onclick="submitCondition()">SUBMIT</div>
     </div>
   </div>
 
@@ -133,9 +133,9 @@
                 <div id="textEnvArea" class="selector envselection">
                 <h4><input id="textenvradio" type="radio" name="inputtextradio"> Select Input Parameter</h4>
                 <select id="textEnvSelect">
-                    <option value="event_message">comment</option>
-                    <option value="event_sender_id">senderid</option>
-                    <option value="event_amount">amount</option>
+                    {{range .EventFieldOptions}}
+                    <option value="{{.Name}}">{{.Label}}</option>
+                    {{end}}
                 </select>
                 </div>
                 <div id="textEnterArea" class="selector entervalue">
@@ -249,6 +249,298 @@ var translations = JSON.parse(document.getElementById('conditionTranslationsData
 let conditionEditor = null;
 let deviceParamsEditor = null;
 
+// Get condition data from page
+function getConditionData() {
+    const conditionLogic = document.getElementById('conditionLogicInput').value;
+    const deviceActionParams = document.getElementById('sendingparamjson').value;
+    return {
+        logic: conditionLogic,
+        params: deviceActionParams
+    };
+}
+
+// Parse JSON safely
+function parseJSON(str) {
+    try {
+        return JSON.parse(str);
+    } catch (e) {
+        console.error('JSON parse error:', e);
+        return null;
+    }
+}
+
+// Open test modal and populate event types
+async function openTestModal() {
+    const eventTypeSelect = document.getElementById('testEventType');
+    const eventTypeValue = '{{.Condition.EventType}}';
+    let platform = '{{.CurrentChannel.Platform}}';
+    
+    // Fallback: extract platform from the platform icon span if template didn't render
+    if (!platform || platform.includes('{')) {
+        const platformSpan = document.querySelector('.platform-icon-sm');
+        if (platformSpan) {
+            platform = platformSpan.className.split(' ')[1]; // Get second class name
+        }
+    }
+    console.log('[condition.openTestModal] Platform:', platform, 'Event type:', eventTypeValue);
+    
+    // Clear existing options
+    eventTypeSelect.innerHTML = '<option value="">Select event type...</option>';
+    
+    // Fetch event types from API
+    try {
+        console.log('[condition.openTestModal] Calling getEventsForPlatform with platform:', platform);
+        const events = await window.getEventsForPlatform(platform);
+        console.log('[condition.openTestModal] Received events:', events);
+        events.forEach(event => {
+            const option = document.createElement('option');
+            option.value = event.value;
+            option.textContent = event.value;
+            eventTypeSelect.appendChild(option);
+        });
+        console.log('[condition.openTestModal] Options populated, count:', events.length);
+    } catch (e) {
+        console.error('Failed to load events:', e);
+    }
+    
+    if (eventTypeValue) {
+        eventTypeSelect.value = eventTypeValue;
+        updateTestEventParams();
+    }
+    
+    // Disable event type selection on this page - the event type is fixed to the condition's type
+    eventTypeSelect.disabled = true;
+    
+    openModal('testConditionModal');
+}
+
+// Close test modal and re-enable event type selector
+function closeTestModal() {
+    const eventTypeSelect = document.getElementById('testEventType');
+    eventTypeSelect.disabled = false;
+    closeModal('testConditionModal');
+}
+
+// Update test event parameters form
+function updateTestEventParams() {
+    const eventType = document.getElementById('testEventType').value;
+    const container = document.getElementById('testEventParamsContainer');
+    
+    if (!eventType) {
+        container.innerHTML = '';
+        return;
+    }
+    
+    // Get parameters for this event type from shared EVENT_PARAMETERS
+    const params = window.EVENT_PARAMETERS ? window.EVENT_PARAMETERS[eventType] : [];
+    
+    if (!params || params.length === 0) {
+        container.innerHTML = '<p style="color: #666; font-size: 0.9rem;">No custom parameters for this event type</p>';
+        return;
+    }
+    
+    let html = '';
+    params.forEach(param => {
+        if (param.type === 'checkbox') {
+            html += `<div class="form-group">
+                <label class="checkbox-label">
+                    <input type="checkbox" id="testParam_${param.name}" value="${param.name}">
+                    <span>${param.label}</span>
+                </label>
+            </div>`;
+        } else {
+            html += `<div class="form-group">
+                <label for="testParam_${param.name}">${param.label}</label>
+                <input type="${param.type}" id="testParam_${param.name}" value="${param.value}">
+            </div>`;
+        }
+    });
+    
+    container.innerHTML = html;
+}
+
+// Collect test event parameters from form
+function getTestEventParams() {
+    const eventType = document.getElementById('testEventType').value;
+    const params = window.EVENT_PARAMETERS ? window.EVENT_PARAMETERS[eventType] : [];
+    const customParams = {};
+    
+    params.forEach(param => {
+        const input = document.getElementById('testParam_' + param.name);
+        if (input) {
+            if (param.type === 'checkbox') {
+                customParams[param.name] = input.checked;
+            } else {
+                customParams[param.name] = input.value;
+            }
+        }
+    });
+    
+    return customParams;
+}
+
+// Run the condition test
+function runConditionTest() {
+    const eventType = document.getElementById('testEventType').value;
+    const triggerRealDevice = document.getElementById('testTriggerRealDevice').checked;
+    
+    if (!eventType) {
+        alert('Please select an event type');
+        return;
+    }
+    
+    const data = getConditionData();
+    const conditionLogic = parseJSON(data.logic);
+    const deviceActionParams = parseJSON(data.params) || {};
+    
+    if (!conditionLogic) {
+        alert('Invalid condition logic JSON');
+        return;
+    }
+    
+    // Use the shared buildTestEvent function if available
+    let sampleEvent;
+    if (window.buildTestEvent) {
+        const customParams = getTestEventParams();
+        sampleEvent = window.buildTestEvent(eventType, '{{.CurrentChannel.Platform}}', customParams);
+    } else {
+        alert('Test event builder not available');
+        return;
+    }
+    
+    const testRequest = {
+        condition_logic: conditionLogic,
+        test_event: sampleEvent,
+        device_id: '{{.Condition.DeviceID}}' || '',
+        device_action: '{{.Condition.DeviceAction}}' || '',
+        device_action_params: deviceActionParams,
+        trigger_real_device: triggerRealDevice
+    };
+    
+    // Show loading state
+    const resultsContainer = document.getElementById('testResultsContainer');
+    const resultsContent = document.getElementById('testResultsContent');
+    resultsContent.innerHTML = '<div style="text-align: center;"><p>Testing...</p></div>';
+    resultsContainer.style.display = 'block';
+    
+    // Call the test endpoint
+    fetch('/api/conditions/test-draft', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(testRequest)
+    })
+    .then(response => {
+        if (!response.ok) {
+            throw new Error('Test failed: ' + response.status);
+        }
+        return response.json();
+    })
+    .then(result => {
+        // Display results
+        let resultHTML = '<pre style="max-height: 300px; overflow-y: auto; background: #fff; padding: 0.5rem; border-radius: 3px; font-size: 0.85rem;">' + JSON.stringify(result, null, 2) + '</pre>';
+        resultHTML += '<div style="margin-top: 1rem; padding: 1rem; background: #fff; border-left: 4px solid ' + (result.matched ? '#28a745' : '#dc3545') + ';">';
+        resultHTML += '<strong>Matched:</strong> <span style="color:' + (result.matched ? 'green' : 'red') + ';">' + (result.matched ? '✓ Yes' : '✗ No') + '</span><br>';
+        if (result.matched) {
+            resultHTML += '<strong>Would Trigger:</strong> <span style="color:' + (result.would_trigger ? 'green' : 'red') + ';">' + (result.would_trigger ? '✓ Yes' : '✗ No') + '</span><br>';
+            if (result.computed_values && result.computed_values.length > 0) {
+                resultHTML += '<strong>Computed Values:</strong> <code>' + result.computed_values.join(', ') + '</code><br>';
+            }
+        }
+        if (result.execution_error) {
+            resultHTML += '<br><strong style="color:red;">Error:</strong> ' + result.execution_error + '<br>';
+        }
+        if (result.execution_result) {
+            resultHTML += '<br><strong style="color:green;">Success:</strong> ' + result.execution_result + '<br>';
+        }
+        resultHTML += '</div>';
+        
+        resultsContent.innerHTML = resultHTML;
+    })
+    .catch(error => {
+        console.error('Test error:', error);
+        resultsContent.innerHTML = '<div style="color:red; padding: 1rem; background: #f8d7da; border-radius: 3px;"><strong>Error:</strong> ' + error.message + '</div>';
+    });
+}
+
+// Submit the condition (create or update)
+function submitCondition() {
+    const conditionID = '{{.Condition.ID}}';
+    const channelID = '{{.CurrentChannel.ID}}';
+    const conditionName = '{{.Condition.Name}}';
+    
+    const data = getConditionData();
+    const conditionLogic = parseJSON(data.logic);
+    const deviceActionParams = parseJSON(data.params) || {};
+    
+    if (!conditionLogic) {
+        alert('Invalid condition logic JSON');
+        return;
+    }
+    
+    if (!conditionName || !conditionName.trim()) {
+        alert('Condition name cannot be empty');
+        return;
+    }
+    
+    const conditionData = {
+        name: conditionName,
+        event_type: '{{.Condition.EventType}}',
+        is_enabled: true,
+        condition_logic: conditionLogic,
+        device_id: '{{.Condition.DeviceID}}' || null,
+        device_action: '{{.Condition.DeviceAction}}' || null,
+        device_action_params: deviceActionParams
+    };
+    
+    // Determine if this is a create or update
+    const isUpdate = conditionID && conditionID.length > 0;
+    const method = isUpdate ? 'PATCH' : 'POST';
+    const endpoint = isUpdate ? '/api/conditions/update?id=' + encodeURIComponent(conditionID) : '/api/conditions';
+    
+    // For POST requests, we need to include watch_id
+    if (!isUpdate) {
+        conditionData.watch_id = channelID;
+    }
+    
+    // Show loading state
+    const submitBtn = document.getElementById('submitConditionButton');
+    const originalText = submitBtn.textContent;
+    submitBtn.textContent = 'Saving...';
+    submitBtn.disabled = true;
+    
+    fetch(endpoint, {
+        method: method,
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(conditionData)
+    })
+    .then(response => {
+        if (!response.ok) {
+            return response.json().then(err => {
+                throw new Error(err.message || 'Failed to save condition');
+            }).catch(() => {
+                throw new Error('HTTP ' + response.status);
+            });
+        }
+        return response.json();
+    })
+    .then(result => {
+        console.log('Condition saved:', result);
+        alert('Condition saved successfully!');
+        // Redirect back to conditions list
+        window.location.href = '/channels/' + encodeURIComponent(channelID) + '/conditions';
+    })
+    .catch(error => {
+        console.error('Save error:', error);
+        alert('Error saving condition: ' + error.message);
+        submitBtn.textContent = originalText;
+        submitBtn.disabled = false;
+    });
+}
+
 document.addEventListener('DOMContentLoaded', function() {
     // Initialize condition logic editor
     conditionEditor = new ConditionEditor('conditionLogicInput', {
@@ -265,6 +557,17 @@ document.addEventListener('DOMContentLoaded', function() {
         logicDescriptionArea: null
     });
     deviceParamsEditor.refresh();
+    
+    // Override test modal close buttons to use custom closeTestModal function
+    const testModal = document.getElementById('testConditionModal');
+    if (testModal) {
+        const closeButtons = testModal.querySelectorAll('.close, .btn-secondary');
+        closeButtons.forEach(btn => {
+            if (btn.getAttribute('onclick') && btn.getAttribute('onclick').includes('testConditionModal')) {
+                btn.setAttribute('onclick', 'closeTestModal()');
+            }
+        });
+    }
 });
 
 // Global refreshSummary for any external code that still calls it

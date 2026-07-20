@@ -28,6 +28,7 @@ body {
     font-size: 2rem;
     margin-bottom: 0.4rem;
     color: #222;
+    line-height: 1.5rem;
 }
 
 .page-header p {
@@ -510,7 +511,7 @@ body {
     flex-shrink: 0;
 }
 .platform-icon.large svg { width: 36px; height: 36px; }
-.platform-icon-sm svg { width: 1em; height: 1em; vertical-align: middle; }
+.platform-icon-sm svg { width: 2em; height: 2em; }
 
 .channel-detail-info {
     flex: 1;

@@ -1156,11 +1156,11 @@ class BoolDialogHandler {
                 document.getElementById("textcomparebasedisplay").style["display"] = currentnode.SubConditions&&currentnode.SubConditions.length ? "inline":"none";
                 let extopr, taropr, targetbase, targetvar, targetvar1, targetvar2, extvar1, extvar2,  extvar3, operator;
                 if (currentnode.SubConditions&&currentnode.SubConditions[0]&&currentnode.SubConditions[0].Operator == "PARAM") {
-                    taropr = namingmap[currentnode.SubConditions[0].Operator];
+                    taropr = this.editor.namingmap[currentnode.SubConditions[0].Operator];
                     targetbase = currentnode.SubConditions[0].Variables[0];
                     targetvar1 = currentnode.SubConditions[0].Variables[1];
                     targetvar2 = currentnode.SubConditions[0].Variables[2];
-                    extopr = namingmap[currentnode.Operator];
+                    extopr = this.editor.namingmap[currentnode.Operator];
                     extvar1 = currentnode.Variables[0];
                     extvar2 = currentnode.Variables&&currentnode.Variables.length&&currentnode.Variables[1]?currentnode.Variables[1].split("-")[0]:currentnode.Variables[1];
                     extvar3 = currentnode.Variables&&currentnode.Variables.length>1&&currentnode.Variables[1].split("-").length>1?currentnode.Variables[1].split("-")[1]:currentnode.Variables[2];
@@ -1177,13 +1177,13 @@ class BoolDialogHandler {
                     document.getElementById("textcomparebaseextvalue").value = "";
                     document.getElementById("textconditionselectrange").value = currentnode.Variables[1];
                 } else {
-                    taropr = namingmap[currentnode.SubConditions[0].Operator];
+                    taropr = this.editor.namingmap[currentnode.SubConditions[0].Operator];
                     let paramcondition = currentnode.SubConditions[0];
                     targetbase = paramcondition.SubConditions&&paramcondition.SubConditions[0]&&paramcondition.SubConditions[0].Variables?paramcondition.SubConditions[0].Variables[0]:null;
                     targetvar = paramcondition&&paramcondition.Variables?paramcondition.Variables[0]:null;
                     targetvar1 = targetvar?targetvar.split("-")[0]:targetvar;
                     targetvar2 = targetvar&&targetvar.split("-").length>1?targetvar.split("-")[1]:paramcondition.Variables[1];
-                    extopr = namingmap[currentnode.Operator];
+                    extopr = this.editor.namingmap[currentnode.Operator];
                     extvar1 = currentnode.Variables[0];
                     extvar2 = currentnode.Variables&&currentnode.Variables.length&&currentnode.Variables[1]?currentnode.Variables[1].split("-")[0]:currentnode.Variables[1];
                     extvar3 = currentnode.Variables&&currentnode.Variables.length>1&&currentnode.Variables[1].split("-").length>1?currentnode.Variables[1].split("-")[1]:currentnode.Variables[2];

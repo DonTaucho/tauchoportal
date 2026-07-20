@@ -7,6 +7,19 @@ import (
 
 type Conditions struct{}
 
+type EventSchemaField struct {
+	Name        string      `json:"name"`
+	Type        string      `json:"type"`
+	Description string      `json:"description"`
+	Optional    bool        `json:"optional"`
+}
+
+type EventMetadataResponse struct {
+	Platform  string                       `json:"platform"`
+	EventType string                       `json:"event_type"`
+	Fields    map[string]EventSchemaField  `json:"fields"`
+}
+
 type ConditionLogic struct {
 	Operator      string           `json:"Operator"`
 	Variables     []string         `json:"Variables"`
@@ -198,3 +211,12 @@ func (Conditions) TestAllConditions(request TestAllConditionsRequest) TestAllCon
 	apiRequest(&result, http.MethodPost, "/conditions/test-all", request)
 	return result
 }
+
+// GetEventMetadata fetches event schema for a specific platform and event type
+func (Conditions) GetEventMetadata(platform, eventType string) EventMetadataResponse {
+	var result EventMetadataResponse
+	apiRequest(&result, http.MethodGet, "/event-metadata/"+url.PathEscape(platform)+"/"+url.PathEscape(eventType))
+	return result
+}
+
+

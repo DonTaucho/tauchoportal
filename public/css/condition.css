@@ -620,6 +620,9 @@ div#logictotaldescription span.or .or .and:hover::after {
     border-color: #26651e;
     background-color: #a8d1a2;
 }
+#textEnvSelect {
+    max-width: 8em;
+}
 
 #textConditionSelector .value {
     border: 2px solid #c7cedd;

@@ -1,6 +1,6 @@
 (function () {
     'use strict';
-    const { PLATFORM_META, PLATFORM_EVENTS, EVENT_PARAMETERS, PRODUCTS, apiRequest, escHtml, formatDate, formatDateTime, openModal, closeModal, getEventLabel, buildTestEvent } = window;
+    const { PLATFORM_META, PLATFORM_EVENTS, PRODUCTS, apiRequest, escHtml, formatDate, formatDateTime, openModal, closeModal, getEventLabel, buildTestEvent, getEventParameters } = window;
     const EVENT_BADGE_CLASS = { comment: 'comment', superchat: 'gift', sticker: 'gift', cheer: 'gift', gift: 'gift', member: 'follow', follow: 'follow', sub: 'follow', nicoru: 'effect', hype_train: 'stream', raid: 'stream', stream_start: 'stream', stream_end: 'stream' };
     let CHANNELS = [], editingConditionId = null, testingConditionId = null, deviceCache = null;
 
@@ -99,8 +99,13 @@
         openModal('conditionModal'); 
     }
 
-    function populateEventSelect(platform) { 
-        document.getElementById('condEventType').innerHTML = '<option value="">Select event type...</option>' + (PLATFORM_EVENTS[platform] || []).map((eventType) => `<option value="${eventType.value}">${eventType.label}</option>`).join(''); 
+    async function populateEventSelect(platform) { 
+        try {
+            const events = await window.getEventsForPlatform(platform);
+            document.getElementById('condEventType').innerHTML = '<option value="">Select event type...</option>' + (events || []).map((eventType) => `<option value="${eventType.value}">${eventType.value}</option>`).join('');
+        } catch (e) {
+            console.error('Failed to populate events:', e);
+        }
     }
 
     function updateCondEventFields() { 
@@ -164,7 +169,7 @@
         } 
     }
 
-    function openTestConditionModal(conditionId) { 
+    async function openTestConditionModal(conditionId) { 
         testingConditionId = conditionId; 
         const conditionName = getConditionNameFromCard(conditionId);
         const card = document.querySelector(`[data-cond-id="${conditionId}"]`);
@@ -172,7 +177,12 @@
         const platform = getPlatformFromDOM();
 
         document.getElementById('testConditionTitle').textContent = `Test Condition: ${conditionName}`; 
-        document.getElementById('testEventType').innerHTML = '<option value="">Select event type...</option>' + (PLATFORM_EVENTS[platform] || []).map((eventType) => `<option value="${eventType.value}">${eventType.label}</option>`).join(''); 
+        try {
+            const events = await window.getEventsForPlatform(platform);
+            document.getElementById('testEventType').innerHTML = '<option value="">Select event type...</option>' + (events || []).map((evt) => `<option value="${evt.value}">${evt.value}</option>`).join('');
+        } catch (e) {
+            console.error('Failed to populate test events:', e);
+        }
         document.getElementById('testEventType').value = eventType; 
         document.getElementById('testTriggerRealDevice').checked = false; 
         document.getElementById('testResultsContainer').style.display = 'none'; 
@@ -180,12 +190,15 @@
         openModal('testConditionModal'); 
     }
 
-    function updateTestEventParams() { 
+    async function updateTestEventParams() { 
         const eventType = document.getElementById('testEventType').value; 
+        const platform = getPlatformFromDOM();
         const container = document.getElementById('testEventParamsContainer'); 
         container.innerHTML = ''; 
-        if (!eventType) return; 
-        (EVENT_PARAMETERS[eventType] || []).forEach((param) => { 
+        if (!eventType || !platform) return; 
+        
+        const params = await window.getEventParameters(platform, eventType); 
+        (params || []).forEach((param) => { 
             const group = document.createElement('div'); 
             group.className = 'form-group'; 
             group.innerHTML = param.type === 'checkbox' 
@@ -197,13 +210,14 @@
 
     async function runConditionTest() { 
         const eventType = document.getElementById('testEventType').value; 
-        if (!eventType) return alert('Please select an event type'); 
         const platform = getPlatformFromDOM();
+        if (!eventType) return alert('Please select an event type'); 
         const button = document.getElementById('testConditionBtn'); 
         button.disabled = true; 
         try { 
             const customParams = {}; 
-            (EVENT_PARAMETERS[eventType] || []).forEach((param) => { 
+            const params = await window.getEventParameters(platform, eventType);
+            (params || []).forEach((param) => { 
                 const input = document.getElementById(`param_${param.name}`); 
                 if (input) customParams[param.name] = param.type === 'checkbox' ? input.checked : input.value; 
             }); 
