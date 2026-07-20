@@ -591,10 +591,7 @@ document.addEventListener('DOMContentLoaded', function() {
         drawingArea: document.getElementById('sendingParameterArea'),
         logicDescriptionArea: null
     });
-    // Don't refresh immediately if there's saved content - let the textarea content take precedence
-    if (!sendingParamTextarea.value || sendingParamTextarea.value.trim() === '') {
-        deviceParamsEditor.refresh();
-    }
+    deviceParamsEditor.refresh();
     
     // Override test modal close buttons to use custom closeTestModal function
     const testModal = document.getElementById('testConditionModal');
