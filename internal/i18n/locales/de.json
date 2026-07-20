@@ -1,20 +1,17 @@
 {
   "nav.title": "Taucho",
-  "nav.dashboard": "Dashboard",
   "nav.channels": "Kanäle",
   "nav.devices": "Meine Geräte",
   "nav.loginSettings": "Anmeldeeinstellungen",
   "nav.accountSettings": "Kontoeinstellungen",
   "nav.brandSettings": "Einstellungen für Gerätemarken",
   "nav.signOut": "Abmelden",
-  
   "nav.home": "Startseite",
   "nav.signIn": "Anmelden",
   "nav.createAccount": "Konto erstellen",
   "nav.privacy": "Datenschutzrichtlinie",
   "nav.terms": "Nutzungsbedingungen",
   "nav.about": "Über diese Website",
-
   "index.titleimage_l": "/image/welcome_title_l_e.png",
   "index.titleimage_s": "/image/welcome_title_s_e.png",
   "index.loginbutton": "Anmelden",
@@ -28,32 +25,12 @@
   "index.section1sentence1": "Taucho veranstaltet einen Live-Stream,<wbr /> um eine Aktion eines Smart-Home-Geräts auszulösen.",
   "index.section1sentence2": "Kommentare, Geschenke, Likes... <wbr />lösen Sie beliebige Reaktionen beim Publikum aus.",
   "index.section1sentence3": "und als es passierte … <strong>PLOP!!</strong>",
-
-  "modal.addNewStream": "➕ Neuen Stream hinzufügen",
-  "modal.selectProvider": "Anbieter auswählen",
-  "modal.chooseProvider": "Wählen Sie einen Anbieter...",
-  "modal.streamName": "Stream-Name",
-  "modal.streamNamePlaceholder": "z.B. Gaming Stream",
-  "modal.rtmpUrl": "RTMP URL",
-  "modal.rtmpUrlPlaceholder": "rtmp://...",
-  "modal.streamKey": "Stream-Schlüssel",
-  "modal.streamKeyPlaceholder": "Ihr Stream-Schlüssel",
-  "modal.addStream": "Stream hinzufügen",
-
-  "alert.copiedToClipboard": "In die Zwischenablage kopiert!",
-  "alert.pauseStream": "Stream pausieren: ",
-  "alert.stopStream": "Stream stoppen: ",
-  "alert.editStream": "Stream bearbeiten: ",
-
   "status.live": "🔴 LIVE",
   "status.offline": "⚪ OFFLINE",
   "status.ended": "⏹ BEENDET",
   "status.excellent": "✅ Ausgezeichnet",
   "status.completed": "Abgeschlossen",
-
   "button.cancel": "Abbrechen",
-  "button.save": "Auslöser speichern",
-
   "policy.privacyTitle": "Datenschutzrichtlinie",
   "policy.termsTitle": "Nutzungsbedingungen",
   "policy.lastUpdated": "Zuletzt aktualisiert:",
@@ -61,7 +38,6 @@
   "policy.responseTime": "Wir werden innerhalb von 30 Tagen antworten.",
   "policy.contactUs": "Kontaktieren Sie uns",
   "policy.contact": "Kontaktieren Sie uns",
-
   "terms.title": "Nutzungsbedingungen",
   "index.section2title": "Publikum, stupst den Influencer an!",
   "index.section2desc1": "Manchmal schickst du Influencern Geschenke,",

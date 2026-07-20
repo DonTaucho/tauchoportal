@@ -1,20 +1,17 @@
 {
   "nav.title": "Taucho",
-  "nav.dashboard": "Dashboard",
   "nav.channels": "Channels",
   "nav.devices": "My Devices",
   "nav.loginSettings": "Login Settings",
   "nav.accountSettings": "Account Settings",
   "nav.brandSettings": "Device Brand Settings",
   "nav.signOut": "Sign Out",
-
   "nav.home": "Home",
   "nav.signIn": "Sign In",
   "nav.createAccount": "Create Account",
   "nav.privacy": "Privacy Policy",
   "nav.terms": "Terms of Service",
   "nav.about": "About this Site",
-
   "index.titleimage_l": "/image/welcome_title_l_e.png",
   "index.titleimage_s": "/image/welcome_title_s_e.png",
   "index.loginbutton": "Login",
@@ -89,33 +86,12 @@
   "index.footerAbout": "About Taucho",
   "index.languageSelectorTitle": "Language",
   "index.welcomeBack": "Welcome back to Taucho",
-
-  "modal.addNewStream": "➕ Add New Stream",
-  "modal.selectProvider": "Select Provider",
-  "modal.chooseProvider": "Choose a provider...",
-  "modal.streamName": "Stream Name",
-  "modal.streamNamePlaceholder": "e.g., Gaming Stream",
-  "modal.rtmpUrl": "RTMP URL",
-  "modal.rtmpUrlPlaceholder": "rtmp://...",
-  "modal.streamKey": "Stream Key",
-  "modal.streamKeyPlaceholder": "Your stream key",
-  "modal.addStream": "Add Stream",
-
-  "alert.copiedToClipboard": "Copied to clipboard!",
-  "alert.pauseStream": "Pause stream: ",
-  "alert.stopStream": "Stop stream: ",
-  "alert.editStream": "Edit stream: ",
-
   "status.live": "🔴 LIVE",
   "status.offline": "⚪ OFFLINE",
   "status.ended": "⏹ ENDED",
   "status.excellent": "✅ Excellent",
   "status.completed": "Completed",
-
   "button.cancel": "Cancel",
-  "button.save": "Save Trigger",
-
-
   "policy.privacyTitle": "Privacy Policy",
   "policy.termsTitle": "Terms of Service",
   "policy.lastUpdated": "Last Updated: June 15, 2026",
@@ -182,7 +158,6 @@
   "policy.contactInfoText": "If you have questions about these Terms of Service or need to report a violation, please contact us at:",
   "policy.tauchoTeam": "Taucho Team",
   "policy.responseTime": "We will respond to your inquiry within 30 days.",
-
   "terms.title": "Terms of Service",
   "terms.lastUpdated": "Last Updated: June 15, 2026",
   "terms.acceptance": "Acceptance of Terms",
@@ -265,7 +240,6 @@
   "terms.contactText": "If you have questions about these Terms of Service or need to report a violation, please contact us at:",
   "terms.changes": "Changes to Terms",
   "terms.changesText": "We may update these Terms of Service at any time. We will notify you of material changes by updating the date at the top of this page. Your continued use of Taucho after changes are posted constitutes your acceptance of the modified terms. If you do not agree to the changes, you must stop using the Service and cancel your account.",
-
   "brandSettings.title": "Smart Device Brands",
   "brandSettings.description": "Manage authentication for your smart device platforms and local controllers.",
   "brandSettings.connected": "Connected",
@@ -306,7 +280,6 @@
   "brandSettings.error.connectFailed": "Unable to start connection",
   "brandSettings.error.saveFailed": "Unable to save authentication",
   "brandSettings.error.disconnectFailed": "Unable to disconnect brand",
-
   "brand.govee.title": "Govee",
   "brand.govee.description": "Connect with a Govee API key for supported cloud devices.",
   "brand.govee.connectButton": "Add API Key",
@@ -347,7 +320,6 @@
   "brand.amazon-alexa.description": "Use the Alexa app for routines, groups, and account linking.",
   "brand.amazon-alexa.connectButton": "Configure via Alexa app",
   "brand.amazon-alexa.disconnectButton": "Disconnect Alexa",
-
   "condition.AND": "All conditions must be met",
   "condition.OR": "Any condition may be met",
   "condition.NOT": "Does not satisfy",
@@ -375,7 +347,6 @@
   "condition.PARSEINT": "Parse to number",
   "condition.EXCHANGE": "Currency conversion",
   "condition.PARAM": "Data from stream",
-
   "condition.generic-notset": "Not set",
   "condition.failedjsonparse": "Failed to parse JSON",
   "condition.staticvalue": "\"{0}\"",
