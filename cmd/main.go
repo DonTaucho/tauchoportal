@@ -35,6 +35,7 @@ type PageData struct {
 	I18n                    *i18n.Translator
 	API                     *controller.API
 	CurrentChannel          *controller.ChannelForTemplate
+	Condition               *controller.ConditionForTemplate
 	Conditions              []controller.ConditionForTemplate
 	EventTypes              []string
 	ChannelDetail           *controller.ChannelDetailForTemplate
@@ -44,6 +45,7 @@ type PageData struct {
 	Dashboard               *controller.DashboardPageData
 	PlatformMeta            map[string]map[string]interface{}
 	EventBadgeClass         map[string]string
+	EventFieldOptions       []controller.EventFieldOption
 }
 
 type UserProfile struct {
@@ -300,6 +302,8 @@ func main() {
 	}
 }
 
+var globalTemplates map[string]*template.Template
+
 func loadTemplates() map[string]*template.Template {
 	result := make(map[string]*template.Template)
 	pages, err := filepath.Glob(filepath.Join("templates", "pages", "*.html"))
@@ -315,9 +319,25 @@ func loadTemplates() map[string]*template.Template {
 	headerPath := filepath.Join("templates", "partials", "header.html")
 	nologinheaderPath := filepath.Join("templates", "partials", "nologinheader.html")
 	loginPath := filepath.Join("templates", "partials", "login.html")
+	catalogDir := filepath.Join("templates", "partials", "catalogs")
+
+	// Load all catalog files dynamically
+	catalogFiles := []string{}
+	catalogEntries, err := os.ReadDir(catalogDir)
+	if err == nil {
+		for _, entry := range catalogEntries {
+			if !entry.IsDir() && strings.HasSuffix(entry.Name(), ".html") {
+				catalogFiles = append(catalogFiles, filepath.Join(catalogDir, entry.Name()))
+			}
+		}
+	}
+
 	funcMap := template.FuncMap{
 		"userJSON": userJSON,
 		"toJSON":   toJSON,
+		"jsonMarshal": func(v interface{}) template.JS {
+			return toJSON(v)
+		},
 		"i18nJSON": func(t *i18n.Translator) template.JS {
 			if t == nil {
 				return template.JS("{}")
@@ -342,17 +362,38 @@ func loadTemplates() map[string]*template.Template {
 		},
 		"getEventLabel":  controller.GetEventLabel,
 		"formatDateTime": controller.FormatDateTime,
+		"renderCatalog": func(brandID string, data interface{}) (template.HTML, error) {
+			if globalTemplates == nil {
+				return "", fmt.Errorf("templates not loaded")
+			}
+			tmpl := globalTemplates["devices"]
+			if tmpl == nil {
+				return "", fmt.Errorf("devices template not found")
+			}
+			tplName := fmt.Sprintf("catalog-%s", brandID)
+			buf := &strings.Builder{}
+			err := tmpl.ExecuteTemplate(buf, tplName, data)
+			if err != nil {
+				return "", err
+			}
+			return template.HTML(buf.String()), nil
+		},
 	}
 
 	for _, pagePath := range pages {
 		name := strings.TrimSuffix(filepath.Base(pagePath), filepath.Ext(pagePath))
-		tmpl, err := template.New(name).Funcs(funcMap).ParseFiles(baseLayoutPath, channelLayoutPath, headerPath, nologinheaderPath, loginPath, pagePath)
+		// Combine all file paths for parsing
+		filePaths := []string{baseLayoutPath, channelLayoutPath, headerPath, nologinheaderPath, loginPath, pagePath}
+		filePaths = append(filePaths, catalogFiles...)
+
+		tmpl, err := template.New(name).Funcs(funcMap).ParseFiles(filePaths...)
 		if err != nil {
 			log.Fatalf("failed to parse template %s: %v", pagePath, err)
 		}
 		result[name] = tmpl
 	}
 
+	globalTemplates = result
 	return result
 }
 
@@ -440,16 +481,29 @@ func (s *Server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	data := PageData{Title: cfg.Title, User: user, Page: cfg.Name, Lang: lang, I18n: s.i18n.Translator(lang), API: &api}
 
 	// Fetch conditions page data if on /conditions page
-	if cfg.Name == "conditions" {
+	if cfg.Name == "conditions" || cfg.Name == "condition" {
 		parts := strings.Split(strings.TrimPrefix(r.URL.Path, "/"), "/")
 		if len(parts) >= 3 && parts[0] == "channels" && parts[2] == "conditions" {
 			channelID := parts[1]
-			pageData := controller.PrepareConditionsPageData(channelID)
-			data.CurrentChannel = pageData.CurrentChannel
-			data.Conditions = pageData.Conditions
-			data.EventTypes = pageData.EventTypes
-			data.PlatformMeta = pageData.PlatformMeta
-			data.EventBadgeClass = pageData.EventBadgeClass
+			
+			// Check if this is a single condition page (has condition_id)
+			if len(parts) >= 4 {
+				conditionID := parts[3]
+				pageData := controller.PrepareConditionPageData(channelID, conditionID)
+				data.CurrentChannel = pageData.CurrentChannel
+				data.Condition = pageData.Condition
+				data.PlatformMeta = pageData.PlatformMeta
+				data.EventFieldOptions = pageData.EventFieldOptions
+			} else {
+				// This is the conditions list page
+				pageData := controller.PrepareConditionsPageData(channelID)
+				data.CurrentChannel = pageData.CurrentChannel
+				data.Conditions = pageData.Conditions
+				data.EventTypes = pageData.EventTypes
+				data.PlatformMeta = pageData.PlatformMeta
+				data.EventBadgeClass = pageData.EventBadgeClass
+				data.EventFieldOptions = pageData.EventFieldOptions
+			}
 		}
 	}
 

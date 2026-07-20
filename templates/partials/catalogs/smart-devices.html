@@ -1,0 +1,151 @@
+{{/* Generic Smart Devices Catalog - Multi-brand showcase */}}
+{{define "catalog-devices"}}
+<div class="catalog-devices brand-catalog">
+    <div class="catalog-products">
+        <!-- Generic Smart Plug -->
+        <div class="catalog-card" data-product-id="generic-smartplug" data-category="plugs">
+            <div class="catalog-image placeholder">
+                <span class="catalog-placeholder-icon">🔌</span>
+            </div>
+            <div class="catalog-info">
+                <h3 class="catalog-product-name">WiFi Smart Plug</h3>
+                <p class="catalog-description">Remote on/off control, energy monitoring, and scheduling.</p>
+                <div class="catalog-price">
+                    <span class="price-range">$12.99 - $24.99</span>
+                </div>
+                <ul class="catalog-features">
+                    <li>Remote control via app</li>
+                    <li>Energy usage monitoring</li>
+                    <li>Timer and scheduling</li>
+                    <li>Voice assistant compatible</li>
+                </ul>
+                <div class="catalog-actions">
+                    <span class="action-tag">on</span>
+                    <span class="action-tag">off</span>
+                    <span class="action-tag">toggle</span>
+                </div>
+            </div>
+            <div class="catalog-actions-bar">
+                <a href="https://www.amazon.com/s?k=WiFi+Smart+Plug" target="_blank" rel="noopener noreferrer" class="btn btn-buy">🛍 Buy</a>
+                <button type="button" class="btn btn-add-device" onclick="addProductToDevices(event, 'generic', 'generic-smartplug', 'WiFi Smart Plug')">+ Add to Devices</button>
+            </div>
+        </div>
+
+        <!-- Generic Smart Switch -->
+        <div class="catalog-card" data-product-id="generic-smartswitch" data-category="switches">
+            <div class="catalog-image placeholder">
+                <span class="catalog-placeholder-icon">🔆</span>
+            </div>
+            <div class="catalog-info">
+                <h3 class="catalog-product-name">WiFi Smart Light Switch</h3>
+                <p class="catalog-description">Control existing lights without rewiring. Works with standard switches.</p>
+                <div class="catalog-price">
+                    <span class="price-range">$19.99 - $39.99</span>
+                </div>
+                <ul class="catalog-features">
+                    <li>No rewiring needed</li>
+                    <li>Dimmer support</li>
+                    <li>Remote and voice control</li>
+                    <li>Scheduling and automation</li>
+                    <li>Works with existing switches</li>
+                </ul>
+                <div class="catalog-actions">
+                    <span class="action-tag">on</span>
+                    <span class="action-tag">off</span>
+                    <span class="action-tag">brightness</span>
+                </div>
+            </div>
+            <div class="catalog-actions-bar">
+                <a href="https://www.amazon.com/s?k=Smart+Light+Switch" target="_blank" rel="noopener noreferrer" class="btn btn-buy">🛍 Buy</a>
+                <button type="button" class="btn btn-add-device" onclick="addProductToDevices(event, 'generic', 'generic-smartswitch', 'WiFi Smart Switch')">+ Add to Devices</button>
+            </div>
+        </div>
+
+        <!-- Generic Motion Sensor -->
+        <div class="catalog-card" data-product-id="generic-motion-sensor" data-category="sensors">
+            <div class="catalog-image placeholder">
+                <span class="catalog-placeholder-icon">👁️</span>
+            </div>
+            <div class="catalog-info">
+                <h3 class="catalog-product-name">WiFi Motion Sensor</h3>
+                <p class="catalog-description">Detect movement and trigger automations based on activity.</p>
+                <div class="catalog-price">
+                    <span class="price-range">$15.99 - $29.99</span>
+                </div>
+                <ul class="catalog-features">
+                    <li>WiFi connectivity</li>
+                    <li>Motion detection</li>
+                    <li>Adjustable sensitivity</li>
+                    <li>Day/night mode</li>
+                    <li>Automations & alerts</li>
+                </ul>
+                <div class="catalog-actions">
+                    <span class="action-tag">brightness</span>
+                </div>
+            </div>
+            <div class="catalog-actions-bar">
+                <a href="https://www.amazon.com/s?k=WiFi+Motion+Sensor" target="_blank" rel="noopener noreferrer" class="btn btn-buy">🛍 Buy</a>
+                <button type="button" class="btn btn-add-device" onclick="addProductToDevices(event, 'generic', 'generic-motion-sensor', 'WiFi Motion Sensor')">+ Add to Devices</button>
+            </div>
+        </div>
+
+        <!-- Generic Smart Speaker -->
+        <div class="catalog-card" data-product-id="generic-speaker" data-category="speakers">
+            <div class="catalog-image placeholder">
+                <span class="catalog-placeholder-icon">🔊</span>
+            </div>
+            <div class="catalog-info">
+                <h3 class="catalog-product-name">WiFi Smart Speaker</h3>
+                <p class="catalog-description">Voice control hub with music streaming and smart home control.</p>
+                <div class="catalog-price">
+                    <span class="price-range">$49.99 - $199.99</span>
+                </div>
+                <ul class="catalog-features">
+                    <li>Voice assistant integration</li>
+                    <li>Music streaming</li>
+                    <li>Smart home hub</li>
+                    <li>Far-field microphones</li>
+                    <li>Customizable settings</li>
+                </ul>
+                <div class="catalog-actions">
+                    <span class="action-tag">on</span>
+                    <span class="action-tag">off</span>
+                    <span class="action-tag">brightness</span>
+                </div>
+            </div>
+            <div class="catalog-actions-bar">
+                <a href="https://www.amazon.com/s?k=Smart+Speaker" target="_blank" rel="noopener noreferrer" class="btn btn-buy">🛍 Buy</a>
+                <button type="button" class="btn btn-add-device" onclick="addProductToDevices(event, 'generic', 'generic-speaker', 'WiFi Smart Speaker')">+ Add to Devices</button>
+            </div>
+        </div>
+
+        <!-- Generic Thermostat -->
+        <div class="catalog-card" data-product-id="generic-thermostat" data-category="climate">
+            <div class="catalog-image placeholder">
+                <span class="catalog-placeholder-icon">🌡️</span>
+            </div>
+            <div class="catalog-info">
+                <h3 class="catalog-product-name">Smart WiFi Thermostat</h3>
+                <p class="catalog-description">Remote temperature control with learning capabilities and energy savings.</p>
+                <div class="catalog-price">
+                    <span class="price-range">$99.99 - $249.99</span>
+                </div>
+                <ul class="catalog-features">
+                    <li>Remote temperature control</li>
+                    <li>Energy usage reports</li>
+                    <li>Learning algorithm</li>
+                    <li>Geofencing support</li>
+                    <li>Multiple schedule options</li>
+                </ul>
+                <div class="catalog-actions">
+                    <span class="action-tag">brightness</span>
+                </div>
+            </div>
+            <div class="catalog-actions-bar">
+                <a href="https://www.amazon.com/s?k=Smart+Thermostat" target="_blank" rel="noopener noreferrer" class="btn btn-buy">🛍 Buy</a>
+                <button type="button" class="btn btn-add-device" onclick="addProductToDevices(event, 'generic', 'generic-thermostat', 'Smart Thermostat')">+ Add to Devices</button>
+            </div>
+        </div>
+    </div>
+</div>
+{{end}}

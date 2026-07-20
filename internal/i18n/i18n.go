@@ -102,6 +102,20 @@ func (t *Translator) T(key string) string {
 	return key
 }
 
+// TByPrefix returns all translations that start with the given prefix as a map.
+// Useful for retrieving sets of related translations (e.g., all "condition.*" keys).
+func (t *Translator) TByPrefix(prefix string) map[string]string {
+	result := make(map[string]string)
+	for key, value := range t.strings {
+		if strings.HasPrefix(key, prefix) {
+			// Remove the prefix and dot from the key for easier access
+			shortKey := strings.TrimPrefix(key, prefix+".")
+			result[shortKey] = value
+		}
+	}
+	return result
+}
+
 // TH returns the translation for key as template.HTML (unescaped).
 // Use this for translations that contain safe HTML markup like <wbr />, <strong>, etc.
 // DO NOT use this with user-supplied data or untrusted input!

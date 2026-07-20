@@ -9,6 +9,10 @@ body {
     padding: 20px;
 }
 
+.policy-nav {
+    display:none;
+}
+
 .register-container {
     max-width: 400px;
     width: 100%;
