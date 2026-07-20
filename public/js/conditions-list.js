@@ -27,8 +27,12 @@
         const iconSpan = document.querySelector('.page-header-top .platform-icon-sm');
         if (iconSpan) {
             const classes = iconSpan.className;
-            if (classes.includes('youtube')) return 'youtube';
-            if (classes.includes('twitch')) return 'twitch';
+            // Extract platform from className - it's the second class after "platform-icon-sm"
+            const parts = classes.split(' ');
+            const platformIdx = parts.indexOf('platform-icon-sm');
+            if (platformIdx !== -1 && parts[platformIdx + 1]) {
+                return parts[platformIdx + 1];
+            }
         }
         return null;
     }
@@ -186,7 +190,7 @@
         document.getElementById('testEventType').value = eventType; 
         document.getElementById('testTriggerRealDevice').checked = false; 
         document.getElementById('testResultsContainer').style.display = 'none'; 
-        updateTestEventParams(); 
+        await updateTestEventParams(); 
         openModal('testConditionModal'); 
     }
 

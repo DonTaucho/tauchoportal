@@ -2402,7 +2402,12 @@ Returns metadata about available providers and supported event types.
       "events": ["comment", "gift", "cheer", "member", "follow", "sub", "raid", "hype_train"]
     },
     "niconico": {
-      "events": ["comment", "superchat", "sticker", "member", "nicoru", "gift"]
+      "events": ["comment"]
+      // NOTE: Real monetization via NicoNico points:
+      // - nicoad (広告): User advertisement system
+      // - gift (ギフト): Gift/item system
+      // スーパーチャット does NOT exist on NicoNico
+      // Actual event types and field names require verification with production data
     },
     "bilibili": {
       "events": ["comment", "superchat", "member", "gift", "viewer_join"]
@@ -2411,7 +2416,9 @@ Returns metadata about available providers and supported event types.
       "events": ["comment", "gift", "like", "viewer_join", "follow"]
     },
     "instagram": {
-      "events": ["comment", "reaction"]
+      "events": ["comment"]
+      // NOTE: Instagram does NOT have official real-time API for gifts, reactions, or other live events.
+      // Only comments supported via unofficial methods (violates ToS).
     },
     "facebook": {
       "events": ["comment", "reaction"]
@@ -2432,6 +2439,41 @@ Returns metadata about available providers and supported event types.
 **Use case:**
 - Frontend calls this once at startup to learn which providers support which events
 - When creating a condition, filter event type options based on the selected provider
+
+---
+
+### GET /event-metadata/{platform}
+
+Returns the list of event types supported by a specific platform.
+
+**Path parameters:**
+- `platform` (string): Provider name (e.g., `youtube`, `twitch`, `niconico`)
+
+**No authentication required.**
+
+**Response (example: GET /event-metadata/youtube):**
+```json
+{
+  "platform": "youtube",
+  "events": ["comment", "superchat", "sticker", "member"]
+}
+```
+
+**Response (example: GET /event-metadata/twitch):**
+```json
+{
+  "platform": "twitch",
+  "events": ["comment", "gift", "cheer", "member", "follow", "sub", "raid", "hype_train"]
+}
+```
+
+**Error responses:**
+- 404: If the platform is not supported
+
+**Use case:**
+- Frontend calls this after user selects a platform
+- Returns the available event types for that platform
+- Used to populate the event type dropdown/filter in the UI
 
 ---
 

@@ -282,23 +282,19 @@ async function openTestModal() {
             platform = platformSpan.className.split(' ')[1]; // Get second class name
         }
     }
-    console.log('[condition.openTestModal] Platform:', platform, 'Event type:', eventTypeValue);
     
     // Clear existing options
     eventTypeSelect.innerHTML = '<option value="">Select event type...</option>';
     
     // Fetch event types from API
     try {
-        console.log('[condition.openTestModal] Calling getEventsForPlatform with platform:', platform);
         const events = await window.getEventsForPlatform(platform);
-        console.log('[condition.openTestModal] Received events:', events);
         events.forEach(event => {
             const option = document.createElement('option');
             option.value = event.value;
             option.textContent = event.value;
             eventTypeSelect.appendChild(option);
         });
-        console.log('[condition.openTestModal] Options populated, count:', events.length);
     } catch (e) {
         console.error('Failed to load events:', e);
     }
@@ -322,57 +318,70 @@ function closeTestModal() {
 }
 
 // Update test event parameters form
-function updateTestEventParams() {
+async function updateTestEventParams() {
     const eventType = document.getElementById('testEventType').value;
     const container = document.getElementById('testEventParamsContainer');
+    let platform = '{{.CurrentChannel.Platform}}';
+    
+    // Fallback: extract platform from the platform icon span if template didn't render
+    if (!platform || platform.includes('{')) {
+        const platformSpan = document.querySelector('.platform-icon-sm');
+        if (platformSpan) {
+            platform = platformSpan.className.split(' ')[1];
+        }
+    }
     
     if (!eventType) {
         container.innerHTML = '';
         return;
     }
     
-    // Get parameters for this event type from shared EVENT_PARAMETERS
-    const params = window.EVENT_PARAMETERS ? window.EVENT_PARAMETERS[eventType] : [];
-    
-    if (!params || params.length === 0) {
-        container.innerHTML = '<p style="color: #666; font-size: 0.9rem;">No custom parameters for this event type</p>';
-        return;
-    }
-    
-    let html = '';
-    params.forEach(param => {
-        if (param.type === 'checkbox') {
-            html += `<div class="form-group">
-                <label class="checkbox-label">
-                    <input type="checkbox" id="testParam_${param.name}" value="${param.name}">
-                    <span>${param.label}</span>
-                </label>
-            </div>`;
-        } else {
-            html += `<div class="form-group">
-                <label for="testParam_${param.name}">${param.label}</label>
-                <input type="${param.type}" id="testParam_${param.name}" value="${param.value}">
-            </div>`;
+    // Fetch parameters for this event type from API
+    try {
+        const params = await window.getEventParameters(platform, eventType);
+        
+        if (!params || params.length === 0) {
+            container.innerHTML = '<p style="color: #666; font-size: 0.9rem;">No custom parameters for this event type</p>';
+            return;
         }
-    });
-    
-    container.innerHTML = html;
+        
+        let html = '';
+        params.forEach(param => {
+            if (param.type === 'checkbox') {
+                html += `<div class="form-group">
+                    <label class="checkbox-label">
+                        <input type="checkbox" id="testParam_${param.name}" value="${param.name}">
+                        <span>${param.label}</span>
+                    </label>
+                </div>`;
+            } else {
+                html += `<div class="form-group">
+                    <label for="testParam_${param.name}">${param.label}</label>
+                    <input type="${param.type}" id="testParam_${param.name}" value="${param.value}">
+                </div>`;
+            }
+        });
+        
+        container.innerHTML = html;
+    } catch (e) {
+        console.error('Failed to load event parameters:', e);
+        container.innerHTML = '<p style="color: #999;">Failed to load parameters</p>';
+    }
 }
 
 // Collect test event parameters from form
 function getTestEventParams() {
-    const eventType = document.getElementById('testEventType').value;
-    const params = window.EVENT_PARAMETERS ? window.EVENT_PARAMETERS[eventType] : [];
+    const container = document.getElementById('testEventParamsContainer');
     const customParams = {};
     
-    params.forEach(param => {
-        const input = document.getElementById('testParam_' + param.name);
-        if (input) {
-            if (param.type === 'checkbox') {
-                customParams[param.name] = input.checked;
-            } else {
-                customParams[param.name] = input.value;
-            }
+    // Collect all form inputs with testParam_ prefix
+    const inputs = container.querySelectorAll('input[id^="testParam_"]');
+    inputs.forEach(input => {
+        const name = input.id.replace('testParam_', '');
+        if (input.type === 'checkbox') {
+            customParams[name] = input.checked;
+        } else {
+            customParams[name] = input.value;
         }
     });
     
@@ -472,7 +481,7 @@ function submitCondition() {
     
     const data = getConditionData();
     const conditionLogic = parseJSON(data.logic);
-    const deviceActionParams = parseJSON(data.params) || {};
+    const deviceActionParams = parseJSON(data.params);
     
     if (!conditionLogic) {
         alert('Invalid condition logic JSON');
@@ -491,7 +500,7 @@ function submitCondition() {
         condition_logic: conditionLogic,
         device_id: '{{.Condition.DeviceID}}' || null,
         device_action: '{{.Condition.DeviceAction}}' || null,
-        device_action_params: deviceActionParams
+        device_action_params: deviceActionParams || null
     };
     
     // Determine if this is a create or update
@@ -529,6 +538,7 @@ function submitCondition() {
     })
     .then(result => {
         console.log('Condition saved:', result);
+        console.log('Device action params saved:', result.device_action_params);
         alert('Condition saved successfully!');
         // Redirect back to conditions list
         window.location.href = '/channels/' + encodeURIComponent(channelID) + '/conditions';
@@ -548,15 +558,43 @@ document.addEventListener('DOMContentLoaded', function() {
         drawingArea: document.getElementById('drawingArea'),
         logicDescriptionArea: document.getElementById('logictotaldescription')
     });
+    
+    // Pretty-print conditionLogicInput if it has content
+    const conditionLogicTextarea = document.getElementById('conditionLogicInput');
+    if (conditionLogicTextarea.value.trim()) {
+        try {
+            const parsed = JSON.parse(conditionLogicTextarea.value);
+            conditionLogicTextarea.value = JSON.stringify(parsed, null, 2);
+        } catch (e) {
+            console.warn('Could not parse condition logic JSON:', e);
+        }
+    }
+    
     conditionEditor.refresh();
 
     // Initialize device action parameters editor
+    const sendingParamTextarea = document.getElementById('sendingparamjson');
+    
+    // Pretty-print sendingparamjson if it has content
+    if (sendingParamTextarea.value.trim()) {
+        try {
+            const parsed = JSON.parse(sendingParamTextarea.value);
+            sendingParamTextarea.value = JSON.stringify(parsed, null, 2);
+        } catch (e) {
+            console.warn('Could not parse sending params JSON:', e);
+        }
+    }
+    
+    // Only create the editor if there's actual content, otherwise just let the textarea be
     deviceParamsEditor = new ConditionEditor('sendingparamjson', {
         baseType: 'WHOLESENTENCE',
         drawingArea: document.getElementById('sendingParameterArea'),
         logicDescriptionArea: null
     });
-    deviceParamsEditor.refresh();
+    // Don't refresh immediately if there's saved content - let the textarea content take precedence
+    if (!sendingParamTextarea.value || sendingParamTextarea.value.trim() === '') {
+        deviceParamsEditor.refresh();
+    }
     
     // Override test modal close buttons to use custom closeTestModal function
     const testModal = document.getElementById('testConditionModal');

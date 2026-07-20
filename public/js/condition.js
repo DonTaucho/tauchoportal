@@ -21,7 +21,7 @@ class ConditionEditor {
         this.conditionInput = conditionInputElement;
         this.baseType = options.baseType || 'OR';
         this.drawingArea = options.drawingArea || document.getElementById('drawingArea');
-        this.logicDescriptionArea = options.logicDescriptionArea || document.getElementById('logictotaldescription');
+        this.logicDescriptionArea = options.logicDescriptionArea;
         try{
             const parsedValue = JSON.parse(this.conditionInput.value);
             if (!parsedValue.Operator) {

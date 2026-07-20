@@ -26,10 +26,7 @@ type ConditionLogic struct {
 	SubConditions []ConditionLogic `json:"SubConditions"`
 }
 
-type ConditionDeviceActionParams struct {
-	Color      string `json:"color"`
-	DurationMs int    `json:"duration_ms"`
-}
+type ConditionDeviceActionParams map[string]interface{}
 
 type ConditionTestDeviceActionParams struct {
 	Color         string  `json:"color"`

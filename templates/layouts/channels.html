@@ -264,7 +264,7 @@
             <div class="test-event-form">
                 <div class="form-group">
                     <label for="testEventType">Event type</label>
-                    <select id="testEventType" onchange="updateTestEventParams()"><option value="">Select event type...</option></select>
+                    <select id="testEventType" onchange="(async () => await updateTestEventParams())()"><option value="">Select event type...</option></select>
                 </div>
                 <div id="testEventParamsContainer"></div>
                 <div class="form-group">

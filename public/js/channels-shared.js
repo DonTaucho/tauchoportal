@@ -29,38 +29,44 @@
         }
     }
 
-    // Fetch and cache available events for all platforms
-    async function getPlatformEvents() {
-        console.log('[getPlatformEvents] Starting fetch');
+    // Fetch and cache available events for a specific platform
+    async function getEventsForPlatform(platform) {
+        console.log('[getEventsForPlatform] Called for platform:', platform);
         if (!apiGet_func) {
-            console.error('[getPlatformEvents] apiGet_func is null!');
-            return {};
+            console.error('[getEventsForPlatform] apiGet_func is null!');
+            return [];
         }
-        if (Object.keys(platformEventsCache).length > 0) {
-            console.log('[getPlatformEvents] Returning cached data:', platformEventsCache);
-            return platformEventsCache;
+        
+        if (!platform) {
+            console.error('[getEventsForPlatform] Platform is null or empty!');
+            return [];
         }
+        
+        const cacheKey = `platform:${platform}`;
+        if (platformEventsCache[cacheKey]) {
+            console.log('[getEventsForPlatform] Returning cached data for', platform);
+            return platformEventsCache[cacheKey];
+        }
+        
         try {
-            console.log('[getPlatformEvents] Calling API: /event-metadata');
-            const data = await apiGet_func('/event-metadata');
-            console.log('[getPlatformEvents] API response received:', data);
-            // Transform from { platforms: { youtube: { events: [...] }, ... } }
-            // to { youtube: [{ value: 'comment' }, ...], twitch: [...], ... }
-            Object.entries(data.platforms || {}).forEach(([platform, info]) => {
-                platformEventsCache[platform] = (info.events || []).map(evt => ({ value: evt }));
-                console.log(`[getPlatformEvents] Cached ${platform}:`, platformEventsCache[platform]);
-            });
-            console.log('[getPlatformEvents] Final cache:', platformEventsCache);
-            return platformEventsCache;
+            console.log('[getEventsForPlatform] Calling API: /event-metadata/' + platform);
+            const data = await apiGet_func(`/event-metadata/${platform}`);
+            console.log('[getEventsForPlatform] API response received:', data);
+            // Transform from { platform, events: ["comment", "gift", ...] }
+            // to [{ value: 'comment' }, { value: 'gift' }, ...]
+            const events = (data.events || []).map(evt => ({ value: evt }));
+            platformEventsCache[cacheKey] = events;
+            console.log('[getEventsForPlatform] Cached for', platform, ':', events);
+            return events;
         } catch (e) {
-            console.error('Failed to fetch platform events:', e);
-            return {};
+            console.error(`Failed to fetch events for platform ${platform}:`, e);
+            return [];
         }
     }
 
     // Convert API field response to form field structure
     // API returns: { platform, event_type, fields: { name: { name, type, description, optional }, ... } }
-    // We need: [{ name: 'field_name', type: 'text/number/checkbox', value: '' }, ...]
+    // We need: [{ name: 'field_name', label: 'field_name', type: 'text/number/checkbox', value: '' }, ...]
     async function getEventParameters(platform, eventType) {
         const metadata = await getEventMetadata(platform, eventType);
         if (!metadata || !metadata.fields) return [];
@@ -78,7 +84,7 @@
             .filter(([_, field]) => !field.optional) // Only include non-optional fields
             .map(([fieldName, field]) => ({
                 name: fieldName,
-                label: fieldName, // Will be translated via i18n
+                label: field.name || fieldName, // Use field.name from API, fallback to key
                 type: typeMapping[field.type] || 'text',
                 value: field.type === 'boolean' ? false : (field.type === 'number' ? '0' : '')
             }));
@@ -136,24 +142,8 @@
     // Set up apiGet_func for use in API fetch functions
     apiGet_func = apiGet;
     
-    // Fetch events dynamically - handles async loading
-    async function getEventsForPlatform(platform) {
-        console.log('[getEventsForPlatform] Called for platform:', platform);
-        // Always use cached data or fetch fresh
-        if (Object.keys(platformEventsCache).length === 0) {
-            console.log('[getEventsForPlatform] Cache empty, fetching from API');
-            await getPlatformEvents();
-        }
-        const result = platformEventsCache[platform] || [];
-        console.log('[getEventsForPlatform] Returning for', platform, ':', result);
-        return result;
-    }
-
-    // Initialize event metadata on page load (for caching)
-    document.addEventListener('DOMContentLoaded', initializeEventMetadata);
-    
     window.onclick = function (event) { ['conditionModal', 'filterModal', 'testConditionModal'].forEach((id) => { if (event.target === document.getElementById(id)) closeModal(id); }); };
-    Object.assign(window, { PLATFORM_EVENTS, EVENT_PARAMETERS, PLATFORM_META, PRODUCTS, escHtml, isZeroDate, formatDate, formatDateTime, hasActiveFilter, navigate, openModal, closeModal, showMonToast, apiRequest, apiGet, getEventLabel, buildTestEvent, getEventMetadata, getEventParameters, getEventsForPlatform, getPlatformEvents });
+    Object.assign(window, { PLATFORM_EVENTS, EVENT_PARAMETERS, PLATFORM_META, PRODUCTS, escHtml, isZeroDate, formatDate, formatDateTime, hasActiveFilter, navigate, openModal, closeModal, showMonToast, apiRequest, apiGet, getEventLabel, buildTestEvent, getEventMetadata, getEventParameters, getEventsForPlatform });
 })();
 
 
