@@ -301,6 +301,8 @@ func main() {
 	}
 }
 
+var globalTemplates map[string]*template.Template
+
 func loadTemplates() map[string]*template.Template {
 	result := make(map[string]*template.Template)
 	pages, err := filepath.Glob(filepath.Join("templates", "pages", "*.html"))
@@ -316,6 +318,19 @@ func loadTemplates() map[string]*template.Template {
 	headerPath := filepath.Join("templates", "partials", "header.html")
 	nologinheaderPath := filepath.Join("templates", "partials", "nologinheader.html")
 	loginPath := filepath.Join("templates", "partials", "login.html")
+	catalogDir := filepath.Join("templates", "partials", "catalogs")
+
+	// Load all catalog files dynamically
+	catalogFiles := []string{}
+	catalogEntries, err := os.ReadDir(catalogDir)
+	if err == nil {
+		for _, entry := range catalogEntries {
+			if !entry.IsDir() && strings.HasSuffix(entry.Name(), ".html") {
+				catalogFiles = append(catalogFiles, filepath.Join(catalogDir, entry.Name()))
+			}
+		}
+	}
+
 	funcMap := template.FuncMap{
 		"userJSON": userJSON,
 		"toJSON":   toJSON,
@@ -346,17 +361,38 @@ func loadTemplates() map[string]*template.Template {
 		},
 		"getEventLabel":  controller.GetEventLabel,
 		"formatDateTime": controller.FormatDateTime,
+		"renderCatalog": func(brandID string, data interface{}) (template.HTML, error) {
+			if globalTemplates == nil {
+				return "", fmt.Errorf("templates not loaded")
+			}
+			tmpl := globalTemplates["devices"]
+			if tmpl == nil {
+				return "", fmt.Errorf("devices template not found")
+			}
+			tplName := fmt.Sprintf("catalog-%s", brandID)
+			buf := &strings.Builder{}
+			err := tmpl.ExecuteTemplate(buf, tplName, data)
+			if err != nil {
+				return "", err
+			}
+			return template.HTML(buf.String()), nil
+		},
 	}
 
 	for _, pagePath := range pages {
 		name := strings.TrimSuffix(filepath.Base(pagePath), filepath.Ext(pagePath))
-		tmpl, err := template.New(name).Funcs(funcMap).ParseFiles(baseLayoutPath, channelLayoutPath, headerPath, nologinheaderPath, loginPath, pagePath)
+		// Combine all file paths for parsing
+		filePaths := []string{baseLayoutPath, channelLayoutPath, headerPath, nologinheaderPath, loginPath, pagePath}
+		filePaths = append(filePaths, catalogFiles...)
+
+		tmpl, err := template.New(name).Funcs(funcMap).ParseFiles(filePaths...)
 		if err != nil {
 			log.Fatalf("failed to parse template %s: %v", pagePath, err)
 		}
 		result[name] = tmpl
 	}
 
+	globalTemplates = result
 	return result
 }
 

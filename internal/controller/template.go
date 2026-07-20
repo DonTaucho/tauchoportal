@@ -398,11 +398,10 @@ type BrandForTemplate struct {
 
 // DevicesPageData contains all data needed to render the devices page
 type DevicesPageData struct {
-	Devices       []DeviceForTemplate
-	Brands        map[string]*BrandForTemplate
-	BrandsSorted  []*BrandForTemplate
-	Products      map[string][]Product
-	BrandIDs      []string
+	Devices      []DeviceForTemplate
+	Brands       map[string]*BrandForTemplate
+	BrandsSorted []*BrandForTemplate
+	BrandIDs     []string
 }
 
 // PrepareDevicesPageData prepares all data needed to render the devices page
@@ -440,9 +439,8 @@ func PrepareDevicesPageData() *DevicesPageData {
 		brandsSorted = append(brandsSorted, brandForTemplate)
 	}
 
-	// Fetch products by brand for product names and supported actions
+	// Fetch products by brand for owned device names and supported actions
 	productsMap := make(map[string]map[string]interface{})
-	productsForTemplate := make(map[string][]Product)
 	for _, brand := range brands {
 		products := catalog.ListProducts(brand.Id, true)
 		productsByID := make(map[string]interface{})
@@ -453,7 +451,6 @@ func PrepareDevicesPageData() *DevicesPageData {
 			}
 		}
 		productsMap[brand.Id] = productsByID
-		productsForTemplate[brand.Id] = products
 	}
 
 	// Convert devices to template format
@@ -515,7 +512,6 @@ func PrepareDevicesPageData() *DevicesPageData {
 		Devices:      devicesForTemplate,
 		Brands:       brandsMap,
 		BrandsSorted: brandsSorted,
-		Products:     productsForTemplate,
 		BrandIDs:     getBrandIDsFromDevices(devicesForTemplate),
 	}
 }

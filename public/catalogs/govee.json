@@ -1,0 +1,98 @@
+{
+  "id": "govee",
+  "name": "Govee",
+  "description": "Colorful smart lights and home devices with app control.",
+  "logo": "💡",
+  "products": [
+    {
+      "id": "govee-h6127",
+      "name": "Govee H6127 LED Strip Light 32.8FT",
+      "description": "Color-changing LED strip with app control, 16 million colors, music synchronization.",
+      "category": "Lights",
+      "icon": "💡",
+      "price": "$29.99",
+      "features": [
+        "16 million color options",
+        "Music sync mode",
+        "Smart scheduling",
+        "DIY mode",
+        "Easy installation"
+      ],
+      "supported_actions": ["color", "brightness", "scene"],
+      "buyUrl": "https://www.amazon.com/s?k=Govee+H6127",
+      "imageUrl": "/image/catalog/govee-h6127.jpg"
+    },
+    {
+      "id": "govee-h6052",
+      "name": "Govee H6052 Smart LED Bulb E26",
+      "description": "WiFi smart bulb with 16 million colors and brightness control.",
+      "category": "Lights",
+      "icon": "💡",
+      "priceRange": "$8.99 - $14.99",
+      "features": [
+        "16 million colors",
+        "Dimmable",
+        "Voice control compatible",
+        "App control",
+        "E26 standard socket"
+      ],
+      "supported_actions": ["on", "off", "color", "brightness"],
+      "buyUrl": "https://www.amazon.com/s?k=Govee+H6052",
+      "imageUrl": "/image/catalog/govee-h6052.jpg"
+    },
+    {
+      "id": "govee-heater",
+      "name": "Govee Smart Space Heater",
+      "description": "WiFi-enabled space heater with app control and scheduling.",
+      "category": "Climate Control",
+      "icon": "🌡️",
+      "price": "$59.99",
+      "features": [
+        "WiFi control",
+        "Scheduling",
+        "Temperature monitoring",
+        "Energy efficient",
+        "Safety auto-shutoff"
+      ],
+      "supported_actions": ["on", "off", "brightness"],
+      "buyUrl": "https://www.amazon.com/s?k=Govee+Heater",
+      "imageUrl": "/image/catalog/govee-heater.jpg"
+    },
+    {
+      "id": "govee-h5075",
+      "name": "Govee H5075 Smart Hygrometer",
+      "description": "WiFi temperature and humidity sensor with app notifications.",
+      "category": "Sensors",
+      "icon": "💧",
+      "price": "$19.99",
+      "features": [
+        "WiFi connectivity",
+        "Temperature & humidity monitoring",
+        "Real-time alerts",
+        "Data history",
+        "Works indoors/outdoors"
+      ],
+      "supported_actions": ["brightness"],
+      "buyUrl": "https://www.amazon.com/s?k=Govee+H5075",
+      "imageUrl": "/image/catalog/govee-h5075.jpg"
+    },
+    {
+      "id": "govee-diffuser",
+      "name": "Govee Smart Aroma Diffuser",
+      "description": "WiFi smart essential oil diffuser with lighting and mist control.",
+      "category": "Accessories",
+      "icon": "💨",
+      "price": "$39.99",
+      "features": [
+        "WiFi control",
+        "Adjustable mist level",
+        "RGB lighting",
+        "Scheduling",
+        "Whisper-quiet operation"
+      ],
+      "supported_actions": ["on", "off", "color"],
+      "buyUrl": "https://www.amazon.com/s?k=Govee+Diffuser",
+      "imageUrl": "/image/catalog/govee-diffuser.jpg"
+    }
+  ]
+}

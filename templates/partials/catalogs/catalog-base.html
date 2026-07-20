@@ -1,0 +1,104 @@
+{{/* Catalog Base - Reusable catalog display component */}}
+{{define "catalog-grid"}}
+<div class="catalog-grid" data-brand-id="{{.BrandID}}" data-catalog-type="{{.Type}}">
+    {{if .Products}}
+    <div class="catalog-products">
+        {{range .Products}}
+        <div class="catalog-card" data-product-id="{{.ID}}" data-brand-id="{{$.BrandID}}">
+            {{if .ImageURL}}
+            <div class="catalog-image">
+                <img src="{{.ImageURL}}" alt="{{.Name}}" loading="lazy">
+            </div>
+            {{else}}
+            <div class="catalog-image placeholder">
+                <span class="catalog-placeholder-icon">{{.Icon}}</span>
+            </div>
+            {{end}}
+            
+            <div class="catalog-info">
+                <h3 class="catalog-product-name">{{.Name}}</h3>
+                {{if .Description}}
+                <p class="catalog-description">{{.Description}}</p>
+                {{end}}
+                
+                {{if .Price}}
+                <div class="catalog-price">
+                    {{if .PriceRange}}
+                    <span class="price-range">{{.PriceRange}}</span>
+                    {{else}}
+                    <span class="price">{{.Price}}</span>
+                    {{end}}
+                </div>
+                {{end}}
+                
+                {{if .Features}}
+                <ul class="catalog-features">
+                    {{range .Features}}
+                    <li>{{.}}</li>
+                    {{end}}
+                </ul>
+                {{end}}
+                
+                {{if .SupportedActions}}
+                <div class="catalog-actions">
+                    {{range .SupportedActions}}
+                    <span class="action-tag">{{.}}</span>
+                    {{end}}
+                </div>
+                {{end}}
+            </div>
+            
+            <div class="catalog-actions-bar">
+                {{if .BuyURL}}
+                <a href="{{.BuyURL}}" target="_blank" rel="noopener noreferrer" class="btn btn-buy">
+                    🛍 Buy
+                </a>
+                {{end}}
+                <button type="button" class="btn btn-add-device" onclick="addProductToDevices(event, '{{$.BrandID}}', '{{.ID}}', '{{.Name | js}}')">
+                    + Add to My Devices
+                </button>
+            </div>
+        </div>
+        {{end}}
+    </div>
+    {{else}}
+    <div class="catalog-empty">
+        <p>No products available for {{.BrandName}}</p>
+    </div>
+    {{end}}
+</div>
+{{end}}
+
+{{/* Catalog View Wrapper */}}
+{{define "catalog-view"}}
+<div class="catalog-view">
+    <div class="catalog-sidebar">
+        <h3 class="sidebar-title">Brands</h3>
+        <div class="brand-list">
+            {{range .Brands}}
+            <button type="button" class="brand-list-item" data-brand-id="{{.ID}}" onclick="selectCatalogBrand(this, '{{.ID}}')">
+                {{if .LogoURL}}
+                <img src="{{.LogoURL}}" alt="{{.Name}}" class="brand-list-logo">
+                {{else}}
+                <span class="brand-list-icon">📱</span>
+                {{end}}
+                <span class="brand-list-name">{{.Name}}</span>
+            </button>
+            {{end}}
+        </div>
+    </div>
+    
+    <div class="catalog-main">
+        <div class="catalog-header">
+            <h2 id="catalogTitle">Select a Brand</h2>
+            <p id="catalogDesc" class="catalog-desc"></p>
+        </div>
+        
+        <div class="catalog-content" id="catalogContent">
+            <div class="catalog-placeholder">
+                <p>Select a brand from the sidebar to view available products</p>
+            </div>
+        </div>
+    </div>
+</div>
+{{end}}
