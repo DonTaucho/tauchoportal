@@ -12,7 +12,7 @@ body {
 }
 
 /* Top Nav */
-.about-nav {
+.policy-nav {
     display: flex;
     justify-content: space-between;
     align-items: center;
@@ -102,6 +102,7 @@ body {
     color: #444;
     margin-bottom: 0.75rem;
     text-align: left;
+    line-height: 1.9rem;
 }
 
 .section h2 {
