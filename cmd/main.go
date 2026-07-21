@@ -357,9 +357,14 @@ func loadTemplates() map[string]*template.Template {
 		"sub": func(a, b int) int {
 			return a - b
 		},
+		"multiply": func(a, b int) int {
+			return a * b
+		},
 		"urlEscape": func(s string) string {
 			return url.QueryEscape(s)
 		},
+		"capitalize":    capitalize,
+		"formatTimeAgo": formatTimeAgo,
 		"getEventLabel":  controller.GetEventLabel,
 		"formatDateTime": controller.FormatDateTime,
 		"renderCatalog": func(brandID string, data interface{}) (template.HTML, error) {
@@ -668,3 +673,64 @@ func formatChannelCount(value int) string {
 	}
 	return fmt.Sprintf("%d", value)
 }
+
+func capitalize(s string) string {
+	if len(s) == 0 {
+		return s
+	}
+	return strings.ToUpper(string(s[0])) + s[1:]
+}
+
+func formatTimeAgo(timestamp string) string {
+	if timestamp == "" {
+		return ""
+	}
+
+	// Try multiple date formats
+	var t time.Time
+	var err error
+
+	// Try RFC3339 first
+	t, err = time.Parse(time.RFC3339, timestamp)
+	if err != nil {
+		// Try Unix timestamp
+		if i, parseErr := strconv.ParseInt(timestamp, 10, 64); parseErr == nil {
+			t = time.Unix(i, 0)
+		} else {
+			return timestamp
+		}
+	}
+
+	now := time.Now()
+	diff := now.Sub(t)
+
+	// Calculate time units
+	if diff < time.Minute {
+		return "just now"
+	}
+	if diff < time.Hour {
+		mins := int(diff.Minutes())
+		if mins == 1 {
+			return "1 minute ago"
+		}
+		return fmt.Sprintf("%d minutes ago", mins)
+	}
+	if diff < 24*time.Hour {
+		hours := int(diff.Hours())
+		if hours == 1 {
+			return "1 hour ago"
+		}
+		return fmt.Sprintf("%d hours ago", hours)
+	}
+	if diff < 7*24*time.Hour {
+		days := int(diff.Hours() / 24)
+		if days == 1 {
+			return "1 day ago"
+		}
+		return fmt.Sprintf("%d days ago", days)
+	}
+
+	// For dates further back, show the date
+	return t.Format("2006-01-02")
+}
+

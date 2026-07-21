@@ -5,159 +5,183 @@
 {{end}}
 
 {{define "content"}}
-<div class="dashboard-container">
-    <!-- Header -->
-    <div class="dashboard-header">
-        <div>
-            <h1>Dashboard</h1>
-            <p class="header-subtitle">System overview and quick stats</p>
-        </div>
-    </div>
-
-    <!-- Stats Grid -->
-    <div class="stats-grid">
-        <div class="stat-card">
-            <div class="stat-icon stat-channels">👁️</div>
-            <div class="stat-info">
-                <div class="stat-value">{{index .Dashboard.Stats "total_channels"}}</div>
-                <div class="stat-label">Total Channels</div>
+<div class="dashboard">
+    <!-- Sidebar Navigation -->
+    <aside class="sidebar">
+        <div class="sidebar-header">
+            <div class="sidebar-title">
+                <span class="icon">🎬</span>
+                TauchoPortal
             </div>
-            {{with (index .Dashboard.Stats "live_channels")}}
-            <div class="stat-badge">{{.}} live</div>
-            {{end}}
         </div>
 
-        <div class="stat-card">
-            <div class="stat-icon stat-devices">💡</div>
-            <div class="stat-info">
-                <div class="stat-value">{{index .Dashboard.Stats "total_devices"}}</div>
-                <div class="stat-label">Total Devices</div>
+        <nav class="sidebar-nav">
+            <li><a href="/dashboard" class="active"><span class="icon">📊</span> Dashboard</a></li>
+            <li><a href="/channels"><span class="icon">👁️</span> Channels</a></li>
+            <li><a href="/devices"><span class="icon">💡</span> Devices</a></li>
+            <li><a href="/account-settings"><span class="icon">⚙️</span> Settings</a></li>
+        </nav>
+    </aside>
+
+    <!-- Main Content -->
+    <div class="main-content">
+        <!-- Page Header -->
+        <div class="page-header">
+            <div>
+                <h1 class="page-title">Dashboard</h1>
+                <p class="page-subtitle">System status and activity overview</p>
             </div>
-            {{with (index .Dashboard.Stats "online_devices")}}
-            <div class="stat-badge">{{.}} online</div>
-            {{end}}
+            <div class="header-actions">
+                <button class="btn btn-secondary" onclick="location.reload()">Refresh</button>
+                <a href="/channels" class="btn">+ New Channel</a>
+            </div>
         </div>
 
-        <div class="stat-card">
-            <div class="stat-icon stat-conditions">⚡</div>
-            <div class="stat-info">
-                <div class="stat-value">{{index .Dashboard.Stats "total_conditions"}}</div>
-                <div class="stat-label">Total Conditions</div>
+        <!-- Stats Bar -->
+        <div class="stats-bar">
+            <div class="stat-box">
+                <div class="stat-label">Active Channels</div>
+                <div class="stat-value">
+                    {{.Dashboard.Stats.Channels.Total}}
+                    {{if gt .Dashboard.Stats.Channels.Change 0}}
+                    <span class="stat-change">↑ {{.Dashboard.Stats.Channels.Change}}</span>
+                    {{else if lt .Dashboard.Stats.Channels.Change 0}}
+                    <span class="stat-change negative">↓ {{multiply .Dashboard.Stats.Channels.Change -1}}</span>
+                    {{end}}
+                </div>
             </div>
-            <div class="stat-badge">Automation rules</div>
-        </div>
-    </div>
 
-    <!-- Content Grid -->
-    <div class="dashboard-grid">
-        <!-- Channels Section -->
-        <section class="dashboard-section">
-            <div class="section-header">
-                <h2>Watched Channels</h2>
-                <a href="/channels" class="section-link">View all →</a>
+            <div class="stat-box">
+                <div class="stat-label">Live Now</div>
+                <div class="stat-value">
+                    {{.Dashboard.Stats.Channels.Live}}
+                    {{if gt .Dashboard.Stats.Channels.Live 0}}
+                    <span class="stat-change">🔴 Active</span>
+                    {{else}}
+                    <span class="stat-change">No streams</span>
+                    {{end}}
+                </div>
             </div>
-            <div class="item-list">
-                {{if .Dashboard.Channels}}
-                    {{range .Dashboard.Channels}}
-                    <div class="list-item">
-                        <div class="item-platform">
-                            {{if eq .Platform "youtube"}}📺{{else if eq .Platform "twitch"}}📱{{else}}📡{{end}}
-                        </div>
-                        <div class="item-info">
-                            <div class="item-name">{{.Name}}</div>
-                            <div class="item-detail">{{.Platform}}</div>
-                        </div>
-                        <div class="item-status {{.Status}}">
-                            {{if eq .Status "live"}}🔴 Live{{else}}⚪ Offline{{end}}
-                        </div>
+
+            <div class="stat-box">
+                <div class="stat-label">Connected Devices</div>
+                <div class="stat-value">
+                    {{.Dashboard.Stats.Devices.Total}}
+                    {{if eq .Dashboard.Stats.Devices.Offline 0}}
+                    <span class="stat-change">All online</span>
+                    {{else}}
+                    <span class="stat-change negative">{{.Dashboard.Stats.Devices.Offline}} offline</span>
+                    {{end}}
+                </div>
+            </div>
+
+            <div class="stat-box">
+                <div class="stat-label">Triggers Today</div>
+                <div class="stat-value">
+                    {{.Dashboard.Stats.Conditions.TriggersToday}}
+                    {{if lt .Dashboard.Stats.Conditions.TriggersChange 0}}
+                    <span class="stat-change negative">↓ {{multiply .Dashboard.Stats.Conditions.TriggersChange -1}}</span>
+                    {{else if gt .Dashboard.Stats.Conditions.TriggersChange 0}}
+                    <span class="stat-change">↑ {{.Dashboard.Stats.Conditions.TriggersChange}}</span>
+                    {{end}}
+                </div>
+            </div>
+        </div>
+
+        <!-- Content Grid -->
+        <div class="content-grid">
+            <!-- Left Column: Activity Feed -->
+            <div class="panel">
+                <div class="panel-header">
+                    <div class="panel-title">Live Activity</div>
+                </div>
+                <div class="panel-body">
+                    {{if .Dashboard.Activity}}
+                    <ul class="activity-list">
+                        {{range .Dashboard.Activity}}
+                        <li class="activity-item">
+                            <span class="activity-icon">{{.Icon}}</span>
+                            <div class="activity-content">
+                                <div class="activity-title">{{.Title}}</div>
+                                <div class="activity-detail">{{.Detail}}</div>
+                                <div class="activity-time">{{formatTimeAgo .Timestamp}}</div>
+                                <span class="activity-badge {{.Status}}">{{capitalize .Status}}</span>
+                            </div>
+                        </li>
+                        {{end}}
+                    </ul>
+                    {{else}}
+                    <div class="empty-state">
+                        <p>No recent activity</p>
                     </div>
                     {{end}}
-                {{else}}
-                    <div class="empty-state">
-                        <p>No channels yet</p>
-                        <a href="/channels" class="btn-small">Add Channel</a>
-                    </div>
-                {{end}}
+                </div>
             </div>
-        </section>
 
-        <!-- Devices Section -->
-        <section class="dashboard-section">
-            <div class="section-header">
-                <h2>Smart Devices</h2>
-                <a href="/devices" class="section-link">View all →</a>
-            </div>
-            <div class="item-list">
-                {{if .Dashboard.Devices}}
-                    {{range .Dashboard.Devices}}
-                    <div class="list-item">
-                        <div class="item-icon">
-                            {{if .IsConfigured}}💡{{else}}🔲{{end}}
-                        </div>
-                        <div class="item-info">
-                            <div class="item-name">{{.Name}}</div>
-                            <div class="item-detail">{{.Brand}}{{if .Room}} • {{.Room}}{{end}}</div>
-                        </div>
-                        <div class="item-status {{if eq .Status "online"}}online{{else}}offline{{end}}">
-                            {{if eq .Status "online"}}🟢 Online{{else}}⚫ Offline{{end}}
-                        </div>
+            <!-- Right Column: Status Panels -->
+            <div>
+                <!-- Channels Status -->
+                <div class="panel" style="margin-bottom: 1.5rem;">
+                    <div class="panel-header">
+                        <div class="panel-title">Channels Status</div>
                     </div>
-                    {{end}}
-                {{else}}
-                    <div class="empty-state">
-                        <p>No devices registered</p>
-                        <a href="/devices" class="btn-small">Add Device</a>
+                    <div class="status-grid">
+                        {{if .Dashboard.ChannelsStatus}}
+                        {{range .Dashboard.ChannelsStatus}}
+                        <div class="status-item">
+                            <span class="status-name">{{.Name}}</span>
+                            <span class="status-indicator">
+                                {{if eq .Status "live"}}
+                                <span class="status-dot"></span>
+                                <span class="status-text">Live</span>
+                                {{else}}
+                                <span class="status-dot offline"></span>
+                                <span class="status-text">Offline</span>
+                                {{end}}
+                            </span>
+                        </div>
+                        {{end}}
+                        {{else}}
+                        <div style="padding: 1rem; color: #8b949e; text-align: center;">
+                            No channels added
+                        </div>
+                        {{end}}
                     </div>
-                {{end}}
-            </div>
-        </section>
+                </div>
 
-        <!-- Conditions Section -->
-        <section class="dashboard-section">
-            <div class="section-header">
-                <h2>Active Conditions</h2>
-                <a href="/channels" class="section-link">Manage →</a>
-            </div>
-            <div class="item-list">
-                {{if .Dashboard.Conditions}}
-                    {{range .Dashboard.Conditions}}
-                    <div class="list-item">
-                        <div class="item-icon">
-                            {{if .IsEnabled}}⚡{{else}}💤{{end}}
-                        </div>
-                        <div class="item-info">
-                            <div class="item-name">{{.Name}}</div>
-                            <div class="item-detail">Triggers: {{.EventType}}</div>
-                        </div>
-                        <div class="item-status {{if .IsEnabled}}enabled{{else}}disabled{{end}}">
-                            {{if .IsEnabled}}Enabled{{else}}Disabled{{end}}
-                        </div>
+                <!-- Devices Status -->
+                <div class="panel">
+                    <div class="panel-header">
+                        <div class="panel-title">Device Status</div>
                     </div>
-                    {{end}}
-                {{else}}
-                    <div class="empty-state">
-                        <p>No conditions configured</p>
-                        <a href="/channels" class="btn-small">Create Condition</a>
+                    <div class="status-grid">
+                        {{if .Dashboard.DevicesStatus}}
+                        {{range .Dashboard.DevicesStatus}}
+                        <div class="status-item">
+                            <span class="status-name">{{.Name}}</span>
+                            <span class="status-indicator">
+                                {{if eq .Status "online"}}
+                                <span class="status-dot"></span>
+                                <span class="status-text">Online</span>
+                                {{else if eq .Status "warning"}}
+                                <span class="status-dot warning"></span>
+                                <span class="status-text">Warning</span>
+                                {{else}}
+                                <span class="status-dot offline"></span>
+                                <span class="status-text">Offline</span>
+                                {{end}}
+                            </span>
+                        </div>
+                        {{end}}
+                        {{else}}
+                        <div style="padding: 1rem; color: #8b949e; text-align: center;">
+                            No devices registered
+                        </div>
+                        {{end}}
                     </div>
-                {{end}}
+                </div>
             </div>
-        </section>
-    </div>
-
-    <!-- Quick Actions -->
-    <div class="quick-actions">
-        <a href="/channels" class="action-card">
-            <span class="action-icon">👁️</span>
-            <span class="action-label">Manage Channels</span>
-        </a>
-        <a href="/devices" class="action-card">
-            <span class="action-icon">💡</span>
-            <span class="action-label">Manage Devices</span>
-        </a>
-        <a href="/channels" class="action-card">
-            <span class="action-icon">⚡</span>
-            <span class="action-label">Configure Conditions</span>
-        </a>
+        </div>
     </div>
 </div>
 {{end}}
