@@ -66,36 +66,36 @@
                         
                         <!-- State: Not connected but requires OAuth -->
                         <div class="acc-not-connected" style="{{if or (not $hasOAuth) $connected}}display:none{{end}}">
-                            <p>{{.I18n.T "channelLayout.connectFirst" (field $platform "label")}}</p>
-                            <a class="acc-connect-link" href="/account-settings">{{.I18n.T "channelLayout.goToSettings"}}</a>
+                            <p>{{$.I18n.T "channelLayout.connectFirst" (field $platform "label")}}</p>
+                            <a class="acc-connect-link" href="/account-settings">{{$.I18n.T "channelLayout.goToSettings"}}</a>
                         </div>
                         
                         <!-- State: OAuth required but not supported -->
                         <div class="acc-stub" style="{{if or $connected (not $hasOAuth) $publicAccess}}display:none{{end}}">
                             <span>🚫</span>
-                            <p>{{.I18n.T "channelLayout.notSupported" (field $platform "label")}}</p>
+                            <p>{{$.I18n.T "channelLayout.notSupported" (field $platform "label")}}</p>
                         </div>
                         
                         <!-- State: Connected or public access -->
                         <div class="acc-content" style="{{if and (not $connected) (not $publicAccess)}}display:none{{end}}">
                             {{ if and (not (eq $platformId "kick")) (not (eq $platformId "bilibili")) }}
-                                <div class="acc-search-wrap"><span class="acc-search-icon">🔍</span><input class="acc-search" type="text" id="acc-search-{{$platformId}}" placeholder="{{.I18n.T "channelLayout.searchPlaceholder"}}" oninput="onAccSearch('{{$platformId}}', this.value)"></div><div class="acc-results" id="acc-results-{{$platformId}}"></div>
+                                <div class="acc-search-wrap"><span class="acc-search-icon">🔍</span><input class="acc-search" type="text" id="acc-search-{{$platformId}}" placeholder="{{$.I18n.T "channelLayout.searchPlaceholder"}}" oninput="onAccSearch('{{$platformId}}', this.value)"></div><div class="acc-results" id="acc-results-{{$platformId}}"></div>
                             {{ else }}
                                 <div class="acc-results" id="acc-results-{{$platformId}}"></div>
                             {{ end }}
                             
                             {{ if $connected }}
-                                <div class="acc-section-label">{{.I18n.T "channelLayout.yourChannels"}}</div>
+                                <div class="acc-section-label">{{$.I18n.T "channelLayout.yourChannels"}}</div>
                                 <div class="acc-results" id="acc-own-{{$platformId}}"></div>
                                 
                                 {{ if or (eq $platformId "youtube") (eq $platformId "twitch") }}
-                                    <div class="acc-section-label">{{.I18n.T "channelLayout.followingSubscriptions"}}</div>
+                                    <div class="acc-section-label">{{$.I18n.T "channelLayout.followingSubscriptions"}}</div>
                                     <div class="acc-results" id="acc-subs-{{$platformId}}"></div>
                                 {{ end }}
                             {{ end }}
                             
-                            <div class="acc-section-label">{{.I18n.T "channelLayout.addById"}}</div>
-                            <form class="acc-manual" id="acc-manual-{{$platformId}}" onsubmit="submitAccManual(event, '{{$platformId}}')"><input id="search-{{$platformId}}" type="text" placeholder="{{.I18n.T "channelLayout.channelIdPlaceholder"}}" required><button type="submit" class="acc-manual-submit">{{.I18n.T "channelLayout.addButton"}}</button></form>
+                            <div class="acc-section-label">{{$.I18n.T "channelLayout.addById"}}</div>
+                            <form class="acc-manual" id="acc-manual-{{$platformId}}" onsubmit="submitAccManual(event, '{{$platformId}}')"><input id="search-{{$platformId}}" type="text" placeholder="{{$.I18n.T "channelLayout.channelIdPlaceholder"}}" required><button type="submit" class="acc-manual-submit">{{$.I18n.T "channelLayout.addButton"}}</button></form>
                         </div>
                     </div>
                 </div>
