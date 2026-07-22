@@ -67,7 +67,7 @@
                         <!-- State: Not connected but requires OAuth -->
                         <div class="acc-not-connected" style="{{if or (not $hasOAuth) $connected}}display:none{{end}}">
                             <p>{{.I18n.T "channelLayout.connectFirst" (field $platform "label")}}</p>
-                            <a class="acc-connect-link" href="/account-settings">{{.I18n.T "channelLayout.goToSettings"}} →</a>
+                            <a class="acc-connect-link" href="/account-settings">{{.I18n.T "channelLayout.goToSettings"}}</a>
                         </div>
                         
                         <!-- State: OAuth required but not supported -->
