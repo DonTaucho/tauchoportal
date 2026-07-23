@@ -889,5 +889,60 @@
   "register.nicoLoginError": "Please enter your NicoNico email and password.",
   "register.nicoConnecting": "Connecting…",
   "register.nicoVerifying": "Verifying…",
-  "register.nicoLoggedIn": "Logged in via NicoNico! ✅"
+  "register.nicoLoggedIn": "Logged in via NicoNico! ✅",
+
+  "eventProp.id": "Event ID",
+  "eventProp.user_id": "User ID",
+  "eventProp.watch_target_id": "Watch Target ID",
+  "eventProp.platform": "Platform",
+  "eventProp.event_type": "Event Type",
+  "eventProp.sender_id": "Sender ID",
+  "eventProp.sender_name": "Sender Name",
+  "eventProp.sender_avatar": "Sender Avatar",
+  "eventProp.message": "Message",
+  "eventProp.content": "Content",
+  "eventProp.amount_value": "Amount",
+  "eventProp.amount_currency": "Currency",
+  "eventProp.amount_display": "Amount Display",
+  "eventProp.is_member": "Is Member",
+  "eventProp.is_mod": "Is Moderator",
+  "eventProp.badges": "Badges",
+  "eventProp.received_at": "Received At",
+  "eventProp.created_at": "Created At",
+  "eventProp.raw": "Raw Data",
+
+  "eventProp.is_anonymous": "Is Anonymous",
+
+  "eventProp.niconico.user_id": "User ID (NicoNico)",
+  "eventProp.niconico.content": "Content",
+  "eventProp.niconico.date": "Date",
+  "eventProp.niconico.mail": "Danmaku Formatting (color, size, position)",
+  "eventProp.niconico.vpos_sec": "Video Position (seconds)",
+  "eventProp.niconico.gift_id": "Gift ID",
+  "eventProp.niconico.gift_name": "Gift Name",
+  "eventProp.niconico.amount_point": "NicoNico Points",
+  "eventProp.niconico.amount": "Amount",
+
+  "eventProp.bilibili.color": "Danmaku Color",
+  "eventProp.bilibili.size": "Danmaku Size",
+  "eventProp.bilibili.position": "Screen Position",
+
+  "eventProp.tiktok.gift_id": "Gift ID",
+  "eventProp.tiktok.gift_name": "Gift Name",
+  "eventProp.tiktok.count": "Count",
+  "eventProp.tiktok.diamond_count": "Diamond Cost",
+
+  "eventProp.facebook.comment_id": "Comment ID",
+  "eventProp.facebook.reaction_type": "Reaction Type",
+
+  "eventProp.kick.gift_type": "Gift Type",
+  "eventProp.kick.gift_message": "Gift Message",
+
+  "eventProp.twitcasting.gift_id": "Gift ID",
+  "eventProp.twitcasting.gift_name": "Gift Name",
+  "eventProp.twitcasting.gift_image_url": "Gift Image URL",
+  "eventProp.twitcasting.gift_message": "Gift Message",
+  "eventProp.twitcasting.is_broadcaster": "Is Broadcaster",
+
+  "eventProp.x.created_at": "Created At"
 }
