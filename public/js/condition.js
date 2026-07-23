@@ -1,3 +1,250 @@
+const conditionTemplateHelpers = {
+    clone(value) {
+        return JSON.parse(JSON.stringify(value));
+    },
+
+    buildParam(name) {
+        return { "Operator": "PARAM", "SubConditions": null, "Variables": [name] };
+    },
+
+    buildTextCompare(operator, property, value, range = "") {
+        const variables = [String(value)];
+        if (range) {
+            variables.push(range);
+        }
+        return {
+            "Operator": operator,
+            "SubConditions": [this.buildParam(property)],
+            "Variables": variables
+        };
+    },
+
+    buildRegexMatch(property, pattern) {
+        return {
+            "Operator": "REGEX_MATCH",
+            "SubConditions": [this.buildParam(property)],
+            "Variables": [pattern]
+        };
+    },
+
+    buildNumericCompare(operator, property, value) {
+        return {
+            "Operator": operator,
+            "SubConditions": [
+                { "Operator": "PARSEINT", "SubConditions": [this.buildParam(property)], "Variables": null },
+                { "Operator": "PARSEINT", "SubConditions": null, "Variables": [String(value)] }
+            ],
+            "Variables": []
+        };
+    },
+
+    buildWordCountPattern(minWords) {
+        const threshold = Math.max(1, parseInt(minWords, 10) || 1);
+        if (threshold === 1) {
+            return "^\\s*\\S+(?:\\s+\\S+)*\\s*$";
+        }
+        return `^\\s*(?:\\S+\\s+){${threshold - 1},}\\S+(?:\\s+\\S+)*\\s*$`;
+    },
+
+    replacePlaceholders(value, replacements) {
+        if (Array.isArray(value)) {
+            return value.map((item) => this.replacePlaceholders(item, replacements));
+        }
+        if (value && typeof value === "object") {
+            return Object.fromEntries(
+                Object.entries(value).map(([key, item]) => [key, this.replacePlaceholders(item, replacements)])
+            );
+        }
+        if (typeof value === "string" && replacements[value] !== undefined) {
+            return replacements[value];
+        }
+        return value;
+    }
+};
+
+const conditionTemplateLibrary = {
+    comment: [
+        {
+            name: "Has keyword",
+            description: "Match when the message includes a keyword or phrase.",
+            json: conditionTemplateHelpers.buildTextCompare("INCLUDES", "message", "hello")
+        },
+        {
+            name: "From moderator",
+            description: "Match when the sender has the moderator flag.",
+            json: conditionTemplateHelpers.buildTextCompare("EQUALS", "is_mod", "true")
+        },
+        {
+            name: "From member",
+            description: "Match when the sender has the member flag.",
+            json: conditionTemplateHelpers.buildTextCompare("EQUALS", "is_member", "true")
+        }
+    ],
+    superchat: [
+        {
+            name: "Amount exceeds $10",
+            description: "Match when the monetary amount is greater than 10.",
+            json: conditionTemplateHelpers.buildNumericCompare("GREATER_THAN", "amount_value", 10)
+        },
+        {
+            name: "Has message",
+            description: "Match when the event includes a non-empty message.",
+            json: conditionTemplateHelpers.buildRegexMatch("message", "\\S")
+        },
+        {
+            name: "USD currency",
+            description: "Match when the monetary currency code is USD.",
+            json: conditionTemplateHelpers.buildTextCompare("EQUALS", "amount_currency", "USD")
+        }
+    ],
+    sticker: [
+        {
+            name: "Amount exceeds $10",
+            description: "Match when the monetary amount is greater than 10.",
+            json: conditionTemplateHelpers.buildNumericCompare("GREATER_THAN", "amount_value", 10)
+        },
+        {
+            name: "Has message",
+            description: "Match when the event includes a non-empty message.",
+            json: conditionTemplateHelpers.buildRegexMatch("message", "\\S")
+        },
+        {
+            name: "USD currency",
+            description: "Match when the monetary currency code is USD.",
+            json: conditionTemplateHelpers.buildTextCompare("EQUALS", "amount_currency", "USD")
+        }
+    ],
+    gift: [
+        {
+            name: "Amount exceeds $10",
+            description: "Match when the monetary amount is greater than 10.",
+            json: conditionTemplateHelpers.buildNumericCompare("GREATER_THAN", "amount_value", 10)
+        },
+        {
+            name: "Has message",
+            description: "Match when the event includes a non-empty message.",
+            json: conditionTemplateHelpers.buildRegexMatch("message", "\\S")
+        },
+        {
+            name: "USD currency",
+            description: "Match when the monetary currency code is USD.",
+            json: conditionTemplateHelpers.buildTextCompare("EQUALS", "amount_currency", "USD")
+        }
+    ],
+    cheer: [
+        {
+            name: "Bits exceed 100",
+            description: "Match when the bits amount is greater than 100.",
+            json: conditionTemplateHelpers.buildNumericCompare("GREATER_THAN", "amount_value", 100)
+        }
+    ],
+    member: [
+        {
+            name: "Just occurred",
+            description: "Match whenever a member event is received.",
+            json: { "Operator": "OR", "SubConditions": [], "Variables": [] }
+        }
+    ],
+    follow: [
+        {
+            name: "Just occurred",
+            description: "Match whenever a follow event is received.",
+            json: { "Operator": "OR", "SubConditions": [], "Variables": [] }
+        }
+    ],
+    sub: [
+        {
+            name: "Just occurred",
+            description: "Match whenever a sub event is received.",
+            json: { "Operator": "OR", "SubConditions": [], "Variables": [] }
+        }
+    ],
+    raid: [
+        {
+            name: "50+ viewers",
+            description: "Match when the raid amount is greater than 50 viewers.",
+            json: conditionTemplateHelpers.buildNumericCompare("GREATER_THAN", "amount_value", 50)
+        }
+    ],
+    nicoru: [
+        {
+            name: "Any reaction",
+            description: "Match whenever a nicoru reaction is received.",
+            json: { "Operator": "OR", "SubConditions": [], "Variables": [] }
+        }
+    ],
+    like: [
+        {
+            name: "Any reaction",
+            description: "Match whenever a like event is received.",
+            json: { "Operator": "OR", "SubConditions": [], "Variables": [] }
+        }
+    ],
+    hype_train: [
+        {
+            name: "Just occurred",
+            description: "Match whenever a hype train event is received.",
+            json: { "Operator": "OR", "SubConditions": [], "Variables": [] }
+        }
+    ],
+    reaction: [
+        {
+            name: "Any reaction",
+            description: "Match whenever a reaction event is received.",
+            json: { "Operator": "OR", "SubConditions": [], "Variables": [] }
+        }
+    ],
+    viewer_join: [
+        {
+            name: "New viewer",
+            description: "Match whenever a viewer join event is received.",
+            json: { "Operator": "OR", "SubConditions": [], "Variables": [] }
+        }
+    ]
+};
+
+const templateEventTypeGroups = {
+    comment: "comment",
+    gift: "gift",
+    superchat: "gift",
+    sticker: "gift",
+    member: "member",
+    follow: "member",
+    sub: "member",
+    cheer: "cheer",
+    bits: "cheer",
+    like: "reaction",
+    reaction: "reaction",
+    nicoru: "reaction",
+    raid: "raid",
+    hype_train: "reaction",
+    viewer_join: "viewer_join"
+};
+
+const eventPropertyDefinitions = {
+    common: [
+        { name: "event_type", description: "Current event type identifier", example: "comment" },
+        { name: "sender_id", description: "Platform user ID for the sender", example: "user_12345" },
+        { name: "sender_name", description: "Display name for the sender", example: "StreamFan42" },
+        { name: "message", description: "Message content attached to the event", example: "Great stream!" },
+        { name: "badges", description: "Badge names associated with the sender", example: "moderator, member" },
+        { name: "is_member", description: "Whether the sender is already a member", example: "true / false" },
+        { name: "is_mod", description: "Whether the sender is a moderator", example: "true / false" },
+        { name: "received_at", description: "Timestamp when the event was received", example: "2026-07-23T11:21:59Z" }
+    ],
+    gift: [
+        { name: "amount_value", description: "Numeric amount for the gift or Super Chat", example: "10" },
+        { name: "amount_currency", description: "Currency code for the monetary amount", example: "USD" },
+        { name: "amount_display", description: "Formatted display value for the amount", example: "$10.00" }
+    ],
+    cheer: [
+        { name: "amount_value", description: "Numeric amount for bits/cheer", example: "500" }
+    ],
+    raid: [
+        { name: "amount_value", description: "Viewer count included with the raid event", example: "50" }
+    ]
+};
+
 /**
  * ConditionEditor - Reusable condition logic editor class
  * Handles JSON editing, rendering, and synchronization across multiple textarea/form elements
@@ -22,6 +269,10 @@ class ConditionEditor {
         this.baseType = options.baseType || 'OR';
         this.drawingArea = options.drawingArea || document.getElementById('drawingArea');
         this.logicDescriptionArea = options.logicDescriptionArea;
+        this.platform = options.platform || '';
+        this.eventType = options.eventType || '';
+        this.eventFieldOptions = Array.isArray(options.eventFieldOptions) ? options.eventFieldOptions : [];
+        this.onRefresh = typeof options.onRefresh === 'function' ? options.onRefresh : null;
         try{
             const parsedValue = JSON.parse(this.conditionInput.value);
             if (!parsedValue.Operator) {
@@ -103,8 +354,19 @@ class ConditionEditor {
             }
 
             // Render description
+            const summaryHtml = this._summarize(json) || '';
             if (this.logicDescriptionArea) {
-                this.logicDescriptionArea.innerHTML = this._summarize(json) || '';
+                this.logicDescriptionArea.innerHTML = summaryHtml;
+            }
+
+            const refreshDetail = {
+                json,
+                summaryHtml,
+                summaryText: this._htmlToText(summaryHtml)
+            };
+            this.conditionInput.dispatchEvent(new CustomEvent('conditioneditor:refresh', { detail: refreshDetail }));
+            if (this.onRefresh) {
+                this.onRefresh(refreshDetail);
             }
         } catch (e) {
             console.error('Error refreshing condition editor:', e);
@@ -119,6 +381,115 @@ class ConditionEditor {
                 this.drawingArea.append(jsonerror);
             }
         }
+    }
+
+    _htmlToText(html) {
+        const temp = document.createElement('div');
+        temp.innerHTML = html || '';
+        return (temp.textContent || temp.innerText || '').trim();
+    }
+
+    _getTemplateEventGroup(eventType = this.eventType) {
+        return templateEventTypeGroups[String(eventType || '').toLowerCase()] || null;
+    }
+
+    _resolveTemplateDefinition(templateDef) {
+        return {
+            ...templateDef,
+            json: conditionTemplateHelpers.clone(templateDef.json)
+        };
+    }
+
+    getTemplatesForEventType(eventType = this.eventType) {
+        const normalizedEventType = String(eventType || '').trim().toLowerCase();
+        const templateKey = conditionTemplateLibrary[normalizedEventType] ? normalizedEventType : this._getTemplateEventGroup(normalizedEventType);
+        const templates = conditionTemplateLibrary[templateKey] || [];
+        return templates.map((templateDef) => this._resolveTemplateDefinition(templateDef));
+    }
+
+    addTemplate(templateJSON) {
+        if (!templateJSON) {
+            return false;
+        }
+
+        const json = this.getJSON() || { "Operator": this.baseType, "SubConditions": [], "Variables": [] };
+        if (!Array.isArray(json.SubConditions)) {
+            json.SubConditions = [];
+        }
+        json.SubConditions.push(conditionTemplateHelpers.clone(templateJSON));
+        this.setJSON(json);
+        return true;
+    }
+
+    async addTemplateFromLibrary(templateDef) {
+        if (!templateDef) {
+            return false;
+        }
+
+        const resolvedTemplate = this._resolveTemplateDefinition(templateDef);
+        return this.addTemplate(resolvedTemplate.json);
+    }
+
+    _requestTemplateInput(templateDef) {
+        if (typeof window.openConditionTemplateInput === 'function') {
+            return window.openConditionTemplateInput(templateDef);
+        }
+        const promptLabel = templateDef?.input?.label || templateDef?.name || 'Template value';
+        const defaultValue = templateDef?.input?.defaultValue || '';
+        const response = window.prompt(promptLabel, defaultValue);
+        return Promise.resolve(response);
+    }
+
+    openQuickOperatorDialog(operatorType) {
+        const json = this.getJSON() || { "Operator": this.baseType, "SubConditions": [], "Variables": [] };
+        if (!Array.isArray(json.SubConditions)) {
+            json.SubConditions = [];
+        }
+        const insertPath = `0/${json.SubConditions.length}`;
+        const fakeTarget = {
+            getAttribute: (attribute) => {
+                if (attribute === "path") return insertPath;
+                if (attribute === "operator") return json.Operator || this.baseType;
+                return null;
+            }
+        };
+
+        this.boolDialog.open({ target: fakeTarget });
+        document.getElementById("boolconditionradio").checked = true;
+        document.getElementById("booltextradio").checked = false;
+        document.getElementById("boolnumericradio").checked = false;
+        document.getElementById("boolmodal_bool").classList.add("available");
+        document.getElementById("boolmodal_text").classList.remove("available");
+        document.getElementById("boolmodal_numeric").classList.remove("available");
+        document.getElementById("boolcondition").value = operatorType;
+        this.boolDialog.validate();
+    }
+
+    getEventPropertyList(eventType = this.eventType) {
+        const propertyMap = new Map();
+        const eventGroup = this._getTemplateEventGroup(eventType);
+        const addProperty = (entry) => {
+            if (!entry?.name || propertyMap.has(entry.name)) {
+                return;
+            }
+            propertyMap.set(entry.name, entry);
+        };
+
+        eventPropertyDefinitions.common.forEach(addProperty);
+        if (eventGroup && eventPropertyDefinitions[eventGroup]) {
+            eventPropertyDefinitions[eventGroup].forEach(addProperty);
+        }
+        this.eventFieldOptions.forEach((fieldOption) => {
+            const [name, description] = String(fieldOption?.Label || fieldOption?.label || fieldOption?.Name || fieldOption?.name || '')
+                .split(' — ');
+            addProperty({
+                name: fieldOption?.Name || fieldOption?.name || name,
+                description: description || `Available on ${this.platform || 'this'} events`,
+                example: ''
+            });
+        });
+
+        return Array.from(propertyMap.values());
     }
 
     /**
@@ -2182,6 +2553,100 @@ function closeModal(modalId) {
     }
 }
 
+function showTemplatePreview(templateDef) {
+    const preview = document.getElementById('templatePreviewContent');
+    if (!preview || !templateDef) {
+        return;
+    }
+    preview.textContent = `${templateDef.name}
+${templateDef.description}`;
+}
+
+function addTemplateToCondition(templateDef) {
+    if (!conditionEditor || !templateDef) {
+        return false;
+    }
+
+    const normalizedTemplate = templateDef.json
+        ? templateDef
+        : { ...templateDef, json: templateDef };
+    return conditionEditor.addTemplate(conditionTemplateHelpers.clone(normalizedTemplate.json));
+}
+
+function renderTemplateCards(templates) {
+    const cardContainer = document.getElementById('templateCards');
+    const emptyState = document.getElementById('templateEmptyState');
+    const templateList = Array.isArray(templates) ? templates : [];
+
+    if (!cardContainer || !emptyState) {
+        return;
+    }
+
+    cardContainer.replaceChildren();
+
+    if (!templateList.length) {
+        cardContainer.style.display = 'none';
+        emptyState.style.display = 'block';
+        emptyState.textContent = 'No built-in templates are available for this event type yet.';
+        return;
+    }
+
+    templateList.forEach((templateDef) => {
+        const button = document.createElement('button');
+        button.type = 'button';
+        button.style.width = '100%';
+        button.style.textAlign = 'left';
+        button.style.marginBottom = '0.6rem';
+        button.style.padding = '0.75rem';
+        button.style.border = '1px solid #d6d6d6';
+        button.style.borderRadius = '8px';
+        button.style.background = '#fff';
+        button.style.cursor = 'pointer';
+        button.innerHTML = `<strong>${templateDef.name}</strong><div style="font-size:0.85rem; color:#555; margin-top:0.35rem;">${templateDef.description}</div>`;
+        button.onmouseenter = function() {
+            showTemplatePreview(templateDef);
+        };
+        button.onfocus = function() {
+            showTemplatePreview(templateDef);
+        };
+        button.onclick = function() {
+            addTemplateToCondition(templateDef);
+        };
+        cardContainer.appendChild(button);
+    });
+
+    emptyState.style.display = 'none';
+    cardContainer.style.display = 'block';
+}
+
+function initializeTemplates() {
+    const currentEventTypeElement = document.getElementById('currentEventType');
+    const eventType = (currentEventTypeElement?.innerText || currentEventTypeElement?.textContent || '').trim();
+    const templates = conditionEditor?.getTemplatesForEventType(eventType) || [];
+    const hint = document.getElementById('templateLibraryHint');
+
+    if (typeof currentTemplateEventType !== 'undefined') {
+        currentTemplateEventType = eventType;
+    }
+    if (hint) {
+        hint.textContent = eventType
+            ? `Templates for "${eventType}" load automatically.`
+            : 'Templates for this event type load automatically.';
+    }
+
+    renderTemplateCards(templates);
+    if (templates.length) {
+        showTemplatePreview(templates[0]);
+    }
+}
+
+window.conditionTemplateLibrary = conditionTemplateLibrary;
+window.initializeTemplates = initializeTemplates;
+window.renderTemplateCards = renderTemplateCards;
+window.addTemplateToCondition = addTemplateToCondition;
+
+window.conditionTemplateDefinitions = conditionTemplateLibrary;
+
 // ============================================
 // Condition Testing UI Functions
 // ============================================
@@ -2267,4 +2732,3 @@ function confirmAdd() {
     console.log('confirmAdd called');
     // TODO: Implement add confirmation
 }
-

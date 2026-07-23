@@ -7,7 +7,7 @@
 {{end}}
 
 {{define "channelscontent"}}
-<div id="condition-view" class="view channels-view condition-container">
+<div id="condition-view" class="view channels-view condition-container" data-platform="{{.CurrentChannel.Platform}}" data-event-type="{{.Condition.EventType}}" data-channel-name="{{.CurrentChannel.Name}}">
   <div class="page-header">
     <nav class="breadcrumb">
       <img src="/image/channels_s.png">
@@ -30,12 +30,27 @@
   </div>
 
   <div id="upperarea">
-    <div class="toolbox" style="display:inline-block; vertical-align:top; width: 20%">
+    <div class="toolbox" style="display:inline-block; vertical-align:top; width: 22%">
       <h3 style="border-bottom: 2px solid blue">ToolBox</h3>
       <h4>Templates</h4>
-      <div>Template1</div><div>Template2</div><div>Template3</div><div>Template4</div><div>Template5</div><div>Template6</div>
-      <h4>Tool</h4>
-      <div>Tool1</div><div>Tool2</div><div>Tool3</div><div>Tool4</div><div>Tool5</div><div>Tool6</div>
+      <div id="currentEventType" style="display:none;">{{.Condition.EventType}}</div>
+      <div id="templateLibraryHint" style="font-size:0.85rem; color:#666; margin-bottom:0.75rem;">Templates for this event type load automatically.</div>
+      <div id="templateCards" style="display:none;"></div>
+      <div id="templateEmptyState" style="font-size:0.9rem; color:#666; border:1px dashed #ccc; padding:0.75rem; border-radius:8px;">No built-in templates are available for this event type yet.</div>
+      <h4 style="margin-top:1.25rem;">Tools</h4>
+      <div style="display:flex; flex-direction:column; gap:0.75rem;">
+        <button type="button" class="btn btn-secondary" onclick="openEventInspector()" style="width:100%;">Event Inspector</button>
+        <div style="display:flex; flex-direction:column; gap:0.4rem;">
+          <strong style="font-size:0.95rem;">Quick Operators</strong>
+          <button type="button" class="btn btn-secondary" onclick="openQuickOperator('AND')" style="width:100%; text-align:left;">AND — All conditions must match</button>
+          <button type="button" class="btn btn-secondary" onclick="openQuickOperator('OR')" style="width:100%; text-align:left;">OR — Any condition can match</button>
+          <button type="button" class="btn btn-secondary" onclick="openQuickOperator('NOT')" style="width:100%; text-align:left;">NOT — Condition must NOT match</button>
+        </div>
+        <div>
+          <strong style="display:block; font-size:0.95rem; margin-bottom:0.4rem;">Template Preview</strong>
+          <div id="templatePreviewContent" style="border:1px solid #d6d6d6; border-radius:8px; padding:0.75rem; min-height:88px; background:#fafafa; white-space:pre-wrap;">Condition preview will appear here.</div>
+        </div>
+      </div>
     </div>
     <div id="drawingAreaContainer">
       <div id="drawingArea" style="border:1px solid grey; height: 100%;">
@@ -234,12 +249,54 @@
             </div>
         </div>
     </div>
+
+    <div id="eventInspectorModal" class="modal">
+        <div class="modal-content modal-large">
+            <div class="modal-header">
+                <span class="close" onclick="closeModal('eventInspectorModal')">×</span>
+                <h2>Event Inspector</h2>
+                <p>Review the available event properties for this condition and click any property to copy it.</p>
+            </div>
+            <div class="modal-body">
+                <div style="margin-bottom:1rem;">
+                    <div><strong>Platform:</strong> <span id="eventInspectorPlatform">-</span></div>
+                    <div><strong>Event Type:</strong> <span id="eventInspectorEventType">-</span></div>
+                </div>
+                <div id="eventInspectorProperties" style="display:flex; flex-direction:column; gap:0.5rem;"></div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" onclick="closeModal('eventInspectorModal')">Close</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="conditionTemplateInputModal" class="modal">
+        <div class="modal-content modal-small">
+            <div class="modal-header">
+                <span class="close" onclick="closeConditionTemplateInput()">×</span>
+                <h2 id="conditionTemplateInputTitle">Customize Template</h2>
+                <p id="conditionTemplateInputDescription">Adjust the template value before adding it.</p>
+            </div>
+            <div class="modal-body">
+                <label id="conditionTemplateInputLabel" for="conditionTemplateInputField" style="display:block; margin-bottom:0.5rem; font-weight:600;">Value</label>
+                <input id="conditionTemplateInputField" type="text" style="width:100%; padding:0.5rem;">
+                <select id="conditionTemplateSelectField" style="display:none; width:100%; padding:0.5rem;"></select>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" onclick="closeConditionTemplateInput()">Cancel</button>
+                <button id="conditionTemplateInputSubmit" type="button" class="btn btn-primary">Add Template</button>
+            </div>
+        </div>
+    </div>
 </div>
 {{end}}
 
 {{define "scripts"}}
 <script id="conditionTranslationsData" type="application/json">
 {{.I18n.TByPrefix "condition" | jsonMarshal}}
+</script>
+<script id="conditionEventFieldOptionsData" type="application/json">
+{{.EventFieldOptions | jsonMarshal}}
 </script>
 <script>
 var translations = JSON.parse(document.getElementById('conditionTranslationsData').textContent);
@@ -248,6 +305,15 @@ var translations = JSON.parse(document.getElementById('conditionTranslationsData
 <script>
 let conditionEditor = null;
 let deviceParamsEditor = null;
+let conditionTemplateInputResolver = null;
+let currentTemplateEventType = '';
+const conditionView = document.getElementById('condition-view');
+const conditionToolboxContext = {
+    platform: conditionView?.dataset?.platform || '',
+    eventType: (document.getElementById('currentEventType')?.innerText || conditionView?.dataset?.eventType || '').trim(),
+    channelName: conditionView?.dataset?.channelName || '',
+    eventFieldOptions: JSON.parse(document.getElementById('conditionEventFieldOptionsData').textContent || '[]')
+};
 
 // Get condition data from page
 function getConditionData() {
@@ -556,7 +622,11 @@ document.addEventListener('DOMContentLoaded', function() {
     conditionEditor = new ConditionEditor('conditionLogicInput', {
         baseType: 'OR',
         drawingArea: document.getElementById('drawingArea'),
-        logicDescriptionArea: document.getElementById('logictotaldescription')
+        logicDescriptionArea: document.getElementById('logictotaldescription'),
+        platform: conditionToolboxContext.platform,
+        eventType: conditionToolboxContext.eventType,
+        eventFieldOptions: conditionToolboxContext.eventFieldOptions,
+        onRefresh: updateTemplatePreview
     });
     
     // Pretty-print conditionLogicInput if it has content
@@ -603,6 +673,9 @@ document.addEventListener('DOMContentLoaded', function() {
             }
         });
     }
+
+    updateTemplatePreview();
+    initializeTemplates();
 });
 
 // Global refreshSummary for any external code that still calls it
@@ -617,6 +690,138 @@ function refreshRequest() {
         deviceParamsEditor.refresh();
     }
 }
+
+function stripSummaryToText(summaryHtml) {
+    const temp = document.createElement('div');
+    temp.innerHTML = summaryHtml || '';
+    return (temp.textContent || temp.innerText || '').trim();
+}
+
+function updateTemplatePreview(detail) {
+    const preview = document.getElementById('templatePreviewContent');
+    if (!preview) return;
+    const summaryText = detail?.summaryText || stripSummaryToText(detail?.summaryHtml || document.getElementById('logictotaldescription')?.innerHTML || '');
+    preview.textContent = summaryText || 'No sub-conditions have been added yet.';
+}
+
+
+
+function openQuickOperator(operatorType) {
+    if (conditionEditor) {
+        conditionEditor.openQuickOperatorDialog(operatorType);
+    }
+}
+
+function copyEventPropertyName(propertyName) {
+    if (navigator.clipboard?.writeText) {
+        navigator.clipboard.writeText(propertyName).catch(err => console.error('Copy failed:', err));
+    }
+}
+
+function openEventInspector() {
+    if (!conditionEditor) return;
+
+    const eventType = currentTemplateEventType || conditionToolboxContext.eventType;
+    const properties = conditionEditor.getEventPropertyList(eventType);
+    const container = document.getElementById('eventInspectorProperties');
+    document.getElementById('eventInspectorPlatform').textContent = conditionToolboxContext.platform || '-';
+    document.getElementById('eventInspectorEventType').textContent = eventType || conditionToolboxContext.eventType || '-';
+    container.replaceChildren();
+
+    properties.forEach(property => {
+        const row = document.createElement('button');
+        row.type = 'button';
+        row.style.textAlign = 'left';
+        row.style.padding = '0.75rem';
+        row.style.border = '1px solid #d6d6d6';
+        row.style.borderRadius = '8px';
+        row.style.background = '#fff';
+        row.style.cursor = 'pointer';
+        row.innerHTML = `<strong>${property.name}</strong><div style="font-size:0.85rem; color:#555; margin-top:0.25rem;">${property.description || 'Available event property'}</div>${property.example ? `<div style="font-size:0.8rem; color:#777; margin-top:0.25rem;">Example: ${property.example}</div>` : ''}`;
+        row.onclick = function() {
+            copyEventPropertyName(property.name);
+        };
+        container.appendChild(row);
+    });
+
+    openModal('eventInspectorModal');
+}
+
+function getTemplateInputValue(templateDef) {
+    const input = document.getElementById('conditionTemplateInputField');
+    const select = document.getElementById('conditionTemplateSelectField');
+    if (templateDef?.input?.type === 'select') {
+        return select.value;
+    }
+    return input.value;
+}
+
+function closeConditionTemplateInput(value = null) {
+    closeModal('conditionTemplateInputModal');
+    if (conditionTemplateInputResolver) {
+        const resolver = conditionTemplateInputResolver;
+        conditionTemplateInputResolver = null;
+        resolver(value);
+    }
+}
+
+function openConditionTemplateInput(templateDef) {
+    const title = document.getElementById('conditionTemplateInputTitle');
+    const description = document.getElementById('conditionTemplateInputDescription');
+    const label = document.getElementById('conditionTemplateInputLabel');
+    const input = document.getElementById('conditionTemplateInputField');
+    const select = document.getElementById('conditionTemplateSelectField');
+    const submit = document.getElementById('conditionTemplateInputSubmit');
+    const config = templateDef?.input || {};
+
+    title.textContent = templateDef?.name || 'Customize Template';
+    description.textContent = templateDef?.description || 'Adjust the template value before adding it.';
+    label.textContent = config.label || 'Value';
+
+    input.style.display = config.type === 'select' ? 'none' : 'block';
+    select.style.display = config.type === 'select' ? 'block' : 'none';
+
+    if (config.type === 'select') {
+        select.innerHTML = '';
+        (config.options || []).forEach(optionDef => {
+            const option = document.createElement('option');
+            option.value = optionDef.value;
+            option.textContent = optionDef.label;
+            if (optionDef.value === config.defaultValue) {
+                option.selected = true;
+            }
+            select.appendChild(option);
+        });
+    } else {
+        input.type = config.type || 'text';
+        input.value = config.defaultValue || '';
+        input.placeholder = config.placeholder || '';
+        input.min = config.min || '';
+    }
+
+    submit.onclick = function() {
+        closeConditionTemplateInput(getTemplateInputValue(templateDef));
+    };
+
+    openModal('conditionTemplateInputModal');
+    return new Promise(resolve => {
+        conditionTemplateInputResolver = resolve;
+    });
+}
+
+window.openConditionTemplateInput = openConditionTemplateInput;
+
+window.addEventListener('click', function(event) {
+    ['eventInspectorModal', 'conditionTemplateInputModal'].forEach(function(modalId) {
+        const modal = document.getElementById(modalId);
+        if (modal && event.target === modal) {
+            if (modalId === 'conditionTemplateInputModal') {
+                closeConditionTemplateInput();
+            } else {
+                closeModal(modalId);
+            }
+        }
+    });
+});
 </script>
 {{end}}
-

@@ -320,6 +320,7 @@
   "brand.amazon-alexa.description": "Use the Alexa app for routines, groups, and account linking.",
   "brand.amazon-alexa.connectButton": "Configure via Alexa app",
   "brand.amazon-alexa.disconnectButton": "Disconnect Alexa",
+
   "condition.AND": "All conditions must be met",
   "condition.OR": "Any condition may be met",
   "condition.NOT": "Does not satisfy",
