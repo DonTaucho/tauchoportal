@@ -245,6 +245,171 @@ const eventPropertyDefinitions = {
     ]
 };
 
+const commonEventPropertySchema = [
+    { name: 'id', type: 'string', description: 'Unique event ID (UUID)', optional: false },
+    { name: 'user_id', type: 'number', description: 'Taucho user ID who owns the watch target', optional: false },
+    { name: 'watch_target_id', type: 'string', description: 'Watch target ID this event is from', optional: false },
+    { name: 'platform', type: 'string', description: 'Platform (youtube, twitch, niconico, etc.)', optional: false },
+    { name: 'event_type', type: 'string', description: 'Event type (comment, superchat, gift, etc.)', optional: false },
+    { name: 'received_at', type: 'timestamp', description: 'When event was received from platform', optional: false },
+    { name: 'created_at', type: 'timestamp', description: 'When event was stored in database', optional: false },
+    { name: 'raw', type: 'object', description: 'Full original platform JSON for additional fields', optional: true }
+];
+
+const eventPropertySchemas = {
+    'youtube:comment': [
+        { name: 'message', type: 'string', description: 'Chat message content', optional: false },
+        { name: 'sender_id', type: 'string', description: 'YouTube channel ID (authorDetails.channelId)', optional: false },
+        { name: 'sender_name', type: 'string', description: 'Display name (authorDetails.displayName)', optional: false },
+        { name: 'sender_avatar', type: 'string', description: 'Profile picture URL', optional: true },
+        { name: 'is_member', type: 'boolean', description: 'Is channel member?', optional: true },
+        { name: 'badges', type: 'array', description: 'Member/moderator badges', optional: true }
+    ],
+    'youtube:superchat': [
+        { name: 'message', type: 'string', description: 'Super Chat message', optional: true },
+        { name: 'amount_value', type: 'number', description: 'Amount in USD', optional: false },
+        { name: 'amount_currency', type: 'string', description: 'Currency (USD)', optional: false },
+        { name: 'amount_display', type: 'string', description: 'Formatted amount (e.g. $5.00)', optional: false },
+        { name: 'sender_id', type: 'string', description: 'YouTube channel ID', optional: false },
+        { name: 'sender_name', type: 'string', description: 'Display name', optional: false },
+        { name: 'sender_avatar', type: 'string', description: 'Profile picture URL', optional: true }
+    ],
+    'youtube:sticker': [
+        { name: 'amount_value', type: 'number', description: 'Sticker price in USD', optional: false },
+        { name: 'amount_currency', type: 'string', description: 'Currency (USD)', optional: false },
+        { name: 'amount_display', type: 'string', description: 'Formatted price', optional: false },
+        { name: 'sender_id', type: 'string', description: 'YouTube channel ID', optional: false },
+        { name: 'sender_name', type: 'string', description: 'Display name', optional: false },
+        { name: 'sender_avatar', type: 'string', description: 'Profile picture URL', optional: true }
+    ],
+    'niconico:comment': [
+        { name: 'content', type: 'string', description: 'Chat message content (field: content from comment data)', optional: false },
+        { name: 'user_id', type: 'string', description: 'NicoNico user ID (anonymized in archived format)', optional: false },
+        { name: 'date', type: 'number', description: 'Unix timestamp when comment was posted', optional: false },
+        { name: 'mail', type: 'string', description: 'Danmaku formatting: color, size, position (e.g. \'white 184 big\')', optional: true },
+        { name: 'vpos_sec', type: 'number', description: 'Video position in seconds where comment appears', optional: true }
+    ],
+    'niconico:nicoad': [
+        { name: 'user_id', type: 'string', description: 'User who sent advertisement (NicoNico point)', optional: false },
+        { name: 'amount_point', type: 'number', description: 'NicoNico points spent (actual monetary value not disclosed)', optional: false },
+        { name: 'date', type: 'number', description: 'Unix timestamp', optional: false },
+        { name: 'message', type: 'string', description: 'Optional message with advertisement', optional: true }
+    ],
+    'niconico:gift': [
+        { name: 'user_id', type: 'string', description: 'User who sent gift', optional: false },
+        { name: 'gift_id', type: 'string', description: 'Gift item ID', optional: true },
+        { name: 'gift_name', type: 'string', description: 'Gift name', optional: true },
+        { name: 'amount', type: 'number', description: 'Amount spent or count', optional: true },
+        { name: 'date', type: 'number', description: 'Unix timestamp', optional: false },
+        { name: 'message', type: 'string', description: 'Optional message with gift', optional: true }
+    ],
+    'twitch:comment': [
+        { name: 'message', type: 'string', description: 'Chat message', optional: false },
+        { name: 'sender_id', type: 'string', description: 'Twitch user ID (user_id field)', optional: false },
+        { name: 'sender_name', type: 'string', description: 'Twitch username (user_login field) or display name (user_name)', optional: false },
+        { name: 'sender_avatar', type: 'string', description: 'Profile picture URL', optional: true },
+        { name: 'is_mod', type: 'boolean', description: 'Is moderator?', optional: true },
+        { name: 'is_member', type: 'boolean', description: 'Is subscriber?', optional: true },
+        { name: 'badges', type: 'array', description: 'Mod, subscriber, bits badges', optional: true }
+    ],
+    'twitch:cheer': [
+        { name: 'message', type: 'string', description: 'Cheer message', optional: true },
+        { name: 'amount_value', type: 'number', description: 'Number of bits', optional: false },
+        { name: 'amount_currency', type: 'string', description: 'Currency code (BITS)', optional: false },
+        { name: 'amount_display', type: 'string', description: 'Formatted (e.g. 100 Bits)', optional: false },
+        { name: 'sender_id', type: 'string', description: 'Twitch user ID', optional: false },
+        { name: 'sender_name', type: 'string', description: 'Twitch username', optional: false },
+        { name: 'is_anonymous', type: 'boolean', description: 'Anonymous cheer?', optional: true }
+    ],
+    'twitch:sub': [
+        { name: 'message', type: 'string', description: 'Sub message', optional: true },
+        { name: 'amount_value', type: 'number', description: 'Sub tier (1, 2, 3)', optional: false },
+        { name: 'sender_id', type: 'string', description: 'Twitch user ID', optional: false },
+        { name: 'sender_name', type: 'string', description: 'Twitch username', optional: false },
+        { name: 'is_gift', type: 'boolean', description: 'Is gifted sub?', optional: true }
+    ],
+    'bilibili:comment': [
+        { name: 'message', type: 'string', description: 'Danmaku message (msg field)', optional: false },
+        { name: 'sender_id', type: 'string', description: 'UID (uid field from p attribute)', optional: false },
+        { name: 'sender_name', type: 'string', description: 'Display name (uname - requires additional API call, may be empty)', optional: true },
+        { name: 'color', type: 'string', description: 'Danmaku color from p attribute (e.g. \'white\', \'#FF0000\')', optional: true },
+        { name: 'size', type: 'string', description: 'Font size from p attribute', optional: true },
+        { name: 'position', type: 'string', description: 'Screen position from p attribute', optional: true },
+        { name: 'badges', type: 'array', description: 'User level, membership badges', optional: true }
+    ],
+    'bilibili:superchat': [
+        { name: 'message', type: 'string', description: 'Message', optional: true },
+        { name: 'amount_value', type: 'number', description: 'Amount in yuan', optional: false },
+        { name: 'amount_currency', type: 'string', description: 'Currency (CNY)', optional: false },
+        { name: 'amount_display', type: 'string', description: 'Formatted amount', optional: false },
+        { name: 'sender_id', type: 'string', description: 'UID', optional: false },
+        { name: 'sender_name', type: 'string', description: 'Display name', optional: false }
+    ],
+    'tiktok:comment': [
+        { name: 'message', type: 'string', description: 'Comment text (comment field)', optional: false },
+        { name: 'sender_id', type: 'string', description: 'TikTok user ID (user.user_id)', optional: false },
+        { name: 'sender_name', type: 'string', description: 'Display name (user.nickname)', optional: false },
+        { name: 'sender_avatar', type: 'string', description: 'Profile picture (user.profile_picture_url)', optional: true }
+    ],
+    'tiktok:gift': [
+        { name: 'sender_id', type: 'string', description: 'TikTok user ID (user.user_id)', optional: false },
+        { name: 'sender_name', type: 'string', description: 'Display name (user.nickname)', optional: false },
+        { name: 'sender_avatar', type: 'string', description: 'Profile picture (user.profile_picture_url)', optional: true },
+        { name: 'gift_id', type: 'string', description: 'Gift ID', optional: false },
+        { name: 'gift_name', type: 'string', description: 'Gift name', optional: true },
+        { name: 'count', type: 'number', description: 'Number of gifts sent', optional: false },
+        { name: 'diamond_count', type: 'number', description: 'Diamond cost (TikTok currency)', optional: true }
+    ],
+    'facebook:comment': [
+        { name: 'message', type: 'string', description: 'Comment text (message field)', optional: false },
+        { name: 'sender_id', type: 'string', description: 'Facebook user ID (from.id)', optional: false },
+        { name: 'sender_name', type: 'string', description: 'User name (from.name)', optional: false },
+        { name: 'comment_id', type: 'string', description: 'Comment ID', optional: false }
+    ],
+    'facebook:reaction': [
+        { name: 'reaction_type', type: 'string', description: 'Reaction type (LIKE, LOVE, WOW, HAHA, SAD, ANGRY)', optional: false },
+        { name: 'sender_id', type: 'string', description: 'User ID who reacted', optional: false },
+        { name: 'sender_name', type: 'string', description: 'User name who reacted', optional: true },
+        { name: 'comment_id', type: 'string', description: 'ID of the comment being reacted to', optional: false }
+    ],
+    'kick:comment': [
+        { name: 'message', type: 'string', description: 'Chat message (content field)', optional: false },
+        { name: 'sender_id', type: 'string', description: 'User ID from sender object', optional: false },
+        { name: 'sender_name', type: 'string', description: 'Username or display name', optional: false },
+        { name: 'badges', type: 'array', description: 'User badges', optional: true }
+    ],
+    'kick:gift': [
+        { name: 'sender_id', type: 'string', description: 'User ID from sender object', optional: false },
+        { name: 'sender_name', type: 'string', description: 'Username or display name', optional: false },
+        { name: 'gift_type', type: 'string', description: 'Type of gift', optional: true },
+        { name: 'amount_value', type: 'number', description: 'Gift amount or count', optional: true },
+        { name: 'gift_message', type: 'string', description: 'Optional message with gift', optional: true }
+    ],
+    'twitcasting:comment': [
+        { name: 'message', type: 'string', description: 'Comment text (comment field)', optional: false },
+        { name: 'sender_id', type: 'string', description: 'User ID (user.id)', optional: false },
+        { name: 'sender_name', type: 'string', description: 'Display name (user.name)', optional: false },
+        { name: 'sender_avatar', type: 'string', description: 'Profile picture (user.image)', optional: true },
+        { name: 'is_broadcaster', type: 'boolean', description: 'Is message from broadcaster?', optional: true }
+    ],
+    'twitcasting:gift': [
+        { name: 'sender_id', type: 'string', description: 'User ID (user.id)', optional: false },
+        { name: 'sender_name', type: 'string', description: 'Display name (user.name)', optional: false },
+        { name: 'sender_avatar', type: 'string', description: 'Profile picture (user.image)', optional: true },
+        { name: 'gift_id', type: 'string', description: 'Gift ID', optional: false },
+        { name: 'gift_name', type: 'string', description: 'Gift name', optional: false },
+        { name: 'gift_image_url', type: 'string', description: 'Gift image URL', optional: true },
+        { name: 'count', type: 'number', description: 'Number of gifts', optional: false },
+        { name: 'gift_message', type: 'string', description: 'Optional message with gift', optional: true }
+    ],
+    'x:comment': [
+        { name: 'message', type: 'string', description: 'Tweet text', optional: false },
+        { name: 'sender_id', type: 'string', description: 'Author ID', optional: false },
+        { name: 'sender_name', type: 'string', description: 'Author username or display name', optional: false },
+        { name: 'created_at', type: 'timestamp', description: 'Tweet creation timestamp', optional: false }
+    ]
+};
+
 /**
  * ConditionEditor - Reusable condition logic editor class
  * Handles JSON editing, rendering, and synchronization across multiple textarea/form elements
@@ -466,30 +631,7 @@ class ConditionEditor {
     }
 
     getEventPropertyList(eventType = this.eventType) {
-        const propertyMap = new Map();
-        const eventGroup = this._getTemplateEventGroup(eventType);
-        const addProperty = (entry) => {
-            if (!entry?.name || propertyMap.has(entry.name)) {
-                return;
-            }
-            propertyMap.set(entry.name, entry);
-        };
-
-        eventPropertyDefinitions.common.forEach(addProperty);
-        if (eventGroup && eventPropertyDefinitions[eventGroup]) {
-            eventPropertyDefinitions[eventGroup].forEach(addProperty);
-        }
-        this.eventFieldOptions.forEach((fieldOption) => {
-            const [name, description] = String(fieldOption?.Label || fieldOption?.label || fieldOption?.Name || fieldOption?.name || '')
-                .split(' — ');
-            addProperty({
-                name: fieldOption?.Name || fieldOption?.name || name,
-                description: description || `Available on ${this.platform || 'this'} events`,
-                example: ''
-            });
-        });
-
-        return Array.from(propertyMap.values());
+        return getFallbackEventInspectorProperties(this.platform, eventType, this.eventFieldOptions);
     }
 
     /**
@@ -2543,6 +2685,329 @@ class NumericDialogHandler {
     }
 }
 
+function getEventInspectorContext() {
+    const eventTypeElement = document.querySelector('[data-event-type]');
+    const platformElement = document.querySelector('[data-platform]');
+    return {
+        eventType: String(eventTypeElement?.dataset?.eventType || '').trim(),
+        platform: String(platformElement?.dataset?.platform || '').trim().toLowerCase()
+    };
+}
+
+function humanizeEventPropertyName(propertyName = '') {
+    return String(propertyName || '')
+        .split('.')
+        .pop()
+        .split('_')
+        .filter(Boolean)
+        .map((part) => part.charAt(0).toUpperCase() + part.slice(1))
+        .join(' ') || propertyName;
+}
+
+function getEventPropertyTranslation(propertyName, platform = '') {
+    const platformKey = platform ? `eventProp.${platform}.${propertyName}` : '';
+    const prefixedPlatformKey = platform ? `condition.eventProp.${platform}.${propertyName}` : '';
+    const genericKey = `eventProp.${propertyName}`;
+    const prefixedGenericKey = `condition.eventProp.${propertyName}`;
+    return translations?.[platformKey]
+        || translations?.[prefixedPlatformKey]
+        || translations?.[genericKey]
+        || translations?.[prefixedGenericKey]
+        || humanizeEventPropertyName(propertyName);
+}
+
+function normalizeEventInspectorField(field, fallback = {}) {
+    const name = field?.name || field?.Name || fallback.name || '';
+    return {
+        name,
+        type: field?.type || field?.Type || fallback.type || 'string',
+        description: field?.description || field?.Description || fallback.description || '',
+        optional: field?.optional ?? field?.Optional ?? fallback.optional ?? false
+    };
+}
+
+function mergeEventInspectorProperties(...groups) {
+    const propertyMap = new Map();
+    groups.flat().forEach((field) => {
+        const normalized = normalizeEventInspectorField(field);
+        if (!normalized.name) {
+            return;
+        }
+        if (propertyMap.has(normalized.name)) {
+            propertyMap.set(normalized.name, { ...propertyMap.get(normalized.name), ...normalized });
+            return;
+        }
+        propertyMap.set(normalized.name, normalized);
+    });
+    return Array.from(propertyMap.values());
+}
+
+function getFallbackEventInspectorProperties(platform = '', eventType = '', eventFieldOptions = []) {
+    const normalizedPlatform = String(platform || '').trim().toLowerCase();
+    const normalizedEventType = String(eventType || '').trim().toLowerCase();
+    const eventGroup = templateEventTypeGroups[normalizedEventType];
+    const schemaKey = normalizedPlatform && normalizedEventType ? `${normalizedPlatform}:${normalizedEventType}` : '';
+    const fallbackFields = (Array.isArray(eventFieldOptions) ? eventFieldOptions : []).map((fieldOption) => {
+        const [labelName, description] = String(fieldOption?.Label || fieldOption?.label || fieldOption?.Name || fieldOption?.name || '')
+            .split(' — ');
+        return {
+            name: fieldOption?.Name || fieldOption?.name || labelName,
+            description: description || `Available on ${normalizedPlatform || 'this'} events`,
+            type: 'string',
+            optional: false
+        };
+    });
+    const genericFields = eventGroup && eventPropertyDefinitions[eventGroup]
+        ? eventPropertyDefinitions[eventGroup].map((entry) => ({ ...entry, type: entry.type || 'string', optional: false }))
+        : [];
+
+    return mergeEventInspectorProperties(
+        commonEventPropertySchema,
+        genericFields,
+        fallbackFields,
+        schemaKey ? eventPropertySchemas[schemaKey] || [] : []
+    );
+}
+
+function normalizeApiMetadataFields(metadata) {
+    if (!metadata?.fields || typeof metadata.fields !== 'object') {
+        return [];
+    }
+    return Object.entries(metadata.fields).map(([name, field]) => normalizeEventInspectorField({ ...field, name }));
+}
+
+async function loadEventInspectorProperties(platform, eventType) {
+    const fallbackFields = getFallbackEventInspectorProperties(
+        platform,
+        eventType,
+        conditionEditor?.eventFieldOptions || conditionToolboxContext?.eventFieldOptions || []
+    );
+    if (!platform || !eventType) {
+        return fallbackFields;
+    }
+
+    try {
+        const metadata = typeof window.getEventMetadata === 'function'
+            ? await window.getEventMetadata(platform, eventType)
+            : (typeof window.apiGet === 'function'
+                ? await window.apiGet(`/event-metadata/${encodeURIComponent(platform)}/${encodeURIComponent(eventType)}`)
+                : null);
+        const metadataFields = normalizeApiMetadataFields(metadata);
+        return metadataFields.length
+            ? mergeEventInspectorProperties(commonEventPropertySchema, fallbackFields, metadataFields)
+            : fallbackFields;
+    } catch (error) {
+        console.error('Failed to load event inspector metadata:', error);
+        return fallbackFields;
+    }
+}
+
+async function copyEventPropertyName(propertyName) {
+    const text = String(propertyName || '');
+    if (!text) {
+        return false;
+    }
+
+    try {
+        if (navigator.clipboard?.writeText) {
+            await navigator.clipboard.writeText(text);
+        } else {
+            const tempInput = document.createElement('textarea');
+            tempInput.value = text;
+            tempInput.setAttribute('readonly', '');
+            tempInput.style.position = 'fixed';
+            tempInput.style.opacity = '0';
+            document.body.appendChild(tempInput);
+            tempInput.select();
+            document.execCommand('copy');
+            tempInput.remove();
+        }
+        if (typeof window.showMonToast === 'function') {
+            window.showMonToast(`Copied ${text}`);
+        }
+        return true;
+    } catch (error) {
+        console.error('Copy failed:', error);
+        return false;
+    }
+}
+
+function renderEventInspectorRows(container, fields, platform) {
+    container.replaceChildren();
+
+    if (!fields.length) {
+        const emptyState = document.createElement('div');
+        emptyState.style.padding = '1rem';
+        emptyState.style.border = '1px solid #d6d6d6';
+        emptyState.style.borderRadius = '8px';
+        emptyState.style.background = '#fff';
+        emptyState.textContent = 'No event properties are available for this event type yet.';
+        container.appendChild(emptyState);
+        return;
+    }
+
+    const tableWrapper = document.createElement('div');
+    tableWrapper.style.border = '1px solid #d6d6d6';
+    tableWrapper.style.borderRadius = '10px';
+    tableWrapper.style.overflow = 'hidden';
+    tableWrapper.style.background = '#fff';
+
+    const table = document.createElement('table');
+    table.style.width = '100%';
+    table.style.borderCollapse = 'collapse';
+
+    const thead = document.createElement('thead');
+    const headerRow = document.createElement('tr');
+    ['Property', 'Label', 'Description', 'Type', 'Copy'].forEach((label) => {
+        const th = document.createElement('th');
+        th.textContent = label;
+        th.style.textAlign = 'left';
+        th.style.padding = '0.75rem';
+        th.style.background = '#f1f3f5';
+        th.style.fontSize = '0.85rem';
+        headerRow.appendChild(th);
+    });
+    thead.appendChild(headerRow);
+    table.appendChild(thead);
+
+    const tbody = document.createElement('tbody');
+    fields.forEach((field, index) => {
+        const row = document.createElement('tr');
+        row.style.background = index % 2 === 0 ? '#ffffff' : '#f8f9fb';
+        row.style.cursor = 'pointer';
+        row.title = `Click to copy ${field.name}`;
+        row.addEventListener('click', () => copyEventPropertyName(field.name));
+
+        const propertyCell = document.createElement('td');
+        propertyCell.style.padding = '0.75rem';
+        propertyCell.style.verticalAlign = 'top';
+        const code = document.createElement('code');
+        code.textContent = field.name;
+        propertyCell.appendChild(code);
+        if (field.optional) {
+            const badge = document.createElement('span');
+            badge.textContent = 'Optional';
+            badge.style.marginLeft = '0.5rem';
+            badge.style.padding = '0.15rem 0.5rem';
+            badge.style.borderRadius = '999px';
+            badge.style.background = '#fff3cd';
+            badge.style.color = '#8a6d3b';
+            badge.style.fontSize = '0.75rem';
+            propertyCell.appendChild(badge);
+        }
+
+        const labelCell = document.createElement('td');
+        labelCell.style.padding = '0.75rem';
+        labelCell.style.verticalAlign = 'top';
+        labelCell.textContent = getEventPropertyTranslation(field.name, platform);
+
+        const descriptionCell = document.createElement('td');
+        descriptionCell.style.padding = '0.75rem';
+        descriptionCell.style.verticalAlign = 'top';
+        descriptionCell.textContent = field.description || '—';
+
+        const typeCell = document.createElement('td');
+        typeCell.style.padding = '0.75rem';
+        typeCell.style.verticalAlign = 'top';
+        typeCell.textContent = field.type || 'string';
+
+        const actionCell = document.createElement('td');
+        actionCell.style.padding = '0.75rem';
+        actionCell.style.verticalAlign = 'top';
+        const button = document.createElement('button');
+        button.type = 'button';
+        button.className = 'btn btn-secondary';
+        button.textContent = 'Copy';
+        button.addEventListener('click', (event) => {
+            event.stopPropagation();
+            copyEventPropertyName(field.name);
+        });
+        actionCell.appendChild(button);
+
+        row.append(propertyCell, labelCell, descriptionCell, typeCell, actionCell);
+        tbody.appendChild(row);
+    });
+    table.appendChild(tbody);
+    tableWrapper.appendChild(table);
+    container.appendChild(tableWrapper);
+}
+
+async function openEventInspector() {
+    const modal = document.getElementById('eventInspectorModal');
+    const modalTitle = modal?.querySelector('.modal-header h2');
+    const modalDescription = modal?.querySelector('.modal-header p');
+    const platformLabel = document.getElementById('eventInspectorPlatform');
+    const eventTypeLabel = document.getElementById('eventInspectorEventType');
+    const propertiesContainer = document.getElementById('eventInspectorProperties');
+    if (!modal || !propertiesContainer) {
+        return;
+    }
+
+    const context = getEventInspectorContext();
+    const platform = context.platform || String(conditionToolboxContext?.platform || '').trim().toLowerCase();
+    const eventType = context.eventType || currentTemplateEventType || String(conditionToolboxContext?.eventType || '').trim();
+    const displayEventType = (typeof window.getEventLabel === 'function' && platform)
+        ? window.getEventLabel(eventType, platform)
+        : eventType;
+
+    if (modalTitle) {
+        modalTitle.textContent = `Available Event Properties — ${displayEventType || 'Unknown Event'}`;
+    }
+    if (modalDescription) {
+        modalDescription.textContent = 'Review available fields, filter the list, or click any row to copy the property name.';
+    }
+    if (platformLabel) {
+        platformLabel.textContent = platform || '-';
+    }
+    if (eventTypeLabel) {
+        eventTypeLabel.textContent = eventType || '-';
+    }
+
+    propertiesContainer.replaceChildren();
+    const searchInput = document.createElement('input');
+    searchInput.type = 'search';
+    searchInput.placeholder = 'Search properties';
+    searchInput.setAttribute('aria-label', 'Search event properties');
+    searchInput.style.width = '100%';
+    searchInput.style.padding = '0.75rem';
+    searchInput.style.marginBottom = '1rem';
+    searchInput.style.border = '1px solid #ced4da';
+    searchInput.style.borderRadius = '8px';
+
+    const listContainer = document.createElement('div');
+    const loadingState = document.createElement('div');
+    loadingState.style.padding = '1rem';
+    loadingState.style.color = '#666';
+    loadingState.textContent = 'Loading event properties...';
+    listContainer.appendChild(loadingState);
+
+    propertiesContainer.append(searchInput, listContainer);
+
+    if (typeof window.openModal === 'function') {
+        window.openModal('eventInspectorModal');
+    } else {
+        modal.style.display = 'block';
+    }
+
+    const allFields = await loadEventInspectorProperties(platform, eventType);
+    const applyFilter = () => {
+        const query = searchInput.value.trim().toLowerCase();
+        const filteredFields = !query
+            ? allFields
+            : allFields.filter((field) => {
+                const translatedName = getEventPropertyTranslation(field.name, platform);
+                return [field.name, translatedName, field.description, field.type]
+                    .filter(Boolean)
+                    .some((value) => String(value).toLowerCase().includes(query));
+            });
+        renderEventInspectorRows(listContainer, filteredFields, platform);
+    };
+
+    searchInput.addEventListener('input', applyFilter);
+    applyFilter();
+    searchInput.focus();
+}
+
 /**
  * Closes a modal by ID
  */
@@ -2651,6 +3116,8 @@ window.conditionTemplateLibrary = conditionTemplateLibrary;
 window.initializeTemplates = initializeTemplates;
 window.renderTemplateCards = renderTemplateCards;
 window.addTemplateToCondition = addTemplateToCondition;
+window.openEventInspector = openEventInspector;
+window.copyEventPropertyName = copyEventPropertyName;
 
 window.conditionTemplateDefinitions = conditionTemplateLibrary;
 

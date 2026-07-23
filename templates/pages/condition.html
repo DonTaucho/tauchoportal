@@ -30,7 +30,7 @@
   </div>
 
   <div id="upperarea">
-    <div class="toolbox" style="display:inline-block; vertical-align:top; width: 22%; height: 100%; border-right: 1px solid #e0e7ff;">
+    <div class="toolbox" style="display:inline-block; vertical-align:top; width: 42%; height: 100%; border-right: 1px solid #e0e7ff;">
       <h3>⚙️ ToolBox</h3>
       
       <h4>Templates</h4>
@@ -711,41 +711,6 @@ function openQuickOperator(operatorType) {
     if (conditionEditor) {
         conditionEditor.openQuickOperatorDialog(operatorType);
     }
-}
-
-function copyEventPropertyName(propertyName) {
-    if (navigator.clipboard?.writeText) {
-        navigator.clipboard.writeText(propertyName).catch(err => console.error('Copy failed:', err));
-    }
-}
-
-function openEventInspector() {
-    if (!conditionEditor) return;
-
-    const eventType = currentTemplateEventType || conditionToolboxContext.eventType;
-    const properties = conditionEditor.getEventPropertyList(eventType);
-    const container = document.getElementById('eventInspectorProperties');
-    document.getElementById('eventInspectorPlatform').textContent = conditionToolboxContext.platform || '-';
-    document.getElementById('eventInspectorEventType').textContent = eventType || conditionToolboxContext.eventType || '-';
-    container.replaceChildren();
-
-    properties.forEach(property => {
-        const row = document.createElement('button');
-        row.type = 'button';
-        row.style.textAlign = 'left';
-        row.style.padding = '0.75rem';
-        row.style.border = '1px solid #d6d6d6';
-        row.style.borderRadius = '8px';
-        row.style.background = '#fff';
-        row.style.cursor = 'pointer';
-        row.innerHTML = `<strong>${property.name}</strong><div style="font-size:0.85rem; color:#555; margin-top:0.25rem;">${property.description || 'Available event property'}</div>${property.example ? `<div style="font-size:0.8rem; color:#777; margin-top:0.25rem;">Example: ${property.example}</div>` : ''}`;
-        row.onclick = function() {
-            copyEventPropertyName(property.name);
-        };
-        container.appendChild(row);
-    });
-
-    openModal('eventInspectorModal');
 }
 
 function getTemplateInputValue(templateDef) {

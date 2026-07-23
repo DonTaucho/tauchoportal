@@ -20,12 +20,13 @@
 }
 
 .toolbox h3 {
-    margin: 0.25rem 0;
-    padding: 0.5rem 0.75rem;
+    margin: 0;
+    padding: 0rem 0.75rem;
     font-size: 1rem;
     color: #1f2937;
     border: none;
     font-weight: 600;
+    border-bottom: 1px solid grey;
 }
 
 .toolbox h4 {
@@ -141,13 +142,6 @@ input[type="number"] {
     min-width: auto;
 }
 
-/* Hide old toolbox div styling */
-.toolbox div:not(#templateCards):not(#templateEmptyState):not(#templatePreviewContent):not([id^="template"]) {
-    padding: 0 !important;
-    border: none !important;
-    margin: 0 !important;
-    background-color: transparent !important;
-}
 .item {
 display:block;
 min-width: 4em;
