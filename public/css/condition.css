@@ -8,12 +8,126 @@
 .channels-panel {
     background-color: rgba(255, 255, 255, 0.8);
 }
-.toolbox div{
-padding: 1rem 2rem;
-border: 1px solid grey;
-margin: 0px 0px 0.2em 0px;
-background-color: lightblue;
+/* Modern Toolbox Design */
+.toolbox {
+    overflow-y: auto;
+    background: linear-gradient(135deg, #f5f7fa 0%, #f0f4f8 100%);
+    border-right: 1px solid #e0e7ff;
+    padding: 0.75rem 0.5rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
 }
+
+.toolbox h3 {
+    margin: 0.25rem 0;
+    padding: 0.5rem 0.75rem;
+    font-size: 1rem;
+    color: #1f2937;
+    border: none;
+    font-weight: 600;
+}
+
+.toolbox h4 {
+    margin: 0.75rem 0 0.5rem 0;
+    padding: 0 0.75rem;
+    font-size: 0.85rem;
+    color: #374151;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    font-weight: 600;
+}
+
+/* Template Cards */
+#templateCards {
+    display: flex !important;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+.template-card {
+    padding: 0.5rem 0.75rem;
+    background: white;
+    border: 1px solid #d1d5db;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    font-size: 0.8rem;
+}
+
+.template-card:hover {
+    background: #f0f9ff;
+    border-color: #3b82f6;
+    box-shadow: 0 2px 6px rgba(59, 130, 246, 0.15);
+}
+
+.template-card-name {
+    font-weight: 600;
+    color: #1f2937;
+    margin-bottom: 0.2rem;
+}
+
+.template-card-desc {
+    font-size: 0.75rem;
+    color: #6b7280;
+}
+
+/* Empty State */
+#templateEmptyState {
+    font-size: 0.8rem !important;
+    padding: 0.5rem 0.75rem !important;
+    background: #fef3c7 !important;
+    border: 1px solid #fcd34d !important;
+    color: #92400e !important;
+}
+
+/* Tools Section */
+.toolbox > div:has(button[onclick*="openEventInspector"]),
+.toolbox > div:has(strong) {
+    padding: 0.5rem 0.75rem;
+    background: white;
+    border: 1px solid #e5e7eb;
+    border-radius: 6px;
+}
+
+/* Tool Buttons */
+.toolbox button {
+    padding: 0.5rem 0.75rem !important;
+    font-size: 0.8rem !important;
+    margin: 0 !important;
+    min-width: auto !important;
+    width: 100% !important;
+    text-align: left;
+    border-radius: 5px;
+    background: white;
+    border: 1px solid #d1d5db;
+    color: #374151;
+    font-weight: 500;
+    transition: all 0.2s ease;
+}
+
+.toolbox button:hover {
+    background: #3b82f6;
+    color: white;
+    border-color: #3b82f6;
+}
+
+.toolbox button:active {
+    transform: scale(0.98);
+}
+
+/* Template Preview */
+#templatePreviewContent {
+    font-size: 0.75rem !important;
+    padding: 0.5rem 0.75rem !important;
+    min-height: 80px !important;
+    line-height: 1.4;
+    color: #374151;
+    overflow-y: auto;
+    max-height: 150px;
+}
+
+/* Legacy support for number inputs */
 input[type="number"] {
     width: 3rem;
     border-radius: 4px;
@@ -21,12 +135,18 @@ input[type="number"] {
     line-height: 3rem;
     font-size: x-large;
 }
+
+/* Legacy button styles - don't override with margin */
 .btn {
-    margin: 0.5rem;
-    min-width: 6rem;
+    min-width: auto;
 }
-.toolbox {
-    overflow-y: auto;
+
+/* Hide old toolbox div styling */
+.toolbox div:not(#templateCards):not(#templateEmptyState):not(#templatePreviewContent):not([id^="template"]) {
+    padding: 0 !important;
+    border: none !important;
+    margin: 0 !important;
+    background-color: transparent !important;
 }
 .item {
 display:block;

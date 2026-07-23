@@ -97,7 +97,7 @@
   "button.cancel": "취소",
   "policy.privacyTitle": "개인 정보 보호 정책",
   "policy.termsTitle": "이용 약관",
-  "policy.lastUpdated": "최종 업데이트:",
+  "policy.lastUpdated": "최종 갱신일:2026년 6월 15일",
   "policy.intro": "개인정보 처리방침",
   "policy.introText": "타우초는 서비스 이용자 모든 프라이버시 및 개인정보의 보호를 항상 우선하고 있습니다.본 개인정보취급방침 페이지에서는 서비스 운영상 취득한 개인정보를 어떻게 취급하고 어디에 이용하는지 설명합니다.",
   "policy.introReadPrivacy": "웹 서비스 타우초를 이용함에 있어 이 개인정보 보호정책 페이지를 잘 읽고, 고객의 정보의 취급 방법에 대해 양해 바랍니다.타우초 서비스를 이용함에 있어서 로그인 사용자 및 사이트 뷰어는 이 정책을 이해하고 동의한 것으로 간주합니다.",
@@ -742,7 +742,7 @@
   "devices.statTotal": "합계",
   "devices.statOnline": "온라인",
   "devices.statOffline": "오프라인",
-  "devices.statSetupIncomplete": "설정이 완료되지 않았습니다.",
+  "devices.statSetupIncomplete": "미완료",
   "devices.allFilter": "모두",
   "devices.noDevices": "기기가 아직 등록되지 않았습니다.상단의 '장치 추가'를 클릭하여 장치를 추가하십시오.",
   "devices.emptyNoDevices": "기기가 등록되지 않았습니다.",
@@ -875,4 +875,5 @@
   "register.nicoConnecting": "연결 중…",
   "register.nicoVerifying": "인증중…",
   "register.nicoLoggedIn": "니코 니코 로그인으로 로그인했습니다!✅"
-}
+}
+

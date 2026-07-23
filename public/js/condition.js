@@ -2592,31 +2592,38 @@ function renderTemplateCards(templates) {
     }
 
     templateList.forEach((templateDef) => {
-        const button = document.createElement('button');
-        button.type = 'button';
-        button.style.width = '100%';
-        button.style.textAlign = 'left';
-        button.style.marginBottom = '0.6rem';
-        button.style.padding = '0.75rem';
-        button.style.border = '1px solid #d6d6d6';
-        button.style.borderRadius = '8px';
-        button.style.background = '#fff';
-        button.style.cursor = 'pointer';
-        button.innerHTML = `<strong>${templateDef.name}</strong><div style="font-size:0.85rem; color:#555; margin-top:0.35rem;">${templateDef.description}</div>`;
-        button.onmouseenter = function() {
+        const card = document.createElement('div');
+        card.className = 'template-card';
+        
+        const nameDiv = document.createElement('div');
+        nameDiv.className = 'template-card-name';
+        nameDiv.textContent = templateDef.name;
+        
+        const descDiv = document.createElement('div');
+        descDiv.className = 'template-card-desc';
+        descDiv.textContent = templateDef.description;
+        
+        card.appendChild(nameDiv);
+        card.appendChild(descDiv);
+        
+        card.style.cursor = 'pointer';
+        card.title = `Click to add: ${templateDef.name}`;
+        
+        card.onmouseenter = function() {
             showTemplatePreview(templateDef);
         };
-        button.onfocus = function() {
+        card.onfocus = function() {
             showTemplatePreview(templateDef);
         };
-        button.onclick = function() {
+        card.onclick = function() {
             addTemplateToCondition(templateDef);
         };
-        cardContainer.appendChild(button);
+        
+        cardContainer.appendChild(card);
     });
 
     emptyState.style.display = 'none';
-    cardContainer.style.display = 'block';
+    cardContainer.style.display = 'flex';
 }
 
 function initializeTemplates() {
