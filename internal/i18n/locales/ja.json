@@ -444,9 +444,9 @@
   "condition.event_created_at": "イベント発生日時",
 
   "channelLayout.selectChannelTitle": "配信チャンネル",
-  "channelLayout.connectFirst": "先にアカウントを接続してください。",
+  "channelLayout.connectFirst": "アカウントを接続してください。",
   "channelLayout.goToSettings": "アカウント設定 →",
-  "channelLayout.notSupported": "チャネル登録はまだサポートされていません。",
+  "channelLayout.notSupported": "チャンネル登録はまだサポートされていません。",
   "channelLayout.searchPlaceholder": "チャンネル検索中…",
   "channelLayout.yourChannels": "所有チャンネル",
   "channelLayout.followingSubscriptions": "フォロー中 / 登録済み",
