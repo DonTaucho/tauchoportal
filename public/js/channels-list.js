@@ -1,11 +1,12 @@
 (function () {
     'use strict';
     const { apiRequest, openModal, closeModal } = window;
+    const t = window.channelsListTranslations || {}; // Fallback to empty object if not loaded
     let filteringChannelId = null;
     async function updateDisplayName(channelId, newName) {
         const trimmed = (newName || '').trim();
         if (!trimmed) {
-            alert('Display name cannot be empty');
+            alert(t.emptyDisplayName || 'Display name cannot be empty');
             return false;
         }
         try {
@@ -13,7 +14,7 @@
             location.reload();
             return true;
         } catch (error) {
-            alert('Failed to update display name: ' + error.message);
+            alert((t.failedUpdateName || 'Failed to update display name: ') + error.message);
             return false;
         }
     }
@@ -55,19 +56,19 @@
             location.reload();
         } catch (error) {
             checkbox.checked = !checkbox.checked;
-            alert('Failed to update channel: ' + error.message);
+            alert((t.failedUpdateChannel || 'Failed to update channel: ') + error.message);
         }
     }
 
     async function deleteChannel(channelId) {
-        if (!confirm('Remove this channel from monitoring?\n\nAll conditions for this channel will also be removed.')) {
+        if (!confirm(t.confirmRemove || 'Remove this channel from monitoring?\n\nAll conditions for this channel will also be removed.')) {
             return;
         }
         try {
             await apiRequest('DELETE', `/watches?id=${channelId}`);
             location.reload();
         } catch (error) {
-            alert('Failed to delete channel: ' + error.message);
+            alert((t.failedDelete || 'Failed to delete channel: ') + error.message);
         }
     }
 
@@ -84,7 +85,8 @@
         
         const filterData = card.dataset.filterData ? JSON.parse(card.dataset.filterData) : {};
         
-        document.getElementById('filterModalSubtitle').textContent = `Control which live streams are tracked for "${card.dataset.channelName || 'this channel'}".`;
+        const channelName = card.dataset.channelName || 'this channel';
+        document.getElementById('filterModalSubtitle').textContent = `${t.filterDesc || 'Control which live streams are tracked for'} "${channelName}".`;
         document.getElementById('filterSkipTitle').value = (filterData.skip_if_title_contains || []).join('\n');
         document.getElementById('filterSkipDesc').value = (filterData.skip_if_description_contains || []).join('\n');
         document.getElementById('filterRequireTitle').value = (filterData.require_title_contains || []).join('\n');
@@ -123,7 +125,7 @@
             closeModal('filterModal');
             location.reload();
         } catch (error) {
-            alert('Failed to save filter: ' + error.message);
+            alert((t.failedSaveFilter || 'Failed to save filter: ') + error.message);
         } finally {
             button.disabled = false;
         }

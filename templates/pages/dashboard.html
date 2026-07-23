@@ -8,19 +8,19 @@
 <div class="dashboard-container">
         <div class="welcome-banner">
             <div class="welcome-text">
-                <h1>Welcome back, <span id="username">...</span> 👋</h1>
+                <h1>{{.I18n.T "dashboard.welcome"}}<span id="username">...</span> 👋</h1>
                 <p id="userEmail" class="welcome-sub"></p>
             </div>
         </div>
 
-        <div class="section-title">Quick Navigation</div>
+        <div class="section-title">{{.I18n.T "dashboard.quickNav"}}</div>
 
         <div class="cards-grid">
             <a href="/channels" class="card">
                 <div class="card-icon">👁️</div>
                 <div class="card-body">
-                    <h3>Watched Channels</h3>
-                    <p>Configure which live streaming channels to monitor. The service detects streams automatically.</p>
+                    <h3>{{.I18n.T "dashboard.channels"}}</h3>
+                    <p>{{.I18n.T "dashboard.channelsDesc"}}</p>
                 </div>
                 <div class="card-arrow">→</div>
             </a>
@@ -28,38 +28,38 @@
             <a href="/devices" class="card">
                 <div class="card-icon">💡</div>
                 <div class="card-body">
-                    <h3>My Devices</h3>
-                    <p>Register and manage your smart home devices — lights, plugs, LED controllers, and more.</p>
+                    <h3>{{.I18n.T "dashboard.devices"}}</h3>
+                    <p>{{.I18n.T "dashboard.devicesDesc"}}</p>
                 </div>
                 <div class="card-arrow">→</div>
             </a>
 
         </div>
 
-        <div class="section-title">How It Works</div>
+        <div class="section-title">{{.I18n.T "dashboard.howItWorks"}}</div>
         <div class="flow-row">
             <div class="flow-step">
                 <div class="flow-icon">📡</div>
-                <div class="flow-label">Watch Channels</div>
-                <div class="flow-desc">Add streaming accounts to monitor</div>
+                <div class="flow-label">{{.I18n.T "dashboard.watchChannels"}}</div>
+                <div class="flow-desc">{{.I18n.T "dashboard.watchChannelsDesc"}}</div>
             </div>
             <div class="flow-arrow">→</div>
             <div class="flow-step">
                 <div class="flow-icon">⚡</div>
-                <div class="flow-label">Set Conditions</div>
-                <div class="flow-desc">Define event rules per channel</div>
+                <div class="flow-label">{{.I18n.T "dashboard.setConditions"}}</div>
+                <div class="flow-desc">{{.I18n.T "dashboard.setConditionsDesc"}}</div>
             </div>
             <div class="flow-arrow">→</div>
             <div class="flow-step">
                 <div class="flow-icon">💡</div>
-                <div class="flow-label">Assign Devices</div>
-                <div class="flow-desc">Link conditions to smart devices</div>
+                <div class="flow-label">{{.I18n.T "dashboard.assignDevices"}}</div>
+                <div class="flow-desc">{{.I18n.T "dashboard.assignDevicesDesc"}}</div>
             </div>
             <div class="flow-arrow">→</div>
             <div class="flow-step">
                 <div class="flow-icon">🎉</div>
-                <div class="flow-label">Stream!</div>
-                <div class="flow-desc">Devices react automatically</div>
+                <div class="flow-label">{{.I18n.T "dashboard.stream"}}</div>
+                <div class="flow-desc">{{.I18n.T "dashboard.streamDesc"}}</div>
             </div>
         </div>
     </div>
