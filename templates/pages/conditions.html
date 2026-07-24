@@ -97,7 +97,10 @@
 
 {{define "scripts"}}
 <script id="conditionsListTranslations" type="application/json">
-{{.I18n.TByPrefix "conditionsList" | jsonMarshal}}
+{
+  ...{{.I18n.TByPrefix "conditionsList" | jsonMarshal}},
+  ...{{.I18n.TByPrefix "conditions" | jsonMarshal}}
+}
 </script>
 <script>
 window.conditionsListTranslations = JSON.parse(document.getElementById('conditionsListTranslations').textContent);
