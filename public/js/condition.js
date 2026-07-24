@@ -65,138 +65,182 @@ const conditionTemplateHelpers = {
 const conditionTemplateLibrary = {
     comment: [
         {
+            nameKey: "condition.templates.comment.has_keyword",
             name: "Has keyword",
+            descriptionKey: "condition.templates.comment.has_keyword.description",
             description: "Match when the message includes a keyword or phrase.",
             json: conditionTemplateHelpers.buildTextCompare("INCLUDES", "message", "hello")
         },
         {
+            nameKey: "condition.templates.comment.from_moderator",
             name: "From moderator",
+            descriptionKey: "condition.templates.comment.from_moderator.description",
             description: "Match when the sender has the moderator flag.",
             json: conditionTemplateHelpers.buildTextCompare("EQUALS", "is_mod", "true")
         },
         {
+            nameKey: "condition.templates.comment.from_member",
             name: "From member",
+            descriptionKey: "condition.templates.comment.from_member.description",
             description: "Match when the sender has the member flag.",
             json: conditionTemplateHelpers.buildTextCompare("EQUALS", "is_member", "true")
         }
     ],
     superchat: [
         {
+            nameKey: "condition.templates.superchat.amount_exceeds_10",
             name: "Amount exceeds $10",
+            descriptionKey: "condition.templates.superchat.amount_exceeds_10.description",
             description: "Match when the monetary amount is greater than 10.",
             json: conditionTemplateHelpers.buildNumericCompare("GREATER_THAN", "amount_value", 10)
         },
         {
+            nameKey: "condition.templates.superchat.has_message",
             name: "Has message",
+            descriptionKey: "condition.templates.superchat.has_message.description",
             description: "Match when the event includes a non-empty message.",
             json: conditionTemplateHelpers.buildRegexMatch("message", "\\S")
         },
         {
+            nameKey: "condition.templates.superchat.usd_currency",
             name: "USD currency",
+            descriptionKey: "condition.templates.superchat.usd_currency.description",
             description: "Match when the monetary currency code is USD.",
             json: conditionTemplateHelpers.buildTextCompare("EQUALS", "amount_currency", "USD")
         }
     ],
     sticker: [
         {
+            nameKey: "condition.templates.sticker.amount_exceeds_10",
             name: "Amount exceeds $10",
+            descriptionKey: "condition.templates.sticker.amount_exceeds_10.description",
             description: "Match when the monetary amount is greater than 10.",
             json: conditionTemplateHelpers.buildNumericCompare("GREATER_THAN", "amount_value", 10)
         },
         {
+            nameKey: "condition.templates.sticker.has_message",
             name: "Has message",
+            descriptionKey: "condition.templates.sticker.has_message.description",
             description: "Match when the event includes a non-empty message.",
             json: conditionTemplateHelpers.buildRegexMatch("message", "\\S")
         },
         {
+            nameKey: "condition.templates.sticker.usd_currency",
             name: "USD currency",
+            descriptionKey: "condition.templates.sticker.usd_currency.description",
             description: "Match when the monetary currency code is USD.",
             json: conditionTemplateHelpers.buildTextCompare("EQUALS", "amount_currency", "USD")
         }
     ],
     gift: [
         {
+            nameKey: "condition.templates.gift.amount_exceeds_10",
             name: "Amount exceeds $10",
+            descriptionKey: "condition.templates.gift.amount_exceeds_10.description",
             description: "Match when the monetary amount is greater than 10.",
             json: conditionTemplateHelpers.buildNumericCompare("GREATER_THAN", "amount_value", 10)
         },
         {
+            nameKey: "condition.templates.gift.has_message",
             name: "Has message",
+            descriptionKey: "condition.templates.gift.has_message.description",
             description: "Match when the event includes a non-empty message.",
             json: conditionTemplateHelpers.buildRegexMatch("message", "\\S")
         },
         {
+            nameKey: "condition.templates.gift.usd_currency",
             name: "USD currency",
+            descriptionKey: "condition.templates.gift.usd_currency.description",
             description: "Match when the monetary currency code is USD.",
             json: conditionTemplateHelpers.buildTextCompare("EQUALS", "amount_currency", "USD")
         }
     ],
     cheer: [
         {
+            nameKey: "condition.templates.cheer.bits_exceed_100",
             name: "Bits exceed 100",
+            descriptionKey: "condition.templates.cheer.bits_exceed_100.description",
             description: "Match when the bits amount is greater than 100.",
             json: conditionTemplateHelpers.buildNumericCompare("GREATER_THAN", "amount_value", 100)
         }
     ],
     member: [
         {
+            nameKey: "condition.templates.member.just_occurred",
             name: "Just occurred",
+            descriptionKey: "condition.templates.member.just_occurred.description",
             description: "Match whenever a member event is received.",
             json: { "Operator": "OR", "SubConditions": [], "Variables": [] }
         }
     ],
     follow: [
         {
+            nameKey: "condition.templates.follow.just_occurred",
             name: "Just occurred",
+            descriptionKey: "condition.templates.follow.just_occurred.description",
             description: "Match whenever a follow event is received.",
             json: { "Operator": "OR", "SubConditions": [], "Variables": [] }
         }
     ],
     sub: [
         {
+            nameKey: "condition.templates.sub.just_occurred",
             name: "Just occurred",
+            descriptionKey: "condition.templates.sub.just_occurred.description",
             description: "Match whenever a sub event is received.",
             json: { "Operator": "OR", "SubConditions": [], "Variables": [] }
         }
     ],
     raid: [
         {
+            nameKey: "condition.templates.raid.50_plus_viewers",
             name: "50+ viewers",
+            descriptionKey: "condition.templates.raid.50_plus_viewers.description",
             description: "Match when the raid amount is greater than 50 viewers.",
             json: conditionTemplateHelpers.buildNumericCompare("GREATER_THAN", "amount_value", 50)
         }
     ],
     nicoru: [
         {
+            nameKey: "condition.templates.nicoru.any_reaction",
             name: "Any reaction",
+            descriptionKey: "condition.templates.nicoru.any_reaction.description",
             description: "Match whenever a nicoru reaction is received.",
             json: { "Operator": "OR", "SubConditions": [], "Variables": [] }
         }
     ],
     like: [
         {
+            nameKey: "condition.templates.like.any_reaction",
             name: "Any reaction",
+            descriptionKey: "condition.templates.like.any_reaction.description",
             description: "Match whenever a like event is received.",
             json: { "Operator": "OR", "SubConditions": [], "Variables": [] }
         }
     ],
     hype_train: [
         {
+            nameKey: "condition.templates.hype_train.just_occurred",
             name: "Just occurred",
+            descriptionKey: "condition.templates.hype_train.just_occurred.description",
             description: "Match whenever a hype train event is received.",
             json: { "Operator": "OR", "SubConditions": [], "Variables": [] }
         }
     ],
     reaction: [
         {
+            nameKey: "condition.templates.reaction.any_reaction",
             name: "Any reaction",
+            descriptionKey: "condition.templates.reaction.any_reaction.description",
             description: "Match whenever a reaction event is received.",
             json: { "Operator": "OR", "SubConditions": [], "Variables": [] }
         }
     ],
     viewer_join: [
         {
+            nameKey: "condition.templates.viewer_join.new_viewer",
             name: "New viewer",
+            descriptionKey: "condition.templates.viewer_join.new_viewer.description",
             description: "Match whenever a viewer join event is received.",
             json: { "Operator": "OR", "SubConditions": [], "Variables": [] }
         }
@@ -223,25 +267,25 @@ const templateEventTypeGroups = {
 
 const eventPropertyDefinitions = {
     common: [
-        { name: "event_type", description: "Current event type identifier", example: "comment" },
-        { name: "sender_id", description: "Platform user ID for the sender", example: "user_12345" },
-        { name: "sender_name", description: "Display name for the sender", example: "StreamFan42" },
-        { name: "message", description: "Message content attached to the event", example: "Great stream!" },
-        { name: "badges", description: "Badge names associated with the sender", example: "moderator, member" },
-        { name: "is_member", description: "Whether the sender is already a member", example: "true / false" },
-        { name: "is_mod", description: "Whether the sender is a moderator", example: "true / false" },
-        { name: "received_at", description: "Timestamp when the event was received", example: "2026-07-23T11:21:59Z" }
+        { name: "event_type", descriptionKey: "condition.eventProp.event_type.description", example: "comment" },
+        { name: "sender_id", descriptionKey: "condition.eventProp.sender_id.description", example: "user_12345" },
+        { name: "sender_name", descriptionKey: "condition.eventProp.sender_name.description", example: "StreamFan42" },
+        { name: "message", descriptionKey: "condition.eventProp.message.description", example: "Great stream!" },
+        { name: "badges", descriptionKey: "condition.eventProp.badges.description", example: "moderator, member" },
+        { name: "is_member", descriptionKey: "condition.eventProp.is_member.description", example: "true / false" },
+        { name: "is_mod", descriptionKey: "condition.eventProp.is_mod.description", example: "true / false" },
+        { name: "received_at", descriptionKey: "condition.eventProp.received_at.description", example: "2026-07-23T11:21:59Z" }
     ],
     gift: [
-        { name: "amount_value", description: "Numeric amount for the gift or Super Chat", example: "10" },
-        { name: "amount_currency", description: "Currency code for the monetary amount", example: "USD" },
-        { name: "amount_display", description: "Formatted display value for the amount", example: "$10.00" }
+        { name: "amount_value", descriptionKey: "condition.eventProp.amount_value.description", example: "10" },
+        { name: "amount_currency", descriptionKey: "condition.eventProp.amount_currency.description", example: "USD" },
+        { name: "amount_display", descriptionKey: "condition.eventProp.amount_display.description", example: "$10.00" }
     ],
     cheer: [
-        { name: "amount_value", description: "Numeric amount for bits/cheer", example: "500" }
+        { name: "amount_value", descriptionKey: "condition.eventProp.amount_value.description", example: "500" }
     ],
     raid: [
-        { name: "amount_value", description: "Viewer count included with the raid event", example: "50" }
+        { name: "amount_value", descriptionKey: "condition.eventProp.amount_value.description", example: "50" }
     ]
 };
 
@@ -461,6 +505,7 @@ class ConditionEditor {
         this.operatormap = { "and": "AND", "or": "OR", "not": "NOT", "some": "SOME", "equivalent": "EQUIVALENT", "greater_than": "GREATER_THAN", "greater_or_equal": "GREATER_OR_EQUAL", "less_than": "LESS_THAN", "less_or_equal": "LESS_OR_EQUAL", "equals": "EQUALS", "includes": "INCLUDES", "regex_match": "REGEX_MATCH", "count": "COUNT", "sum": "SUM", "wholesentence": "WHOLESENTENCE", "regex_extract": "REGEX_EXTRACT", "substring": "SUBSTRING", "first": "FIRST", "last": "LAST", "add": "ADD", "subtract": "SUBTRACT", "multiply": "MULTIPLY", "divide": "DIVIDE", "modulo": "MODULO", "parseint": "PARSEINT", "exchange": "EXCHANGE", "param": "PARAM" };
         this.reverselookuptype = { "AND": "boolean", "OR": "boolean", "NOT": "boolean", "SOME": "boolean", "EQUIVALENT": "comp", "GREATER_THAN": "comp", "LESS_THAN": "comp", "EQUALS": "optext", "INCLUDES": "optext", "REGEX_MATCH": "optext", "COUNT": "group", "SUM": "group", "ADD": "calc", "SUBTRACT": "calc", "MULTIPLY": "calc", "DIVIDE": "calc", "MODULO": "calc", "PARSEINT": "conv", "EXCHANGE": "conv", "PARAM": "extract" }; 
         this.calcoperatorssign = {"ADD": "＋", "SUBTRACT": "－", "MULTIPLY": "×", "DIVIDE": "÷", "MODULO": "≡"};
+        this.textextractorlabels = {"WHOLESENTENCE": "Whole Sentence", "REGEX_EXTRACT": "Regex Extract", "SUBSTRING": "Substring", "FIRST": "First", "LAST": "Last"};
         // Initialize boolean dialog handler
         this.boolDialog = new BoolDialogHandler(this);
         
@@ -1822,6 +1867,19 @@ class TextDialogHandler {
             document.getElementById('textExtFirst').style['display']=e.target.value=='first'?'inline-block':'none';
             document.getElementById('textExtLast').style['display']=e.target.value=='last'?'inline-block':'none';
         }.bind(this);
+        
+        if (document.getElementById("textExtSelect").options.length === 0) {
+            const emptyoption = document.createElement("option");
+            emptyoption.value = "";
+            emptyoption.text = "";
+            document.getElementById("textExtSelect").appendChild(emptyoption);
+            for (const i in editor.textextractors) {
+                const option = document.createElement("option");
+                option.value = editor.textextractors[i];
+                option.text = editor.textextractorlabels[editor.textextractors[i]] || editor.textextractors[i];
+                document.getElementById("textExtSelect").appendChild(option);
+            }
+        }
 
         document.getElementById("textExtRegex").onchange = this.validate;
         document.getElementById("textExtSubFrom").onchange = this.validate;
@@ -2705,15 +2763,57 @@ function humanizeEventPropertyName(propertyName = '') {
 }
 
 function getEventPropertyTranslation(propertyName, platform = '') {
-    const platformKey = platform ? `eventProp.${platform}.${propertyName}` : '';
-    const prefixedPlatformKey = platform ? `condition.eventProp.${platform}.${propertyName}` : '';
-    const genericKey = `eventProp.${propertyName}`;
-    const prefixedGenericKey = `condition.eventProp.${propertyName}`;
-    return translations?.[platformKey]
+    // Look for translations with flattened condition.* keys
+    const prefixedGenericKey = `condition.${propertyName}`;
+    const prefixedPlatformKey = platform ? `condition.${platform}.${propertyName}` : '';
+    
+    // TByPrefix removes the "condition." prefix from keys, so also try without prefix
+    const shortGenericKey = propertyName;
+    const shortPlatformKey = platform ? `${platform}.${propertyName}` : '';
+    
+    // Fallback to old keys for backward compatibility (though they're all updated now)
+    const oldGenericKey = `eventProp.${propertyName}`;
+    const oldPrefixedGenericKey = `condition.eventProp.${propertyName}`;
+    const oldPrefixedPlatformKey = platform ? `condition.eventProp.${platform}.${propertyName}` : '';
+    
+    return translations?.[prefixedGenericKey]
+        || translations?.[shortGenericKey]
         || translations?.[prefixedPlatformKey]
-        || translations?.[genericKey]
-        || translations?.[prefixedGenericKey]
+        || translations?.[shortPlatformKey]
+        || translations?.[oldPrefixedGenericKey]
+        || translations?.[oldGenericKey]
+        || translations?.[oldPrefixedPlatformKey]
         || humanizeEventPropertyName(propertyName);
+}
+
+function getTemplateTranslation(translationKey, fallback = '') {
+    if (!translationKey) return fallback;
+    // Try the key as-is first, then try without the "condition." prefix
+    // (TByPrefix removes the prefix from keys)
+    let key = translationKey;
+    if (translations?.[key] !== undefined) {
+        return translations[key];
+    }
+    // Try without "condition." prefix
+    const shortKey = key.startsWith('condition.') ? key.substring('condition.'.length) : key;
+    if (translations?.[shortKey] !== undefined) {
+        return translations[shortKey];
+    }
+    return fallback;
+}
+
+function getPropertyDescriptionTranslation(fieldName, fallback = '') {
+    // Try the property-specific description key first
+    const propDescKey = `condition.eventProp.${fieldName}.description`;
+    const schemaDescKey = `condition.schema.${fieldName}.description`;
+    // TByPrefix removes the "condition." prefix, so also try without it
+    const shortPropDescKey = `eventProp.${fieldName}.description`;
+    const shortSchemaDescKey = `schema.${fieldName}.description`;
+    return translations?.[propDescKey] 
+        || translations?.[shortPropDescKey]
+        || translations?.[schemaDescKey] 
+        || translations?.[shortSchemaDescKey]
+        || fallback || '—';
 }
 
 function normalizeEventInspectorField(field, fallback = {}) {
@@ -2904,7 +3004,7 @@ function renderEventInspectorRows(container, fields, platform) {
         const descriptionCell = document.createElement('td');
         descriptionCell.style.padding = '0.75rem';
         descriptionCell.style.verticalAlign = 'top';
-        descriptionCell.textContent = field.description || '—';
+        descriptionCell.textContent = getPropertyDescriptionTranslation(field.name, field.description || field.descriptionKey || '');
 
         const typeCell = document.createElement('td');
         typeCell.style.padding = '0.75rem';
@@ -3023,8 +3123,9 @@ function showTemplatePreview(templateDef) {
     if (!preview || !templateDef) {
         return;
     }
-    preview.textContent = `${templateDef.name}
-${templateDef.description}`;
+    const name = getTemplateTranslation(templateDef.nameKey, templateDef.name || templateDef.nameKey);
+    const description = getTemplateTranslation(templateDef.descriptionKey, templateDef.description || templateDef.descriptionKey);
+    preview.textContent = `${name}\n${description}`;
 }
 
 function addTemplateToCondition(templateDef) {
@@ -3052,7 +3153,7 @@ function renderTemplateCards(templates) {
     if (!templateList.length) {
         cardContainer.style.display = 'none';
         emptyState.style.display = 'block';
-        emptyState.textContent = 'No built-in templates are available for this event type yet.';
+        emptyState.textContent = getTemplateTranslation('condition.ui.noTemplates', 'No built-in templates are available for this event type yet.');
         return;
     }
 
@@ -3062,17 +3163,17 @@ function renderTemplateCards(templates) {
         
         const nameDiv = document.createElement('div');
         nameDiv.className = 'template-card-name';
-        nameDiv.textContent = templateDef.name;
+        nameDiv.textContent = getTemplateTranslation(templateDef.nameKey, templateDef.name || templateDef.nameKey);
         
         const descDiv = document.createElement('div');
         descDiv.className = 'template-card-desc';
-        descDiv.textContent = templateDef.description;
+        descDiv.textContent = getTemplateTranslation(templateDef.descriptionKey, templateDef.description || templateDef.descriptionKey);
         
         card.appendChild(nameDiv);
         card.appendChild(descDiv);
         
         card.style.cursor = 'pointer';
-        card.title = `Click to add: ${templateDef.name}`;
+        card.title = `Click to add: ${nameDiv.textContent}`;
         
         card.onmouseenter = function() {
             showTemplatePreview(templateDef);
@@ -3101,9 +3202,16 @@ function initializeTemplates() {
         currentTemplateEventType = eventType;
     }
     if (hint) {
-        hint.textContent = eventType
-            ? `Templates for "${eventType}" load automatically.`
-            : 'Templates for this event type load automatically.';
+        if (eventType) {
+            const hintKey = `condition.ui.templateLibraryHintWithType`;
+            const hintFallback = `Templates for "${eventType}" load automatically.`;
+            const translatedHint = getTemplateTranslation(hintKey, hintFallback);
+            hint.textContent = translatedHint.includes('{eventType}') 
+                ? translatedHint.replace('{eventType}', eventType)
+                : translatedHint;
+        } else {
+            hint.textContent = getTemplateTranslation('condition.ui.templateLibraryHint', 'Templates for this event type load automatically.');
+        }
     }
 
     renderTemplateCards(templates);
@@ -3206,3 +3314,96 @@ function confirmAdd() {
     console.log('confirmAdd called');
     // TODO: Implement add confirmation
 }
+
+// ============================================
+// New Tool Functions: Regex Tester, Snippets, Operators
+// ============================================
+
+/**
+ * Opens the Regex Tester modal
+ */
+function openRegexTester() {
+    const modal = document.getElementById('regexTesterModal');
+    if (modal) {
+        modal.style.display = 'block';
+        document.getElementById('regexPattern').focus();
+    }
+}
+window.openRegexTester = openRegexTester;
+
+/**
+ * Tests a regex pattern against test string
+ */
+function testRegexPattern() {
+    const pattern = document.getElementById('regexPattern').value.trim();
+    const testString = document.getElementById('regexTestString').value;
+    const resultDiv = document.getElementById('regexResult');
+    
+    if (!pattern) {
+        resultDiv.textContent = 'Please enter a regex pattern';
+        resultDiv.style.color = '#d32f2f';
+        return;
+    }
+    
+    try {
+        const regex = new RegExp(pattern);
+        const matches = testString.match(regex);
+        
+        if (matches) {
+            resultDiv.textContent = `✓ Match found!\n\nMatched text: "${matches[0]}"${matches.length > 1 ? `\n\nCapture groups: ${matches.slice(1).map((m, i) => `[${i + 1}] "${m}"`).join(', ')}` : ''}`;
+            resultDiv.style.color = '#2e7d32';
+        } else {
+            resultDiv.textContent = '✗ No match found';
+            resultDiv.style.color = '#d32f2f';
+        }
+    } catch (err) {
+        resultDiv.textContent = `✗ Invalid regex pattern:\n${err.message}`;
+        resultDiv.style.color = '#d32f2f';
+    }
+}
+window.testRegexPattern = testRegexPattern;
+
+/**
+ * Opens the Condition Snippets/Examples modal
+ */
+function openConditionExamples() {
+    const modal = document.getElementById('conditionSnippetsModal');
+    if (modal) {
+        modal.style.display = 'block';
+    }
+}
+window.openConditionExamples = openConditionExamples;
+
+/**
+ * Copies text to clipboard and shows feedback
+ */
+function copyToClipboard(text, element) {
+    navigator.clipboard.writeText(text).then(() => {
+        const originalText = element.textContent;
+        const originalBg = element.style.backgroundColor;
+        element.style.backgroundColor = '#4caf50';
+        element.style.color = 'white';
+        element.textContent = '✓ Copied!';
+        
+        setTimeout(() => {
+            element.textContent = originalText;
+            element.style.backgroundColor = originalBg;
+            element.style.color = '';
+        }, 1500);
+    }).catch(err => {
+        console.error('Failed to copy:', err);
+        alert('Could not copy to clipboard');
+    });
+}
+window.copyToClipboard = copyToClipboard;
+
+/**
+ * Opens the Operator Reference modal
+ */
+function openOperatorReference() {
+    const modal = document.getElementById('operatorRefModal');
+    if (modal) {
+        modal.style.display = 'block';
+    }
+}
+window.openOperatorReference = openOperatorReference;
