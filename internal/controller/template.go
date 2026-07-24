@@ -51,12 +51,12 @@ type ConditionForTemplate struct {
 
 // PageData contains all data needed to render a page
 type PageData struct {
-	CurrentChannel     *ChannelForTemplate
-	Conditions         []ConditionForTemplate
-	EventTypes         []string
-	PlatformMeta       map[string]map[string]interface{}
-	EventBadgeClass    map[string]string
-	EventFieldOptions  []EventFieldOption
+	CurrentChannel    *ChannelForTemplate
+	Conditions        []ConditionForTemplate
+	EventTypes        []string
+	PlatformMeta      map[string]map[string]interface{}
+	EventBadgeClass   map[string]string
+	EventFieldOptions []EventFieldOption
 }
 
 // GetEventLabel returns the human-readable label for an event type on a platform
@@ -119,14 +119,14 @@ func GetPlatformMetadata(cond Conditions) map[string]map[string]interface{} {
 		"twitcasting",
 		"x",
 	}
-	
+
 	platformMeta := make(map[string]map[string]interface{})
 	for _, platform := range platforms {
 		platformMeta[platform] = map[string]interface{}{
 			"label": capitalize(platform),
 		}
 	}
-	
+
 	return platformMeta
 }
 
@@ -156,9 +156,9 @@ func GetEventBadgeClasses(cond Conditions) map[string]string {
 // GetEventFieldOptions returns available fields from the event schema with translated labels
 func GetEventFieldOptions(cond Conditions, platform, eventType string, translator *i18n.Translator) []EventFieldOption {
 	metadata := cond.GetEventMetadata(platform, eventType)
-	
+
 	var options []EventFieldOption
-	
+
 	if metadata.Fields != nil {
 		// Convert map to sorted slice for consistent ordering
 		type fieldEntry struct {
@@ -166,16 +166,16 @@ func GetEventFieldOptions(cond Conditions, platform, eventType string, translato
 			field EventSchemaField
 		}
 		var entries []fieldEntry
-		
+
 		for name, field := range metadata.Fields {
 			entries = append(entries, fieldEntry{name, field})
 		}
-		
+
 		// Sort by name for consistent ordering
 		sort.Slice(entries, func(i, j int) bool {
 			return entries[i].name < entries[j].name
 		})
-		
+
 		for _, entry := range entries {
 			label := entry.name
 			if translator != nil {
@@ -188,7 +188,7 @@ func GetEventFieldOptions(cond Conditions, platform, eventType string, translato
 			})
 		}
 	}
-	
+
 	// Fallback if no metadata available
 	if len(options) == 0 {
 		defaultFields := []string{"message", "sender_id", "sender_name", "amount_value", "amount_display", "is_member", "is_mod"}
@@ -203,7 +203,7 @@ func GetEventFieldOptions(cond Conditions, platform, eventType string, translato
 			})
 		}
 	}
-	
+
 	return options
 }
 
@@ -243,6 +243,16 @@ type ChannelDetailPageData struct {
 	CurrentChannel  *ChannelDetailForTemplate
 	PlatformMeta    map[string]map[string]interface{}
 	EventBadgeClass map[string]string
+}
+
+// DashboardPageData is an alias for the API response (pass it directly to template)
+type DashboardPageData = DashboardStatsResponse
+
+// PrepareDashboardPageData fetches dashboard data from the API endpoint
+func PrepareDashboardPageData() *DashboardPageData {
+	dashAPI := Dashboard{}
+	result := dashAPI.GetDashboardStats()
+	return &result
 }
 
 // ConditionsPageData contains all data needed to render a conditions page
@@ -373,32 +383,32 @@ func PrepareChannelDetailPageData(channelID string) *ChannelDetailPageData {
 
 // DeviceForTemplate represents a device prepared for template rendering
 type DeviceForTemplate struct {
-	ID               string      `json:"id"`
-	Name             string      `json:"name"`
-	Brand            string      `json:"brand"`
-	ProductID        string      `json:"product_id"`
-	ProductName      string      `json:"product_name"`
-	Room             string      `json:"room"`
-	Status           string      `json:"status"` // "online", "offline"
-	IsConfigured     bool        `json:"is_configured"`
-	BrandColor       string      `json:"brand_color"`
-	BrandLogo        string      `json:"brand_logo"`
-	SupportedActions []string    `json:"supported_actions"`
+	ID               string            `json:"id"`
+	Name             string            `json:"name"`
+	Brand            string            `json:"brand"`
+	ProductID        string            `json:"product_id"`
+	ProductName      string            `json:"product_name"`
+	Room             string            `json:"room"`
+	Status           string            `json:"status"` // "online", "offline"
+	IsConfigured     bool              `json:"is_configured"`
+	BrandColor       string            `json:"brand_color"`
+	BrandLogo        string            `json:"brand_logo"`
+	SupportedActions []string          `json:"supported_actions"`
 	Credentials      map[string]string `json:"credentials"`
 }
 
 // BrandForTemplate represents a device brand for template rendering
 type BrandForTemplate struct {
-	ID               string             `json:"id"`
-	Name             string             `json:"name"`
-	LogoURL          string             `json:"logo_url"`
-	BrandColor       string             `json:"brand_color"`
-	AffiliateURL     string             `json:"affiliate_url"`
-	Icon             string             `json:"icon"`
-	CredentialFields []CredentialField  `json:"credential_fields"`
-	DocsUrl          string             `json:"docs_url"`
-	DocsLabel        string             `json:"docs_label"`
-	SortOrder        int                `json:"sort_order"`
+	ID               string            `json:"id"`
+	Name             string            `json:"name"`
+	LogoURL          string            `json:"logo_url"`
+	BrandColor       string            `json:"brand_color"`
+	AffiliateURL     string            `json:"affiliate_url"`
+	Icon             string            `json:"icon"`
+	CredentialFields []CredentialField `json:"credential_fields"`
+	DocsUrl          string            `json:"docs_url"`
+	DocsLabel        string            `json:"docs_label"`
+	SortOrder        int               `json:"sort_order"`
 }
 
 // DevicesPageData contains all data needed to render the devices page
