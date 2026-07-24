@@ -1875,7 +1875,7 @@ class TextDialogHandler {
             document.getElementById("textExtSelect").appendChild(emptyoption);
             for (const i in editor.textextractors) {
                 const option = document.createElement("option");
-                option.value = editor.textextractors[i];
+                option.value = editor.namingmap[editor.textextractors[i]] ||editor.textextractors[i];
                 option.text = editor.textextractorlabels[editor.textextractors[i]] || editor.textextractors[i];
                 document.getElementById("textExtSelect").appendChild(option);
             }

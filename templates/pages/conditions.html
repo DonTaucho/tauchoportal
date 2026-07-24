@@ -17,7 +17,7 @@
           <span class="platform-icon-sm {{.CurrentChannel.Platform}}">{{$platformMeta := index .PlatformMeta .CurrentChannel.Platform}}{{if $platformMeta}}{{index $platformMeta "icon"}}{{end}}</span>
           <span>{{.CurrentChannel.Name}}</span> — {{.I18n.T "conditions.breadcrumb"}}
         </h1>
-        <p>Events on <strong>{{$platformMeta := index .PlatformMeta .CurrentChannel.Platform}}{{if $platformMeta}}{{index $platformMeta "label"}}{{end}}</strong> that will trigger an external action when met.</p>
+        <p>{{.I18n.T "conditions.pageDescription"}} {{if $platformMeta}}<strong>{{index $platformMeta "label"}}</strong>{{end}}</p>
       </div>
       <button class="btn btn-primary" onclick="openAddConditionModal()">{{.I18n.T "conditions.addCondition"}}</button>
     </div>
