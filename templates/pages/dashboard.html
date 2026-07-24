@@ -5,72 +5,183 @@
 {{end}}
 
 {{define "content"}}
-<div class="dashboard-container">
-        <div class="welcome-banner">
-            <div class="welcome-text">
-                <h1>{{.I18n.T "dashboard.welcome"}}<span id="username">...</span> 👋</h1>
-                <p id="userEmail" class="welcome-sub"></p>
+<div class="dashboard">
+    <!-- Sidebar Navigation -->
+    <aside class="sidebar">
+        <div class="sidebar-header">
+            <div class="sidebar-title">
+                <span class="icon"><img src="/image/logo_ss.png" alt="Taucho"></span>
+                {{ .I18n.T "dashboard.sitename" }}
             </div>
         </div>
 
-        <div class="section-title">{{.I18n.T "dashboard.quickNav"}}</div>
+        <nav class="sidebar-nav">
+            <li><a href="/dashboard" class="active"><img src="/image/dashboard.png" /> {{ .I18n.T "dashboard.title" }}</a></li>
+            <li><a href="/account-settings"><img src="/image/accountsettings.png" /> {{ .I18n.T "dashboard.accounts" }}</a></li>
+            <li><a href="/brand-settings"><img src="/image/devicebrands.png" /> {{ .I18n.T "dashboard.devicebrands" }}</a></li>
+            <li><a href="/login-settings"><img src="/image/settings.png" /> {{ .I18n.T "dashboard.settings" }}</a></li>
+        </nav>
+    </aside>
 
-        <div class="cards-grid">
-            <a href="/channels" class="card">
-                <div class="card-icon">👁️</div>
-                <div class="card-body">
-                    <h3>{{.I18n.T "dashboard.channels"}}</h3>
-                    <p>{{.I18n.T "dashboard.channelsDesc"}}</p>
-                </div>
-                <div class="card-arrow">→</div>
-            </a>
-
-            <a href="/devices" class="card">
-                <div class="card-icon">💡</div>
-                <div class="card-body">
-                    <h3>{{.I18n.T "dashboard.devices"}}</h3>
-                    <p>{{.I18n.T "dashboard.devicesDesc"}}</p>
-                </div>
-                <div class="card-arrow">→</div>
-            </a>
-
+    <!-- Main Content -->
+    <div class="main-content">
+        <!-- Page Header -->
+        <div class="page-header">
+            <div>
+                <h1 class="page-title">{{ .I18n.T "dashboard.title" }}</h1>
+                <p class="page-subtitle">{{ .I18n.T "dashboard.subtitle" }}</p>
+            </div>
+            <div class="header-actions">
+                <button class="btn btn-secondary" onclick="location.reload()"><img src="/image/refresh.png" />{{ .I18n.T "dashboard.refresh" }}</button>
+                <a href="/channels" class="btn">{{ .I18n.T "dashboard.newchannel" }}</a>
+            </div>
         </div>
 
-        <div class="section-title">{{.I18n.T "dashboard.howItWorks"}}</div>
-        <div class="flow-row">
-            <div class="flow-step">
-                <div class="flow-icon">📡</div>
-                <div class="flow-label">{{.I18n.T "dashboard.watchChannels"}}</div>
-                <div class="flow-desc">{{.I18n.T "dashboard.watchChannelsDesc"}}</div>
+        <!-- Stats Bar -->
+        <div class="stats-bar">
+            <div class="stat-box">
+                <div class="stat-label">{{ .I18n.T "dashboard.activechannels" }}</div>
+                <div class="stat-value">
+                    {{.Dashboard.Stats.Channels.Total}}
+                    {{if gt .Dashboard.Stats.Channels.Change 0}}
+                    <span class="stat-change">↑ {{.Dashboard.Stats.Channels.Change}}</span>
+                    {{else if lt .Dashboard.Stats.Channels.Change 0}}
+                    <span class="stat-change negative">↓ {{multiply .Dashboard.Stats.Channels.Change -1}}</span>
+                    {{end}}
+                </div>
             </div>
-            <div class="flow-arrow">→</div>
-            <div class="flow-step">
-                <div class="flow-icon">⚡</div>
-                <div class="flow-label">{{.I18n.T "dashboard.setConditions"}}</div>
-                <div class="flow-desc">{{.I18n.T "dashboard.setConditionsDesc"}}</div>
+
+            <div class="stat-box">
+                <div class="stat-label">{{ .I18n.T "dashboard.livenow" }}</div>
+                <div class="stat-value">
+                    {{.Dashboard.Stats.Channels.Live}}
+                    {{if gt .Dashboard.Stats.Channels.Live 0}}
+                    <span class="stat-change">{{ .I18n.T "dashboard.active" }}</span>
+                    {{else}}
+                    <span class="stat-change">{{ .I18n.T "dashboard.nostreams" }}</span>
+                    {{end}}
+                </div>
             </div>
-            <div class="flow-arrow">→</div>
-            <div class="flow-step">
-                <div class="flow-icon">💡</div>
-                <div class="flow-label">{{.I18n.T "dashboard.assignDevices"}}</div>
-                <div class="flow-desc">{{.I18n.T "dashboard.assignDevicesDesc"}}</div>
+
+            <div class="stat-box">
+                <div class="stat-label">{{ .I18n.T "dashboard.connecteddevices" }}</div>
+                <div class="stat-value">
+                    {{.Dashboard.Stats.Devices.Total}}
+                    {{if eq .Dashboard.Stats.Devices.Offline 0}}
+                    <span class="stat-change">{{ .I18n.T "dashboard.allonline" }}</span>
+                    {{else}}
+                    <span class="stat-change negative">{{.Dashboard.Stats.Devices.Offline}} {{ .I18n.T "dashboard.offline" }}</span>
+                    {{end}}
+                </div>
             </div>
-            <div class="flow-arrow">→</div>
-            <div class="flow-step">
-                <div class="flow-icon">🎉</div>
-                <div class="flow-label">{{.I18n.T "dashboard.stream"}}</div>
-                <div class="flow-desc">{{.I18n.T "dashboard.streamDesc"}}</div>
+
+            <div class="stat-box">
+                <div class="stat-label">{{ .I18n.T "dashboard.triggersToday" }}</div>
+                <div class="stat-value">
+                    {{.Dashboard.Stats.Conditions.TriggersToday}}
+                    {{if lt .Dashboard.Stats.Conditions.TriggersChange 0}}
+                    <span class="stat-change negative">↓ {{multiply .Dashboard.Stats.Conditions.TriggersChange -1}}</span>
+                    {{else if gt .Dashboard.Stats.Conditions.TriggersChange 0}}
+                    <span class="stat-change">↑ {{.Dashboard.Stats.Conditions.TriggersChange}}</span>
+                    {{end}}
+                </div>
+            </div>
+        </div>
+
+        <!-- Content Grid -->
+        <div class="content-grid">
+            <!-- Left Column: Activity Feed -->
+            <div class="panel">
+                <div class="panel-header">
+                    <div class="panel-title">{{ .I18n.T "dashboard.liveactivity" }}</div>
+                </div>
+                <div class="panel-body">
+                    {{if .Dashboard.Activity}}
+                    <ul class="activity-list">
+                        {{range .Dashboard.Activity}}
+                        <li class="activity-item">
+                            <span class="activity-icon">{{.Icon}}</span>
+                            <div class="activity-content">
+                                <div class="activity-title">{{.Title}}</div>
+                                <div class="activity-detail">{{.Detail}}</div>
+                                <div class="activity-time">{{formatTimeAgo .Timestamp}}</div>
+                                <span class="activity-badge {{.Status}}">{{capitalize .Status}}</span>
+                            </div>
+                        </li>
+                        {{end}}
+                    </ul>
+                    {{else}}
+                    <div class="empty-state">
+                        <p>{{ .I18n.T "dashboard.noactivity" }}</p>
+                    </div>
+                    {{end}}
+                </div>
+            </div>
+
+            <!-- Right Column: Status Panels -->
+            <div>
+                <!-- Channels Status -->
+                <div class="panel" style="margin-bottom: 1.5rem;">
+                    <div class="panel-header">
+                        <div class="panel-title">{{ .I18n.T "dashboard.channelsstatus" }}</div>
+                    </div>
+                    <div class="status-grid">
+                        {{if .Dashboard.ChannelsStatus}}
+                        {{range .Dashboard.ChannelsStatus}}
+                        <div class="status-item">
+                            <span class="status-name">{{.Name}}</span>
+                            <span class="status-indicator">
+                                {{if eq .Status "live"}}
+                                <span class="status-dot"></span>
+                                <span class="status-text">{{ $.I18n.T "dashboard.live" }}</span>
+                                {{else}}
+                                <span class="status-dot offline"></span>
+                                <span class="status-text">{{ $.I18n.T "dashboard.offline" }}</span>
+                                {{end}}
+                            </span>
+                        </div>
+                        {{end}}
+                        {{else}}
+                        <div style="padding: 1rem; color: #8b949e; text-align: center;">
+                            {{ .I18n.T "dashboard.nochannels" }}
+                        </div>
+                        {{end}}
+                    </div>
+                </div>
+
+                <!-- Devices Status -->
+                <div class="panel">
+                    <div class="panel-header">
+                        <div class="panel-title">{{ .I18n.T "dashboard.devicestatus" }}</div>
+                    </div>
+                    <div class="status-grid">
+                        {{if .Dashboard.DevicesStatus}}
+                        {{range .Dashboard.DevicesStatus}}
+                        <div class="status-item">
+                            <span class="status-name">{{.Name}}</span>
+                            <span class="status-indicator">
+                                {{if eq .Status "online"}}
+                                <span class="status-dot"></span>
+                                <span class="status-text">{{ $.I18n.T "dashboard.online" }}</span>
+                                {{else if eq .Status "warning"}}
+                                <span class="status-dot warning"></span>
+                                <span class="status-text">{{ $.I18n.T "dashboard.warning" }}</span>
+                                {{else}}
+                                <span class="status-dot offline"></span>
+                                <span class="status-text">{{ $.I18n.T "dashboard.offline" }}</span>
+                                {{end}}
+                            </span>
+                        </div>
+                        {{end}}
+                        {{else}}
+                        <div style="padding: 1rem; color: #8b949e; text-align: center;">
+                            {{ .I18n.T "dashboard.nodevices" }}
+                        </div>
+                        {{end}}
+                    </div>
+                </div>
             </div>
         </div>
     </div>
-
-    <script>
-        document.addEventListener('DOMContentLoaded', () => {
-            const user = window.__user;
-            if (!user) return;
-            document.getElementById('username').textContent = user.username || user.email?.split('@')[0] || 'there';
-            const emailEl = document.getElementById('userEmail');
-            if (user.email) emailEl.textContent = user.email;
-        });
-    </script>
+</div>
 {{end}}
