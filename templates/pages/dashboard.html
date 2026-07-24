@@ -10,16 +10,16 @@
     <aside class="sidebar">
         <div class="sidebar-header">
             <div class="sidebar-title">
-                <span class="icon">🎬</span>
-                TauchoPortal
+                <span class="icon"><img src="/image/logo_ss.png" alt="Taucho"></span>
+                {{ .I18n.T "dashboard.sitename" }}
             </div>
         </div>
 
         <nav class="sidebar-nav">
-            <li><a href="/dashboard" class="active"><span class="icon">📊</span> Dashboard</a></li>
-            <li><a href="/channels"><span class="icon">👁️</span> Channels</a></li>
-            <li><a href="/devices"><span class="icon">💡</span> Devices</a></li>
-            <li><a href="/account-settings"><span class="icon">⚙️</span> Settings</a></li>
+            <li><a href="/dashboard" class="active"><img src="/image/dashboard.png" /> {{ .I18n.T "dashboard.title" }}</a></li>
+            <li><a href="/account-settings"><img src="/image/accountsettings.png" /> {{ .I18n.T "dashboard.accounts" }}</a></li>
+            <li><a href="/brand-settings"><img src="/image/devicebrands.png" /> {{ .I18n.T "dashboard.devicebrands" }}</a></li>
+            <li><a href="/login-settings"><img src="/image/settings.png" /> {{ .I18n.T "dashboard.settings" }}</a></li>
         </nav>
     </aside>
 
@@ -28,19 +28,19 @@
         <!-- Page Header -->
         <div class="page-header">
             <div>
-                <h1 class="page-title">Dashboard</h1>
-                <p class="page-subtitle">System status and activity overview</p>
+                <h1 class="page-title">{{ .I18n.T "dashboard.title" }}</h1>
+                <p class="page-subtitle">{{ .I18n.T "dashboard.subtitle" }}</p>
             </div>
             <div class="header-actions">
-                <button class="btn btn-secondary" onclick="location.reload()">Refresh</button>
-                <a href="/channels" class="btn">+ New Channel</a>
+                <button class="btn btn-secondary" onclick="location.reload()"><img src="/image/refresh.png" />{{ .I18n.T "dashboard.refresh" }}</button>
+                <a href="/channels" class="btn">{{ .I18n.T "dashboard.newchannel" }}</a>
             </div>
         </div>
 
         <!-- Stats Bar -->
         <div class="stats-bar">
             <div class="stat-box">
-                <div class="stat-label">Active Channels</div>
+                <div class="stat-label">{{ .I18n.T "dashboard.activechannels" }}</div>
                 <div class="stat-value">
                     {{.Dashboard.Stats.Channels.Total}}
                     {{if gt .Dashboard.Stats.Channels.Change 0}}
@@ -52,31 +52,31 @@
             </div>
 
             <div class="stat-box">
-                <div class="stat-label">Live Now</div>
+                <div class="stat-label">{{ .I18n.T "dashboard.livenow" }}</div>
                 <div class="stat-value">
                     {{.Dashboard.Stats.Channels.Live}}
                     {{if gt .Dashboard.Stats.Channels.Live 0}}
-                    <span class="stat-change">🔴 Active</span>
+                    <span class="stat-change">{{ .I18n.T "dashboard.active" }}</span>
                     {{else}}
-                    <span class="stat-change">No streams</span>
+                    <span class="stat-change">{{ .I18n.T "dashboard.nostreams" }}</span>
                     {{end}}
                 </div>
             </div>
 
             <div class="stat-box">
-                <div class="stat-label">Connected Devices</div>
+                <div class="stat-label">{{ .I18n.T "dashboard.connecteddevices" }}</div>
                 <div class="stat-value">
                     {{.Dashboard.Stats.Devices.Total}}
                     {{if eq .Dashboard.Stats.Devices.Offline 0}}
-                    <span class="stat-change">All online</span>
+                    <span class="stat-change">{{ .I18n.T "dashboard.allonline" }}</span>
                     {{else}}
-                    <span class="stat-change negative">{{.Dashboard.Stats.Devices.Offline}} offline</span>
+                    <span class="stat-change negative">{{.Dashboard.Stats.Devices.Offline}} {{ .I18n.T "dashboard.offline" }}</span>
                     {{end}}
                 </div>
             </div>
 
             <div class="stat-box">
-                <div class="stat-label">Triggers Today</div>
+                <div class="stat-label">{{ .I18n.T "dashboard.triggersToday" }}</div>
                 <div class="stat-value">
                     {{.Dashboard.Stats.Conditions.TriggersToday}}
                     {{if lt .Dashboard.Stats.Conditions.TriggersChange 0}}
@@ -93,7 +93,7 @@
             <!-- Left Column: Activity Feed -->
             <div class="panel">
                 <div class="panel-header">
-                    <div class="panel-title">Live Activity</div>
+                    <div class="panel-title">{{ .I18n.T "dashboard.liveactivity" }}</div>
                 </div>
                 <div class="panel-body">
                     {{if .Dashboard.Activity}}
@@ -112,7 +112,7 @@
                     </ul>
                     {{else}}
                     <div class="empty-state">
-                        <p>No recent activity</p>
+                        <p>{{ .I18n.T "dashboard.noactivity" }}</p>
                     </div>
                     {{end}}
                 </div>
@@ -123,7 +123,7 @@
                 <!-- Channels Status -->
                 <div class="panel" style="margin-bottom: 1.5rem;">
                     <div class="panel-header">
-                        <div class="panel-title">Channels Status</div>
+                        <div class="panel-title">{{ .I18n.T "dashboard.channelsstatus" }}</div>
                     </div>
                     <div class="status-grid">
                         {{if .Dashboard.ChannelsStatus}}
@@ -133,17 +133,17 @@
                             <span class="status-indicator">
                                 {{if eq .Status "live"}}
                                 <span class="status-dot"></span>
-                                <span class="status-text">Live</span>
+                                <span class="status-text">{{ $.I18n.T "dashboard.live" }}</span>
                                 {{else}}
                                 <span class="status-dot offline"></span>
-                                <span class="status-text">Offline</span>
+                                <span class="status-text">{{ $.I18n.T "dashboard.offline" }}</span>
                                 {{end}}
                             </span>
                         </div>
                         {{end}}
                         {{else}}
                         <div style="padding: 1rem; color: #8b949e; text-align: center;">
-                            No channels added
+                            {{ .I18n.T "dashboard.nochannels" }}
                         </div>
                         {{end}}
                     </div>
@@ -152,7 +152,7 @@
                 <!-- Devices Status -->
                 <div class="panel">
                     <div class="panel-header">
-                        <div class="panel-title">Device Status</div>
+                        <div class="panel-title">{{ .I18n.T "dashboard.devicestatus" }}</div>
                     </div>
                     <div class="status-grid">
                         {{if .Dashboard.DevicesStatus}}
@@ -162,20 +162,20 @@
                             <span class="status-indicator">
                                 {{if eq .Status "online"}}
                                 <span class="status-dot"></span>
-                                <span class="status-text">Online</span>
+                                <span class="status-text">{{ $.I18n.T "dashboard.online" }}</span>
                                 {{else if eq .Status "warning"}}
                                 <span class="status-dot warning"></span>
-                                <span class="status-text">Warning</span>
+                                <span class="status-text">{{ $.I18n.T "dashboard.warning" }}</span>
                                 {{else}}
                                 <span class="status-dot offline"></span>
-                                <span class="status-text">Offline</span>
+                                <span class="status-text">{{ $.I18n.T "dashboard.offline" }}</span>
                                 {{end}}
                             </span>
                         </div>
                         {{end}}
                         {{else}}
                         <div style="padding: 1rem; color: #8b949e; text-align: center;">
-                            No devices registered
+                            {{ .I18n.T "dashboard.nodevices" }}
                         </div>
                         {{end}}
                     </div>
