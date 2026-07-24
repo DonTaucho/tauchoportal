@@ -97,13 +97,15 @@
 
 {{define "scripts"}}
 <script id="conditionsListTranslations" type="application/json">
-{
-  ...{{.I18n.TByPrefix "conditionsList" | jsonMarshal}},
-  ...{{.I18n.TByPrefix "conditions" | jsonMarshal}}
-}
+{{.I18n.TByPrefix "conditionsList" | jsonMarshal}}
+</script>
+<script id="conditionsTranslations" type="application/json">
+{{.I18n.TByPrefix "conditions" | jsonMarshal}}
 </script>
 <script>
-window.conditionsListTranslations = JSON.parse(document.getElementById('conditionsListTranslations').textContent);
+const conditionsListTrans = JSON.parse(document.getElementById('conditionsListTranslations').textContent);
+const conditionsTrans = JSON.parse(document.getElementById('conditionsTranslations').textContent);
+window.conditionsListTranslations = { ...conditionsListTrans, ...conditionsTrans };
 </script>
 <script src="/js/conditions-list.js"></script>
 {{end}}
