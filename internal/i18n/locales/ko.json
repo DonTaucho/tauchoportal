@@ -335,7 +335,7 @@
   "condition.EQUALS": "동일(문자 비교)",
   "condition.INCLUDES": "포함",
   "condition.REGEX_MATCH": "정규식으로 일치",
-  "condition.WHOLEWORD": "문장 전체",
+  "condition.WHOLESENTENCE": "문장 전체",
   "condition.REGEX_EXTRACT": "정규식에 의한 추출",
   "condition.SUBSTRING": "문장중의 부분(문자수 지정)",
   "condition.FIRST": "문두",

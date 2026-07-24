@@ -332,7 +332,7 @@
   "condition.EQUALS": "Égal (comparaison de texte)",
   "condition.INCLUDES": "Contient",
   "condition.REGEX_MATCH": "Correspondance regex",
-  "condition.WHOLEWORD": "Chaîne entière",
+  "condition.WHOLESENTENCE": "Chaîne entière",
   "condition.REGEX_EXTRACT": "Extraire avec une regex",
   "condition.SUBSTRING": "Sous-chaîne (par nombre de caractères)",
   "condition.FIRST": "Début de chaîne",

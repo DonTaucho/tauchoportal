@@ -332,7 +332,7 @@
   "condition.EQUALS": "同一（文字比較）",
   "condition.INCLUDES": "含む",
   "condition.REGEX_MATCH": "正規表現による一致",
-  "condition.WHOLEWORD": "文全体",
+  "condition.WHOLESENTENCE": "文全体",
   "condition.REGEX_EXTRACT": "正規表現による抜き出し",
   "condition.SUBSTRING": "文章中の部分（文字数指定）",
   "condition.FIRST": "文頭",

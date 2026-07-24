@@ -335,7 +335,7 @@
   "condition.EQUALS": "相同（人物比較）",
   "condition.INCLUDES": "包括",
   "condition.REGEX_MATCH": "透過正規表示式匹配",
-  "condition.WHOLEWORD": "整個句子",
+  "condition.WHOLESENTENCE": "整個句子",
   "condition.REGEX_EXTRACT": "使用正規表示式提取",
   "condition.SUBSTRING": "句子的一部分（指定字元數）",
   "condition.FIRST": "句子開頭",
