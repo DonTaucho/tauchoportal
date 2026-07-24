@@ -2,6 +2,7 @@
     'use strict';
 
     const { PLATFORM_META, apiRequest, apiGet, showMonToast, escHtml } = window;
+    const t = window.sidebarChannelsTranslations || {}; // Fallback to empty object
     const PLATFORMS = [
         { id: 'youtube', label: 'YouTube', hasOAuth: true, publicAccess: false },
         { id: 'twitch', label: 'Twitch', hasOAuth: true, publicAccess: true },
@@ -101,9 +102,9 @@
         try {
             const endpoint = `/platform/${platformId}/channels/mine`;
             const items = await apiGet(endpoint);
-            renderMiniChannelResults(results, normalizePagedData(items).items, platformId, 'No own channels found.');
+            renderMiniChannelResults(results, normalizePagedData(items).items, platformId, t.noOwnChannels || 'No own channels found.');
         } catch (error) { 
-            results.innerHTML = `<div class="result-error">Failed to load channels: ${esc(error.message)}</div>`; 
+            results.innerHTML = `<div class="result-error">${t.failedLoadChannels || 'Failed to load channels: '}${esc(error.message)}</div>`; 
         }
     }
 
@@ -118,30 +119,30 @@
     }
 
     async function doAccSearch(platformId, query) {
-        const results = document.getElementById(`acc-results-${platformId}`); if (!results) return; results.innerHTML = '<div class="result-loading">Searching…</div>';
-        try { renderMiniChannelResults(results, normalizePagedData(await apiGet(`/platform/${platformId}/search?q=${encodeURIComponent(query)}`)).items, platformId, 'No channels found.'); }
-        catch (error) { results.innerHTML = error.status === 501 ? `<div class="stub-notice">🚧 Search for ${esc(PLATFORM_META[platformId]?.label || platformId)} is coming soon.</div>` : `<div class="result-error">Search failed: ${esc(error.message)}</div>`; }
+        const results = document.getElementById(`acc-results-${platformId}`); if (!results) return; results.innerHTML = `<div class="result-loading">${t.searching || 'Searching…'}</div>`;
+        try { renderMiniChannelResults(results, normalizePagedData(await apiGet(`/platform/${platformId}/search?q=${encodeURIComponent(query)}`)).items, platformId, t.noChannelsFound || 'No channels found.'); }
+        catch (error) { results.innerHTML = error.status === 501 ? `<div class="stub-notice">🚧 ${t.searchComingSoon ? t.searchComingSoon.replace('{0}', esc(PLATFORM_META[platformId]?.label || platformId)) : 'Search for ' + esc(PLATFORM_META[platformId]?.label || platformId) + ' is coming soon.'}</div>` : `<div class="result-error">${t.searchFailed || 'Search failed: '}${esc(error.message)}</div>`; }
     }
 
 
     async function loadAccSubs(platformId, cursor) {
-        const results = document.getElementById(`acc-subs-${platformId}`); if (!results) return; if (!cursor) results.innerHTML = '<div class="result-loading">Loading…</div>';
+        const results = document.getElementById(`acc-subs-${platformId}`); if (!results) return; if (!cursor) results.innerHTML = `<div class="result-loading">${t.loading || 'Loading…'}</div>`;
         const param = platformId === 'youtube' ? 'page_token' : 'cursor'; const endpoint = platformId === 'youtube' ? 'subscriptions' : 'following'; const suffix = cursor ? `?${param}=${encodeURIComponent(cursor)}` : '';
         try {
             const normalized = normalizePagedData(await apiGet(`/platform/${platformId}/${endpoint}${suffix}`)); const token = normalized.next_page_token || normalized.cursor || null;
-            if (!cursor) renderMiniChannelResults(results, normalized.items || normalized, platformId, 'Not following any channels.', token);
+            if (!cursor) renderMiniChannelResults(results, normalized.items || normalized, platformId, t.notFollowingChannels || 'Not following any channels.', token);
             else { const fragment = document.createElement('div'); renderMiniChannelResults(fragment, normalized.items || normalized, platformId, '', token); results.querySelector('.load-more-sm')?.remove(); results.append(...fragment.childNodes); }
-        } catch (error) { results.innerHTML = error.status === 501 ? '<div class="stub-notice">🚧 Not yet available.</div>' : `<div class="result-error">Failed to load: ${esc(error.message)}</div>`; }
+        } catch (error) { results.innerHTML = error.status === 501 ? '<div class="stub-notice">🚧 Not yet available.</div>' : `<div class="result-error">${t.failedLoad || 'Failed to load: '}${esc(error.message)}</div>`; }
     }
 
     function renderMiniChannelResults(container, items, platformId, emptyMessage, nextToken) {
         if (!items || items.length === 0) { container.innerHTML = `<div class="result-empty">${esc(emptyMessage)}</div>`; return; }
         container.innerHTML = items.map((channel) => {
             const channelId = channel.channel_id || channel.id || ''; const name = channel.title || channel.display_name || channel.name || channelId; const thumbnail = channel.thumbnail || channel.thumbnail_url || '';
-            const subtitle = channel.subscriber_count != null ? `${formatCount(channel.subscriber_count)} subscribers` : (channel.follower_count != null ? `${formatCount(channel.follower_count)} followers` : '');
+            const subtitle = channel.subscriber_count != null ? `${formatCount(channel.subscriber_count)} ${t.subscribers || 'subscribers'}` : (channel.follower_count != null ? `${formatCount(channel.follower_count)} ${t.followers || 'followers'}` : '');
             const added = state.existingWatchSet.has(`${platformId}:${channelId}`); const thumb = thumbnail ? `<img class="mini-thumb-img" src="${esc(thumbnail)}" alt="" loading="lazy">` : `<div class="mini-thumb-placeholder">${esc(PLATFORM_META[platformId]?.icon || '📺')}</div>`;
-            return `<div class="mini-card"><div class="mini-thumb">${thumb}</div><div class="mini-info"><div class="mini-name">${esc(name)}</div><div class="mini-meta">${subtitle}</div></div>${added ? '<span class="mini-badge-added">Added</span>' : `<button class="mini-add-btn" title="Add channel" onclick='openConfirm(${JSON.stringify({ platform: platformId, channelId, name, thumbnail: thumbnail || null })})'>+</button>`}</div>`;
-        }).join('') + (nextToken ? `<button class="load-more-sm" onclick="loadAccSubs('${platformId}', '${esc(nextToken)}')">Load more…</button>` : '');
+            return `<div class="mini-card"><div class="mini-thumb">${thumb}</div><div class="mini-info"><div class="mini-name">${esc(name)}</div><div class="mini-meta">${subtitle}</div></div>${added ? '<span class="mini-badge-added">' + (t.added || 'Added') + '</span>' : `<button class="mini-add-btn" title="${t.addChannelTitle || 'Add channel'}" onclick='openConfirm(${JSON.stringify({ platform: platformId, channelId, name, thumbnail: thumbnail || null })})'>+</button>`}</div>`;
+        }).join('') + (nextToken ? `<button class="load-more-sm" onclick="loadAccSubs('${platformId}', '${esc(nextToken)}')">${t.loadMore || 'Load more…'}</button>` : '');
     }
 
     function openConfirm(channel) {
@@ -154,13 +155,13 @@
     function cancelConfirm() { document.getElementById('confirmOverlay').style.display = 'none'; document.getElementById('confirmDrawer').classList.remove('open'); state.selectedChannel = null; }
     function showConfirmError(message) { const error = document.getElementById('confirmError'); error.textContent = message; error.style.display = 'block'; }
     async function confirmAdd() {
-        if (!state.selectedChannel) return; const name = document.getElementById('confirmName').value.trim(); if (!name) { showConfirmError('Please enter a display name.'); return; }
-        const button = document.getElementById('confirmAddBtn'); button.disabled = true; button.textContent = 'Adding…'; document.getElementById('confirmError').style.display = 'none';
+        if (!state.selectedChannel) return; const name = document.getElementById('confirmName').value.trim(); if (!name) { showConfirmError(t.emptyName || 'Please enter a display name.'); return; }
+        const button = document.getElementById('confirmAddBtn'); button.disabled = true; button.textContent = t.adding || 'Adding…'; document.getElementById('confirmError').style.display = 'none';
         try {
             const body = { platform: state.selectedChannel.platform, channel_id: state.selectedChannel.channelId, name, is_active: document.getElementById('confirmActive').checked };
             if (state.selectedChannel.thumbnail) body.thumbnail_url = state.selectedChannel.thumbnail; await apiRequest('POST', '/watches', body); state.existingWatchSet.add(`${state.selectedChannel.platform}:${state.selectedChannel.channelId}`);
             cancelConfirm(); showMonToast(`✅ "${name}" added!`); if (typeof state.onChannelsChanged === 'function') await state.onChannelsChanged();
-        } catch (error) { showConfirmError(error.message || 'Failed to add channel.'); button.disabled = false; button.textContent = '+ Add Channel'; }
+        } catch (error) { showConfirmError(error.message || (t.failedAddChannel || 'Failed to add channel.')); button.disabled = false; button.textContent = '+ Add Channel'; }
     }
 
     function normalizePagedData(data) { if (Array.isArray(data)) return { items: data, next_page_token: null, cursor: null }; if (data && Array.isArray(data.items)) return data; return { items: [], next_page_token: null, cursor: null }; }

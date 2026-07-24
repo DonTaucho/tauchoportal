@@ -7,12 +7,12 @@
 {{define "content"}}
 <div class="register-container">
         <div class="back-link">
-            <a href="/">← Back to Home</a>
+            <a href="/">{{.I18n.T "register.backHome"}}</a>
         </div>
         
         <div class="register-header">
-            <h1>🌊 Join Us</h1>
-            <p>Create your TauchoPortal account</p>
+            <h1>{{.I18n.T "register.joinUs"}}</h1>
+            <p>{{.I18n.T "register.createAccount"}}</p>
         </div>
         
         <div class="error-message" id="errorMessage"></div>
@@ -21,53 +21,53 @@
         <!-- Step 1: Email/Password Registration -->
         <form id="registerForm">
             <div class="form-group">
-                <label for="username">Username</label>
+                <label for="username">{{.I18n.T "register.username"}}</label>
                 <input 
                     type="text" 
                     id="username" 
                     name="username" 
                     required
-                    placeholder="your_username"
+                    placeholder="{{.I18n.T "register.usernamePlaceholder"}}"
                     minlength="3"
                 >
             </div>
             
             <div class="form-group">
-                <label for="email">Email Address</label>
+                <label for="email">{{.I18n.T "register.email"}}</label>
                 <input 
                     type="email" 
                     id="email" 
                     name="email" 
                     required
-                    placeholder="your@email.com"
+                    placeholder="{{.I18n.T "register.emailPlaceholder"}}"
                 >
             </div>
             
             <div class="form-group">
-                <label for="password">Password</label>
+                <label for="password">{{.I18n.T "register.password"}}</label>
                 <input 
                     type="password" 
                     id="password" 
                     name="password" 
                     required
-                    placeholder="••••••••"
+                    placeholder="{{.I18n.T "register.passwordPlaceholder"}}"
                     minlength="6"
                 >
                 <div class="password-requirements">
-                    Minimum 6 characters
+                    {{.I18n.T "register.passwordRequirements"}}
                 </div>
             </div>
             
-            <button type="submit" class="submit-btn" id="submitBtn">Create Account</button>
+            <button type="submit" class="submit-btn" id="submitBtn">{{.I18n.T "register.createAccountBtn"}}</button>
         </form>
         
         <!-- Step 2: Email Verification Code (hidden until step 1 succeeds) -->
         <div id="verificationStep" style="display:none">
             <form id="verificationForm">
                 <div class="form-group">
-                    <label>Verification Code</label>
+                    <label>{{.I18n.T "register.verificationCode"}}</label>
                     <p style="font-size: 14px; color: #666; margin-bottom: 12px;">
-                        We sent a 6-digit code to <span id="verifyEmail"></span>
+                        {{.I18n.T "register.verificationSent"}}<span id="verifyEmail"></span>
                     </p>
                     <input 
                         type="text" 
@@ -78,19 +78,19 @@
                         maxlength="6"
                         autocomplete="one-time-code"
                         required
-                        placeholder="000000"
+                        placeholder="{{.I18n.T "register.verificationCodePlaceholder"}}"
                     >
                 </div>
                 <p style="font-size: 12px; color: #999; text-align: center; margin-top: 8px;">
-                    Code expires in <span id="verificationTimer">60:00</span>
+                    {{.I18n.T "register.codeExpires"}}<span id="verificationTimer">60:00</span>
                 </p>
-                <button type="submit" class="submit-btn" id="verifyBtn">Verify & Create Account</button>
-                <button type="button" class="submit-btn" style="background: #f0f0f0; color: #333;" onclick="backToRegistration()">← Back</button>
+                <button type="submit" class="submit-btn" id="verifyBtn">{{.I18n.T "register.verifyCreateBtn"}}</button>
+                <button type="button" class="submit-btn" style="background: #f0f0f0; color: #333;" onclick="backToRegistration()">{{.I18n.T "register.backButton"}}</button>
             </form>
         </div>
 
         <div class="divider">
-            <span>Or sign up with</span>
+            <span>{{.I18n.T "register.orSignUpWith"}}</span>
         </div>
 
         <div class="oauth-buttons">
@@ -137,7 +137,7 @@
         </div>
 
         <div class="footer-links">
-            <p>Already have an account? <a href="/login">Sign in</a></p>
+            <p>{{.I18n.T "register.alreadyHave"}}<a href="/login">{{.I18n.T "register.signInLink"}}</a></p>
         </div>
     </div>
 
@@ -146,17 +146,17 @@
         <div class="nico-box">
             <div id="nicoStep1">
                 <div class="nico-box-header">
-                    <span class="nico-box-title">NicoNico Login / Register</span>
+                    <span class="nico-box-title">{{.I18n.T "register.nicoLoginRegister"}}</span>
                     <button class="nico-box-close" onclick="closeNicoModal()">✕</button>
                 </div>
                 <div class="nico-box-body">
-                    <div class="nico-privacy-note">⚠️ Your credentials are sent directly to NicoNico via a secure proxy. They are never stored. If you don't have a TauchoPortal account yet, one will be created automatically.</div>
+                    <div class="nico-privacy-note">{{.I18n.T "register.nicoPrivacy"}}</div>
                     <div class="nico-form-row">
-                        <label for="nicoEmail">NicoNico Email</label>
+                        <label for="nicoEmail">{{.I18n.T "register.nicoEmailLabel"}}</label>
                         <input type="email" id="nicoEmail" autocomplete="username" placeholder="you@example.com">
                     </div>
                     <div class="nico-form-row">
-                        <label for="nicoPassword">NicoNico Password</label>
+                        <label for="nicoPassword">{{.I18n.T "register.nicoPasswordLabel"}}</label>
                         <div class="nico-pw-field">
                             <input type="password" id="nicoPassword" autocomplete="current-password" placeholder="••••••••">
                             <button type="button" class="nico-toggle-pw" onclick="toggleNicoPw()">👁</button>
@@ -165,17 +165,17 @@
                     <div id="nicoErr1" class="nico-err" style="display:none"></div>
                 </div>
                 <div class="nico-box-footer">
-                    <button class="btn btn-secondary" onclick="closeNicoModal()">Cancel</button>
-                    <button id="nicoLoginBtn" class="btn btn-primary" onclick="submitNicoLogin()">Continue</button>
+                    <button class="btn btn-secondary" onclick="closeNicoModal()">{{.I18n.T "register.backButton"}}</button>
+                    <button id="nicoLoginBtn" class="btn btn-primary" onclick="submitNicoLogin()">{{.I18n.T "register.nicoContinue"}}</button>
                 </div>
             </div>
             <div id="nicoStep2" style="display:none">
                 <div class="nico-box-header">
-                    <span class="nico-box-title">NicoNico — Enter OTP</span>
+                    <span class="nico-box-title">{{.I18n.T "register.nicoOtpTitle"}}</span>
                     <button class="nico-box-close" onclick="closeNicoModal()">✕</button>
                 </div>
                 <div class="nico-box-body">
-                    <p class="nico-mfa-desc">A 6-digit code was sent to your email. Enter it below.</p>
+                    <p class="nico-mfa-desc">{{.I18n.T "register.nicoOtpDesc"}}</p>
                     <div class="nico-otp-row">
                         <input type="text" id="nicoOtp" inputmode="numeric" pattern="[0-9]*" maxlength="6" autocomplete="one-time-code" placeholder="000000">
                         <span id="nicoCountdown" class="nico-countdown"></span>
@@ -183,8 +183,8 @@
                     <div id="nicoErr2" class="nico-err" style="display:none"></div>
                 </div>
                 <div class="nico-box-footer">
-                    <button class="btn btn-secondary" onclick="backNicoStep1()">← Back</button>
-                    <button id="nicoMfaBtn" class="btn btn-primary" onclick="submitNicoMfa()">Verify</button>
+                    <button class="btn btn-secondary" onclick="backNicoStep1()">{{.I18n.T "register.backButton"}}</button>
+                    <button id="nicoMfaBtn" class="btn btn-primary" onclick="submitNicoMfa()">{{.I18n.T "register.nicoVerifyBtn"}}</button>
                 </div>
             </div>
         </div>

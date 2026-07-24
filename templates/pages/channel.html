@@ -5,7 +5,7 @@
   <div class="page-header">
     <nav class="breadcrumb">
       <img src="/image/channels_s.png">
-      <a href="/channels">Watched Channels</a>
+      <a href="/channels">{{.I18n.T "channel.breadcrumb"}}</a>
       <span class="breadcrumb-sep">›</span>
       <span>{{.ChannelDetail.Name}}</span>
     </nav>
@@ -31,11 +31,11 @@
           {{if $platformMeta}}{{index $platformMeta "label"}}{{else}}{{.ChannelDetail.Platform}}{{end}}
         </span>
         <div class="meta-item">
-          <span class="meta-label">Last stream</span>
+          <span class="meta-label">{{.I18n.T "channel.lastStream"}}</span>
           <span class="meta-value">{{formatDateTime .ChannelDetail.LastStreamAt "Never"}}</span>
         </div>
         <div class="meta-item">
-          <span class="meta-label">Platform ID</span>
+          <span class="meta-label">{{.I18n.T "channel.platformId"}}</span>
           <span class="meta-value mono">{{escHtml .ChannelDetail.ChannelID}}</span>
         </div>
       </div>
@@ -43,11 +43,11 @@
 
     <div class="channel-status-group">
       {{if eq .ChannelDetail.Status "live"}}
-        <span class="live-badge">🔴 Live now</span>
+        <span class="live-badge">{{.I18n.T "channel.live"}}</span>
       {{else if .ChannelDetail.IsActive}}
-        <span class="offline-badge">Offline</span>
+        <span class="offline-badge">{{.I18n.T "channel.offline"}}</span>
       {{else}}
-        <span class="paused-badge">Paused</span>
+        <span class="paused-badge">{{.I18n.T "channel.paused"}}</span>
       {{end}}
     </div>
 
@@ -58,35 +58,35 @@
           <span class="toggle-slider"></span>
         </label>
         <span class="watch-toggle-label {{if not .ChannelDetail.IsActive}}paused{{end}}">
-          {{if .ChannelDetail.IsActive}}Watching{{else}}Paused{{end}}
+          {{if .ChannelDetail.IsActive}}{{.I18n.T "channel.watching"}}{{else}}{{.I18n.T "channel.paused"}}{{end}}
         </span>
       </div>
       <button class="action-btn filter" onclick="openFilterModal('{{.ChannelDetail.ID}}')">
         <svg width="1em" height="1em" viewBox="0 0 512 512" xmlns="http://www.w3.org/2000/svg">
           <path fill="#ffffff" stroke="black" stroke-width="6%" d="M296,464a23.88,23.88,0,0,1-7.55-1.23l-80.15-26.67A23.92,23.92,0,0,1,192,413.32V294.11a.44.44,0,0,0-.09-.13L23.26,97.54A30,30,0,0,1,46.05,48H466a30,30,0,0,1,22.79,49.54L320.09,294a.77.77,0,0,0-.09.13V440a23.93,23.93,0,0,1-24,24Z"></path>
-        </svg> Filter
+        </svg> {{.I18n.T "channel.filter"}}
       </button>
-      <button class="action-btn delete" onclick="deleteChannel('{{.ChannelDetail.ID}}')">🗑Remove</button>
+      <button class="action-btn delete" onclick="deleteChannel('{{.ChannelDetail.ID}}')">🗑{{.I18n.T "channel.removeButton"}}</button>
     </div>
   </div>
 
   <div style="display:flex; gap:0.5rem;">
-    <button class="btn btn-secondary" onclick="openTestAllConditionsModal()">🧪 Test Conditions</button>
+    <button class="btn btn-secondary" onclick="openTestAllConditionsModal()">{{.I18n.T "channel.testConditions"}}</button>
   </div>
 
   <div class="detail-section">
     <div class="detail-section-header" onclick="navigate('/channels/{{.ChannelDetail.ID}}/conditions')">
       <div>
-        <h2>⚙️ Conditions <span class="conditions-count-badge">{{len .ChannelDetailConditions}}</span></h2>
-        <p>Events to react to on <strong>{{escHtml .ChannelDetail.Name}}</strong>.</p>
+        <h2>{{.I18n.T "channel.conditions"}} <span class="conditions-count-badge">{{len .ChannelDetailConditions}}</span></h2>
+        <p>{{.I18n.T "channel.noConditions"}}</p>
       </div>
       <div class="btn btn-primary">
-        Manage Conditions →
+        {{.I18n.T "channel.manageConditions"}}
       </div>
     </div>
     <div class="conditions-preview">
       {{if eq (len .ChannelDetailConditions) 0}}
-        <p class="no-conditions-msg">No conditions yet.</p>
+        <p class="no-conditions-msg">{{.I18n.T "channel.noConditions"}}</p>
       {{else}}
         {{range $i, $condition := .ChannelDetailConditions}}
           {{if lt $i 3}}
@@ -97,11 +97,11 @@
             </span>
             <span class="cond-preview-name">{{escHtml $condition.Name}}</span>
             <span class="rule-status {{if $condition.IsEnabled}}enabled{{else}}disabled{{end}}">
-              {{if $condition.IsEnabled}}On{{else}}Off{{end}}
+              {{if $condition.IsEnabled}}{{$.I18n.T "conditions.enabled"}}{{else}}{{$.I18n.T "conditions.disabled"}}{{end}}
             </span>
             <span>
               <div class="btn btn-primary">
-                Edit Condition →
+                {{$.I18n.T "channel.editCondition"}}
               </div>
             </span>
           </div>
@@ -109,7 +109,7 @@
         {{end}}
         {{if gt (len .ChannelDetailConditions) 3}}
         <div class="more-conditions-link">
-          <a href="/channels/{{.ChannelDetail.ID}}/conditions">+ {{sub (len .ChannelDetailConditions) 3}} more...</a>
+          <a href="/channels/{{.ChannelDetail.ID}}/conditions">+ {{sub (len .ChannelDetailConditions) 3}} {{.I18n.T "channel.more"}}</a>
         </div>
         {{end}}
       {{end}}
@@ -119,6 +119,12 @@
 {{end}}
 
 {{define "scripts"}}
+<script id="channelDetailTranslations" type="application/json">
+{{.I18n.TByPrefix "channelDetail" | jsonMarshal}}
+</script>
+<script>
+window.channelDetailTranslations = JSON.parse(document.getElementById('channelDetailTranslations').textContent);
+</script>
 <script src="/js/channel-detail.js"></script>
 {{end}}
 

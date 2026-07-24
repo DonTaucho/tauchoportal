@@ -1,6 +1,7 @@
 (function () {
     'use strict';
     const { PLATFORM_META, PLATFORM_EVENTS, apiRequest, escHtml, hasActiveFilter, openModal, closeModal, buildTestEvent, getEventParameters } = window;
+    const t = window.channelDetailTranslations || {}; // Fallback to empty object if not loaded
     let filteringChannelId = null;
     const getChannelIdFromURL = () => {
         const match = window.location.pathname.match(/^\/channels\/([^\/]+)\/?$/);
@@ -34,7 +35,7 @@
     async function updateDisplayName(channelId, newName) { 
         const trimmed = (newName || '').trim(); 
         if (!trimmed) { 
-            alert('Display name cannot be empty'); 
+            alert(t.emptyDisplayName || 'Display name cannot be empty'); 
             return false; 
         } 
         try { 
@@ -42,7 +43,7 @@
             location.reload();
             return true; 
         } catch (error) { 
-            alert('Failed to update display name: ' + error.message); 
+            alert((t.failedUpdateName || 'Failed to update display name: ') + error.message); 
             return false; 
         } 
     }
@@ -76,16 +77,16 @@
             location.reload();
         } catch (error) { 
             checkbox.checked = !checkbox.checked; 
-            alert('Failed to update channel: ' + error.message); 
+            alert((t.failedUpdateChannel || 'Failed to update channel: ') + error.message); 
         } 
     }
     async function deleteChannel(channelId) { 
-        if (!confirm('Remove this channel from monitoring?\n\nAll conditions for this channel will also be removed.')) return; 
+        if (!confirm(t.confirmRemove || 'Remove this channel from monitoring?\n\nAll conditions for this channel will also be removed.')) return; 
         try { 
             await apiRequest('DELETE', `/watches?id=${channelId}`); 
             window.location.href = '/channels';
         } catch (error) { 
-            alert('Failed to delete channel: ' + error.message); 
+            alert((t.failedDelete || 'Failed to delete channel: ') + error.message); 
         } 
     }
     const textToArray = (text) => text.split('\n').map((item) => item.trim()).filter(Boolean);
@@ -139,7 +140,7 @@
         try {
             const events = await window.getEventsForPlatform(platform);
             console.log('[openTestAllConditionsModal] Events returned:', events);
-            select.innerHTML = '<option value="">Select event type...</option>' + (events || []).map((evt) => {
+            select.innerHTML = '<option value="">' + (t.selectEventType || 'Select event type...') + '</option>' + (events || []).map((evt) => {
                 console.log('[openTestAllConditionsModal] Mapping event:', evt);
                 return `<option value="${evt.value}">${evt.value}</option>`;
             }).join('');
@@ -147,7 +148,7 @@
         } catch (e) {
             console.error('[openTestAllConditionsModal] Failed to populate events:', e);
         }
-        document.getElementById('testConditionTitle').textContent = 'Test All Conditions'; 
+        document.getElementById('testConditionTitle').textContent = t.testAllConditions || 'Test All Conditions'; 
         document.getElementById('testTriggerRealDevice').checked = false; 
         document.getElementById('testResultsContainer').style.display = 'none'; 
         await updateTestEventParams(); 
@@ -176,7 +177,7 @@
     }
     async function runConditionTest() { 
         const eventType = document.getElementById('testEventType').value; 
-        if (!eventType) return alert('Please select an event type'); 
+        if (!eventType) return alert(t.selectEventTypeAlert || 'Please select an event type'); 
         const button = document.getElementById('testConditionBtn'); 
         button.disabled = true; 
         try { 
@@ -197,7 +198,7 @@
                 trigger_real_device: document.getElementById('testTriggerRealDevice').checked 
             })); 
         } catch (error) { 
-            alert('Failed to test condition: ' + error.message); 
+            alert((t.failedTestCondition || 'Failed to test condition: ') + error.message); 
         } finally { 
             button.disabled = false; 
         } 
@@ -206,7 +207,7 @@
         const container = document.getElementById('testResultsContainer'); 
         const content = document.getElementById('testResultsContent'); 
         container.style.display = 'block'; 
-        content.innerHTML = `<p><strong>Total tested:</strong> ${response.total_conditions}</p><p><strong>Matched:</strong> ${response.matched}</p><p><strong>Would trigger:</strong> ${response.triggered}</p><p><strong>Errors:</strong> ${response.errors}</p>${response.results && response.results.length ? `<hr><h5>Details:</h5><div style="max-height:300px; overflow-y:auto;">${response.results.map((result) => `<div style="margin:0.5rem 0; padding:0.5rem; background:${result.matched ? '#e8f5e9' : '#ffebee'}; border-radius:4px;"><strong>${escHtml(result.condition_name)}</strong>: ${result.matched ? '✅ Matched' : '❌ No match'}${result.would_trigger ? ' (would trigger)' : ''}</div>`).join('')}</div>` : ''}`; 
+        content.innerHTML = `<p><strong>${t.totalTested || 'Total tested:'}` + `</strong> ${response.total_conditions}</p><p><strong>${t.matched || 'Matched:'}` + `</strong> ${response.matched}</p><p><strong>${t.wouldTrigger || 'Would trigger:'}` + `</strong> ${response.triggered}</p><p><strong>${t.errors || 'Errors:'}` + `</strong> ${response.errors}</p>${response.results && response.results.length ? `<hr><h5>${t.details || 'Details:'}</h5><div style="max-height:300px; overflow-y:auto;">${response.results.map((result) => `<div style="margin:0.5rem 0; padding:0.5rem; background:${result.matched ? '#e8f5e9' : '#ffebee'}; border-radius:4px;"><strong>${escHtml(result.condition_name)}</strong>: ${result.matched ? t.matched_badge || '✅ Matched' : t.no_match || '❌ No match'}${result.would_trigger ? ' ' + (t.would_trigger || '(would trigger)') : ''}</div>`).join('')}</div>` : ''}`; 
     }
     Object.assign(window, { openTestAllConditionsModal, toggleChannel, deleteChannel, updateDisplayName, startEditDisplayName, openFilterModal, saveFilter, updateTestEventParams, runConditionTest, displayTestResults });
     route();

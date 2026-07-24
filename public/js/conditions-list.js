@@ -1,6 +1,7 @@
 (function () {
     'use strict';
     const { PLATFORM_META, PLATFORM_EVENTS, PRODUCTS, apiRequest, escHtml, formatDate, formatDateTime, openModal, closeModal, getEventLabel, buildTestEvent, getEventParameters } = window;
+    const t = window.conditionsListTranslations || {}; // Fallback to empty object
     const EVENT_BADGE_CLASS = { comment: 'comment', superchat: 'gift', sticker: 'gift', cheer: 'gift', gift: 'gift', member: 'follow', follow: 'follow', sub: 'follow', nicoru: 'effect', hype_train: 'stream', raid: 'stream', stream_start: 'stream', stream_end: 'stream' };
     let CHANNELS = [], editingConditionId = null, testingConditionId = null, deviceCache = null;
 
@@ -58,9 +59,9 @@
         editingConditionId = null; 
         const channelName = getChannelNameFromDOM();
         const platform = getPlatformFromDOM();
-        document.getElementById('condModalTitle').textContent = 'Add Condition'; 
-        document.getElementById('condModalSubtitle').textContent = `Define when to trigger an action on ${channelName}.`; 
-        document.getElementById('condSaveBtn').textContent = 'Add Condition'; 
+        document.getElementById('condModalTitle').textContent = t.addCondition || 'Add Condition'; 
+        document.getElementById('condModalSubtitle').textContent = `${t.defineWhenTrigger || 'Define when to trigger an action on'} ${channelName}.`; 
+        document.getElementById('condSaveBtn').textContent = t.addBtn || 'Add Condition'; 
         document.getElementById('conditionForm').reset(); 
         document.getElementById('condFilterGroup').style.display = 'none'; 
         document.getElementById('condActionSelectGroup').style.display = 'none'; 
@@ -85,9 +86,9 @@
         const filterValue = card?.querySelector('.rule-detail-value')?.textContent?.match(/containing <code>"([^"]*)"<\/code>/) || null;
         const isEnabled = card?.querySelector('input[type="checkbox"]')?.checked || false;
         
-        document.getElementById('condModalTitle').textContent = 'Edit Condition'; 
-        document.getElementById('condModalSubtitle').textContent = `Update this condition for ${channelName}.`; 
-        document.getElementById('condSaveBtn').textContent = 'Save Changes'; 
+        document.getElementById('condModalTitle').textContent = t.editCondition || 'Edit Condition'; 
+        document.getElementById('condModalSubtitle').textContent = `${t.updateThisCondition || 'Update this condition for'} ${channelName}.`; 
+        document.getElementById('condSaveBtn').textContent = t.saveChanges || 'Save Changes'; 
         document.getElementById('conditionForm').reset(); 
         document.getElementById('condName').value = conditionName; 
         if (platform) populateEventSelect(platform); 

@@ -8,154 +8,132 @@
 <div class="about-page">
         <div class="container">
             <div class="header">
-                <h1>About Taucho</h1>
+                <h1>{{.I18n.T "about.title"}}</h1>
             </div>
 
             <div class="section lead-section">
                 <img src="/image/sunsetcrabs.png" width="449" height="375">
-                <p>The name "Taucho" is derived from *Taucho-gane*, a local dialect term from the Isahaya region of Japan for the fiddler crab. Fiddler crabs are known for a distinctive movement in which they wave one of their claws as if beckoning toward the setting sun.</p>
-                <p>We named this service with the hope that, even if individual actions are small, their collective impact will create a powerful synergy within influencer content—much</p>
-                <p> ..like the fiddler crab, whose Japanese name literally translates to "one that beckons the tide."</p>
+                <p>{{.I18n.T "about.nameMeaning"}}</p>
+                <p>{{.I18n.T "about.impact"}}{{.I18n.T "about.impactEnd"}}</p>
             </div>
 
             <div class="section intro">
-                <p>Taucho is a live stream automation platform. It watches your YouTube, Twitch, and NicoNico channels around the clock, and when viewers interact — sending a Super Chat, gifting, cheering with Bits, or triggering emotion effects — your smart home devices respond instantly.</p>
-                <p>No scripts to run. No browser tab to keep open. The cloud service handles all detection and device control automatically.</p>
+                <p>{{.I18n.T "about.intro"}}</p>
+                <p>{{.I18n.T "about.introEnd"}}</p>
             </div>
 
             <div class="section">
-                <h2>🎯 How It Works</h2>
+                <h2>{{.I18n.T "about.howItWorks"}}</h2>
                 <div class="steps">
                     <div class="step">
                         <div class="step-num">1</div>
                         <div>
-                            <strong>Add Watched Channels</strong>
-                            <p>Register your streaming account handles (YouTube, Twitch, NicoNico). The polling service detects when you go live automatically — nothing to trigger manually.</p>
+                            <strong>{{.I18n.T "about.step1Title"}}</strong>
+                            <p>{{.I18n.T "about.step1Desc"}}</p>
                         </div>
                     </div>
                     <div class="step">
                         <div class="step-num">2</div>
                         <div>
-                            <strong>Define Event Conditions</strong>
-                            <p>For each channel, set rules tied to platform-specific events: comments, Super Chats, Bits, gifts, Nicoru reactions, hype trains, raids, and more.</p>
+                            <strong>{{.I18n.T "about.step2Title"}}</strong>
+                            <p>{{.I18n.T "about.step2Desc"}}</p>
                         </div>
                     </div>
                     <div class="step">
                         <div class="step-num">3</div>
                         <div>
-                            <strong>Register Your Devices</strong>
-                            <p>Add your smart home devices — Govee, Philips Hue, LIFX, WLED, TP-Link Kasa, and others. Configure API credentials once; reuse devices across any number of conditions.</p>
+                            <strong>{{.I18n.T "about.step3Title"}}</strong>
+                            <p>{{.I18n.T "about.step3Desc"}}</p>
                         </div>
                     </div>
                     <div class="step">
                         <div class="step-num">4</div>
                         <div>
-                            <strong>Stream and React</strong>
-                            <p>When a condition fires, the cloud service calls the device API directly. Lights change color, plugs switch, LEDs animate — in real time, while you stream.</p>
+                            <strong>{{.I18n.T "about.step4Title"}}</strong>
+                            <p>{{.I18n.T "about.step4Desc"}}</p>
                         </div>
                     </div>
                 </div>
             </div>
 
             <div class="section">
-                <h2>✨ Supported Platforms</h2>
+                <h2>{{.I18n.T "about.supportedPlatforms"}}</h2>
                 <div class="platform-grid">
                     <div class="platform-card">
                         <div class="platform-icon">{{platformIcon "youtube"}}</div>
                         <strong>YouTube</strong>
                         <ul>
-                            <li>Live chat comments</li>
-                            <li>Super Chat / Super Sticker</li>
-                            <li>Channel memberships</li>
-                            <li>Stream start / end</li>
+                            <li>{{.I18n.T "about.youtubeFeatures"}}</li>
                         </ul>
                     </div>
                     <div class="platform-card">
                         <div class="platform-icon">{{platformIcon "twitch"}}</div>
                         <strong>Twitch</strong>
                         <ul>
-                            <li>Chat comments</li>
-                            <li>Cheering (Bits)</li>
-                            <li>Subscriptions &amp; follows</li>
-                            <li>Hype Train / Raid</li>
+                            <li>{{.I18n.T "about.twitchFeatures"}}</li>
                         </ul>
                     </div>
                     <div class="platform-card">
                         <div class="platform-icon">{{platformIcon "niconico"}}</div>
                         <strong>NicoNico</strong>
                         <ul>
-                            <li>Live comments</li>
-                            <li>Nicoru reactions</li>
-                            <li>Gifts</li>
-                            <li>Emotion effects</li>
+                            <li>{{.I18n.T "about.niconicoFeatures"}}</li>
                         </ul>
                     </div>
                     <div class="platform-card">
                         <div class="platform-icon">{{platformIcon "instagram"}}</div>
                         <strong>Instagram</strong>
                         <ul>
-                            <li>Live comments</li>
-                            <li>Hearts / reactions</li>
-                            <li>Stream start / end</li>
-                            <li><em>Coming soon</em></li>
+                            <li>{{.I18n.T "about.instagramFeatures"}}</li>
+                           <li><em>{{.I18n.T "about.comingSoon"}}</em></li>
                         </ul>
                     </div>
                     <div class="platform-card">
                         <div class="platform-icon">{{platformIcon "tiktok"}}</div>
                         <strong>TikTok</strong>
                         <ul>
-                            <li>Live comments</li>
-                            <li>Gifts</li>
-                            <li>Follows</li>
-                            <li><em>Coming soon</em></li>
+                            <li>{{.I18n.T "about.tiktokFeatures"}}</li>
+                           <li><em>{{.I18n.T "about.comingSoon"}}</em></li>
                         </ul>
                     </div>
                     <div class="platform-card">
                         <div class="platform-icon">{{platformIcon "kick"}}</div>
                         <strong>Kick</strong>
                         <ul>
-                            <li>Chat comments</li>
-                            <li>Subscriptions</li>
-                            <li>Gifts</li>
-                            <li><em>Coming soon</em></li>
+                            <li>{{.I18n.T "about.kickFeatures"}}</li>
+                           <li><em>{{.I18n.T "about.comingSoon"}}</em></li>
                         </ul>
                     </div>
                     <div class="platform-card">
                         <div class="platform-icon">{{platformIcon "facebook"}}</div>
                         <strong>Facebook</strong>
                         <ul>
-                            <li>Live comments</li>
-                            <li>Reactions</li>
-                            <li>Stars</li>
-                            <li><em>Coming soon</em></li>
+                            <li>{{.I18n.T "about.facebookFeatures"}}</li>
+                           <li><em>{{.I18n.T "about.comingSoon"}}</em></li>
                         </ul>
                     </div>
                     <div class="platform-card">
                         <div class="platform-icon">{{platformIcon "x"}}</div>
                         <strong>X</strong>
                         <ul>
-                            <li>Live comments</li>
-                            <li>Tips</li>
-                            <li>Stream start / end</li>
-                            <li><em>Coming soon</em></li>
+                            <li>{{.I18n.T "about.xFeatures"}}</li>
+                           <li><em>{{.I18n.T "about.comingSoon"}}</em></li>
                         </ul>
                     </div>
                     <div class="platform-card">
                         <div class="platform-icon">{{platformIcon "bilibili"}}</div>
                         <strong>Bilibili</strong>
                         <ul>
-                            <li>Live comments</li>
-                            <li>Gifts</li>
-                            <li>Follows</li>
-                            <li><em>Coming soon</em></li>
+                            <li>{{.I18n.T "about.bilibiliFeatures"}}</li>
+                           <li><em>{{.I18n.T "about.comingSoon"}}</em></li>
                         </ul>
                     </div>
                 </div>
             </div>
 
             <div class="section">
-                <h2>💡 Supported Devices</h2>
-                <p>TauchoPortal works with popular smart home brands out of the box:</p>
+                <h2>{{.I18n.T "about.supportedDevices"}}</h2>
+                <p>{{.I18n.T "about.devicesDesc"}}</p>
                 <div class="device-tags">
                     <span class="dtag">Govee</span>
                     <span class="dtag">Philips Hue</span>
@@ -168,44 +146,44 @@
                     <span class="dtag">Meross</span>
                     <span class="dtag">SwitchBot</span>
                 </div>
-                <p>Actions include power on/off, color, brightness, LED effects, and scenes — depending on what each device supports.</p>
+                <p>{{.I18n.T "about.deviceActions"}}</p>
             </div>
 
             <div class="section">
-                <h2>🏗️ Technology Stack</h2>
+                <h2>{{.I18n.T "about.technologyStack"}}</h2>
                 <div class="tech-stack">
                     <div class="tech-item">
-                        <strong>Go 1.22</strong>
-                        <p>Backend & web server</p>
+                        <strong>{{.I18n.T "about.techGo"}}</strong>
+                        <p>{{.I18n.T "about.techGoDesc"}}</p>
                     </div>
                     <div class="tech-item">
-                        <strong>Google Cloud Run</strong>
-                        <p>Hosting &amp; scaling</p>
+                        <strong>{{.I18n.T "about.techCloudRun"}}</strong>
+                        <p>{{.I18n.T "about.techCloudRunDesc"}}</p>
                     </div>
                     <div class="tech-item">
-                        <strong>Cloud Functions</strong>
-                        <p>Event polling &amp; dispatch</p>
+                        <strong>{{.I18n.T "about.techFunctions"}}</strong>
+                        <p>{{.I18n.T "about.techFunctionsDesc"}}</p>
                     </div>
                     <div class="tech-item">
-                        <strong>Firestore</strong>
-                        <p>User &amp; config storage</p>
+                        <strong>{{.I18n.T "about.techFirestore"}}</strong>
+                        <p>{{.I18n.T "about.techFirestoreDesc"}}</p>
                     </div>
                 </div>
             </div>
 
             {{if .User}}{{else}}
             <div class="section cta-section">
-                <h2>🚀 Get Started</h2>
-                <p>Create a free account and connect your first streaming channel in minutes.</p>
+                <h2>{{.I18n.T "about.ctaTitle"}}</h2>
+                <p>{{.I18n.T "about.ctaDesc"}}</p>
                 <div class="cta-row">
-                    <a href="/register" class="btn btn-primary">Create Account</a>
-                    <a href="/login" class="btn btn-secondary">Sign In</a>
+                    <a href="/register" class="btn btn-primary">{{.I18n.T "about.ctaCreateAccount"}}</a>
+                    <a href="/login" class="btn btn-secondary">{{.I18n.T "about.ctaSignIn"}}</a>
                 </div>
             </div>
             {{end}}
 
             <div class="footer">
-                <p>TauchoPortal © 2026 | <a href="/">Home</a> | <a href="/login">Sign In</a> | <a href="/register">Sign Up</a> | <a href="https://github.com/DonTaucho/tauchoportal" target="_blank">GitHub</a></p>
+                <p>{{.I18n.T "about.footerCopyright"}}<a href="/">{{.I18n.T "about.footerHome"}}</a> | <a href="/login">{{.I18n.T "about.footerSignIn"}}</a> | <a href="/register">{{.I18n.T "about.footerSignUp"}}</a> | <a href="https://github.com/DonTaucho/tauchoportal" target="_blank">{{.I18n.T "about.footerGitHub"}}</a></p>
             </div>
         </div>
     </div>

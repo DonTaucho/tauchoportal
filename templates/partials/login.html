@@ -2,81 +2,81 @@
 <div class="error-message" id="errorMessage"></div>
 <form id="loginForm">
     <div class="form-group">
-        <label for="identifier">Username or Email</label>
+        <label for="identifier">{{.I18n.T "login.usernameOrEmail"}}</label>
         <input 
             type="text" 
             id="identifier" 
             name="identifier" 
             required
-            placeholder="username or email address"
+            placeholder="{{.I18n.T "login.usernameOrEmailPlaceholder"}}"
             autocomplete="username"
         >
     </div>
     
     <div class="form-group">
-        <label for="password">Password</label>
+        <label for="password">{{.I18n.T "login.password"}}</label>
         <input 
             type="password" 
             id="password" 
             name="password" 
             required
-            placeholder="••••••••"
+            placeholder="{{.I18n.T "login.passwordPlaceholder"}}"
             autocomplete="current-password"
         >
     </div>
     
-    <button type="submit" class="submit-btn">Sign In</button>
+    <button type="submit" class="submit-btn">{{.I18n.T "login.signInButton"}}</button>
 </form>
 
 <div class="divider">
-    <span>Or continue with</span>
+    <span>{{.I18n.T "login.orContinueWith"}}</span>
 </div>
 
 <div class="oauth-buttons">
     <button type="button" onclick="startOAuthLogin('google')" class="oauth-btn youtube-btn">
         <span class="oauth-icon">{{platformIcon "youtube"}}</span>
-        <span>YouTube</span>
+        <span>{{.I18n.T "login.youtubeLogin"}}</span>
     </button>
     <button type="button" onclick="startOAuthLogin('twitch')" class="oauth-btn twitch-btn">
         <span class="oauth-icon">{{platformIcon "twitch"}}</span>
-        <span>Twitch</span>
+        <span>{{.I18n.T "login.twitchLogin"}}</span>
     </button>
     <button type="button" onclick="openNicoLoginModal()" class="oauth-btn niconico-btn">
         <span class="oauth-icon">{{platformIcon "niconico"}}</span>
-        <span>NicoNico</span>
+        <span>{{.I18n.T "login.nicoNicoLogin"}}</span>
     </button>
     <button type="button" onclick="startOAuthLogin('twitcasting')" class="oauth-btn twitcasting-btn">
         <span class="oauth-icon">{{platformIcon "twitcasting"}}</span>
-        <span>TwitCasting</span>
+        <span>{{.I18n.T "login.twitcastingLogin"}}</span>
     </button>
     <button type="button" onclick="startOAuthLogin('instagram')" class="oauth-btn instagram-btn">
         <span class="oauth-icon">{{platformIcon "instagram"}}</span>
-        <span>Instagram</span>
+        <span>{{.I18n.T "login.instagramLogin"}}</span>
     </button>
     <button type="button" onclick="startOAuthLogin('tiktok')" class="oauth-btn tiktok-btn">
         <span class="oauth-icon">{{platformIcon "tiktok"}}</span>
-        <span>TikTok</span>
+        <span>{{.I18n.T "login.tiktokLogin"}}</span>
     </button>
     <button type="button" onclick="startOAuthLogin('kick')" class="oauth-btn kick-btn">
         <span class="oauth-icon">{{platformIcon "kick"}}</span>
-        <span>Kick</span>
+        <span>{{.I18n.T "login.kickLogin"}}</span>
     </button>
     <button type="button" onclick="startOAuthLogin('facebook')" class="oauth-btn facebook-btn">
         <span class="oauth-icon">{{platformIcon "facebook"}}</span>
-        <span>Facebook</span>
+        <span>{{.I18n.T "login.facebookLogin"}}</span>
     </button>
     <button type="button" onclick="startOAuthLogin('x')" class="oauth-btn x-btn">
         <span class="oauth-icon">{{platformIcon "x"}}</span>
-        <span>X</span>
+        <span>{{.I18n.T "login.xLogin"}}</span>
     </button>
     <button type="button" onclick="startOAuthLogin('bilibili')" class="oauth-btn bilibili-btn">
         <span class="oauth-icon">{{platformIcon "bilibili"}}</span>
-        <span>Bilibili</span>
+        <span>{{.I18n.T "login.bilibiliLogin"}}</span>
     </button>
 </div>
 
 <div class="footer-links">
-    <p>Don't have an account? <a href="/register">Create one</a></p>
+    <p>{{.I18n.T "login.noAccountText"}}<a href="/register">{{.I18n.T "login.createAccountLink"}}</a></p>
 </div>
 
 <!-- NicoNico semi-OAuth modal -->
@@ -84,45 +84,45 @@
     <div class="nico-box">
         <div id="nicoStep1">
             <div class="nico-box-header">
-                <span class="nico-box-title">NicoNico Login</span>
+                <span class="nico-box-title">{{.I18n.T "login.niconicoDivider"}}</span>
                 <button class="nico-box-close" onclick="closeNicoModal()">✕</button>
             </div>
             <div class="nico-box-body">
-                <div class="nico-privacy-note">⚠️ Your credentials are sent directly to NicoNico via a secure proxy. They are never stored.</div>
+                <div class="nico-privacy-note">{{.I18n.T "login.nicoPrivacyNote"}}</div>
                 <div class="nico-form-row">
-                    <label for="nicoEmail">Email</label>
-                    <input type="email" id="nicoEmail" autocomplete="email" placeholder="you@example.com">
+                    <label for="nicoEmail">{{.I18n.T "login.nicoEmail"}}</label>
+                    <input type="email" id="nicoEmail" autocomplete="email" placeholder="{{.I18n.T "login.nicoEmailPlaceholder"}}">
                 </div>
                 <div class="nico-form-row">
-                    <label for="nicoPassword">Password</label>
+                    <label for="nicoPassword">{{.I18n.T "login.nicoPassword"}}</label>
                     <div class="nico-pw-field">
-                        <input type="password" id="nicoPassword" autocomplete="off" placeholder="••••••••">
+                        <input type="password" id="nicoPassword" autocomplete="off" placeholder="{{.I18n.T "login.nicoPasswordPlaceholder"}}">
                         <button type="button" class="nico-toggle-pw" onclick="toggleNicoPw()">👁</button>
                     </div>
                 </div>
                 <div id="nicoErr1" class="nico-err" style="display:none"></div>
             </div>
             <div class="nico-box-footer">
-                <button class="btn btn-secondary" onclick="closeNicoModal()">Cancel</button>
-                <button id="nicoLoginBtn" class="btn btn-primary" onclick="submitNicoLogin()">Login</button>
+                <button class="btn btn-secondary" onclick="closeNicoModal()">{{.I18n.T "login.nicoCancel"}}</button>
+                <button id="nicoLoginBtn" class="btn btn-primary" onclick="submitNicoLogin()">{{.I18n.T "login.nicoLoginButton"}}</button>
             </div>
         </div>
         <div id="nicoStep2" style="display:none">
             <div class="nico-box-header">
-                <span class="nico-box-title">NicoNico — Enter OTP</span>
+                <span class="nico-box-title">{{.I18n.T "login.niconicoDividerOtp"}}</span>
                 <button class="nico-box-close" onclick="closeNicoModal()">✕</button>
             </div>
             <div class="nico-box-body">
-                <p class="nico-mfa-desc">A 6-digit code was sent to your email. Enter it below.</p>
+                <p class="nico-mfa-desc">{{.I18n.T "login.nicoOtpDescription"}}</p>
                 <div class="nico-otp-row">
-                    <input type="text" id="nicoOtp" inputmode="numeric" pattern="[0-9]*" maxlength="6" autocomplete="one-time-code" placeholder="000000">
+                    <input type="text" id="nicoOtp" inputmode="numeric" pattern="[0-9]*" maxlength="6" autocomplete="one-time-code" placeholder="{{.I18n.T "login.nicoOtpPlaceholder"}}">
                     <span id="nicoCountdown" class="nico-countdown"></span>
                 </div>
                 <div id="nicoErr2" class="nico-err" style="display:none"></div>
             </div>
             <div class="nico-box-footer">
-                <button class="btn btn-secondary" onclick="backNicoStep1()">← Back</button>
-                <button id="nicoMfaBtn" class="btn btn-primary" onclick="submitNicoMfa()">Verify</button>
+                <button class="btn btn-secondary" onclick="backNicoStep1()">{{.I18n.T "login.nicoBackButton"}}</button>
+                <button id="nicoMfaBtn" class="btn btn-primary" onclick="submitNicoMfa()">{{.I18n.T "login.nicoVerifyButton"}}</button>
             </div>
         </div>
     </div>
@@ -154,11 +154,11 @@
                 window.location.href = '/dashboard';
             } else {
                 const data = await response.json().catch(() => ({}));
-                errorMessage.textContent = data.error || 'Invalid username/email or password.';
+                errorMessage.textContent = data.error || window._i18nMsg?.['login.nicoInvalidCredentials'] || 'Invalid username/email or password.';
                 errorMessage.classList.add('show');
             }
         } catch (error) {
-            errorMessage.textContent = 'An error occurred. Please try again.';
+            errorMessage.textContent = window._i18nMsg?.['login.nicoErrorGeneric'] || 'An error occurred. Please try again.';
             errorMessage.classList.add('show');
         }
     });
@@ -214,10 +214,10 @@
             var errEl    = document.getElementById('nicoErr1');
 
             errEl.style.display = 'none';
-            if (!email || !password) { showErr(errEl, 'Please enter email and password.'); return; }
+            if (!email || !password) { showErr(errEl, window._i18nMsg?.['login.nicoErrorMissing'] || 'Please enter email and password.'); return; }
 
             btn.disabled = true;
-            btn.innerHTML = '<span class="nico-spinner"></span>Logging in…';
+            btn.innerHTML = '<span class="nico-spinner"></span>' + (window._i18nMsg?.['login.nicoLoggingIn'] || 'Logging in…');
             try {
                 var resp = await fetch('/api/niconico/portal-login', {
                     method: 'POST', credentials: 'include',
@@ -234,12 +234,12 @@
                     document.getElementById('nicoErr2').style.display  = 'none';
                     document.getElementById('nicoOtp').value = '';
                     document.getElementById('nicoMfaBtn').disabled = false;
-                    document.getElementById('nicoMfaBtn').textContent = 'Verify';
+                    document.getElementById('nicoMfaBtn').textContent = window._i18nMsg?.['login.nicoVerifyButton'] || 'Verify';
                     startTimer(600);
                     document.getElementById('nicoOtp').focus();
                 } else if (data.status === 'logged_in') {
                     closeNicoModal();
-                    showNicoToast('Logged in via NicoNico! ✅');
+                    showNicoToast(window._i18nMsg?.['login.nicoLoginSuccess'] || 'Logged in via NicoNico! ✅');
                     setTimeout(function () { window.location.href = '/dashboard'; }, 1200);
                 } else {
                     throw new Error('Unexpected response from server.');
@@ -247,7 +247,7 @@
             } catch (e) {
                 showErr(errEl, e.message);
                 btn.disabled = false;
-                btn.textContent = 'Login';
+                btn.textContent = window._i18nMsg?.['login.nicoLoginButton'] || 'Login';
             }
         };
 
@@ -257,10 +257,10 @@
             var errEl = document.getElementById('nicoErr2');
 
             errEl.style.display = 'none';
-            if (!otp) { showErr(errEl, 'Please enter the OTP code.'); return; }
+            if (!otp) { showErr(errEl, window._i18nMsg?.['login.nicoErrorOtpMissing'] || 'Please enter the OTP code.'); return; }
 
             btn.disabled = true;
-            btn.innerHTML = '<span class="nico-spinner"></span>Verifying…';
+            btn.innerHTML = '<span class="nico-spinner"></span>' + (window._i18nMsg?.['login.nicoVerifying'] || 'Verifying…');
             try {
                 var resp = await fetch('/api/niconico/portal-login/mfa', {
                     method: 'POST', credentials: 'include',
@@ -271,28 +271,28 @@
                 if (!resp.ok) {
                     if (resp.status === 401) {
                         // Wrong OTP — session still valid, let the user retry while timer runs
-                        showErr(errEl, (data.error || 'Incorrect code.') + ' Please try again.');
+                        showErr(errEl, (data.error || window._i18nMsg?.['login.nicoIncorrectCode'] || 'Incorrect code.') + ' ' + (window._i18nMsg?.['login.nicoIncorrectCode'] || 'Please try again.'));
                         btn.disabled = false;
-                        btn.textContent = 'Verify';
+                        btn.textContent = window._i18nMsg?.['login.nicoVerifyButton'] || 'Verify';
                     } else {
                         // 400 expired / other fatal error — session is dead
                         clearTimer();
-                        showErr(errEl, (data.error || 'Session error.') + ' Please go back and try again.');
+                        showErr(errEl, (data.error || window._i18nMsg?.['login.nicoSessionError'] || 'Session error.') + ' ' + (window._i18nMsg?.['login.nicoSessionError'] || 'Please go back and try again.'));
                         btn.disabled = true;
-                        btn.textContent = 'Verify';
+                        btn.textContent = window._i18nMsg?.['login.nicoVerifyButton'] || 'Verify';
                     }
                     return;
                 }
 
                 clearTimer();
                 closeNicoModal();
-                showNicoToast('Logged in via NicoNico! ✅');
+                showNicoToast(window._i18nMsg?.['login.nicoLoginSuccess'] || 'Logged in via NicoNico! ✅');
                 setTimeout(function () { window.location.href = '/dashboard'; }, 1200);
             } catch (e) {
                 clearTimer();
-                showErr(errEl, 'Connection error. Please go back and try again.');
+                showErr(errEl, window._i18nMsg?.['login.nicoConnectionError'] || 'Connection error. Please go back and try again.');
                 btn.disabled = true;
-                btn.textContent = 'Verify';
+                btn.textContent = window._i18nMsg?.['login.nicoVerifyButton'] || 'Verify';
             }
         };
 
@@ -306,7 +306,7 @@
                 if (_seconds <= 0) {
                     clearTimer();
                     document.getElementById('nicoMfaBtn').disabled = true;
-                    showErr(document.getElementById('nicoErr2'), 'OTP expired. Please go back and try again.');
+                    showErr(document.getElementById('nicoErr2'), window._i18nMsg?.['login.nicoOtpExpired'] || 'OTP expired. Please go back and try again.');
                 }
             }, 1000);
         }

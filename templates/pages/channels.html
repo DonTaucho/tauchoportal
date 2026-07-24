@@ -7,8 +7,8 @@
             <div class="page-header">
                 <div class="page-header-top">
                     <div>
-                        <h1><img src="/image/channels_s.png"> Channels</h1>
-                        <p>Live streaming accounts monitored by the polling service. Add channels via the sidebar on the left.</p>
+                        <h1><img src="/image/channels_s.png"> {{.I18n.T "channels.pageTitle"}}</h1>
+                        <p>{{.I18n.T "channels.pageDesc"}}</p>
                     </div>
                 </div>
                 <div class="stats-row">
@@ -20,15 +20,15 @@
                             {{if .IsActive}}{{$active = add $active 1}}{{else}}{{$paused = add $paused 1}}{{end}}
                             {{if eq .Status "live"}}{{$live = add $live 1}}{{end}}
                         {{end}}
-                        <div class="stat-card active"><span class="stat-number">{{$active}}</span><span class="stat-label">Watching</span></div>
-                        <div class="stat-card paused"><span class="stat-number">{{$paused}}</span><span class="stat-label">Paused</span></div>
-                        <div class="stat-card live"><span class="stat-number">{{$live}}</span><span class="stat-label">Live Now</span></div>
-                        <div class="stat-card"><span class="stat-number">{{len .Channels.Watches}}</span><span class="stat-label">Total</span></div>
+                        <div class="stat-card active"><span class="stat-number">{{$active}}</span><span class="stat-label">{{.I18n.T "channels.statWatching"}}</span></div>
+                        <div class="stat-card paused"><span class="stat-number">{{$paused}}</span><span class="stat-label">{{.I18n.T "channels.statPaused"}}</span></div>
+                        <div class="stat-card live"><span class="stat-number">{{$live}}</span><span class="stat-label">{{.I18n.T "channels.statLiveNow"}}</span></div>
+                        <div class="stat-card"><span class="stat-number">{{len .Channels.Watches}}</span><span class="stat-label">{{.I18n.T "channels.statTotal"}}</span></div>
                     {{else}}
-                        <div class="stat-card active"><span class="stat-number">0</span><span class="stat-label">Watching</span></div>
-                        <div class="stat-card paused"><span class="stat-number">0</span><span class="stat-label">Paused</span></div>
-                        <div class="stat-card live"><span class="stat-number">0</span><span class="stat-label">Live Now</span></div>
-                        <div class="stat-card"><span class="stat-number">0</span><span class="stat-label">Total</span></div>
+                        <div class="stat-card active"><span class="stat-number">0</span><span class="stat-label">{{.I18n.T "channels.statWatching"}}</span></div>
+                        <div class="stat-card paused"><span class="stat-number">0</span><span class="stat-label">{{.I18n.T "channels.statPaused"}}</span></div>
+                        <div class="stat-card live"><span class="stat-number">0</span><span class="stat-label">{{.I18n.T "channels.statLiveNow"}}</span></div>
+                        <div class="stat-card"><span class="stat-number">0</span><span class="stat-label">{{.I18n.T "channels.statTotal"}}</span></div>
                     {{end}}
                 </div>
             </div>
@@ -68,7 +68,7 @@
                                     </span>
                                     <span class="channel-id">{{.ChannelID}}</span>
                                     <div class="meta-item">
-                                        <span class="meta-label">Last stream:</span>
+                                        <span class="meta-label">{{$.I18n.T "channel.lastStream"}}:</span>
                                         <span class="meta-value">{{.LastStream}}</span>
                                     </div>
                                 </div>
@@ -76,16 +76,16 @@
                             
                             <div class="channel-status-group">
                                 {{if eq .Status "live"}}
-                                    <span class="live-badge">🔴 Live</span>
+                                    <span class="live-badge">{{$.I18n.T "channel.live"}}</span>
                                 {{else if .IsActive}}
-                                    <span class="offline-badge">Offline</span>
+                                    <span class="offline-badge">{{$.I18n.T "channel.offline"}}</span>
                                 {{else}}
-                                    <span class="paused-badge">Paused</span>
+                                    <span class="paused-badge">{{$.I18n.T "channel.paused"}}</span>
                                 {{end}}
                             </div>
                             
                             <div class="channel-edit">
-                                <span class="watch-toggle-label {{if not .IsActive}}paused{{end}}">Watch</span>
+                                <span class="watch-toggle-label {{if not .IsActive}}paused{{end}}">{{$.I18n.T "channel.watching"}}</span>
                                 <label class="toggle-switch" onclick="event.stopPropagation()">
                                     <input type="checkbox" {{if .IsActive}}checked{{end}} onchange="toggleChannel('{{.ID}}', this)">
                                     <span class="toggle-slider"></span>
@@ -101,8 +101,8 @@
             {{else}}
                 <div class="empty-state" style="display:flex">
                     <div class="empty-icon"><img src="/image/waiting_s.png" /></div>
-                    <h2>No channels yet</h2>
-                    <p>Choose a platform on the left and add the channels you want to monitor.</p>
+                    <h2>{{.I18n.T "channels.noChannels"}}</h2>
+                    <p>{{.I18n.T "channels.noChannelsDesc"}}</p>
                 </div>
             {{end}}
         </div>
@@ -111,42 +111,53 @@
         <div id="filterModal" class="modal" style="display:none">
             <div class="modal-content">
                 <div class="modal-header">
-                    <h2>Stream Filter</h2>
+                    <h2>{{.I18n.T "channels.filterModal"}}</h2>
                     <p id="filterModalSubtitle"></p>
                 </div>
                 
                 <div class="modal-body">
                     <div class="form-section">
-                        <label>Require Title Contains (one per line)</label>
-                        <textarea id="filterRequireTitle" placeholder="Enter keywords that must appear in stream title..."></textarea>
+                        <label>{{.I18n.T "channels.requireTitle"}}</label>
+                        <textarea id="filterRequireTitle" placeholder="{{.I18n.T "channels.requireTitlePlaceholder"}}"></textarea>
                     </div>
                     
                     <div class="form-section">
-                        <label>Skip If Title Contains (one per line)</label>
-                        <textarea id="filterSkipTitle" placeholder="Enter keywords to skip stream..."></textarea>
+                        <label>{{.I18n.T "channels.skipTitle"}}</label>
+                        <textarea id="filterSkipTitle" placeholder="{{.I18n.T "channels.skipTitlePlaceholder"}}"></textarea>
                     </div>
                     
                     <div class="form-section">
-                        <label>Skip If Description Contains (one per line)</label>
-                        <textarea id="filterSkipDesc" placeholder="Enter keywords to skip stream..."></textarea>
+                        <label>{{.I18n.T "channels.skipDesc"}}</label>
+                        <textarea id="filterSkipDesc" placeholder="{{.I18n.T "channels.skipDescPlaceholder"}}"></textarea>
                     </div>
                     
                     <div class="form-section">
                         <label class="checkbox-label">
                             <input type="checkbox" id="filterClearAll">
-                            <span>Clear All Filters</span>
+                            <span>{{.I18n.T "channels.clearAllFilters"}}</span>
                         </label>
                     </div>
                 </div>
                 
                 <div class="modal-buttons">
-                    <button class="btn btn-secondary" onclick="closeModal('filterModal')">Cancel</button>
-                    <button id="filterSaveBtn" class="btn btn-primary" onclick="saveFilter()">Save</button>
+                    <button class="btn btn-secondary" onclick="closeModal('filterModal')">{{.I18n.T "channels.cancelFilter"}}</button>
+                    <button id="filterSaveBtn" class="btn btn-primary" onclick="saveFilter()">{{.I18n.T "channels.saveFilter"}}</button>
                 </div>
             </div>
         </div>
 {{end}}
 
 {{define "scripts"}}
+<script id="channelsListTranslations" type="application/json">
+{{.I18n.TByPrefix "channelsList" | jsonMarshal}}
+</script>
+<script id="sidebarChannelsTranslations" type="application/json">
+{{.I18n.TByPrefix "sidebarChannels" | jsonMarshal}}
+</script>
+<script>
+// Inject translations for channels-list.js and channels-sidebar.js
+window.channelsListTranslations = JSON.parse(document.getElementById('channelsListTranslations').textContent);
+window.sidebarChannelsTranslations = JSON.parse(document.getElementById('sidebarChannelsTranslations').textContent);
+</script>
 <script src="/js/channels-list.js"></script>
 {{end}}
