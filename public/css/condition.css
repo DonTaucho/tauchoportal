@@ -696,6 +696,9 @@ div#logictotaldescription span.or .or .and:hover::after {
   color: black;
   border-color: black;
 }
+#textExtArea select {
+  max-width: 16rem;
+}
 #textSelector .value {
     padding: 0.4em 1em;
     display: none;
@@ -708,15 +711,16 @@ div#logictotaldescription span.or .or .and:hover::after {
     border: 2px solid #c7cedd;
 }
 #textSelector .placeholder {
-    padding: 0.4em 1em;
+    padding: 0.4em 0em;
     display: inline-block;
-    width: 8em;
     text-align: center;
     border-radius: 4px;
     background-color: #dde7eb;
     cursor: pointer;
     font-weight: unset;
     border: 2px dotted #c7cedd;
+    font-size: 0.8rem;
+    min-width: 10rem;
 }
 .available #textSelector .value {
     border-color: #2f8525;

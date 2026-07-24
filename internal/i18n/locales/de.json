@@ -332,7 +332,7 @@
   "condition.EQUALS": "Gleich (Textvergleich)",
   "condition.INCLUDES": "Enthält",
   "condition.REGEX_MATCH": "Regex-Übereinstimmung",
-  "condition.WHOLEWORD": "Ganzer String",
+  "condition.WHOLESENTENCE": "Ganzer String",
   "condition.REGEX_EXTRACT": "Mit Regex extrahieren",
   "condition.SUBSTRING": "Teilstring (nach Zeichenanzahl)",
   "condition.FIRST": "Anfang des Strings",
