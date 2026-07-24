@@ -3203,7 +3203,7 @@ function initializeTemplates() {
     }
     if (hint) {
         if (eventType) {
-            const hintKey = `condition.ui.templateLibraryHintWithType`;
+            const hintKey = `condition.ui.templateLibraryHintWithEventType`;
             const hintFallback = `Templates for "${eventType}" load automatically.`;
             const translatedHint = getTemplateTranslation(hintKey, hintFallback);
             hint.textContent = translatedHint.includes('{eventType}') 
