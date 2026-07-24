@@ -107,7 +107,7 @@
     async function populateEventSelect(platform) { 
         try {
             const events = await window.getEventsForPlatform(platform);
-            document.getElementById('condEventType').innerHTML = '<option value="">Select event type...</option>' + (events || []).map((eventType) => `<option value="${eventType.value}">${eventType.value}</option>`).join('');
+            document.getElementById('condEventType').innerHTML = `<option value="">${t.selectEventType || 'Select event type...'}</option>` + (events || []).map((eventType) => `<option value="${eventType.value}">${eventType.value}</option>`).join('');
         } catch (e) {
             console.error('Failed to populate events:', e);
         }
@@ -148,7 +148,8 @@
             closeModal('conditionModal'); 
             window.location.reload(); 
         } catch (error) { 
-            alert('Failed to save condition: ' + error.message); 
+            const errorMsg = error.message || 'Unknown error';
+            alert((t.saveError || 'Failed to save condition: {error}').replace('{error}', errorMsg)); 
         } finally { 
             button.disabled = false; 
         } 
@@ -160,17 +161,19 @@
             window.location.reload(); 
         } catch (error) { 
             checkbox.checked = !checkbox.checked; 
-            alert('Failed to update condition: ' + error.message); 
+            const errorMsg = error.message || 'Unknown error';
+            alert((t.updateError || 'Failed to update condition: {error}').replace('{error}', errorMsg)); 
         } 
     }
 
     async function deleteCondition(conditionId) { 
-        if (!confirm('Delete this condition?\n\nThis event will no longer trigger any actions.')) return; 
+        if (!confirm(t.deleteConfirm || 'Delete this condition?\n\nThis event will no longer trigger any actions.')) return; 
         try { 
             await apiRequest('DELETE', `/conditions?id=${conditionId}`); 
             window.location.reload(); 
         } catch (error) { 
-            alert('Failed to delete condition: ' + error.message); 
+            const errorMsg = error.message || 'Unknown error';
+            alert((t.deleteError || 'Failed to delete condition: {error}').replace('{error}', errorMsg)); 
         } 
     }
 
@@ -181,12 +184,12 @@
         const eventType = card?.dataset.type || '';
         const platform = getPlatformFromDOM();
 
-        document.getElementById('testConditionTitle').textContent = `Test Condition: ${conditionName}`; 
+        document.getElementById('testConditionTitle').textContent = (t.testTitle || 'Test Condition: {name}').replace('{name}', conditionName); 
         try {
             const events = await window.getEventsForPlatform(platform);
-            document.getElementById('testEventType').innerHTML = '<option value="">Select event type...</option>' + (events || []).map((evt) => `<option value="${evt.value}">${evt.value}</option>`).join('');
+            document.getElementById('testEventType').innerHTML = `<option value="">${t.selectEventType || 'Select event type...'}</option>` + (events || []).map((evt) => `<option value="${evt.value}">${evt.value}</option>`).join('');
         } catch (e) {
-            console.error('Failed to populate test events:', e);
+            console.error(t.populateEventsError || 'Failed to populate test events:', e);
         }
         document.getElementById('testEventType').value = eventType; 
         document.getElementById('testTriggerRealDevice').checked = false; 
@@ -216,7 +219,7 @@
     async function runConditionTest() { 
         const eventType = document.getElementById('testEventType').value; 
         const platform = getPlatformFromDOM();
-        if (!eventType) return alert('Please select an event type'); 
+        if (!eventType) return alert(t.selectEventTypeRequired || 'Please select an event type'); 
         const button = document.getElementById('testConditionBtn'); 
         button.disabled = true; 
         try { 
@@ -231,7 +234,8 @@
                 trigger_real_device: document.getElementById('testTriggerRealDevice').checked 
             })); 
         } catch (error) { 
-            alert('Failed to test condition: ' + error.message); 
+            const errorMsg = error.message || 'Unknown error';
+            alert((t.testError || 'Failed to test condition: {error}').replace('{error}', errorMsg)); 
         } finally { 
             button.disabled = false; 
         } 
@@ -241,7 +245,8 @@
         const container = document.getElementById('testResultsContainer'); 
         const content = document.getElementById('testResultsContent'); 
         container.style.display = 'block'; 
-        content.innerHTML = `<p><strong>${response.matched ? '✅ MATCHED' : '❌ NO MATCH'}</strong></p><p><strong>Would trigger device:</strong> ${response.would_trigger ? 'Yes' : 'No'}</p><p><strong>Device:</strong> ${response.device_id || 'None'}</p><p><strong>Action:</strong> ${response.device_action || 'None'}</p>${response.computed_values && response.computed_values.length ? `<p><strong>Computed values:</strong> ${response.computed_values.map((value) => `<code>${escHtml(value)}</code>`).join(', ')}</p>` : ''}${response.execution_error ? `<p style="color:red"><strong>Error:</strong> ${escHtml(response.execution_error)}</p>` : ''}${response.execution_result ? `<p style="color:green"><strong>Result:</strong> ${escHtml(response.execution_result)}</p>` : ''}`; 
+        const resultLabel = response.matched ? t.testMatched || '✅ MATCHED' : t.testNoMatch || '❌ NO MATCH';
+        content.innerHTML = `<p><strong>${resultLabel}</strong></p><p><strong>${t.testWouldTrigger || 'Would trigger device:'}:</strong> ${response.would_trigger ? 'Yes' : 'No'}</p><p><strong>${t.testDevice || 'Device:'}:</strong> ${response.device_id || 'None'}</p><p><strong>${t.testAction || 'Action:'}:</strong> ${response.device_action || 'None'}</p>${response.computed_values && response.computed_values.length ? `<p><strong>${t.testComputedValues || 'Computed values:'}:</strong> ${response.computed_values.map((value) => `<code>${escHtml(value)}</code>`).join(', ')}</p>` : ''}${response.execution_error ? `<p style="color:red"><strong>${t.testError_label || 'Error:'}:</strong> ${escHtml(response.execution_error)}</p>` : ''}${response.execution_result ? `<p style="color:green"><strong>${t.testResult || 'Result:'}:</strong> ${escHtml(response.execution_result)}</p>` : ''}`; 
     }
 
     function editConditionLogic(conditionId) { 
@@ -286,14 +291,14 @@
         group.style.display = 'block'; 
         while (actionSelect.options.length > 1) actionSelect.remove(1); 
         const labels = { 
-            on: 'Turn On', 
-            off: 'Turn Off', 
-            toggle: 'Toggle On/Off', 
-            color: 'Set Color', 
-            brightness: 'Set Brightness', 
-            color_temp: 'Set Color Temperature', 
-            scene: 'Scene Mode', 
-            flash: 'Flash Alert' 
+            on: t['deviceAction.on'] || 'Turn On', 
+            off: t['deviceAction.off'] || 'Turn Off', 
+            toggle: t['deviceAction.toggle'] || 'Toggle On/Off', 
+            color: t['deviceAction.color'] || 'Set Color', 
+            brightness: t['deviceAction.brightness'] || 'Set Brightness', 
+            color_temp: t['deviceAction.color_temp'] || 'Set Color Temperature', 
+            scene: t['deviceAction.scene'] || 'Scene Mode', 
+            flash: t['deviceAction.flash'] || 'Flash Alert' 
         }; 
         PRODUCTS[device.product_id].actions.forEach((action) => actionSelect.add(new Option(labels[action] || action, action))); 
         if (currentValue && PRODUCTS[device.product_id].actions.includes(currentValue)) actionSelect.value = currentValue; 

@@ -494,7 +494,7 @@ func (s *Server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 			// Check if this is a single condition page (has condition_id)
 			if len(parts) >= 4 {
 				conditionID := parts[3]
-				pageData := controller.PrepareConditionPageData(channelID, conditionID)
+				pageData := controller.PrepareConditionPageData(channelID, conditionID, data.I18n)
 				data.CurrentChannel = pageData.CurrentChannel
 				data.Condition = pageData.Condition
 				data.PlatformMeta = pageData.PlatformMeta

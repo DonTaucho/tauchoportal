@@ -5,6 +5,8 @@ import (
 	"html"
 	"sort"
 	"time"
+
+	"tauchoportal/internal/i18n"
 )
 
 // WatchForTemplate represents a watched channel as prepared for template rendering
@@ -151,8 +153,8 @@ func GetEventBadgeClasses(cond Conditions) map[string]string {
 	}
 }
 
-// GetEventFieldOptions returns available fields from the event schema as template options
-func GetEventFieldOptions(cond Conditions, platform, eventType string) []EventFieldOption {
+// GetEventFieldOptions returns available fields from the event schema with translated labels
+func GetEventFieldOptions(cond Conditions, platform, eventType string, translator *i18n.Translator) []EventFieldOption {
 	metadata := cond.GetEventMetadata(platform, eventType)
 
 	var options []EventFieldOption
@@ -176,8 +178,9 @@ func GetEventFieldOptions(cond Conditions, platform, eventType string) []EventFi
 
 		for _, entry := range entries {
 			label := entry.name
-			if entry.field.Description != "" {
-				label = entry.name + " — " + entry.field.Description
+			if translator != nil {
+				// Look up translation key: condition.{fieldname}
+				label = translator.T("condition." + entry.name)
 			}
 			options = append(options, EventFieldOption{
 				Name:  entry.name,
@@ -188,14 +191,16 @@ func GetEventFieldOptions(cond Conditions, platform, eventType string) []EventFi
 
 	// Fallback if no metadata available
 	if len(options) == 0 {
-		options = []EventFieldOption{
-			{Name: "message", Label: "message — Message content for comments, gifts, or subs"},
-			{Name: "sender_id", Label: "sender_id — Platform user ID of the sender"},
-			{Name: "sender_name", Label: "sender_name — Display name of the sender"},
-			{Name: "amount_value", Label: "amount_value — Numeric amount for monetary events"},
-			{Name: "amount_display", Label: "amount_display — Formatted display string"},
-			{Name: "is_member", Label: "is_member — Whether the sender is a channel member"},
-			{Name: "is_mod", Label: "is_mod — Whether the sender is a moderator"},
+		defaultFields := []string{"message", "sender_id", "sender_name", "amount_value", "amount_display", "is_member", "is_mod"}
+		for _, fieldName := range defaultFields {
+			label := fieldName
+			if translator != nil {
+				label = translator.T("condition." + fieldName)
+			}
+			options = append(options, EventFieldOption{
+				Name:  fieldName,
+				Label: label,
+			})
 		}
 	}
 
@@ -583,7 +588,7 @@ type ConditionPageData struct {
 }
 
 // PrepareConditionPageData prepares all data needed to render a single condition logic page
-func PrepareConditionPageData(channelID, conditionID string) *ConditionPageData {
+func PrepareConditionPageData(channelID, conditionID string, translator *i18n.Translator) *ConditionPageData {
 	// Fetch current channel
 	watches := Watches{}.ListWatches()
 	var currentChannel *ChannelForTemplate
@@ -621,6 +626,6 @@ func PrepareConditionPageData(channelID, conditionID string) *ConditionPageData 
 		CurrentChannel:    currentChannel,
 		Condition:         condForTemplate,
 		PlatformMeta:      GetPlatformMetadata(cond),
-		EventFieldOptions: GetEventFieldOptions(cond, currentChannel.Platform, condition.EventType),
+		EventFieldOptions: GetEventFieldOptions(cond, currentChannel.Platform, condition.EventType, translator),
 	}
 }

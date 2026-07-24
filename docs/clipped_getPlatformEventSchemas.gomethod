@@ -1,0 +1,198 @@
+
+// getPlatformEventSchemas returns platform-specific field definitions
+// Key format: "platform:event_type"
+func getPlatformEventSchemas() map[string][]EventFieldInfo {
+	return map[string][]EventFieldInfo{
+		// YouTube Comment
+		"youtube:comment": {
+			{Name: "message", Type: "string", Description: "Chat message content", Optional: false},
+			{Name: "sender_id", Type: "string", Description: "YouTube channel ID (authorDetails.channelId)", Optional: false},
+			{Name: "sender_name", Type: "string", Description: "Display name (authorDetails.displayName)", Optional: false},
+			{Name: "sender_avatar", Type: "string", Description: "Profile picture URL", Optional: true},
+			{Name: "is_member", Type: "boolean", Description: "Is channel member?", Optional: true},
+			{Name: "badges", Type: "array", Description: "Member/moderator badges", Optional: true},
+		},
+		// YouTube Super Chat
+		"youtube:superchat": {
+			{Name: "message", Type: "string", Description: "Super Chat message", Optional: true},
+			{Name: "amount_value", Type: "number", Description: "Amount in USD", Optional: false},
+			{Name: "amount_currency", Type: "string", Description: "Currency (USD)", Optional: false},
+			{Name: "amount_display", Type: "string", Description: "Formatted amount (e.g. $5.00)", Optional: false},
+			{Name: "sender_id", Type: "string", Description: "YouTube channel ID", Optional: false},
+			{Name: "sender_name", Type: "string", Description: "Display name", Optional: false},
+			{Name: "sender_avatar", Type: "string", Description: "Profile picture URL", Optional: true},
+		},
+		// YouTube Sticker
+		"youtube:sticker": {
+			{Name: "amount_value", Type: "number", Description: "Sticker price in USD", Optional: false},
+			{Name: "amount_currency", Type: "string", Description: "Currency (USD)", Optional: false},
+			{Name: "amount_display", Type: "string", Description: "Formatted price", Optional: false},
+			{Name: "sender_id", Type: "string", Description: "YouTube channel ID", Optional: false},
+			{Name: "sender_name", Type: "string", Description: "Display name", Optional: false},
+			{Name: "sender_avatar", Type: "string", Description: "Profile picture URL", Optional: true},
+		},
+		// NicoNico Comment (with danmaku formatting)
+		"niconico:comment": {
+			{Name: "content", Type: "string", Description: "Chat message content (field: content from comment data)", Optional: false},
+			{Name: "user_id", Type: "string", Description: "NicoNico user ID (anonymized in archived format)", Optional: false},
+			{Name: "date", Type: "number", Description: "Unix timestamp when comment was posted", Optional: false},
+			{Name: "mail", Type: "string", Description: "Danmaku formatting: color, size, position (e.g. 'white 184 big')", Optional: true},
+			{Name: "vpos_sec", Type: "number", Description: "Video position in seconds where comment appears", Optional: true},
+		},
+		// NicoNico 広告 (Advertisement / Nicoad)
+		// NOTE: User supports streaming via NicoNico points (free or purchased)
+		// This is monetization but amounts are not disclosed by NicoNico
+		"niconico:nicoad": {
+			{Name: "user_id", Type: "string", Description: "User who sent advertisement (NicoNico point)", Optional: false},
+			{Name: "amount_point", Type: "number", Description: "NicoNico points spent (actual monetary value not disclosed)", Optional: false},
+			{Name: "date", Type: "number", Description: "Unix timestamp", Optional: false},
+			{Name: "message", Type: "string", Description: "Optional message with advertisement", Optional: true},
+		},
+		// NicoNico ギフト (Gift)
+		// NOTE: Similar to 広告 but via gift/item system
+		"niconico:gift": {
+			{Name: "user_id", Type: "string", Description: "User who sent gift", Optional: false},
+			{Name: "gift_id", Type: "string", Description: "Gift item ID", Optional: true},
+			{Name: "gift_name", Type: "string", Description: "Gift name", Optional: true},
+			{Name: "amount", Type: "number", Description: "Amount spent or count", Optional: true},
+			{Name: "date", Type: "number", Description: "Unix timestamp", Optional: false},
+			{Name: "message", Type: "string", Description: "Optional message with gift", Optional: true},
+		},
+		// Twitch Comment
+		"twitch:comment": {
+			{Name: "message", Type: "string", Description: "Chat message", Optional: false},
+			{Name: "sender_id", Type: "string", Description: "Twitch user ID (user_id field)", Optional: false},
+			{Name: "sender_name", Type: "string", Description: "Twitch username (user_login field) or display name (user_name)", Optional: false},
+			{Name: "sender_avatar", Type: "string", Description: "Profile picture URL", Optional: true},
+			{Name: "is_mod", Type: "boolean", Description: "Is moderator?", Optional: true},
+			{Name: "is_member", Type: "boolean", Description: "Is subscriber?", Optional: true},
+			{Name: "badges", Type: "array", Description: "Mod, subscriber, bits badges", Optional: true},
+		},
+		// Twitch Cheer (Bits)
+		"twitch:cheer": {
+			{Name: "message", Type: "string", Description: "Cheer message", Optional: true},
+			{Name: "amount_value", Type: "number", Description: "Number of bits", Optional: false},
+			{Name: "amount_currency", Type: "string", Description: "Currency code (BITS)", Optional: false},
+			{Name: "amount_display", Type: "string", Description: "Formatted (e.g. 100 Bits)", Optional: false},
+			{Name: "sender_id", Type: "string", Description: "Twitch user ID", Optional: false},
+			{Name: "sender_name", Type: "string", Description: "Twitch username", Optional: false},
+			{Name: "is_anonymous", Type: "boolean", Description: "Anonymous cheer?", Optional: true},
+		},
+		// Twitch Subscribe
+		"twitch:sub": {
+			{Name: "message", Type: "string", Description: "Sub message", Optional: true},
+			{Name: "amount_value", Type: "number", Description: "Sub tier (1, 2, 3)", Optional: false},
+			{Name: "sender_id", Type: "string", Description: "Twitch user ID", Optional: false},
+			{Name: "sender_name", Type: "string", Description: "Twitch username", Optional: false},
+			{Name: "is_gift", Type: "boolean", Description: "Is gifted sub?", Optional: true},
+		},
+		// Bilibili Comment (Danmaku)
+		"bilibili:comment": {
+			{Name: "message", Type: "string", Description: "Danmaku message (msg field)", Optional: false},
+			{Name: "sender_id", Type: "string", Description: "UID (uid field from p attribute)", Optional: false},
+			{Name: "sender_name", Type: "string", Description: "Display name (uname - requires additional API call, may be empty)", Optional: true},
+			{Name: "color", Type: "string", Description: "Danmaku color from p attribute (e.g. 'white', '#FF0000')", Optional: true},
+			{Name: "size", Type: "string", Description: "Font size from p attribute", Optional: true},
+			{Name: "position", Type: "string", Description: "Screen position from p attribute", Optional: true},
+			{Name: "badges", Type: "array", Description: "User level, membership badges", Optional: true},
+		},
+		// Bilibili SuperChat
+		"bilibili:superchat": {
+			{Name: "message", Type: "string", Description: "Message", Optional: true},
+			{Name: "amount_value", Type: "number", Description: "Amount in yuan", Optional: false},
+			{Name: "amount_currency", Type: "string", Description: "Currency (CNY)", Optional: false},
+			{Name: "amount_display", Type: "string", Description: "Formatted amount", Optional: false},
+			{Name: "sender_id", Type: "string", Description: "UID", Optional: false},
+			{Name: "sender_name", Type: "string", Description: "Display name", Optional: false},
+		},
+		// TikTok Comment
+		"tiktok:comment": {
+			{Name: "message", Type: "string", Description: "Comment text (comment field)", Optional: false},
+			{Name: "sender_id", Type: "string", Description: "TikTok user ID (user.user_id)", Optional: false},
+			{Name: "sender_name", Type: "string", Description: "Display name (user.nickname)", Optional: false},
+			{Name: "sender_avatar", Type: "string", Description: "Profile picture (user.profile_picture_url)", Optional: true},
+		},
+		// TikTok Gift
+		"tiktok:gift": {
+			{Name: "sender_id", Type: "string", Description: "TikTok user ID (user.user_id)", Optional: false},
+			{Name: "sender_name", Type: "string", Description: "Display name (user.nickname)", Optional: false},
+			{Name: "sender_avatar", Type: "string", Description: "Profile picture (user.profile_picture_url)", Optional: true},
+			{Name: "gift_id", Type: "string", Description: "Gift ID", Optional: false},
+			{Name: "gift_name", Type: "string", Description: "Gift name", Optional: true},
+			{Name: "count", Type: "number", Description: "Number of gifts sent", Optional: false},
+			{Name: "diamond_count", Type: "number", Description: "Diamond cost (TikTok currency)", Optional: true},
+		},
+		// Facebook Comment
+		"facebook:comment": {
+			{Name: "message", Type: "string", Description: "Comment text (message field)", Optional: false},
+			{Name: "sender_id", Type: "string", Description: "Facebook user ID (from.id)", Optional: false},
+			{Name: "sender_name", Type: "string", Description: "User name (from.name)", Optional: false},
+			{Name: "comment_id", Type: "string", Description: "Comment ID", Optional: false},
+		},
+		// Facebook Reaction (on comments)
+		"facebook:reaction": {
+			{Name: "reaction_type", Type: "string", Description: "Reaction type (LIKE, LOVE, WOW, HAHA, SAD, ANGRY)", Optional: false},
+			{Name: "sender_id", Type: "string", Description: "User ID who reacted", Optional: false},
+			{Name: "sender_name", Type: "string", Description: "User name who reacted", Optional: true},
+			{Name: "comment_id", Type: "string", Description: "ID of the comment being reacted to", Optional: false},
+		},
+		// Kick Comment
+		"kick:comment": {
+			{Name: "message", Type: "string", Description: "Chat message (content field)", Optional: false},
+			{Name: "sender_id", Type: "string", Description: "User ID from sender object", Optional: false},
+			{Name: "sender_name", Type: "string", Description: "Username or display name", Optional: false},
+			{Name: "badges", Type: "array", Description: "User badges", Optional: true},
+		},
+		// Kick Gift
+		"kick:gift": {
+			{Name: "sender_id", Type: "string", Description: "User ID from sender object", Optional: false},
+			{Name: "sender_name", Type: "string", Description: "Username or display name", Optional: false},
+			{Name: "gift_type", Type: "string", Description: "Type of gift", Optional: true},
+			{Name: "amount_value", Type: "number", Description: "Gift amount or count", Optional: true},
+			{Name: "gift_message", Type: "string", Description: "Optional message with gift", Optional: true},
+		},
+		// TwitCasting Comment
+		"twitcasting:comment": {
+			{Name: "message", Type: "string", Description: "Comment text (comment field)", Optional: false},
+			{Name: "sender_id", Type: "string", Description: "User ID (user.id)", Optional: false},
+			{Name: "sender_name", Type: "string", Description: "Display name (user.name)", Optional: false},
+			{Name: "sender_avatar", Type: "string", Description: "Profile picture (user.image)", Optional: true},
+			{Name: "is_broadcaster", Type: "boolean", Description: "Is message from broadcaster?", Optional: true},
+		},
+		// TwitCasting Gift
+		"twitcasting:gift": {
+			{Name: "sender_id", Type: "string", Description: "User ID (user.id)", Optional: false},
+			{Name: "sender_name", Type: "string", Description: "Display name (user.name)", Optional: false},
+			{Name: "sender_avatar", Type: "string", Description: "Profile picture (user.image)", Optional: true},
+			{Name: "gift_id", Type: "string", Description: "Gift ID", Optional: false},
+			{Name: "gift_name", Type: "string", Description: "Gift name", Optional: false},
+			{Name: "gift_image_url", Type: "string", Description: "Gift image URL", Optional: true},
+			{Name: "count", Type: "number", Description: "Number of gifts", Optional: false},
+			{Name: "gift_message", Type: "string", Description: "Optional message with gift", Optional: true},
+		},
+		// X (Twitter) Comment
+		// NOTE: X does not have real-time live API; only supports filtered stream of tweets
+		// This is primarily for tweet content matching search filters (e.g., hashtag, keyword)
+		"x:comment": {
+			{Name: "message", Type: "string", Description: "Tweet text", Optional: false},
+			{Name: "sender_id", Type: "string", Description: "Author ID", Optional: false},
+			{Name: "sender_name", Type: "string", Description: "Author username or display name", Optional: false},
+			{Name: "created_at", Type: "timestamp", Description: "Tweet creation timestamp", Optional: false},
+		},
+	}
+}
+
+// getCommonEventFields returns the universal fields available in all event types
+func getCommonEventFields() []EventFieldInfo {
+	return []EventFieldInfo{
+		{Name: "id", Type: "string", Description: "Unique event ID (UUID)", Optional: false},
+		{Name: "user_id", Type: "number", Description: "Taucho user ID who owns the watch target", Optional: false},
+		{Name: "watch_target_id", Type: "string", Description: "Watch target ID this event is from", Optional: false},
+		{Name: "platform", Type: "string", Description: "Platform (youtube, twitch, niconico, etc.)", Optional: false},
+		{Name: "event_type", Type: "string", Description: "Event type (comment, superchat, gift, etc.)", Optional: false},
+		{Name: "received_at", Type: "timestamp", Description: "When event was received from platform", Optional: false},
+		{Name: "created_at", Type: "timestamp", Description: "When event was stored in database", Optional: false},
+		{Name: "raw", Type: "object", Description: "Full original platform JSON for additional fields", Optional: true},
+	}
+}
+
