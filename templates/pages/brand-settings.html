@@ -43,25 +43,25 @@
                 <article class="brand-card" data-brand-card data-brand-id="{{.ID}}" data-brand-title="{{.Name}}">
                     <div class="brand-card-header">
                         <div class="brand-card-identity">
-                            <div class="brand-logo" aria-hidden="true"><img src="/image/brand_{{.ID | replace "-" "_"}}.png" alt="{{.Name}}"></div>
+                            <div class="brand-logo" aria-hidden="true"><img src="/image/brand_{{.ID}}.png" alt="{{.Name}}"></div>
                             <div>
                                 <h3 class="brand-name">{{.Name}}</h3>
-                                <p class="brand-description">{{if .IsConnected}}{{.I18n.T "brandSettings.connected"}}{{else}}{{.I18n.T "brandSettings.notConnected"}}{{end}}</p>
+                                <p class="brand-description">{{if .IsConnected}}{{$.I18n.T "brandSettings.connected"}}{{else}}{{$.I18n.T "brandSettings.notConnected"}}{{end}}</p>
                             </div>
                         </div>
                         <span class="status-badge {{if .IsConnected}}connected{{else}}disconnected{{end}}" data-brand-status>
-                            {{if .IsConnected}}{{.I18n.T "brandSettings.connected"}}{{else}}{{.I18n.T "brandSettings.notConnected"}}{{end}}
+                            {{if .IsConnected}}{{$.I18n.T "brandSettings.connected"}}{{else}}{{$.I18n.T "brandSettings.notConnected"}}{{end}}
                         </span>
                     </div>
                     <div class="brand-details">
                         <div class="brand-detail-row">
-                            <span class="brand-detail-label">{{.I18n.T "brandSettings.lastConnected"}}</span>
-                            <span data-brand-last-connected>{{if .ConnectedAt}}{{.ConnectedAt}}{{else}}{{.I18n.T "brandSettings.neverConnected"}}{{end}}</span>
+                            <span class="brand-detail-label">{{$.I18n.T "brandSettings.lastConnected"}}</span>
+                            <span data-brand-last-connected>{{if .ConnectedAt}}{{.ConnectedAt}}{{else}}{{$.I18n.T "brandSettings.neverConnected"}}{{end}}</span>
                         </div>
                     </div>
                     <div class="brand-actions">
                         <button type="button" class="btn-connect brand-action-button" data-brand-action-button data-brand-action="{{if .IsConnected}}manage{{else}}connect{{end}}" data-brand-id="{{.ID}}">
-                            {{if .IsConnected}}{{.I18n.T "brandSettings.manage"}}{{else}}{{.I18n.T "brandSettings.connect"}}{{end}}
+                            {{if .IsConnected}}{{$.I18n.T "brandSettings.manage"}}{{else}}{{$.I18n.T "brandSettings.connect"}}{{end}}
                         </button>
                         {{if .IsConnected}}<button type="button" class="btn-disconnect brand-action-button" data-brand-action-button data-brand-action="disconnect" data-brand-id="{{.ID}}">{{.I18n.T "brandSettings.disconnect"}}</button>{{end}}
                         <span class="brand-note" data-brand-note hidden></span>

@@ -257,6 +257,38 @@
         width: 100%;
     }
 
+    .device-header-section {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        padding: 1rem;
+        display: flex;
+        flex-direction: column;
+        gap: 0.5rem;
+    }
+
+    .device-header-section[data-brand="govee"] {
+        background: linear-gradient(135deg, #ffc933 0%, #ffb200 100%);
+        color: #333;
+    }
+
+    .device-header-section[data-brand="philips_hue"],
+    .device-header-section[data-brand="philips-hue"] {
+        background: linear-gradient(135deg, #39b54a 0%, #2d8a3a 100%);
+        color: white;
+    }
+
+    .device-header-name {
+        font-weight: 600;
+        font-size: 1.05rem;
+        margin: 0;
+    }
+
+    .device-header-brand {
+        font-size: 0.85rem;
+        opacity: 0.9;
+        margin: 0;
+    }
+
     .device-body {
         flex: 1;
         padding: 1rem;
@@ -649,43 +681,23 @@
                 </div>
             </div>
 
-            <!-- Stats Row (pre-rendered) -->
-            <div class="stats-row">
-                {{$total := len .Devices.Devices}}
-                {{$online := 0}}
-                {{$offline := 0}}
-                {{$notConf := 0}}
-                {{range .Devices.Devices}}
-                    {{if eq .Status "online"}}{{$online = add $online 1}}{{end}}
-                    {{if eq .Status "offline"}}{{$offline = add $offline 1}}{{end}}
-                    {{if not .IsConfigured}}{{$notConf = add $notConf 1}}{{end}}
-                {{end}}
-                <div class="stat-card"><span class="stat-number">{{$total}}</span><span class="stat-label">{{.I18n.T "devices.statTotal"}}</span></div>
-                <div class="stat-card online"><span class="stat-number">{{$online}}</span><span class="stat-label">{{.I18n.T "devices.statOnline"}}</span></div>
-                <div class="stat-card offline"><span class="stat-number">{{$offline}}</span><span class="stat-label">{{.I18n.T "devices.statOffline"}}</span></div>
-                <div class="stat-card warn"><span class="stat-number">{{$notConf}}</span><span class="stat-label">{{.I18n.T "devices.statSetupIncomplete"}}</span></div>
-            </div>
         </div>
 
-        <!-- Filter Tabs (pre-rendered) -->
-        <div class="filter-tabs">
-            <button class="filter-tab active" data-filter="all" onclick="filterByBrand('all', this)">
-                {{.I18n.T "devices.allFilter"}} <span class="tab-count">{{len .Devices.Devices}}</span>
-            </button>
-            {{range $brandId := .Devices.BrandIDs}}
-                {{$brand := index $.Devices.Brands $brandId}}
-                {{$count := 0}}
-                {{range $.Devices.Devices}}
-                    {{if eq .Brand $brandId}}{{$count = add $count 1}}{{end}}
+        <!-- Quick Connect New Brand Section -->
+        <div style="background: #eaf4f8; border-radius: 8px; padding: 1.5rem; margin-bottom: 2rem;">
+            <h3 style="color: #0969da; margin-bottom: 1rem; font-size: 1rem; font-weight: 600;">🚀 {{.I18n.T "devices.quickConnect" "Quick Connect New Brand?"}}</h3>
+            <div style="display: flex; gap: 0.75rem; flex-wrap: wrap;">
+                {{$connectedBrands := dict}}
+                {{range .Devices.BrandsSorted}}
+                    {{$connectedBrands = set $connectedBrands .ID "true"}}
                 {{end}}
-                {{$brandLabel := $brandId}}
-                {{if $brand}}
-                    {{$brandLabel = $brand.Name}}
+                {{range .Devices.BrandsSorted}}
+                    {{if not (index $connectedBrands .ID)}}
+                    <button class="setup-btn" style="padding: 0.5rem 1rem; background: white; border: 1px solid #0969da; border-radius: 4px; color: #0969da; font-size: 0.9rem; cursor: pointer; transition: 0.2s;" onclick="goToBrandSettings()">+ Connect {{.Name}}</button>
+                    {{end}}
                 {{end}}
-                <button class="filter-tab" data-filter="{{$brandId}}" onclick="filterByBrand('{{$brandId}}', this)">
-                    🔌 {{$brandLabel}} <span class="tab-count">{{$count}}</span>
-                </button>
-            {{end}}
+                <button class="setup-btn" style="padding: 0.5rem 1rem; background: white; border: 1px solid #0969da; border-radius: 4px; color: #0969da; font-size: 0.9rem; cursor: pointer; transition: 0.2s;" onclick="goToBrandSettings()">⚙️ More Brands</button>
+            </div>
         </div>
 
         <!-- Device List (pre-rendered) with Catalog Injections -->
@@ -703,44 +715,32 @@
                 {{end}}
                 
                 <div class="device-card" data-id="{{$device.ID}}" data-brand="{{$device.Brand}}">
-                    <div class="device-accent" style="background:{{$brandColor}}"></div>
+                    <div class="device-header-section" data-brand="{{$device.Brand}}" style="background:linear-gradient(135deg, {{$brandColor}} 0%, {{$brandColor}} 100%);">
+                        <h4 class="device-header-name">{{$device.Name}}</h4>
+                        <p class="device-header-brand">{{$device.ProductName}}</p>
+                    </div>
                     <div class="device-body">
-                        <div class="device-brand">
-                            {{if $brandLogo}}
-                            <span class="device-brand-icon"><img src="{{$brandLogo}}" alt="{{$device.Brand}}" style="max-height:24px; width:auto;"></span>
+                        <div class="device-badges">
+                            {{if eq $device.Status "online"}}
+                            <span class="status-badge online">{{$.I18n.T "devices.statusBadgeOnline"}}</span>
                             {{else}}
-                            <span class="device-brand-icon">🔌</span>
+                            <span class="status-badge offline">{{$.I18n.T "devices.statusBadgeOffline"}}</span>
                             {{end}}
-                            <span class="device-brand-label">{{if $brand}}{{$brand.Name}}{{else}}{{$device.Brand}}{{end}}</span>
+                            {{if $device.Room}}
+                            <span class="device-room">🏠 {{$device.Room}}</span>
+                            {{end}}
                         </div>
-                        <div class="device-info">
-                            <div class="device-name">{{$device.Name}}</div>
-                            <div class="device-model">{{$device.ProductName}}</div>
-                            <div class="device-badges">
-                                {{if eq $device.Status "online"}}
-                                <span class="status-badge online">{{$.I18n.T "devices.statusBadgeOnline"}}</span>
-                                {{else}}
-                                <span class="status-badge offline">{{$.I18n.T "devices.statusBadgeOffline"}}</span>
+                        <div class="device-action-chips">
+                            {{range $aidx, $action := $device.SupportedActions}}
+                                {{if lt $aidx 5}}
+                                <span class="action-chip" data-action="{{$action}}">
+                                    {{$action}}
+                                </span>
                                 {{end}}
-                                {{if not $device.IsConfigured}}
-                                <span class="status-badge warn">{{$.I18n.T "devices.setupIncomplete"}}</span>
-                                {{end}}
-                                {{if $device.Room}}
-                                <span class="device-room">🏠 {{$device.Room}}</span>
-                                {{end}}
-                            </div>
-                            <div class="device-action-chips">
-                                {{range $aidx, $action := $device.SupportedActions}}
-                                    {{if lt $aidx 5}}
-                                    <span class="action-chip" data-action="{{$action}}">
-                                        {{$action}}
-                                    </span>
-                                    {{end}}
-                                {{end}}
-                                {{if gt (len $device.SupportedActions) 5}}
-                                <span class="action-chip more">+{{sub (len $device.SupportedActions) 5}}</span>
-                                {{end}}
-                            </div>
+                            {{end}}
+                            {{if gt (len $device.SupportedActions) 5}}
+                            <span class="action-chip more">+{{sub (len $device.SupportedActions) 5}}</span>
+                            {{end}}
                         </div>
                         <div class="device-ctrl">
                             <button class="action-btn test" onclick="testDevice('{{$device.ID}}')">{{$.I18n.T "devices.testButton"}}</button>
@@ -802,7 +802,14 @@
                     {{end}}
                 {{end}}
             {{end}}
-            {{end}}
+            <!-- Add New Device Card (dotted border, like in mock) -->
+            <div class="device-card" style="border: 2px dashed #0969da; display: flex; align-items: center; justify-content: center; min-height: 300px; cursor: pointer; background: white; padding: 2rem; text-align: center;" onclick="openAddModal()">
+                <div style="display: flex; flex-direction: column; align-items: center; gap: 1rem;">
+                    <h3 style="color: #0969da; font-size: 1.3rem; margin: 0;">+ Add New Device</h3>
+                    <p style="color: #666; font-size: 0.95rem; margin: 0;">Click to register a new device</p>
+                    <p style="color: #999; font-size: 0.85rem; margin: 0;">Choose from connected brands or set up a new brand</p>
+                </div>
+            </div>
         </div>
 
         <!-- Empty State -->
@@ -814,6 +821,17 @@
             <button class="btn btn-primary" onclick="openAddModal()">{{.I18n.T "devices.addFirstDevice"}}</button>
         </div>
         {{end}}
+
+        <!-- How to Use Legend Section -->
+        <div style="background: #f9f9f9; border-left: 4px solid #0969da; padding: 1.5rem; margin-top: 3rem; border-radius: 4px; font-size: 0.9rem;">
+            <p style="margin: 0 0 0.75rem 0; font-weight: 600; color: #1f2937;"><strong>{{.I18n.T "devices.howToUse" "How to use:"}}</strong></p>
+            <ul style="margin: 0; padding-left: 1.5rem; color: #555; line-height: 1.8;">
+                <li>{{.I18n.T "devices.howToUseStep1" "See all connected brands at the top. Click \"Manage Brands\" to add/edit brand credentials"}}
+                <li>{{.I18n.T "devices.howToUseStep2" "Use \"Quick Connect\" buttons to add new brands"}}
+                <li>{{.I18n.T "devices.howToUseStep3" "Each device is linked to a brand. Devices let you use brand features in your Channels and Conditions"}}
+                <li>{{.I18n.T "devices.howToUseStep4" "To set up a device, first ensure its brand is connected (via \"Manage Brands\")"}}
+            </ul>
+        </div>
     </div>
 
     <!-- Add / Edit Device Modal (Accordion Style) -->
