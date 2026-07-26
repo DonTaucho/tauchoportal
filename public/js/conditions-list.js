@@ -276,14 +276,17 @@
         } 
     }
 
-    function updateCondActionSelect() { 
+    async function updateCondActionSelect() { 
         const select = document.getElementById('condDeviceSelect'); 
         const device = (deviceCache || []).find((item) => item.id === select.value); 
         const group = document.getElementById('condActionSelectGroup'); 
         const actionSelect = document.getElementById('condActionSelect'); 
+        const sendingParamsSection = document.getElementById('sendingParamsSection');
+        
         if (!device || !PRODUCTS[device.product_id]?.actions?.length) { 
             group.style.display = 'none'; 
             actionSelect.value = ''; 
+            if (sendingParamsSection) sendingParamsSection.style.display = 'none';
             updateCondActionParams(); 
             return; 
         } 
@@ -302,6 +305,16 @@
         }; 
         PRODUCTS[device.product_id].actions.forEach((action) => actionSelect.add(new Option(labels[action] || action, action))); 
         if (currentValue && PRODUCTS[device.product_id].actions.includes(currentValue)) actionSelect.value = currentValue; 
+        
+        // Load device templates for sending parameters
+        if (sendingParamsSection && device.brand) {
+            try {
+                await loadDeviceTemplates(device.brand);
+            } catch (err) {
+                console.warn('[updateCondActionSelect] Failed to load device templates:', err);
+            }
+        }
+        
         updateCondActionParams(); 
     }
 
