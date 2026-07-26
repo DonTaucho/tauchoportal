@@ -1,32 +1,26 @@
 /**
  * Brand Settings - Brand Credentials Management
- * Uses actual /auth/brand/* API endpoints (6 implemented, 2 pending)
+ * Uses actual /auth/brand/* API endpoints (6 implemented)
  * 
- * Phase 1: API Key & Local Bridge brands (Govee, Hue, LIFX, Nanoleaf, Kasa, WiZ)
- * Phase 2: OAuth brands (Tuya) - wait for backend
+ * User ID obtained from server-side injection: window.__user.id
+ * Portal proxy automatically adds X-User-ID header to API calls
  */
 
 (function () {
   const API_BASE = window.API_BASE || '/api';
   
-  // Helper to get user ID from session
-  let cachedUserId = null;
-  async function getUserId() {
-    if (cachedUserId) return cachedUserId;
-    try {
-      const resp = await fetch(`${API_BASE}/auth/me`, { credentials: 'include' });
-      const data = await resp.json();
-      cachedUserId = data.id || data.user_id;
-      return cachedUserId;
-    } catch (e) {
-      console.error('Failed to get user ID:', e);
+  // Get user ID from server-injected data (not from API call)
+  function getUserId() {
+    if (!window.__user) {
+      console.error('User data not available - page not properly initialized');
       return null;
     }
+    return window.__user.id;
   }
 
   // API wrapper - all calls need X-User-ID header
-  async function apiCall(method, path, body = null) {
-    const userId = await getUserId();
+  function apiCall(method, path, body = null) {
+    const userId = getUserId();
     if (!userId) throw new Error('Not authenticated');
 
     const options = {
@@ -43,30 +37,30 @@
     }
 
     const url = `${API_BASE}${path}`;
-    const resp = await fetch(url, options);
-    
-    if (!resp.ok) {
-      const contentType = resp.headers.get('content-type') || '';
-      let errMsg = `HTTP ${resp.status}`;
-      
-      if (contentType.includes('application/json')) {
-        try {
-          const data = await resp.json();
-          errMsg = data.error || data.message || JSON.stringify(data);
-        } catch (e) {
-          errMsg = await resp.text();
+    return fetch(url, options).then(resp => {
+      if (!resp.ok) {
+        const contentType = resp.headers.get('content-type') || '';
+        let errMsg = `HTTP ${resp.status}`;
+        
+        if (contentType.includes('application/json')) {
+          return resp.json().then(data => {
+            errMsg = data.error || data.message || JSON.stringify(data);
+            throw new Error(errMsg);
+          }).catch(e => {
+            throw new Error(errMsg);
+          });
+        } else {
+          return resp.text().then(text => {
+            throw new Error(text || errMsg);
+          });
         }
-      } else {
-        errMsg = await resp.text();
       }
-      
-      throw new Error(errMsg);
-    }
 
-    if (resp.status === 204) return null;
-    
-    const contentType = resp.headers.get('content-type') || '';
-    return contentType.includes('application/json') ? resp.json() : resp.text();
+      if (resp.status === 204) return null;
+      
+      const contentType = resp.headers.get('content-type') || '';
+      return contentType.includes('application/json') ? resp.json() : resp.text();
+    });
   }
 
   // ==========================================
