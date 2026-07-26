@@ -685,7 +685,7 @@
 
         <!-- Quick Connect New Brand Section -->
         <div style="background: #eaf4f8; border-radius: 8px; padding: 1.5rem; margin-bottom: 2rem;">
-            <h3 style="color: #0969da; margin-bottom: 1rem; font-size: 1rem; font-weight: 600;">🚀 {{.I18n.T "devices.quickConnect" "Quick Connect New Brand?"}}</h3>
+            <h3 style="color: #0969da; margin-bottom: 1rem; font-size: 1rem; font-weight: 600;">🚀 {{.I18n.T "devices.quickConnect" }}</h3>
             <div style="display: flex; gap: 0.75rem; flex-wrap: wrap;">
                 <button style="padding: 0.5rem 1rem; background: white; border: 1px solid #0969da; border-radius: 4px; color: #0969da; font-size: 0.9rem; cursor: pointer; transition: 0.2s;" onclick="goToBrandSettings()">+ Connect LIFX</button>
                 <button style="padding: 0.5rem 1rem; background: white; border: 1px solid #0969da; border-radius: 4px; color: #0969da; font-size: 0.9rem; cursor: pointer; transition: 0.2s;" onclick="goToBrandSettings()">+ Connect WiZ</button>
@@ -819,7 +819,7 @@
 
         <!-- How to Use Legend Section -->
         <div style="background: #f9f9f9; border-left: 4px solid #0969da; padding: 1.5rem; margin-top: 3rem; border-radius: 4px; font-size: 0.9rem;">
-            <p style="margin: 0 0 0.75rem 0; font-weight: 600; color: #1f2937;"><strong>{{.I18n.T "devices.howToUse" "How to use:"}}</strong></p>
+            <p style="margin: 0 0 0.75rem 0; font-weight: 600; color: #1f2937;"><strong>{{.I18n.T "devices.howToUse" }}</strong></p>
             <ul style="margin: 0; padding-left: 1.5rem; color: #555; line-height: 1.8;">
                 <li>See all connected brands at the top. Click "Manage Brands" to add/edit brand credentials</li>
                 <li>Use "Quick Connect" buttons to add new brands</li>
@@ -925,7 +925,7 @@
                                     
                                     <!-- Include brand-specific catalog partial using dynamic rendering -->
                                     {{renderCatalog $brandId .}}
-                                </div>
+                                </div>o
                             </div>
                         {{end}}
                         

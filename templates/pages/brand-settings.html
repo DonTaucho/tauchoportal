@@ -63,7 +63,7 @@
                         <button type="button" class="btn-connect brand-action-button" data-brand-action-button data-brand-action="{{if .IsConnected}}manage{{else}}connect{{end}}" data-brand-id="{{.ID}}">
                             {{if .IsConnected}}{{$.I18n.T "brandSettings.manage"}}{{else}}{{$.I18n.T "brandSettings.connect"}}{{end}}
                         </button>
-                        {{if .IsConnected}}<button type="button" class="btn-disconnect brand-action-button" data-brand-action-button data-brand-action="disconnect" data-brand-id="{{.ID}}">{{.I18n.T "brandSettings.disconnect"}}</button>{{end}}
+                        {{if .IsConnected}}<button type="button" class="btn-disconnect brand-action-button" data-brand-action-button data-brand-action="disconnect" data-brand-id="{{.ID}}">{{$.I18n.T "brandSettings.disconnect"}}</button>{{end}}
                         <span class="brand-note" data-brand-note hidden></span>
                     </div>
                 </article>
