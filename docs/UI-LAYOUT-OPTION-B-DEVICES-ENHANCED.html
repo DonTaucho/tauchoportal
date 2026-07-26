@@ -1,0 +1,240 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Option B: Devices Page Enhanced (Primary)</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Arial, sans-serif; background: #f5f5f5; padding: 20px; }
+    .container { max-width: 1200px; margin: 0 auto; background: white; border-radius: 8px; overflow: hidden; box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
+    
+    header { background: #2c3e50; color: white; padding: 20px; display: flex; justify-content: space-between; align-items: center; }
+    header h1 { font-size: 24px; }
+    .header-action { display: flex; gap: 10px; }
+    
+    .content { padding: 30px; }
+    
+    .section-title { font-size: 18px; font-weight: 600; margin: 30px 0 15px 0; border-bottom: 2px solid #3498db; padding-bottom: 10px; }
+    .section-title:first-of-type { margin-top: 0; }
+    
+    /* Brand Status Bar */
+    .brand-status-bar { background: #ecf0f1; border-radius: 8px; padding: 15px; margin-bottom: 25px; display: flex; gap: 15px; align-items: center; flex-wrap: wrap; }
+    
+    .brand-pill { display: inline-flex; align-items: center; gap: 8px; background: white; padding: 8px 12px; border-radius: 20px; border: 1px solid #ddd; font-size: 12px; }
+    .brand-pill.connected { border-color: #27ae60; background: #eafaf1; }
+    .brand-pill.connected:after { content: "✓"; color: #27ae60; font-weight: bold; }
+    .brand-pill.disconnected { border-color: #e74c3c; background: #fadbd8; }
+    .brand-pill.disconnected:after { content: "✗"; color: #e74c3c; font-weight: bold; }
+    
+    .brand-icon { width: 18px; height: 18px; border-radius: 3px; display: inline-block; margin-left: 4px; }
+    .brand-icon.govee { background: #ffc933; }
+    .brand-icon.hue { background: #39b54a; }
+    .brand-icon.wiz { background: #9b59b6; }
+    .brand-icon.kasa { background: #3498db; }
+    
+    .manage-brands-link { margin-left: auto; }
+    .manage-brands-link a { color: #2980b9; text-decoration: none; font-weight: 500; display: flex; align-items: center; gap: 5px; }
+    .manage-brands-link a:hover { text-decoration: underline; }
+    
+    /* Devices Grid */
+    .devices-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 20px; }
+    
+    .device-card { border: 1px solid #ddd; border-radius: 8px; overflow: hidden; transition: box-shadow 0.2s; }
+    .device-card:hover { box-shadow: 0 4px 12px rgba(0,0,0,0.15); }
+    
+    .device-header { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 15px; }
+    .device-header.govee { background: linear-gradient(135deg, #ffc933 0%, #ffb200 100%); color: #333; }
+    .device-header.hue { background: linear-gradient(135deg, #39b54a 0%, #2d8a3a 100%); }
+    
+    .device-name { font-weight: 600; font-size: 16px; margin-bottom: 4px; }
+    .device-brand { font-size: 12px; opacity: 0.9; }
+    
+    .device-content { padding: 15px; }
+    .device-meta { font-size: 12px; color: #666; line-height: 1.8; margin-bottom: 12px; }
+    .meta-row { display: flex; gap: 10px; margin: 6px 0; }
+    .meta-label { color: #999; min-width: 80px; font-weight: 500; }
+    
+    .warning-banner { background: #fadbd8; border-left: 4px solid #e74c3c; padding: 10px; border-radius: 4px; font-size: 12px; color: #c0392b; margin-bottom: 12px; display: flex; gap: 8px; align-items: center; }
+    .warning-icon { color: #e74c3c; font-weight: bold; }
+    
+    .device-actions { display: flex; gap: 8px; }
+    .btn { flex: 1; padding: 8px 12px; border: none; border-radius: 4px; font-size: 12px; cursor: pointer; transition: 0.2s; }
+    .btn-primary { background: #3498db; color: white; }
+    .btn-primary:hover { background: #2980b9; }
+    .btn-secondary { background: #ecf0f1; color: #333; }
+    .btn-secondary:hover { background: #d5dbdb; }
+    .btn-danger { background: #e74c3c; color: white; }
+    .btn-danger:hover { background: #c0392b; }
+    .btn-sm { padding: 6px 10px; font-size: 11px; }
+    .btn-full { width: 100%; }
+    
+    /* Add Device Card */
+    .add-device-card { border: 2px dashed #3498db; border-radius: 8px; padding: 40px 20px; text-align: center; cursor: pointer; transition: 0.2s; display: flex; flex-direction: column; align-items: center; justify-content: center; min-height: 200px; }
+    .add-device-card:hover { background: #ecf0f1; }
+    .add-device-card h3 { color: #2980b9; font-size: 16px; margin-bottom: 8px; }
+    .add-device-card p { color: #666; font-size: 13px; }
+    
+    .quick-setup { background: #eaf4f8; border-radius: 8px; padding: 20px; margin-bottom: 25px; }
+    .quick-setup h3 { color: #2980b9; margin-bottom: 12px; font-size: 14px; }
+    .setup-options { display: flex; gap: 10px; flex-wrap: wrap; }
+    .setup-btn { padding: 8px 15px; background: white; border: 1px solid #3498db; border-radius: 4px; color: #2980b9; font-size: 12px; cursor: pointer; transition: 0.2s; }
+    .setup-btn:hover { background: #3498db; color: white; }
+    
+    .legend { background: #f9f9f9; border-left: 4px solid #3498db; padding: 15px; margin-top: 40px; font-size: 12px; }
+    .legend p { margin: 8px 0; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <header>
+      <h1>Devices</h1>
+      <div class="header-action">
+        <button class="btn btn-primary">+ Add Device</button>
+      </div>
+    </header>
+    
+    <div class="content">
+      <!-- Brand Connection Status -->
+      <div class="brand-status-bar">
+        <span style="font-weight: 500; color: #555;">Connected brands:</span>
+        <div class="brand-pill connected">
+          Govee <span class="brand-icon govee"></span>
+        </div>
+        <div class="brand-pill connected">
+          Philips Hue <span class="brand-icon hue"></span>
+        </div>
+        <div class="brand-pill disconnected">
+          LIFX
+        </div>
+        <div class="brand-pill disconnected">
+          WiZ
+        </div>
+        <div class="manage-brands-link">
+          <a href="#" onclick="alert('Open Brand Settings')" title="Manage brand connections and credentials">
+            ⚙️ Manage Brands →
+          </a>
+        </div>
+      </div>
+      
+      <!-- Quick Setup for Unconnected Brands -->
+      <div class="quick-setup">
+        <h3>🚀 Quick Connect New Brand?</h3>
+        <div class="setup-options">
+          <button class="setup-btn">+ Connect LIFX</button>
+          <button class="setup-btn">+ Connect WiZ</button>
+          <button class="setup-btn">+ Connect Nanoleaf</button>
+          <button class="setup-btn">⚙️ More Brands</button>
+        </div>
+      </div>
+      
+      <!-- Devices Section -->
+      <h2 class="section-title">Your Devices</h2>
+      
+      <div class="devices-grid">
+        <!-- Device Card - Govee -->
+        <div class="device-card">
+          <div class="device-header govee">
+            <div class="device-name">Bedroom Light</div>
+            <div class="device-brand">Govee RGBIC Strip</div>
+          </div>
+          <div class="device-content">
+            <div class="device-meta">
+              <div class="meta-row">
+                <span class="meta-label">Brand:</span>
+                <span>Govee</span>
+              </div>
+              <div class="meta-row">
+                <span class="meta-label">Model:</span>
+                <span>LED Strip (H6159)</span>
+              </div>
+              <div class="meta-row">
+                <span class="meta-label">Status:</span>
+                <span style="color: #27ae60;">● Connected</span>
+              </div>
+            </div>
+            
+            <div class="device-actions">
+              <button class="btn btn-secondary btn-sm">Edit</button>
+              <button class="btn btn-danger btn-sm">Remove</button>
+            </div>
+          </div>
+        </div>
+        
+        <!-- Device Card - Govee -->
+        <div class="device-card">
+          <div class="device-header govee">
+            <div class="device-name">Living Room Strip</div>
+            <div class="device-brand">Govee Smart Light</div>
+          </div>
+          <div class="device-content">
+            <div class="device-meta">
+              <div class="meta-row">
+                <span class="meta-label">Brand:</span>
+                <span>Govee</span>
+              </div>
+              <div class="meta-row">
+                <span class="meta-label">Model:</span>
+                <span>Smart Bulb (H5080)</span>
+              </div>
+              <div class="meta-row">
+                <span class="meta-label">Status:</span>
+                <span style="color: #27ae60;">● Connected</span>
+              </div>
+            </div>
+            
+            <div class="device-actions">
+              <button class="btn btn-secondary btn-sm">Edit</button>
+              <button class="btn btn-danger btn-sm">Remove</button>
+            </div>
+          </div>
+        </div>
+        
+        <!-- Device Card - Philips Hue -->
+        <div class="device-card">
+          <div class="device-header hue">
+            <div class="device-name">Desk Lamp</div>
+            <div class="device-brand">Philips Hue Color A19</div>
+          </div>
+          <div class="device-content">
+            <div class="device-meta">
+              <div class="meta-row">
+                <span class="meta-label">Brand:</span>
+                <span>Philips Hue</span>
+              </div>
+              <div class="meta-row">
+                <span class="meta-label">Bridge:</span>
+                <span>192.168.1.50</span>
+              </div>
+              <div class="meta-row">
+                <span class="meta-label">Status:</span>
+                <span style="color: #27ae60;">● Connected</span>
+              </div>
+            </div>
+            
+            <div class="device-actions">
+              <button class="btn btn-secondary btn-sm">Edit</button>
+              <button class="btn btn-danger btn-sm">Remove</button>
+            </div>
+          </div>
+        </div>
+        
+        <!-- Add Device -->
+        <div class="add-device-card" onclick="alert('Open add device modal')">
+          <h3>+ Add New Device</h3>
+          <p>Click to register a new device</p>
+          <p style="font-size: 11px; margin-top: 8px; color: #999;">Choose from connected brands or set up a new brand</p>
+        </div>
+      </div>
+      
+      <div class="legend">
+        <p><strong>How to use:</strong></p>
+        <p>• See all connected brands at the top. Click "Manage Brands" to add/edit brand credentials</p>
+        <p>• Use "Quick Connect" buttons to add new brands</p>
+        <p>• Each device is linked to a brand. Devices let you use brand features in your Channels and Conditions</p>
+        <p>• To set up a device, first ensure its brand is connected (via "Manage Brands")</p>
+      </div>
+    </div>
+  </div>
+</body>
+</html>

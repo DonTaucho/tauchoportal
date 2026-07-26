@@ -1,0 +1,231 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Option C: Better Navigation Between Separate Pages</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Arial, sans-serif; background: #f5f5f5; padding: 20px; }
+    .container { max-width: 1200px; margin: 0 auto; background: white; border-radius: 8px; overflow: hidden; box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
+    
+    /* Side-by-side layout for comparison */
+    .comparison-layout { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+    
+    .page { border: 1px solid #ddd; border-radius: 8px; overflow: hidden; }
+    
+    header { background: #2c3e50; color: white; padding: 20px; }
+    header h1 { font-size: 24px; margin-bottom: 5px; }
+    header p { font-size: 12px; opacity: 0.8; }
+    
+    .content { padding: 20px; }
+    
+    .section-title { font-size: 14px; font-weight: 600; margin: 20px 0 12px 0; border-bottom: 2px solid #3498db; padding-bottom: 8px; }
+    .section-title:first-of-type { margin-top: 0; }
+    
+    /* Breadcrumb / Quick Links */
+    .quick-link-bar { background: #ecf0f1; padding: 10px; border-radius: 4px; margin-bottom: 15px; font-size: 12px; }
+    .quick-link-bar a { color: #2980b9; text-decoration: none; margin-right: 15px; cursor: pointer; display: inline-flex; align-items: center; gap: 5px; }
+    .quick-link-bar a:hover { text-decoration: underline; }
+    .arrow { color: #999; }
+    
+    /* Mini Brand Status */
+    .mini-status { background: #f9f9f9; border: 1px solid #ddd; border-radius: 4px; padding: 10px; margin-bottom: 15px; font-size: 11px; }
+    .status-item { display: flex; justify-content: space-between; margin: 4px 0; }
+    .status-dot { display: inline-block; width: 6px; height: 6px; border-radius: 50%; margin-right: 5px; }
+    .status-dot.connected { background: #27ae60; }
+    .status-dot.disconnected { background: #e74c3c; }
+    
+    .devices-list { font-size: 12px; }
+    .device-item { padding: 8px; border: 1px solid #ecf0f1; border-radius: 3px; margin-bottom: 6px; background: #f9f9f9; }
+    .device-item .brand { color: #999; font-size: 10px; }
+    
+    .btn { padding: 8px 12px; border: none; border-radius: 4px; font-size: 12px; cursor: pointer; transition: 0.2s; }
+    .btn-primary { background: #3498db; color: white; }
+    .btn-primary:hover { background: #2980b9; }
+    .btn-secondary { background: #ecf0f1; color: #333; }
+    .btn-secondary:hover { background: #d5dbdb; }
+    .btn-sm { padding: 6px 10px; font-size: 11px; }
+    .btn-full { width: 100%; display: block; margin-top: 10px; }
+    
+    .note { background: #eaf4f8; border-left: 3px solid #3498db; padding: 10px; border-radius: 4px; font-size: 11px; color: #2c3e50; margin-top: 15px; }
+    
+    .comparison-note { background: #fff3cd; border-left: 3px solid #ffc107; padding: 15px; border-radius: 4px; margin-bottom: 20px; }
+    .comparison-note h2 { font-size: 14px; margin-bottom: 8px; }
+    .comparison-note p { font-size: 12px; line-height: 1.6; }
+  </style>
+</head>
+<body>
+  <div class="comparison-note">
+    <h2>Option C: Better Navigation Between Separate Pages</h2>
+    <p>Keep Brand Settings and Devices as separate pages, but make it obvious they're related with navigation links and quick-reference info. Lighter than Option A/B, but still feels integrated.</p>
+  </div>
+  
+  <div class="comparison-layout">
+    <!-- LEFT SIDE: DEVICES PAGE -->
+    <div class="page">
+      <header>
+        <h1>Devices</h1>
+        <p>Manage your smart devices</p>
+      </header>
+      
+      <div class="content">
+        <!-- Quick Link to Brand Settings -->
+        <div class="quick-link-bar">
+          <a href="#" onclick="alert('Go to Brand Settings')">
+            ⚙️ Manage Brands
+            <span class="arrow">→</span>
+          </a>
+          <span style="color: #999;">Set up API keys, connect accounts</span>
+        </div>
+        
+        <!-- Mini Brand Status Widget -->
+        <div class="section-title">Brand Status</div>
+        <div class="mini-status">
+          <div class="status-item">
+            <span><span class="status-dot connected"></span> Govee</span>
+            <span style="color: #27ae60;">✓</span>
+          </div>
+          <div class="status-item">
+            <span><span class="status-dot connected"></span> Philips Hue</span>
+            <span style="color: #27ae60;">✓</span>
+          </div>
+          <div class="status-item">
+            <span><span class="status-dot disconnected"></span> LIFX</span>
+            <span style="color: #e74c3c;">✗</span>
+          </div>
+          <div class="status-item">
+            <span><span class="status-dot disconnected"></span> WiZ</span>
+            <span style="color: #e74c3c;">✗</span>
+          </div>
+          <button class="btn btn-primary btn-sm btn-full">Connect New Brand</button>
+        </div>
+        
+        <!-- Devices List -->
+        <div class="section-title">Your Devices</div>
+        <div class="devices-list">
+          <div class="device-item">
+            <strong>Bedroom Light</strong>
+            <div class="brand">Govee → RGBIC Strip</div>
+          </div>
+          <div class="device-item">
+            <strong>Living Room</strong>
+            <div class="brand">Govee → Smart Bulb</div>
+          </div>
+          <div class="device-item">
+            <strong>Desk Lamp</strong>
+            <div class="brand">Philips Hue → Color A19</div>
+          </div>
+        </div>
+        
+        <button class="btn btn-primary btn-full">+ Add Device</button>
+        
+        <div class="note">
+          <strong>💡 Tip:</strong> Need to connect a new brand first? Use "Manage Brands" above to set up credentials.
+        </div>
+      </div>
+    </div>
+    
+    <!-- RIGHT SIDE: BRAND SETTINGS PAGE -->
+    <div class="page">
+      <header>
+        <h1>Brand Settings</h1>
+        <p>Connect your smart home accounts</p>
+      </header>
+      
+      <div class="content">
+        <!-- Quick Link to Devices -->
+        <div class="quick-link-bar">
+          <a href="#" onclick="alert('Go to Devices')">
+            📱 View Devices
+            <span class="arrow">→</span>
+          </a>
+          <span style="color: #999;">See all your devices</span>
+        </div>
+        
+        <!-- Quick Links by Brand -->
+        <div class="section-title">Connected Brands</div>
+        <div class="devices-list" style="margin-bottom: 15px;">
+          <div class="device-item">
+            <strong>✓ Govee</strong>
+            <div class="brand">API Key • 3 devices</div>
+            <div style="margin-top: 6px;">
+              <button class="btn btn-secondary btn-sm">Settings</button>
+              <button class="btn btn-secondary btn-sm">Test</button>
+            </div>
+          </div>
+          <div class="device-item">
+            <strong>✓ Philips Hue</strong>
+            <div class="brand">Bridge IP • 2 devices</div>
+            <div style="margin-top: 6px;">
+              <button class="btn btn-secondary btn-sm">Settings</button>
+              <button class="btn btn-secondary btn-sm">Test</button>
+            </div>
+          </div>
+        </div>
+        
+        <div class="section-title">Available Brands</div>
+        <div class="devices-list">
+          <div class="device-item">
+            <strong>LIFX</strong>
+            <div class="brand">Cloud API</div>
+            <div style="margin-top: 6px;">
+              <button class="btn btn-primary btn-sm">Connect</button>
+            </div>
+          </div>
+          <div class="device-item">
+            <strong>WiZ</strong>
+            <div class="brand">Local/Cloud</div>
+            <div style="margin-top: 6px;">
+              <button class="btn btn-primary btn-sm">Connect</button>
+            </div>
+          </div>
+        </div>
+        
+        <div class="note">
+          <strong>💡 Tip:</strong> After connecting a brand, go to "Devices" to add your devices.
+        </div>
+      </div>
+    </div>
+  </div>
+  
+  <div style="background: white; padding: 30px; margin-top: 20px; border-radius: 8px; border: 1px solid #ddd;">
+    <h2 style="color: #2c3e50; margin-bottom: 15px; font-size: 16px;">Option C: Implementation Details</h2>
+    
+    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px; font-size: 12px; line-height: 1.8; color: #555;">
+      <div>
+        <h3 style="color: #2980b9; margin-bottom: 10px;">✓ Advantages</h3>
+        <ul style="margin-left: 20px;">
+          <li>Keeps pages logically separate (good for structure)</li>
+          <li>Minimal changes to current UI</li>
+          <li>Clear navigation between related pages</li>
+          <li>Mini-widgets show context without full page load</li>
+          <li>Quick links prevent users from getting lost</li>
+        </ul>
+      </div>
+      
+      <div>
+        <h3 style="color: #e74c3c; margin-bottom: 10px;">✗ Disadvantages</h3>
+        <ul style="margin-left: 20px;">
+          <li>Still feels disconnected (two separate pages)</li>
+          <li>User must navigate between pages to complete workflow</li>
+          <li>Status info must be kept in sync (duplication risk)</li>
+          <li>Managing brand AND devices feels like multiple steps</li>
+          <li>Doesn't reduce cognitive load much vs. current</li>
+        </ul>
+      </div>
+    </div>
+    
+    <h3 style="color: #2c3e50; margin-top: 25px; margin-bottom: 10px; font-size: 14px;">User Flow Example</h3>
+    <p style="background: #f9f9f9; padding: 12px; border-left: 3px solid #3498db; font-size: 11px; color: #666;">
+      User wants to add new LIFX device:<br>
+      1. Currently on Devices page<br>
+      2. Sees "LIFX not connected" in Brand Status widget<br>
+      3. Clicks "Connect New Brand" → goes to Brand Settings<br>
+      4. Clicks "Connect" for LIFX → enters credentials<br>
+      5. Gets link "Go to Devices" after connecting<br>
+      6. Back on Devices page → clicks "+ Add Device" → selects LIFX device
+    </p>
+  </div>
+</body>
+</html>
