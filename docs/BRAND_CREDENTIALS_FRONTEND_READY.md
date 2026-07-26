@@ -84,15 +84,21 @@ The new script is framework-agnostic and dynamically renders the entire brand gr
 
 ## 🔑 Key Implementation Details
 
-### User Authentication
+### User Authentication (CORRECTED)
 ```javascript
-// All API calls include X-User-ID header
-// Header is automatically added by apiCall() wrapper
+// User data is injected by server in base template
+// Available as window.__user (contains: id, username, email, picture)
+const userId = window.__user.id;
+
+// All API calls include this ID in X-User-ID header
+// Portal proxy forwards requests with this header
 headers: {
   'X-User-ID': String(userId),
   'Content-Type': 'application/json'
 }
 ```
+
+**Important:** The user ID comes from server-side injection, NOT from an API call. The `/auth/me` endpoint does not exist. User data must be obtained via the server template variable `window.__user`.
 
 ### Credential Fields
 Response from `GET /auth/brand/{id}` includes:
