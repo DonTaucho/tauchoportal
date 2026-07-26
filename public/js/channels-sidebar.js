@@ -13,9 +13,9 @@
         { id: 'instagram', label: 'Instagram', hasOAuth: true, publicAccess: false },
         { id: 'tiktok', label: 'TikTok', hasOAuth: false, publicAccess: false },
         { id: 'facebook', label: 'Facebook', hasOAuth: true, publicAccess: false },
-        { id: 'x', label: 'X', hasOAuth: false, publicAccess: false },
+        { id: 'x', label: 'X', hasOAuth: true, publicAccess: false },
     ];
-    const PROVIDER_MAP = { google: 'youtube', twitch: 'twitch', niconico: 'niconico', twitcasting: 'twitcasting', instagram: 'instagram', facebook: 'facebook' };
+    const PROVIDER_MAP = { google: 'youtube', twitch: 'twitch', niconico: 'niconico', twitcasting: 'twitcasting', instagram: 'instagram', facebook: 'facebook', x: 'x' };
     const state = { connectedSet: new Set(), existingWatchSet: new Set(), selectedChannel: null, accordionLoaded: new Set(), accSearchTimers: new Map(), onChannelsChanged: null };
     const esc = (v) => escHtml(v);
 
@@ -106,6 +106,8 @@
                 endpoint = `/platform/instagram/user/mine`;
             } else if (platformId === 'facebook') {
                 endpoint = `/platform/facebook/page/mine`;
+            } else if (platformId === 'x') {
+                endpoint = `/platform/x/user/mine`;
             } else {
                 endpoint = `/platform/${platformId}/channels/mine`;
             }
