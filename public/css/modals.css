@@ -304,3 +304,88 @@
     cursor: not-allowed;
 }
 
+/* =============================================
+   Sending Parameters / Device Action Params
+   ============================================= */
+
+.json-editor {
+    font-family: 'Monaco', 'Courier New', monospace;
+    font-size: 0.9rem;
+    background: #f9f9f9;
+    border: 1px solid #e0e0e0 !important;
+    line-height: 1.5;
+    color: #333;
+}
+
+.json-editor:focus {
+    background: #fff;
+    border-color: #4CAF50 !important;
+}
+
+.form-help {
+    display: block;
+    font-size: 0.85rem;
+    color: #666;
+    margin-top: 0.25rem;
+    margin-bottom: 0.5rem;
+    line-height: 1.4;
+}
+
+.section-note {
+    background: #f0f8ff;
+    border-left: 3px solid #4CAF50;
+    padding: 0.75rem;
+    border-radius: 3px;
+    font-size: 0.9rem;
+    color: #666;
+    margin-bottom: 1rem;
+}
+
+.result-preview {
+    color: #333;
+}
+
+.result-preview pre {
+    margin: 0;
+    white-space: pre-wrap;
+    word-wrap: break-word;
+}
+
+.form-section {
+    border: none;
+    padding: 1rem;
+    margin: 1.5rem 0;
+    background: #f9f9f9;
+    border-radius: 4px;
+}
+
+.form-section legend {
+    font-weight: 600;
+    margin-bottom: 0.75rem;
+    font-size: 0.95rem;
+    color: #222;
+    padding: 0 0.5rem;
+}
+
+.optional-label {
+    font-size: 0.8rem;
+    color: #999;
+    font-weight: normal;
+    margin-left: 0.5rem;
+}
+
+.checkbox-label {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    cursor: pointer;
+    font-weight: normal;
+    color: #333;
+}
+
+.checkbox-label input[type="checkbox"] {
+    width: auto;
+    cursor: pointer;
+}
+
+

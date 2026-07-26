@@ -201,7 +201,7 @@
                                     <div class="owned-devices-section">
                                         {{range $.Devices.Devices}}
                                             {{if eq .Brand $brandId}}
-                                            <div class="product-item" onclick="selectProduct('{{.Brand}}', '{{.ProductName}}', '{{.Name}}')">
+                                            <div class="product-item" onclick="selectProduct('{{.Brand}}', '{{.ProductID}}', '{{.ProductName}}', '{{.Name}}', {{toJSON .Credentials}})">
                                                 <div class="product-info">
                                                     <span class="product-name">{{.Name}}</span>
                                                     <span class="product-actions">{{.ProductName}}</span>
@@ -515,7 +515,7 @@
         item.classList.toggle('open', !isOpen);
     }
     
-    function selectProduct(brandId, productId, productName) {
+    function selectProduct(brandId, productId, productName, deviceName, credentials) {
         selectedBrand = brandId;
         selectedProduct = productId;
         selectedProductName = productName;
@@ -525,12 +525,50 @@
         } else {
             const brand = BRANDS.find(b => b.id === brandId);
             setStep2Brand(brand);
+            
+            // Set the product model display (read-only)
             document.getElementById('devProductDisplay').value = productName;
             document.getElementById('devProduct').value = productId;
+            
+            // Set the display name to the device name, or suggest product name
+            const devNameInput = document.getElementById('devName');
+            if (deviceName) {
+                devNameInput.value = deviceName;
+            } else {
+                devNameInput.value = '';
+                devNameInput.placeholder = 'e.g., ' + productName;
+            }
+            
+            // Fill credentials if they exist
+            if (credentials && typeof credentials === 'object') {
+                Object.keys(credentials).forEach(key => {
+                    const credField = document.getElementById('cred_' + key);
+                    if (credField && credentials[key]) {
+                        credField.value = credentials[key];
+                    }
+                });
+            }
+            
             renderCredFields(brandId);
         }
         
         document.getElementById('deviceForm').reset();
+        // Restore values that were just set
+        if (brandId !== 'custom') {
+            document.getElementById('devProductDisplay').value = productName;
+            document.getElementById('devProduct').value = productId;
+            if (deviceName) {
+                document.getElementById('devName').value = deviceName;
+            }
+            if (credentials && typeof credentials === 'object') {
+                Object.keys(credentials).forEach(key => {
+                    const credField = document.getElementById('cred_' + key);
+                    if (credField && credentials[key]) {
+                        credField.value = credentials[key];
+                    }
+                });
+            }
+        }
         document.getElementById('devSaveBtn').textContent = 'Add Device';
         showStep(2);
     }
@@ -542,7 +580,7 @@
     }
 
     function goToStep1() {
-        renderBrandAccordion();
+        //renderBrandAccordion();
         showStep(1);
     }
 

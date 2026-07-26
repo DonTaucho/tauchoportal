@@ -34,7 +34,6 @@ body {
 .page-header p {
     color: #666;
     font-size: 0.95rem;
-    max-width: 600px;
 }
 
 .acc-item svg {
@@ -492,15 +491,16 @@ body {
 }
 
 .channel-edit {
-    max-width: 92px;
+    width: 110px;
 }
 
 .channel-edit button {
     height: 34px;
     width: 34px;
 }
-.channel-detail-card .channel-edit button {
-    min-width: 90px;
+
+#view-channel .channel-edit button {
+    width: 100%;
 }
 
 .platform-icon.large {

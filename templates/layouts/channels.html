@@ -236,6 +236,63 @@
                             <label for="condBrightness">{{.I18n.T "channelLayout.brightness"}}: <span id="condBrightnessVal">50</span>%</label>
                             <input type="range" id="condBrightness" min="1" max="100" value="50" oninput="document.getElementById('condBrightnessVal').textContent=this.value">
                         </div>
+
+                        <!-- NEW: Sending Parameters Section -->
+                        <div id="sendingParamsSection" style="display:none">
+                            <div class="form-group">
+                                <h5 style="margin:1rem 0 0.5rem; color:#666;">{{.I18n.T "channelLayout.sendingParams"}}</h5>
+                                <p class="section-note">{{.I18n.TH "channelLayout.sendingParamsNote"}}</p>
+                            </div>
+                            
+                            <!-- Device Action Body Template -->
+                            <div class="form-group">
+                                <label for="condDeviceActionBody">{{.I18n.T "channelLayout.actionBodyTemplate"}}</label>
+                                <p class="form-help">{{.I18n.TH "channelLayout.actionBodyHelp"}}</p>
+                                <textarea id="condDeviceActionBody" class="json-editor" rows="6" placeholder='{"state":"on","brightness":50}' oninput="updateParamNameDropdown(); updateResultPreview();"></textarea>
+                                <div id="bodyValidationMsg" class="form-help" style="color:#888;"></div>
+                            </div>
+
+                            <!-- Parameter Name Selection -->
+                            <div class="form-group">
+                                <label for="condParamName">{{.I18n.T "channelLayout.paramName"}}</label>
+                                <p class="form-help">{{.I18n.TH "channelLayout.paramNameHelp"}}</p>
+                                <select id="condParamName" onchange="updateResultPreview()">
+                                    <option value="">{{.I18n.T "channelLayout.selectParam"}}</option>
+                                </select>
+                            </div>
+
+                            <!-- Parameter Evaluator / Logic -->
+                            <div class="form-group">
+                                <label>{{.I18n.T "channelLayout.paramEvaluator"}}</label>
+                                <p class="form-help">{{.I18n.TH "channelLayout.paramEvaluatorHelp"}}</p>
+                                
+                                <!-- Evaluator Type Selection -->
+                                <div class="form-group">
+                                    <label for="evaluatorType">{{.I18n.T "channelLayout.evaluatorType"}}</label>
+                                    <select id="evaluatorType" onchange="updateEvaluatorUI(); updateResultPreview()">
+                                        <option value="">{{.I18n.T "channelLayout.selectEvaluatorType"}}</option>
+                                        <option value="extract_number">{{.I18n.T "channelLayout.extractNumber"}}</option>
+                                        <option value="extract_hex_color">{{.I18n.T "channelLayout.extractHexColor"}}</option>
+                                        <option value="extract_text">{{.I18n.T "channelLayout.extractText"}}</option>
+                                        <option value="regex_extract">{{.I18n.T "channelLayout.regexExtract"}}</option>
+                                        <option value="conditional">{{.I18n.T "channelLayout.conditional"}}</option>
+                                        <option value="fixed_value">{{.I18n.T "channelLayout.fixedValue"}}</option>
+                                    </select>
+                                </div>
+
+                                <!-- Evaluator UI Container (populated based on type) -->
+                                <div id="evaluatorUIContainer" style="margin-top:0.75rem;"></div>
+                            </div>
+
+                            <!-- Result Preview -->
+                            <div class="form-group">
+                                <label>{{.I18n.T "channelLayout.resultPreview"}}</label>
+                                <div class="result-preview" id="resultPreview" style="background:#f9f9f9;border:1px solid #ddd;border-radius:4px;padding:0.75rem;font-family:monospace;font-size:0.9rem;max-height:200px;overflow:auto;display:none;">
+                                    <pre id="resultPreviewContent"></pre>
+                                </div>
+                                <p class="form-help" id="previewHelp" style="margin-top:0.5rem;">{{.I18n.TH "channelLayout.resultPreviewHelp"}}</p>
+                            </div>
+                        </div>
                     </div>
                 </fieldset>
                 <div class="form-group">
