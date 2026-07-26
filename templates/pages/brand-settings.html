@@ -4,7 +4,7 @@
 <link rel="stylesheet" href="/css/modals.css">
 <link rel="stylesheet" href="/css/account-settings.css">
 <link rel="stylesheet" href="/css/brand-settings.css">
-<script src="/js/brand-settings-new.js" defer></script>
+<script src="/js/brand-settings.js" defer></script>
 {{end}}
 
 {{define "content"}}
@@ -39,204 +39,35 @@
                 data-save-failed-message="{{.I18n.T "brandSettings.error.saveFailed"}}"
                 data-disconnect-failed-message="{{.I18n.T "brandSettings.error.disconnectFailed"}}"></div>
             <div id="brandsGrid" class="brands">
-                <article class="brand-card" data-brand-card data-brand-id="govee" data-brand-title="{{.I18n.T "brand.govee.title"}}" data-brand-description="{{.I18n.T "brand.govee.description"}}" data-connect-label="{{.I18n.T "brand.govee.connectButton"}}" data-disconnect-label="{{.I18n.T "brand.govee.disconnectButton"}}">
+                {{range .Brands}}
+                <article class="brand-card" data-brand-card data-brand-id="{{.ID}}" data-brand-title="{{.Name}}">
                     <div class="brand-card-header">
                         <div class="brand-card-identity">
-                            <div class="brand-logo" aria-hidden="true"><img src="/image/brand_govee.png"></div>
+                            <div class="brand-logo" aria-hidden="true"><img src="/image/brand_{{.ID | replace "-" "_"}}.png" alt="{{.Name}}"></div>
                             <div>
-                                <h3 class="brand-name">{{.I18n.T "brand.govee.title"}}</h3>
-                                <p class="brand-description">{{.I18n.T "brand.govee.description"}}</p>
+                                <h3 class="brand-name">{{.Name}}</h3>
+                                <p class="brand-description">{{if .IsConnected}}{{.I18n.T "brandSettings.connected"}}{{else}}{{.I18n.T "brandSettings.notConnected"}}{{end}}</p>
                             </div>
                         </div>
-                        <span class="status-badge disconnected" data-brand-status>{{.I18n.T "brandSettings.notConnected"}}</span>
+                        <span class="status-badge {{if .IsConnected}}connected{{else}}disconnected{{end}}" data-brand-status>
+                            {{if .IsConnected}}{{.I18n.T "brandSettings.connected"}}{{else}}{{.I18n.T "brandSettings.notConnected"}}{{end}}
+                        </span>
                     </div>
                     <div class="brand-details">
                         <div class="brand-detail-row">
                             <span class="brand-detail-label">{{.I18n.T "brandSettings.lastConnected"}}</span>
-                            <span data-brand-last-connected>{{.I18n.T "brandSettings.neverConnected"}}</span>
+                            <span data-brand-last-connected>{{if .ConnectedAt}}{{.ConnectedAt}}{{else}}{{.I18n.T "brandSettings.neverConnected"}}{{end}}</span>
                         </div>
                     </div>
                     <div class="brand-actions">
-                        <button type="button" class="btn-connect brand-action-button" data-brand-action-button data-brand-action="connect" data-brand-id="govee">{{.I18n.T "brand.govee.connectButton"}}</button>
+                        <button type="button" class="btn-connect brand-action-button" data-brand-action-button data-brand-action="{{if .IsConnected}}manage{{else}}connect{{end}}" data-brand-id="{{.ID}}">
+                            {{if .IsConnected}}{{.I18n.T "brandSettings.manage"}}{{else}}{{.I18n.T "brandSettings.connect"}}{{end}}
+                        </button>
+                        {{if .IsConnected}}<button type="button" class="btn-disconnect brand-action-button" data-brand-action-button data-brand-action="disconnect" data-brand-id="{{.ID}}">{{.I18n.T "brandSettings.disconnect"}}</button>{{end}}
                         <span class="brand-note" data-brand-note hidden></span>
                     </div>
                 </article>
-                <article class="brand-card" data-brand-card data-brand-id="philips-hue" data-brand-title="{{.I18n.T "brand.philips-hue.title"}}" data-brand-description="{{.I18n.T "brand.philips-hue.description"}}" data-connect-label="{{.I18n.T "brand.philips-hue.connectButton"}}" data-disconnect-label="{{.I18n.T "brand.philips-hue.disconnectButton"}}">
-                    <div class="brand-card-header">
-                        <div class="brand-card-identity">
-                            <div class="brand-logo" aria-hidden="true"><img src="/image/brand_philips.png"></div>
-                            <div>
-                                <h3 class="brand-name">{{.I18n.T "brand.philips-hue.title"}}</h3>
-                                <p class="brand-description">{{.I18n.T "brand.philips-hue.description"}}</p>
-                            </div>
-                        </div>
-                        <span class="status-badge disconnected" data-brand-status>{{.I18n.T "brandSettings.notConnected"}}</span>
-                    </div>
-                    <div class="brand-details">
-                        <div class="brand-detail-row">
-                            <span class="brand-detail-label">{{.I18n.T "brandSettings.lastConnected"}}</span>
-                            <span data-brand-last-connected>{{.I18n.T "brandSettings.neverConnected"}}</span>
-                        </div>
-                    </div>
-                    <div class="brand-actions">
-                        <button type="button" class="btn-connect brand-action-button" data-brand-action-button data-brand-action="connect" data-brand-id="philips-hue">{{.I18n.T "brand.philips-hue.connectButton"}}</button>
-                        <span class="brand-note" data-brand-note hidden></span>
-                    </div>
-                </article>
-                <article class="brand-card" data-brand-card data-brand-id="wiz" data-brand-title="{{.I18n.T "brand.wiz.title"}}" data-brand-description="{{.I18n.T "brand.wiz.description"}}" data-connect-label="{{.I18n.T "brand.wiz.connectButton"}}" data-disconnect-label="{{.I18n.T "brand.wiz.disconnectButton"}}">
-                    <div class="brand-card-header">
-                        <div class="brand-card-identity">
-                            <div class="brand-logo" aria-hidden="true"><img src="/image/brand_wiz.png"></div>
-                            <div>
-                                <h3 class="brand-name">{{.I18n.T "brand.wiz.title"}}</h3>
-                                <p class="brand-description">{{.I18n.T "brand.wiz.description"}}</p>
-                            </div>
-                        </div>
-                        <span class="status-badge disconnected" data-brand-status>{{.I18n.T "brandSettings.notConnected"}}</span>
-                    </div>
-                    <div class="brand-details">
-                        <div class="brand-detail-row">
-                            <span class="brand-detail-label">{{.I18n.T "brandSettings.lastConnected"}}</span>
-                            <span data-brand-last-connected>{{.I18n.T "brandSettings.neverConnected"}}</span>
-                        </div>
-                    </div>
-                    <div class="brand-actions">
-                        <button type="button" class="btn-connect brand-action-button" data-brand-action-button data-brand-action="connect" data-brand-id="wiz">{{.I18n.T "brand.wiz.connectButton"}}</button>
-                        <span class="brand-note" data-brand-note hidden></span>
-                    </div>
-                </article>
-                <article class="brand-card" data-brand-card data-brand-id="lifx" data-brand-title="{{.I18n.T "brand.lifx.title"}}" data-brand-description="{{.I18n.T "brand.lifx.description"}}" data-connect-label="{{.I18n.T "brand.lifx.connectButton"}}" data-disconnect-label="{{.I18n.T "brand.lifx.disconnectButton"}}">
-                    <div class="brand-card-header">
-                        <div class="brand-card-identity">
-                            <div class="brand-logo" aria-hidden="true"><img src="/image/brand_lifx.png"></div>
-                            <div>
-                                <h3 class="brand-name">{{.I18n.T "brand.lifx.title"}}</h3>
-                                <p class="brand-description">{{.I18n.T "brand.lifx.description"}}</p>
-                            </div>
-                        </div>
-                        <span class="status-badge disconnected" data-brand-status>{{.I18n.T "brandSettings.notConnected"}}</span>
-                    </div>
-                    <div class="brand-details">
-                        <div class="brand-detail-row">
-                            <span class="brand-detail-label">{{.I18n.T "brandSettings.lastConnected"}}</span>
-                            <span data-brand-last-connected>{{.I18n.T "brandSettings.neverConnected"}}</span>
-                        </div>
-                    </div>
-                    <div class="brand-actions">
-                        <button type="button" class="btn-connect brand-action-button" data-brand-action-button data-brand-action="connect" data-brand-id="lifx">{{.I18n.T "brand.lifx.connectButton"}}</button>
-                        <span class="brand-note" data-brand-note hidden></span>
-                    </div>
-                </article>
-                <article class="brand-card" data-brand-card data-brand-id="nanoleaf" data-brand-title="{{.I18n.T "brand.nanoleaf.title"}}" data-brand-description="{{.I18n.T "brand.nanoleaf.description"}}" data-connect-label="{{.I18n.T "brand.nanoleaf.connectButton"}}" data-disconnect-label="{{.I18n.T "brand.nanoleaf.disconnectButton"}}">
-                    <div class="brand-card-header">
-                        <div class="brand-card-identity">
-                            <div class="brand-logo" aria-hidden="true"><img src="/image/brand_nanoleaf.png"></div>
-                            <div>
-                                <h3 class="brand-name">{{.I18n.T "brand.nanoleaf.title"}}</h3>
-                                <p class="brand-description">{{.I18n.T "brand.nanoleaf.description"}}</p>
-                            </div>
-                        </div>
-                        <span class="status-badge disconnected" data-brand-status>{{.I18n.T "brandSettings.notConnected"}}</span>
-                    </div>
-                    <div class="brand-details">
-                        <div class="brand-detail-row">
-                            <span class="brand-detail-label">{{.I18n.T "brandSettings.lastConnected"}}</span>
-                            <span data-brand-last-connected>{{.I18n.T "brandSettings.neverConnected"}}</span>
-                        </div>
-                    </div>
-                    <div class="brand-actions">
-                        <button type="button" class="btn-connect brand-action-button" data-brand-action-button data-brand-action="connect" data-brand-id="nanoleaf">{{.I18n.T "brand.nanoleaf.connectButton"}}</button>
-                        <span class="brand-note" data-brand-note hidden></span>
-                    </div>
-                </article>
-                <article class="brand-card" data-brand-card data-brand-id="tp-link-kasa" data-brand-title="{{.I18n.T "brand.tp-link-kasa.title"}}" data-brand-description="{{.I18n.T "brand.tp-link-kasa.description"}}" data-connect-label="{{.I18n.T "brand.tp-link-kasa.connectButton"}}" data-disconnect-label="{{.I18n.T "brand.tp-link-kasa.disconnectButton"}}">
-                    <div class="brand-card-header">
-                        <div class="brand-card-identity">
-                            <div class="brand-logo" aria-hidden="true"><img src="/image/brand_tplink.png"></div>
-                            <div>
-                                <h3 class="brand-name">{{.I18n.T "brand.tp-link-kasa.title"}}</h3>
-                                <p class="brand-description">{{.I18n.T "brand.tp-link-kasa.description"}}</p>
-                            </div>
-                        </div>
-                        <span class="status-badge disconnected" data-brand-status>{{.I18n.T "brandSettings.notConnected"}}</span>
-                    </div>
-                    <div class="brand-details">
-                        <div class="brand-detail-row">
-                            <span class="brand-detail-label">{{.I18n.T "brandSettings.lastConnected"}}</span>
-                            <span data-brand-last-connected>{{.I18n.T "brandSettings.neverConnected"}}</span>
-                        </div>
-                    </div>
-                    <div class="brand-actions">
-                        <button type="button" class="btn-connect brand-action-button" data-brand-action-button data-brand-action="connect" data-brand-id="tp-link-kasa">{{.I18n.T "brand.tp-link-kasa.connectButton"}}</button>
-                        <span class="brand-note" data-brand-note hidden></span>
-                    </div>
-                </article>
-                <article class="brand-card" data-brand-card data-brand-id="wled" data-brand-title="{{.I18n.T "brand.wled.title"}}" data-brand-description="{{.I18n.T "brand.wled.description"}}" data-connect-label="{{.I18n.T "brand.wled.connectButton"}}" data-disconnect-label="{{.I18n.T "brand.wled.disconnectButton"}}">
-                    <div class="brand-card-header">
-                        <div class="brand-card-identity">
-                            <div class="brand-logo" aria-hidden="true"><img src="/image/brand_wled.png"></div>
-                            <div>
-                                <h3 class="brand-name">{{.I18n.T "brand.wled.title"}}</h3>
-                                <p class="brand-description">{{.I18n.T "brand.wled.description"}}</p>
-                            </div>
-                        </div>
-                        <span class="status-badge disconnected" data-brand-status>{{.I18n.T "brandSettings.notConnected"}}</span>
-                    </div>
-                    <div class="brand-details">
-                        <div class="brand-detail-row">
-                            <span class="brand-detail-label">{{.I18n.T "brandSettings.lastConnected"}}</span>
-                            <span data-brand-last-connected>{{.I18n.T "brandSettings.neverConnected"}}</span>
-                        </div>
-                    </div>
-                    <div class="brand-actions">
-                        <button type="button" class="btn-connect brand-action-button" data-brand-action-button data-brand-action="connect" data-brand-id="wled">{{.I18n.T "brand.wled.connectButton"}}</button>
-                        <span class="brand-note" data-brand-note hidden></span>
-                    </div>
-                </article>
-                <article class="brand-card" data-brand-card data-brand-id="yeelight" data-brand-title="{{.I18n.T "brand.yeelight.title"}}" data-brand-description="{{.I18n.T "brand.yeelight.description"}}" data-connect-label="{{.I18n.T "brand.yeelight.connectButton"}}" data-disconnect-label="{{.I18n.T "brand.yeelight.disconnectButton"}}">
-                    <div class="brand-card-header">
-                        <div class="brand-card-identity">
-                            <div class="brand-logo" aria-hidden="true"><img src="/image/brand_yeelight.png"></div>
-                            <div>
-                                <h3 class="brand-name">{{.I18n.T "brand.yeelight.title"}}</h3>
-                                <p class="brand-description">{{.I18n.T "brand.yeelight.description"}}</p>
-                            </div>
-                        </div>
-                        <span class="status-badge disconnected" data-brand-status>{{.I18n.T "brandSettings.notConnected"}}</span>
-                    </div>
-                    <div class="brand-details">
-                        <div class="brand-detail-row">
-                            <span class="brand-detail-label">{{.I18n.T "brandSettings.lastConnected"}}</span>
-                            <span data-brand-last-connected>{{.I18n.T "brandSettings.neverConnected"}}</span>
-                        </div>
-                    </div>
-                    <div class="brand-actions">
-                        <button type="button" class="btn-connect brand-action-button" data-brand-action-button data-brand-action="connect" data-brand-id="yeelight">{{.I18n.T "brand.yeelight.connectButton"}}</button>
-                        <span class="brand-note" data-brand-note hidden></span>
-                    </div>
-                </article>
-                <article class="brand-card is-external" data-brand-card data-brand-id="amazon-alexa" data-brand-title="{{.I18n.T "brand.amazon-alexa.title"}}" data-brand-description="{{.I18n.T "brand.amazon-alexa.description"}}" data-connect-label="{{.I18n.T "brand.amazon-alexa.connectButton"}}" data-disconnect-label="{{.I18n.T "brand.amazon-alexa.disconnectButton"}}">
-                    <div class="brand-card-header">
-                        <div class="brand-card-identity">
-                            <div class="brand-logo" aria-hidden="true"><img src="/image/brand_amazon.png"></div>
-                            <div>
-                                <h3 class="brand-name">{{.I18n.T "brand.amazon-alexa.title"}}</h3>
-                                <p class="brand-description">{{.I18n.T "brand.amazon-alexa.description"}}</p>
-                            </div>
-                        </div>
-                        <span class="status-badge info" data-brand-status>{{.I18n.T "brandSettings.status.external"}}</span>
-                    </div>
-                    <div class="brand-details">
-                        <div class="brand-detail-row">
-                            <span class="brand-detail-label">{{.I18n.T "brandSettings.lastConnected"}}</span>
-                            <span data-brand-last-connected>{{.I18n.T "brandSettings.neverConnected"}}</span>
-                        </div>
-                    </div>
-                    <div class="brand-actions">
-                        <button type="button" class="btn-connect brand-action-button" data-brand-action-button data-brand-id="amazon-alexa" disabled>{{.I18n.T "brand.amazon-alexa.connectButton"}}</button>
-                        <span class="brand-note" data-brand-note>{{.I18n.T "brand.amazon-alexa.description"}}</span>
-                    </div>
-                </article>
+                {{end}}
             </div>
         </section>
     </div>

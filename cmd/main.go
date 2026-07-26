@@ -43,6 +43,7 @@ type PageData struct {
 	Devices                 *controller.DevicesPageData
 	Channels                *controller.ChannelsPageData
 	Dashboard               *controller.DashboardPageData
+	Brands                  []controller.ConnectedBrand
 	PlatformMeta            map[string]map[string]interface{}
 	EventBadgeClass         map[string]string
 	EventFieldOptions       []controller.EventFieldOption
@@ -367,6 +368,9 @@ func loadTemplates() map[string]*template.Template {
 		"formatTimeAgo": formatTimeAgo,
 		"getEventLabel":  controller.GetEventLabel,
 		"formatDateTime": controller.FormatDateTime,
+		"replace": func(s, old, new string) string {
+			return strings.ReplaceAll(s, old, new)
+		},
 		"renderCatalog": func(brandID string, data interface{}) (template.HTML, error) {
 			if globalTemplates == nil {
 				return "", fmt.Errorf("templates not loaded")
@@ -542,6 +546,13 @@ func (s *Server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		pageData := controller.PrepareChannelsPageData()
 		data.Channels = pageData
 	}
+
+	// Fetch brand-settings page data if on /brand-settings page
+	if cfg.Name == "brand-settings" {
+		brandSettings := controller.BrandSettings{}
+		data.Brands = brandSettings.ListBrands()
+	}
+
 	if err := tmpl.ExecuteTemplate(w, "page", data); err != nil {
 		log.Printf("failed to render page %s: %v", cfg.Name, err)
 		http.Error(w, "failed to render page", http.StatusInternalServerError)
