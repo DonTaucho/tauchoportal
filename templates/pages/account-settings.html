@@ -15,12 +15,12 @@
             <!-- ── Connected Accounts (functional) ─────────────────────── -->
             <section id="section-connections" class="settings-section active">
                 <div class="section-header">
-                    <h2>Connected Accounts</h2>
-                    <p>Link or unlink OAuth providers. Connected providers can be used to log in to this account.</p>
+                    <h2>{{.I18n.T "accountSettings.connectedAccounts"}}</h2>
+                    <p>{{.I18n.T "accountSettings.connectedAccountsDesc"}}</p>
                 </div>
-                <div id="connectionsMsg" class="status-msg">Loading…</div>
+                <div id="connectionsMsg" class="status-msg">{{.I18n.T "accountSettings.loading"}}</div>
                 <div id="providersList" class="providers-list"></div>
-                <p class="section-note">Google (YouTube), Twitch, NicoNico, TwitCasting, Instagram, and Facebook OAuth are active. Other providers are reserved for future integration.</p>
+                <p class="section-note">{{.I18n.T "accountSettings.providers"}}</p>
             </section>
             
         </div><!-- /settings-content -->
@@ -35,29 +35,28 @@
         <div id="nicoStep1">
             <div class="modal-header">
                 <span class="close" onclick="closeNicoModal()">&times;</span>
-                <h2 id="nicoModalTitle">🔴 Connect NicoNico</h2>
+                <h2 id="nicoModalTitle">{{.I18n.T "accountSettings.nicoConnect"}}</h2>
             </div>
             <div class="modal-body">
                 <div class="nico-privacy-note">
-                    ⚠️ Your password is used <strong>once</strong> to obtain a login session and is <strong>never stored</strong>.
-                    This is a temporary measure while official OAuth is pending from Dwango.
+                    {{.I18n.T "accountSettings.nicoPrivacy"}}
                 </div>
                 <div class="form-row">
-                    <label for="nicoEmail">NicoNico email / phone</label>
+                    <label for="nicoEmail">{{.I18n.T "accountSettings.nicoEmailLabel"}}</label>
                     <input id="nicoEmail" type="text" autocomplete="email" placeholder="user@example.com">
                 </div>
                 <div class="form-row">
-                    <label for="nicoPass">Password</label>
+                    <label for="nicoPass">{{.I18n.T "accountSettings.nicoPasswordLabel"}}</label>
                     <div class="password-field">
                         <input id="nicoPass" type="password" autocomplete="off" placeholder="••••••••">
-                        <button type="button" class="toggle-pw" onclick="toggleNicoPassword()" tabindex="-1" aria-label="Show/hide password">👁</button>
+                        <button type="button" class="toggle-pw" onclick="toggleNicoPassword()" tabindex="-1" aria-label="{{.I18n.T "accountSettings.togglePasswordAria"}}">👁</button>
                     </div>
                 </div>
                 <div id="nicoStep1Error" class="nico-error" style="display:none"></div>
             </div>
             <div class="modal-footer">
-                <button class="btn btn-secondary" onclick="closeNicoModal()">Cancel</button>
-                <button id="nicoStep1Btn" class="btn btn-primary" onclick="submitNicoLogin()">Connect NicoNico →</button>
+                <button class="btn btn-secondary" onclick="closeNicoModal()">{{.I18n.T "button.cancel"}}</button>
+                <button id="nicoStep1Btn" class="btn btn-primary" onclick="submitNicoLogin()">{{.I18n.T "accountSettings.nicoStep1Btn"}}</button>
             </div>
         </div>
 
@@ -65,31 +64,37 @@
         <div id="nicoStep2" style="display:none">
             <div class="modal-header">
                 <span class="close" onclick="closeNicoModal()">&times;</span>
-                <h2 class="modal-title">🔴 NicoNico Two-Factor Auth</h2>
+                <h2 class="modal-title">{{.I18n.T "accountSettings.nicoMfaTitle"}}</h2>
             </div>
             <div class="modal-body">
-                <p class="nico-mfa-desc">A 6-digit code was sent to your NicoNico email address. Enter it below.</p>
-                <p class="nico-mfa-hint">Didn't receive a code? ← Go back and double-check your email and password.</p>
+                <p class="nico-mfa-desc">{{.I18n.T "accountSettings.nicoMfaDesc"}}</p>
+                <p class="nico-mfa-hint">{{.I18n.T "accountSettings.nicoMfaHint"}}</p>
                 <div class="form-row">
-                    <label for="nicoOtp">One-time code</label>
+                    <label for="nicoOtp">{{.I18n.T "accountSettings.nicoOtpLabel"}}</label>
                     <div class="otp-row">
                         <input id="nicoOtp" type="text" inputmode="numeric" pattern="[0-9]*"
-                               maxlength="12" autocomplete="one-time-code" placeholder="123456">
+                               maxlength="12" autocomplete="one-time-code" placeholder="{{.I18n.T "accountSettings.nicoOtpPlaceholder"}}">
                         <span id="nicoCountdown" class="nico-countdown">10:00</span>
                     </div>
                 </div>
                 <div id="nicoStep2Error" class="nico-error" style="display:none"></div>
             </div>
             <div class="modal-footer">
-                <button class="btn btn-secondary" onclick="nicoBackToStep1()">← Back</button>
-                <button id="nicoStep2Btn" class="btn btn-primary" onclick="submitNicoMfa()">Verify &amp; Connect</button>
+                <button class="btn btn-secondary" onclick="nicoBackToStep1()">{{.I18n.T "accountSettings.nicoBackBtn"}}</button>
+                <button id="nicoStep2Btn" class="btn btn-primary" onclick="submitNicoMfa()">{{.I18n.T "accountSettings.nicoVerifyBtn"}}</button>
             </div>
         </div>
 
     </div>
 </div>
 
+<script id="accountSettingsTranslations" type="application/json">
+{{.I18n.TByPrefix "accountSettings" | jsonMarshal}}
+</script>
 <script>
+    const t = JSON.parse(document.getElementById('accountSettingsTranslations').textContent);
+    const formatMessage = (template, ...args) => String(template || '').replace(/\{(\d+)\}/g, (_, i) => args[Number(i)] ?? '');
+
     // ── Provider definitions ──────────────────────────────────────────────
     const PROVIDERS = [
         { id: 'google',      name: 'YouTube',     icon: 'youtube'   },
@@ -168,7 +173,7 @@
             connections = [];
             nicoStatus = { connected: false };
             hasPassword = false;
-            msgEl.textContent = 'Failed to load connections: ' + e.message;
+            msgEl.textContent = t.failedToLoad + e.message;
             msgEl.className = 'status-msg error-msg';
             return;
         }
@@ -178,8 +183,15 @@
         const params = new URLSearchParams(window.location.search);
         const justConnected = params.get('connected');
         if (justConnected) {
-            const names = { google: 'YouTube/Google', twitch: 'Twitch', instagram: 'Instagram', facebook: 'Facebook' };
-            showToast((names[justConnected] || justConnected) + ' connected! ✅');
+            const connectedMessages = {
+                google: t.youtubeConnected,
+                twitch: t.twitchConnected,
+                twitcasting: t.twitcastingConnected,
+                instagram: t.instagramConnected,
+                facebook: t.facebookConnected,
+                niconico: t.nicoConnected,
+            };
+            showToast(connectedMessages[justConnected] || formatMessage(t.providerConnected, justConnected));
             history.replaceState({}, '', '/account-settings');
         }
     }
@@ -203,8 +215,8 @@
             const isWired     = WIRED.has(p.id);
 
             const badge = isConnected
-                ? `<span class="badge connected">Connected</span>`
-                : `<span class="badge disconnected">Not connected</span>`;
+                ? `<span class="badge connected">${esc(t.connected)}</span>`
+                : `<span class="badge disconnected">${esc(t.notConnected)}</span>`;
 
             let subParts = [];
             if (isConnected) {
@@ -215,19 +227,19 @@
                 if (channelName) subParts.push(`<span class="sub-channel">📺 ${channelName}</span>`);
                 if (displayName && displayName !== channelName) subParts.push(`<span class="sub-name">@${displayName}</span>`);
                 if (email) subParts.push(`<span class="sub-email">${email}</span>`);
-                if (since) subParts.push(`<span class="sub-since">since ${since}</span>`);
-                if (subParts.length === 0) subParts.push(`<span class="sub-email">Account linked</span>`);
+                if (since) subParts.push(`<span class="sub-since">${esc(formatMessage(t.connectedSince, since))}</span>`);
+                if (subParts.length === 0) subParts.push(`<span class="sub-email">${esc(t.accountLinked)}</span>`);
             } else if (!isWired) {
-                subParts.push(`<span class="sub-coming-soon">OAuth coming soon</span>`);
+                subParts.push(`<span class="sub-coming-soon">${esc(t.comingSoon)}</span>`);
             }
 
             let btn = '';
             if (isConnected) {
-                btn = `<button class="btn-disconnect" onclick="disconnectProvider('${p.id}','${esc(p.name)}')">Disconnect</button>`;
+                btn = `<button class="btn-disconnect" onclick="disconnectProvider('${p.id}','${esc(p.name)}')">${esc(t.disconnect)}</button>`;
             } else if (isWired) {
-                btn = `<button class="btn-connect" onclick="connectProvider('${p.id}')">Connect</button>`;
+                btn = `<button class="btn-connect" onclick="connectProvider('${p.id}')">${esc(t.connect)}</button>`;
             } else {
-                btn = `<button class="btn-connect" disabled title="Coming soon">Connect</button>`;
+                btn = `<button class="btn-connect" disabled title="${esc(t.comingSoon)}">${esc(t.connect)}</button>`;
             }
 
             return `
@@ -249,20 +261,20 @@
         const isConnected = !!ns.connected;
 
         const badge = isConnected
-            ? `<span class="badge connected">Connected</span>`
-            : `<span class="badge disconnected">Not connected</span>`;
+            ? `<span class="badge connected">${esc(t.connected)}</span>`
+            : `<span class="badge disconnected">${esc(t.notConnected)}</span>`;
 
         let subParts = [];
         if (isConnected) {
             if (ns.nico_username) subParts.push(`<span class="sub-name">${esc(ns.nico_username)}</span>`);
-            if (!isZeroDate(ns.connected_at)) subParts.push(`<span class="sub-since">since ${formatDate(ns.connected_at)}</span>`);
+            if (!isZeroDate(ns.connected_at)) subParts.push(`<span class="sub-since">${esc(formatMessage(t.connectedSince, formatDate(ns.connected_at)))}</span>`);
         } else {
-            subParts.push(`<span class="sub-coming-soon">Session-proxy login (official OAuth pending)</span>`);
+            subParts.push(`<span class="sub-coming-soon">${esc(t.nicoSessionProxy)}</span>`);
         }
 
         const btn = isConnected
-            ? `<button class="btn-disconnect" onclick="disconnectNico()">Disconnect</button>`
-            : `<button class="btn-connect" onclick="openNicoModal()">Connect</button>`;
+            ? `<button class="btn-disconnect" onclick="disconnectNico()">${esc(t.disconnect)}</button>`
+            : `<button class="btn-connect" onclick="openNicoModal()">${esc(t.connect)}</button>`;
 
         return `
         <div class="provider-card${isConnected ? ' is-connected' : ''}">
@@ -282,23 +294,23 @@
                 window.location.href = data.auth_url;
             }
         } catch (e) {
-            alert('Could not start OAuth: ' + e.message);
+            alert(t.startOAuthError + e.message);
         }
     }
 
     async function disconnectProvider(providerId, providerName) {
         const totalMethods = connections.length + (nicoStatus?.connected ? 1 : 0) + (hasPassword ? 1 : 0);
         if (totalMethods <= 1) {
-            alert('Cannot disconnect — this is your only login method.\nAdd a password or connect another provider first.');
+            alert(t.onlyLoginMethod);
             return;
         }
-        if (!confirm(`Disconnect ${providerName}?\nYou will no longer be able to log in using this account.`)) return;
+        if (!confirm(formatMessage(t.disconnectConfirm, providerName))) return;
         try {
             await apiRequest('DELETE', '/auth/connections/' + providerId);
             connections = connections.filter(c => c.provider !== providerId);
             renderProviders();
         } catch (e) {
-            alert('Failed to disconnect: ' + e.message);
+            alert(t.failedToDisconnect + e.message);
         }
     }
 
@@ -330,7 +342,7 @@
         setNicoError('nicoStep1Error', '');
         const btn = document.getElementById('nicoStep1Btn');
         btn.disabled = false;
-        btn.textContent = 'Connect NicoNico →';
+        btn.textContent = t.nicoStep1Btn;
     }
 
     function nicoBackToStep1() { showNicoStep1(); }
@@ -350,12 +362,12 @@
         const email = document.getElementById('nicoEmail').value.trim();
         const pass  = document.getElementById('nicoPass').value;
         if (!email || !pass) {
-            setNicoError('nicoStep1Error', 'Please enter your NicoNico email and password.');
+            setNicoError('nicoStep1Error', t.nicoLoginError);
             return;
         }
         const btn = document.getElementById('nicoStep1Btn');
         btn.disabled = true;
-        btn.innerHTML = '<span class="spinner"></span> Connecting…';
+        btn.innerHTML = `<span class="spinner"></span> ${esc(t.nicoConnecting)}`;
         setNicoError('nicoStep1Error', '');
         try {
             const data = await apiRequest('POST', '/niconico/login', { email, password: pass });
@@ -363,17 +375,17 @@
                 nicoStatus = { connected: true, ...data };
                 closeNicoModal();
                 renderProviders();
-                showToast('NicoNico connected! ✅');
+                showToast(t.nicoConnected);
             } else if (data.status === 'mfa_required') {
                 nicoMfaSessionId = data.mfa_session_id;
                 showNicoStep2();
             } else {
-                throw new Error('Unexpected response from server.');
+                throw new Error(t.unexpectedResponse);
             }
         } catch (e) {
             setNicoError('nicoStep1Error', nicoPrettyError(e.message));
             btn.disabled = false;
-            btn.textContent = 'Connect NicoNico →';
+            btn.textContent = t.nicoStep1Btn;
         }
     }
 
@@ -384,7 +396,7 @@
         setNicoError('nicoStep2Error', '');
         const btn = document.getElementById('nicoStep2Btn');
         btn.disabled = false;
-        btn.textContent = 'Verify & Connect';
+        btn.textContent = t.nicoVerifyBtn;
         startNicoMfaTimer();
         setTimeout(() => document.getElementById('nicoOtp').focus(), 50);
     }
@@ -399,7 +411,7 @@
             if (nicoMfaSecondsLeft <= 0) {
                 clearNicoMfaTimer();
                 document.getElementById('nicoStep2Btn').disabled = true;
-                setNicoError('nicoStep2Error', 'Session expired — please click ← Back to start over.');
+                setNicoError('nicoStep2Error', t.nicoOtpExpired);
             }
         }, 1000);
     }
@@ -418,11 +430,11 @@
     async function submitNicoMfa() {
         // Strip ALL whitespace so copy-pasted codes like "123 456" or " 123456 " work correctly.
         const otp = document.getElementById('nicoOtp').value.replace(/\s/g, '');
-        if (!otp) { setNicoError('nicoStep2Error', 'Please enter the one-time code.'); return; }
-        if (!/^\d{6}$/.test(otp)) { setNicoError('nicoStep2Error', 'Please enter exactly 6 digits.'); return; }
+        if (!otp) { setNicoError('nicoStep2Error', t.nicoOtpRequired); return; }
+        if (!/^\d{6}$/.test(otp)) { setNicoError('nicoStep2Error', t.nicoOtpDigits); return; }
         const btn = document.getElementById('nicoStep2Btn');
         btn.disabled = true;
-        btn.innerHTML = '<span class="spinner"></span> Verifying…';
+        btn.innerHTML = `<span class="spinner"></span> ${esc(t.nicoVerifying)}`;
         setNicoError('nicoStep2Error', '');
 
         const payload = { mfa_session_id: nicoMfaSessionId, otp };
@@ -433,7 +445,7 @@
                 nicoStatus = { connected: true, ...data };
                 closeNicoModal();
                 renderProviders();
-                showToast('NicoNico connected! ✅');
+                showToast(t.nicoConnected);
             }
         } catch (e) {
             const msg = e.message;
@@ -442,17 +454,17 @@
 
             if (isWrongOtp) {
                 // Session still valid — let the user retry while the timer runs
-                setNicoError('nicoStep2Error', 'That code is incorrect. Please try again.');
+                setNicoError('nicoStep2Error', t.nicoIncorrectOtp);
                 btn.disabled = false;
-                btn.textContent = 'Verify & Connect';
+                btn.textContent = t.nicoVerifyBtn;
             } else {
                 // Expired session or unknown fatal error
                 clearNicoMfaTimer();
                 setNicoError('nicoStep2Error', isExpired
-                    ? 'The session timed out. Please click ← Back to start over.'
-                    : 'Could not verify the code. Please click ← Back to start over.');
+                    ? t.nicoSessionError
+                    : t.nicoVerifyError);
                 btn.disabled = true;
-                btn.textContent = 'Verify & Connect';
+                btn.textContent = t.nicoVerifyBtn;
             }
         }
     }
@@ -460,29 +472,29 @@
     async function disconnectNico() {
         const totalMethods = connections.length + (nicoStatus?.connected ? 1 : 0) + (hasPassword ? 1 : 0);
         if (totalMethods <= 1) {
-            alert('Cannot disconnect — this is your only login method.\nAdd a password or connect another provider first.');
+            alert(t.onlyLoginMethod);
             return;
         }
-        if (!confirm('Disconnect NicoNico?\nLive stream monitoring for NicoNico channels will stop.')) return;
+        if (!confirm(t.disconnectNicoConfirm)) return;
         try {
             await apiRequest('DELETE', '/niconico/session');
             nicoStatus = { connected: false };
             renderProviders();
         } catch (e) {
-            alert('Failed to disconnect NicoNico: ' + e.message);
+            alert(t.failedToDisconnectNico + e.message);
         }
     }
 
     function nicoPrettyError(msg) {
         if (msg.includes('invalid') && (msg.includes('credentials') || msg.includes('password')))
-            return 'Incorrect email or password. Please check your NicoNico login details.';
+            return t.nicoIncorrectEmail;
         if (msg.includes('invalid OTP') || msg.includes('invalid otp') || msg.includes('OTP code'))
-            return 'That code is incorrect. Please check your authenticator app and try again.';
+            return t.nicoIncorrectCode;
         if (msg.includes('expired') || msg.includes('not found'))
-            return 'The session timed out. Please start over.';
+            return t.nicoSessionExpired;
         if (msg.includes('user_session'))
-            return 'NicoNico blocked the login attempt. Please try again in a few minutes.';
-        return 'Could not reach the server. Please check your connection and try again.';
+            return t.nicoBlocked;
+        return t.nicoServerError;
     }
 
     // ── Toast notification ────────────────────────────────────────────────
