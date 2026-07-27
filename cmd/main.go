@@ -28,7 +28,7 @@ import (
 )
 
 type PageData struct {
-	Title                   string
+	TitleKey                string
 	User                    *UserProfile
 	Page                    string
 	Lang                    string
@@ -58,27 +58,27 @@ type UserProfile struct {
 
 type pageConfig struct {
 	Name        string
-	Title       string
+	TitleKey    string
 	RequireAuth bool
 }
 
 var pageRoutes = map[string]pageConfig{
-	"/":                 {Name: "index", Title: "Home", RequireAuth: false},
-	"/login":            {Name: "login", Title: "Login", RequireAuth: false},
-	"/register":         {Name: "register", Title: "Register", RequireAuth: false},
-	"/dashboard":        {Name: "dashboard", Title: "Dashboard", RequireAuth: true},
-	"/channels":         {Name: "channels", Title: "Watched Channels", RequireAuth: true},
-	"/channel":          {Name: "channel", Title: "Channel", RequireAuth: true},
-	"/conditions":       {Name: "conditions", Title: "Conditions", RequireAuth: true},
-	"/condition":        {Name: "condition", Title: "Condition Logic", RequireAuth: true},
-	"/devices":          {Name: "devices", Title: "My Devices", RequireAuth: true},
-	"/brand-settings":   {Name: "brand-settings", Title: "Device Brands", RequireAuth: true},
-	"/about":            {Name: "about", Title: "About", RequireAuth: false},
-	"/login-settings":   {Name: "login-settings", Title: "Login Settings", RequireAuth: true},
-	"/account-settings": {Name: "account-settings", Title: "Account Settings", RequireAuth: true},
-	"/privacy-policy":   {Name: "privacy-policy", Title: "Privacy Policy", RequireAuth: false},
-	"/terms-of-service": {Name: "terms-of-service", Title: "Terms of Service", RequireAuth: false},
-	"/data-deletion":    {Name: "data-deletion", Title: "Data Deletion", RequireAuth: false},
+	"/":                 {Name: "index", TitleKey: "index.title", RequireAuth: false},
+	"/login":            {Name: "login", TitleKey: "login.title", RequireAuth: false},
+	"/register":         {Name: "register", TitleKey: "register.title", RequireAuth: false},
+	"/dashboard":        {Name: "dashboard", TitleKey: "dashboard.title", RequireAuth: true},
+	"/channels":         {Name: "channels", TitleKey: "channels.title", RequireAuth: true},
+	"/channel":          {Name: "channel", TitleKey: "channel.title", RequireAuth: true},
+	"/conditions":       {Name: "conditions", TitleKey: "conditions.title", RequireAuth: true},
+	"/condition":        {Name: "condition", TitleKey: "condition.title", RequireAuth: true},
+	"/devices":          {Name: "devices", TitleKey: "devices.title", RequireAuth: true},
+	"/brand-settings":   {Name: "brand-settings", TitleKey: "brand-settings.title", RequireAuth: true},
+	"/about":            {Name: "about", TitleKey: "about.title", RequireAuth: false},
+	"/login-settings":   {Name: "login-settings", TitleKey: "login-settings.title", RequireAuth: true},
+	"/account-settings": {Name: "account-settings", TitleKey: "account-settings.title", RequireAuth: true},
+	"/privacy-policy":   {Name: "privacy-policy", TitleKey: "privacy-policy.title", RequireAuth: false},
+	"/terms-of-service": {Name: "terms-of-service", TitleKey: "terms-of-service.title", RequireAuth: false},
+	"/data-deletion":    {Name: "data-deletion", TitleKey: "data-deletion.title", RequireAuth: false},
 }
 
 type Server struct {
@@ -364,8 +364,8 @@ func loadTemplates() map[string]*template.Template {
 		"urlEscape": func(s string) string {
 			return url.QueryEscape(s)
 		},
-		"capitalize":    capitalize,
-		"formatTimeAgo": formatTimeAgo,
+		"capitalize":     capitalize,
+		"formatTimeAgo":  formatTimeAgo,
 		"getEventLabel":  controller.GetEventLabel,
 		"formatDateTime": controller.FormatDateTime,
 		"replace": func(s, old, new string) string {
@@ -487,14 +487,14 @@ func (s *Server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 
 	w.Header().Set("Content-Type", "text/html; charset=utf-8")
 	lang := i18n.DetectLang(r)
-	data := PageData{Title: cfg.Title, User: user, Page: cfg.Name, Lang: lang, I18n: s.i18n.Translator(lang), API: &api}
+	data := PageData{TitleKey: cfg.TitleKey, User: user, Page: cfg.Name, Lang: lang, I18n: s.i18n.Translator(lang), API: &api}
 
 	// Fetch conditions page data if on /conditions page
 	if cfg.Name == "conditions" || cfg.Name == "condition" {
 		parts := strings.Split(strings.TrimPrefix(r.URL.Path, "/"), "/")
 		if len(parts) >= 3 && parts[0] == "channels" && parts[2] == "conditions" {
 			channelID := parts[1]
-			
+
 			// Check if this is a single condition page (has condition_id)
 			if len(parts) >= 4 {
 				conditionID := parts[3]
@@ -744,4 +744,3 @@ func formatTimeAgo(timestamp string) string {
 	// For dates further back, show the date
 	return t.Format("2006-01-02")
 }
-

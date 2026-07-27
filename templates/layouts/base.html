@@ -4,7 +4,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>{{.Title}} - Taucho</title>
+  <title>{{.I18n.T .TitleKey}} - {{.I18n.T "nav.title"}}</title>
   <link rel="stylesheet" href="/css/main.css">
   {{block "head" .}}{{end}}
   <script src="/js/auth.js"></script>
