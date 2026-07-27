@@ -78,7 +78,7 @@
                         
                         <!-- State: Connected or public access -->
                         <div class="acc-content" style="{{if and (not $connected) (not $publicAccess)}}display:none{{end}}">
-                            {{ if and (not (eq $platformId "kick")) (not (eq $platformId "bilibili")) }}
+                            {{ if and (not (eq $platformId "kick")) (not (eq $platformId "bilibili")) (not (eq $platformId "x")) }}
                                 <div class="acc-search-wrap"><span class="acc-search-icon">🔍</span><input class="acc-search" type="text" id="acc-search-{{$platformId}}" placeholder="{{$.I18n.T "channelLayout.searchPlaceholder"}}" oninput="onAccSearch('{{$platformId}}', this.value)"></div><div class="acc-results" id="acc-results-{{$platformId}}"></div>
                             {{ else }}
                                 <div class="acc-results" id="acc-results-{{$platformId}}"></div>

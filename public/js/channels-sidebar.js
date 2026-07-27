@@ -124,6 +124,7 @@
     }
 
     function onAccSearch(platformId, value) {
+        if (platformId === "kick" && value.length < 3) return;
         clearTimeout(state.accSearchTimers.get(platformId)); const results = document.getElementById(`acc-results-${platformId}`);
         if (!value.trim()) { if (results) results.innerHTML = ''; return; }
         state.accSearchTimers.set(platformId, setTimeout(() => doAccSearch(platformId, value.trim()), 400));

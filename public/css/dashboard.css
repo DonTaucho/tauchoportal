@@ -560,8 +560,21 @@ a.status-item {
         gap: 1rem;
     }
 
-    .stat-box {
-        padding: 1rem;
-    }
 }
 
+
+@media (max-width: 1200px) {
+    .stats-bar {
+        grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));
+        padding: 0.8rem;
+    }
+    .stat-box {
+        padding: 0.2rem;
+        max-width: 12rem;
+        
+    }
+    .stat-value {
+        margin-left: 1rem;
+        font-size: 1.5rem;
+    }
+}
