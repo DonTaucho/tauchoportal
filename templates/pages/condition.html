@@ -30,17 +30,17 @@
   </div>
 
   <div id="upperarea">
-    <div class="toolbox" style="display:inline-block; vertical-align:top; width: 42%; height: 100%; border-right: 1px solid #e0e7ff;">
+    <div class="toolbox">
       <h3>⚙️ {{.I18n.T "condition.toolbox.title"}}</h3>
       
       <h4>{{.I18n.T "condition.templates.heading"}}</h4>
       <div id="currentEventType" style="display:none;">{{.Condition.EventType}}</div>
-      <div id="templateLibraryHint" style="font-size:0.8rem; color:#6b7280; margin-bottom:0.5rem; padding: 0 0.75rem;">{{.I18n.T "condition.templates.hint"}}</div>
+      <div id="templateLibraryHint">{{.I18n.T "condition.templates.hint"}}</div>
       <div id="templateCards"></div>
-      <div id="templateEmptyState" style="font-size:0.85rem; color:#92400e;">{{.I18n.T "condition.templates.empty"}}</div>
+      <div id="templateEmptyState">{{.I18n.T "condition.templates.empty"}}</div>
       
       <h4 style="margin-top:1rem;">{{.I18n.T "condition.tools.heading"}}</h4>
-      <div style="display:flex; flex-direction:column; gap:0.5rem;">
+      <div class="toolutils">
         <!-- Regex Tester Tool -->
         <button type="button" class="btn btn-secondary" onclick="openRegexTester()" title="{{.I18n.T "condition.tools.regexTesterTitle"}}">{{.I18n.T "condition.tools.regexTester"}}</button>
         
@@ -50,19 +50,16 @@
         <!-- Operator Reference Tool -->
         <button type="button" class="btn btn-secondary" onclick="openOperatorReference()" title="{{.I18n.T "condition.tools.operatorsTitle"}}">{{.I18n.T "condition.tools.operators"}}</button>
         
-        <div style="display:flex; flex-direction:column; gap:0.35rem;">
-          <strong style="font-size:0.8rem; color:#374151; padding: 0 0.75rem; margin-top: 0.25rem;">{{.I18n.T "condition.tools.quickOperators"}}</strong>
+        <div class="operatorDesc">
+          <strong>{{.I18n.T "condition.tools.quickOperators"}}</strong>
           <button type="button" class="btn btn-secondary" onclick="openQuickOperator('AND')" title="{{.I18n.T "condition.tools.andTitle"}}">{{.I18n.T "condition.tools.and"}}</button>
           <button type="button" class="btn btn-secondary" onclick="openQuickOperator('OR')" title="{{.I18n.T "condition.tools.orTitle"}}">{{.I18n.T "condition.tools.or"}}</button>
           <button type="button" class="btn btn-secondary" onclick="openQuickOperator('NOT')" title="{{.I18n.T "condition.tools.notTitle"}}">{{.I18n.T "condition.tools.not"}}</button>
         </div>
       </div>
-      
-      <h4 style="margin-top:1rem;">{{.I18n.T "condition.preview.heading"}}</h4>
-      <div id="templatePreviewContent" style="border:1px solid #d1d5db; border-radius:6px; background:#fafafa; white-space:pre-wrap;">{{.I18n.T "condition.preview.placeholder"}}</div>
     </div>
     <div id="drawingAreaContainer">
-      <div id="drawingArea" style="border:1px solid grey; height: 100%;">
+      <div id="drawingArea">
       </div>
       <div id="fullscreenbuttonarea"><div id="fullscreenbutton" onclick="document.getElementsByTagName('body')[0].classList.toggle('fullscreen');"><img src="/image/fullscreenicon.png"></div></div>
     </div>
@@ -71,7 +68,11 @@
   <div id="jsonarea"><div class="jsontab"><img src="/image/jsonareaedge.png" width="43" height="27"><a onclick="if(document.getElementById('jsonarea').classList.contains('active')){document.getElementById('jsonarea').classList.remove('active');}else {document.getElementById('jsonarea').classList.add('active')};if(document.getElementById('jsonarea').classList.contains('active')){document.getElementById('upperarea').classList.add('hide')}else {document.getElementById('upperarea').classList.remove('hide')};return false">JSON</a></div>
   <div id="jsonareawrapper"><textarea id="conditionLogicInput" class="condition-textarea" onchange="refreshSummary()">{{.Condition.ConditionLogic}}</textarea></div>
   </div>
-  <div id="logictotaldescription"></div>
+  <div class="preview">
+    <h4>{{.I18n.T "condition.previewTitle"}}</h4>
+    <div id="logictotaldescription"></div>
+  </div>
+  
 
   <div class="submitarea">
     <div id="sendingParameterContainer">
@@ -129,7 +130,7 @@
                     <option value="less_than">&lt;</option>
                     </select>
                     <span id="numericcomparetargetdisp" class="numselector">
-                        <span id="numericcomparetargetplaceholder" class="placeholder">Enter Value</span>
+                        <span id="numericcomparetargetplaceholder" class="placeholder">{{.I18n.T "condition.modal.bool.numericEnter"}}</span>
                         <span id="numericcomparetargetplacedisp" class="value" style="display:none"></span>
                     </span>
                     <input id="numericcomparetarget" type="hidden" />

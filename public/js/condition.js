@@ -135,7 +135,7 @@ const conditionTemplateLibrary = {
     gift: [
         {
             nameKey: "condition.templates.gift.amount_exceeds_10",
-            name: "Amount exceeds $10",
+            name: "Amount exceeds 10",
             descriptionKey: "condition.templates.gift.amount_exceeds_10.description",
             description: "Match when the monetary amount is greater than 10.",
             json: conditionTemplateHelpers.buildNumericCompare("GREATER_THAN", "amount_value", 10)
@@ -153,6 +153,16 @@ const conditionTemplateLibrary = {
             descriptionKey: "condition.templates.gift.usd_currency.description",
             description: "Match when the monetary currency code is USD.",
             json: conditionTemplateHelpers.buildTextCompare("EQUALS", "amount_currency", "USD")
+        },
+        {
+            nameKey: "condition.templates.gift.usd_10byUSD",
+            name: "10$ by USD ",
+            descriptionKey: "condition.templates.gift.usd_10byUSD.description",
+            description: "Match when the monetary currency code is USD and the amount is greater than 10.",
+            json: conditionTemplateHelpers.clone({"Operator": "AND", "SubConditions": [
+                { "Operator": "GREATER_THAN", "SubConditions": [{ "Operator": "PARAM", "SubConditions": null, "Variables": ["amount_value"] }], "Variables": ["10"] },
+                { "Operator": "EQUALS", "SubConditions": [{ "Operator": "PARAM", "SubConditions": null, "Variables": ["amount_currency"] }], "Variables": ["USD"] }
+            ]})
         }
     ],
     cheer: [
@@ -499,11 +509,11 @@ class ConditionEditor {
         this.textextractors = ["WHOLESENTENCE", "REGEX_EXTRACT", "SUBSTRING", "FIRST", "LAST"];
         this.groupoperators = ["COUNT", "SUM"];
         this.calcoperators = ["ADD", "SUBTRACT", "MULTIPLY", "DIVIDE", "MODULO"];
-        this.convoperators = ["PARSEINT", "EXCHANGE"];
+        this.convoperators = ["PARSEINT", "EXCHANGE", "COLOR_PICKUP"];
 
-        this.namingmap = {"AND": "and", "OR": "or", "NOT": "not", "SOME": "some", "EQUIVALENT": "equivalent", "GREATER_THAN": "greater_than", "GREATER_OR_EQUAL": "greater_or_equal", "LESS_THAN": "less_than", "LESS_OR_EQUAL": "less_or_equal", "EQUALS": "equals", "INCLUDES": "includes", "REGEX_MATCH": "regex_match", "COUNT": "count", "SUM": "sum", "WHOLESENTENCE": "wholesentence", "REGEX_EXTRACT": "regex_extract", "SUBSTRING": "substring", "FIRST": "first", "LAST": "last", "ADD": "add", "SUBTRACT": "subtract", "MULTIPLY": "multiply", "DIVIDE": "divide", "MODULO": "modulo", "PARSEINT": "parseint", "EXCHANGE": "exchange", "PARAM": "param" };
-        this.operatormap = { "and": "AND", "or": "OR", "not": "NOT", "some": "SOME", "equivalent": "EQUIVALENT", "greater_than": "GREATER_THAN", "greater_or_equal": "GREATER_OR_EQUAL", "less_than": "LESS_THAN", "less_or_equal": "LESS_OR_EQUAL", "equals": "EQUALS", "includes": "INCLUDES", "regex_match": "REGEX_MATCH", "count": "COUNT", "sum": "SUM", "wholesentence": "WHOLESENTENCE", "regex_extract": "REGEX_EXTRACT", "substring": "SUBSTRING", "first": "FIRST", "last": "LAST", "add": "ADD", "subtract": "SUBTRACT", "multiply": "MULTIPLY", "divide": "DIVIDE", "modulo": "MODULO", "parseint": "PARSEINT", "exchange": "EXCHANGE", "param": "PARAM" };
-        this.reverselookuptype = { "AND": "boolean", "OR": "boolean", "NOT": "boolean", "SOME": "boolean", "EQUIVALENT": "comp", "GREATER_THAN": "comp", "LESS_THAN": "comp", "EQUALS": "optext", "INCLUDES": "optext", "REGEX_MATCH": "optext", "COUNT": "group", "SUM": "group", "ADD": "calc", "SUBTRACT": "calc", "MULTIPLY": "calc", "DIVIDE": "calc", "MODULO": "calc", "PARSEINT": "conv", "EXCHANGE": "conv", "PARAM": "extract" }; 
+        this.namingmap = {"AND": "and", "OR": "or", "NOT": "not", "SOME": "some", "EQUIVALENT": "equivalent", "GREATER_THAN": "greater_than", "GREATER_OR_EQUAL": "greater_or_equal", "LESS_THAN": "less_than", "LESS_OR_EQUAL": "less_or_equal", "EQUALS": "equals", "INCLUDES": "includes", "REGEX_MATCH": "regex_match", "COUNT": "count", "SUM": "sum", "WHOLESENTENCE": "wholesentence", "REGEX_EXTRACT": "regex_extract", "SUBSTRING": "substring", "FIRST": "first", "LAST": "last", "ADD": "add", "SUBTRACT": "subtract", "MULTIPLY": "multiply", "DIVIDE": "divide", "MODULO": "modulo", "PARSEINT": "parseint", "COLOR_PICKUP": "color_pickup", "PARAM": "param" };
+        this.operatormap = { "and": "AND", "or": "OR", "not": "NOT", "some": "SOME", "equivalent": "EQUIVALENT", "greater_than": "GREATER_THAN", "greater_or_equal": "GREATER_OR_EQUAL", "less_than": "LESS_THAN", "less_or_equal": "LESS_OR_EQUAL", "equals": "EQUALS", "includes": "INCLUDES", "regex_match": "REGEX_MATCH", "count": "COUNT", "sum": "SUM", "wholesentence": "WHOLESENTENCE", "regex_extract": "REGEX_EXTRACT", "substring": "SUBSTRING", "first": "FIRST", "last": "LAST", "add": "ADD", "subtract": "SUBTRACT", "multiply": "MULTIPLY", "divide": "DIVIDE", "modulo": "MODULO", "parseint": "PARSEINT", "exchange": "EXCHANGE", "color_pickup": "COLOR_PICKUP", "param": "PARAM" };
+        this.reverselookuptype = { "AND": "boolean", "OR": "boolean", "NOT": "boolean", "SOME": "boolean", "EQUIVALENT": "comp", "GREATER_THAN": "comp", "LESS_THAN": "comp", "EQUALS": "optext", "INCLUDES": "optext", "REGEX_MATCH": "optext", "COUNT": "group", "SUM": "group", "ADD": "calc", "SUBTRACT": "calc", "MULTIPLY": "calc", "DIVIDE": "calc", "MODULO": "calc", "PARSEINT": "conv", "EXCHANGE": "conv", "COLOR_PICKUP": "conv", "PARAM": "extract" }; 
         this.calcoperatorssign = {"ADD": "＋", "SUBTRACT": "－", "MULTIPLY": "×", "DIVIDE": "÷", "MODULO": "≡"};
         this.textextractorlabels = {"WHOLESENTENCE": "Whole Sentence", "REGEX_EXTRACT": "Regex Extract", "SUBSTRING": "Substring", "FIRST": "First", "LAST": "Last"};
         // Initialize boolean dialog handler
@@ -857,7 +867,10 @@ class ConditionEditor {
             inputnumbutton.innerText = "+";
             inputnumbutton.setAttribute("path", path);
             inputnumbutton.setAttribute("operator", operator);
-            inputnumbutton.onclick = this.numericDialog.open.bind(this.numericDialog);
+            const currentObj = this;
+            inputnumbutton.onclick = function() {
+                this.open(currentObj);
+            }.bind(this.numericDialog);
             area.append(inputnumbutton);
         } else if (this.textextractors.includes(operator)) {
             if ((!jsonnode.SubConditions || jsonnode.SubConditions.length < 1) && (!jsonnode.Variables || jsonnode.Variables.length < 1)) {
@@ -883,7 +896,7 @@ class ConditionEditor {
         } else if ((this.extractionoperators.includes(operator) ||
             this.textoperators.includes(operator) ||
             this.convoperators.includes(operator))
-            &&!jsonnode.Variables
+            && !jsonnode.Variables && (!jsonnode.SubConditions || operator != "PARSEINT")
         ) {
             const inputtextbutton = document.createElement("div");
             inputtextbutton.classList.add("inputtextbutton");
@@ -3118,16 +3131,6 @@ function closeModal(modalId) {
     }
 }
 
-function showTemplatePreview(templateDef) {
-    const preview = document.getElementById('templatePreviewContent');
-    if (!preview || !templateDef) {
-        return;
-    }
-    const name = getTemplateTranslation(templateDef.nameKey, templateDef.name || templateDef.nameKey);
-    const description = getTemplateTranslation(templateDef.descriptionKey, templateDef.description || templateDef.descriptionKey);
-    preview.textContent = `${name}\n${description}`;
-}
-
 function addTemplateToCondition(templateDef) {
     if (!conditionEditor || !templateDef) {
         return false;
@@ -3175,12 +3178,6 @@ function renderTemplateCards(templates) {
         card.style.cursor = 'pointer';
         card.title = `Click to add: ${nameDiv.textContent}`;
         
-        card.onmouseenter = function() {
-            showTemplatePreview(templateDef);
-        };
-        card.onfocus = function() {
-            showTemplatePreview(templateDef);
-        };
         card.onclick = function() {
             addTemplateToCondition(templateDef);
         };
@@ -3215,9 +3212,6 @@ function initializeTemplates() {
     }
 
     renderTemplateCards(templates);
-    if (templates.length) {
-        showTemplatePreview(templates[0]);
-    }
 }
 
 window.conditionTemplateLibrary = conditionTemplateLibrary;

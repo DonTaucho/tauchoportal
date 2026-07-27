@@ -12,11 +12,15 @@
 .toolbox {
     overflow-y: auto;
     background: linear-gradient(135deg, #f5f7fa 0%, #f0f4f8 100%);
-    border-right: 1px solid #e0e7ff;
     padding: 0.75rem 0.5rem;
-    display: flex;
     flex-direction: column;
     gap: 0.5rem;
+
+    display:inline-block;
+    vertical-align:top;
+    width: 42%;
+    height: 100%;
+    border-right: 1px solid #e0e7ff;
 }
 
 .toolbox h3 {
@@ -73,13 +77,21 @@
     color: #6b7280;
 }
 
+
+#templateLibraryHint {
+    font-size: 0.8rem;
+    color: #6b7280;
+    margin-bottom: 0.5rem;
+    padding: 0 0.75rem;
+}
+
 /* Empty State */
 #templateEmptyState {
-    font-size: 0.8rem !important;
-    padding: 0.5rem 0.75rem !important;
-    background: #fef3c7 !important;
-    border: 1px solid #fcd34d !important;
-    color: #92400e !important;
+    font-size: 0.8rem;
+    padding: 0.5rem 0.75rem;
+    background: #fef3c7;
+    border: 1px solid #fcd34d;
+    color: #92400e;
 }
 
 /* Tools Section */
@@ -89,6 +101,12 @@
     background: white;
     border: 1px solid #e5e7eb;
     border-radius: 6px;
+}
+
+.toolutils {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
 }
 
 /* Tool Buttons */
@@ -115,6 +133,18 @@
 
 .toolbox button:active {
     transform: scale(0.98);
+}
+
+.operatorDesc {
+    display:flex;
+    flex-direction:column;
+    gap:0.35rem;
+}
+.operatorDesc strong{
+    font-size:0.8rem;
+    color:#374151;
+    padding: 0 0.75rem;
+    margin-top: 0.25rem;
 }
 
 /* Template Preview */
@@ -167,6 +197,8 @@ display:none;
 #drawingArea {
   overflow-x: hidden;
   padding-bottom: 42px;
+  border:1px solid grey;
+  height: 100%;
 }
 #drawingArea > div.item {
   margin: 0px;
@@ -176,7 +208,7 @@ display:none;
   overflow-y: auto;
 }
 #drawingArea>div.detailarea>.subcondition>.item>.detailarea {
-	max-height: 1em;
+	max-height: 0em;
 	overflow: hidden;
     color: lightgrey;
     border-top: 1px dotted lightgray;
@@ -201,6 +233,11 @@ display:none;
 #drawingArea>div.detailarea>.subcondition>.item.focus>.detailarea .detailarea{
 	max-height: unset;
 	overflow-y: unset;
+}
+
+#drawingArea>div.detailarea>.subcondition>.item>.detailarea .subcondition {
+    display: inline-block;
+    margin-right: 1rem;
 }
 
 #drawingArea>legend,
@@ -404,8 +441,23 @@ fieldset{
 	border: 1px dotted orange;
 }
 
+.preview {
+    background-image: linear-gradient(170deg, #ffffff 0%, #ebebeba8 80%, #ebebeba8 100%);
+    padding: 0.5rem;
+}
+
+.preview h4 {
+    font-size: 0.85rem;
+    color: #1f2937;
+    font-weight: 600;
+}
+
 div#logictotaldescription {
 	font-size: 9pt;
+    border: 1px solid #d1d5db;
+    border-radius: 6px;
+    background-color: white;
+    padding: 0.2rem;
 }
 div#logictotaldescription .and, 
 div#logictotaldescription .or {
@@ -993,6 +1045,13 @@ fieldset.item.param>div.icons{
 .available .numselector:hover {
     border-color: #4c7add;
     background-color: #81caec;
+}
+.numselector .placeholder {
+    font-size: small;
+    color: lightgrey;
+}
+.available .numselector .placeholder {
+    color: grey;
 }
 .selector select {
     font-size: 1.5em;
