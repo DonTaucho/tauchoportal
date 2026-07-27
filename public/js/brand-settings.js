@@ -5,7 +5,7 @@
     { id: 'lifx', label: 'LX', authType: 'api-key' },
     { id: 'nanoleaf', label: 'NL', authType: 'local', requiresToken: true },
     { id: 'tp-link-kasa', label: 'KS', authType: 'local', requiresToken: true },
-    { id: 'tuya', label: 'TY', authType: 'oauth' },
+    { id: 'wiz', label: 'WZ', authType: 'local', requiresToken: true },
     { id: 'wled', label: 'WL', authType: 'local', requiresToken: false },
     { id: 'wyze', label: 'WY', authType: 'unsupported' },
     { id: 'yeelight', label: 'YL', authType: 'local', requiresToken: false },
@@ -65,15 +65,16 @@
         'selector': 'LIFX device selector. Can be device name, ID, group name, or "all". Example: "Living Room Light"'
       }
     },
-    'tuya': {
+    'wiz': {
       steps: [
-        { title: 'OAuth Setup', content: 'Tuya uses OAuth for secure authentication. Click the OAuth button above and you\'ll be guided through Tuya\'s official login.' },
-        { title: 'Authorize', content: 'You\'ll be redirected to Tuya\'s site. Log in with your Tuya account and authorize access.' },
-        { title: 'Device ID', content: 'After OAuth, look in the Tuya IoT platform for your device ID. This identifies the specific device to control.' },
-        { title: 'Test', content: 'Your OAuth token is automatically stored. Click "Test Credentials" to verify everything works.' }
+        { title: 'Locate Controller', content: 'Find your WiZ device\'s IP address on your local network. Check your router or the WiZ app.' },
+        { title: 'Get Auth Token', content: 'Use the WiZ app to generate an API token or auth key for local access.' },
+        { title: 'Enter IP & Token', content: 'Enter your WiZ device IP address and the authentication token.' },
+        { title: 'Test Connection', content: 'Click "Test Credentials" to verify the device responds correctly.' }
       ],
       helpFields: {
-        'device_id': 'Your Tuya device ID. Find it in the Tuya IoT platform under your devices.'
+        'device_ip': 'IP address of your WiZ device on your local network. Example: 192.168.1.100',
+        'api_key': 'Auth token for WiZ device local API access.'
       }
     },
     'nanoleaf': {
@@ -540,10 +541,11 @@
     }
 
     try {
-      await apiRequest('POST', `/auth/brand/${encodeURIComponent(brand)}/api-key`, {
-        api_key: key,
-        token: key,
-        key
+      await apiRequest('POST', `/auth/brand/${encodeURIComponent(brand)}/connect`, {
+        auth_type: 'api_key',
+        credentials: {
+          api_key: key
+        }
       });
       closeModal('apiKeyModal');
       showToast(getUiString('savedMessage', 'Brand authentication saved.'));
@@ -575,10 +577,12 @@
     }
 
     try {
-      await apiRequest('POST', `/auth/brand/${encodeURIComponent(brand)}/local`, {
-        ip,
-        token,
-        auth_token: token
+      await apiRequest('POST', `/auth/brand/${encodeURIComponent(brand)}/connect`, {
+        auth_type: 'local',
+        credentials: {
+          bridge_ip: ip,
+          api_key: token
+        }
       });
       closeModal('localDeviceModal');
       showToast(getUiString('savedMessage', 'Brand authentication saved.'));
@@ -601,7 +605,7 @@
 
   async function disconnectBrand(brand) {
     try {
-      await apiRequest('DELETE', `/auth/brand/${encodeURIComponent(brand)}`);
+      await apiRequest('POST', `/auth/brand/${encodeURIComponent(brand)}/disconnect`);
       closeModal('disconnectModal');
       pendingDisconnectBrand = null;
       showToast(getUiString('disconnectedMessage', 'Brand disconnected.'));
@@ -669,10 +673,10 @@
     }
 
     // Update button visibility
-    if (backBtn) backBtn.hidden = stepIndex === 0;
-    if (nextBtn) nextBtn.hidden = isLastStep;
-    if (testBtn) testBtn.hidden = !isLastStep;
-    if (saveBtn) saveBtn.hidden = !isLastStep;
+    if (backBtn) backBtn.style.display = stepIndex === 0 ? 'none' : '';
+    if (nextBtn) nextBtn.style.display = isLastStep ? 'none' : '';
+    if (testBtn) testBtn.style.display = !isLastStep ? 'none' : '';
+    if (saveBtn) saveBtn.style.display = !isLastStep ? 'none' : '';
 
     openModal('setupWizardModal');
     setupWizardState.currentStep = stepIndex;
@@ -741,10 +745,23 @@
         testBtn.textContent = 'Testing...';
       }
 
-      // Try to test the credentials using the device test endpoint
-      // This requires creating a temporary device, which may not be ideal
-      // For now, just show success if fields are filled
-      showToast('✅ Credentials look valid! Click Save to continue.');
+      // Build credentials payload based on auth type
+      const credentialsPayload = buildCredentialsPayload(meta, setupWizardState.credentials);
+      
+      // Call test endpoint
+      const result = await apiRequest('POST', `/auth/brand/${encodeURIComponent(brandId)}/test`, {
+        auth_type: meta.authType,
+        credentials: credentialsPayload
+      });
+      
+      if (result && result.is_valid) {
+        const deviceCount = result.device_count || 0;
+        const msg = result.message || `✅ Credentials verified! Found ${deviceCount} device(s).`;
+        showToast(msg);
+      } else {
+        const error = result?.error || 'Credentials validation failed';
+        showToast(`❌ ${error}`);
+      }
       
       if (testBtn) {
         testBtn.disabled = false;
@@ -760,26 +777,44 @@
     }
   }
 
+  function buildCredentialsPayload(meta, wizardCredentials) {
+    if (meta.authType === 'api_key') {
+      return {
+        api_key: wizardCredentials.api_key || wizardCredentials.token
+      };
+    } else if (meta.authType === 'local') {
+      return {
+        bridge_ip: wizardCredentials.device_ip || wizardCredentials.bridge_ip,
+        api_key: wizardCredentials.api_key || wizardCredentials.token
+      };
+    }
+    return wizardCredentials;
+  }
+
+
   async function saveWizardCredentials(brandId) {
     const meta = getBrandMeta(brandId);
     if (!meta) return;
 
-    if (meta.authType === 'api-key') {
-      // Combine all credentials into one key if needed
-      const credValues = Object.values(setupWizardState.credentials).filter(v => v);
-      if (credValues.length === 0) {
-        showToast('Please enter at least one credential value.');
-        return;
-      }
-      // For multi-field brands, we'd need to call a different endpoint
-      // For now, just use the first value
-      await saveApiKey(brandId, credValues[0]);
-    } else if (meta.authType === 'local') {
-      const ip = setupWizardState.credentials.device_ip || '';
-      const token = setupWizardState.credentials.api_key || '';
-      await saveLocalDeviceAuth(brandId, ip, token);
+    if (!setupWizardState.credentials || Object.keys(setupWizardState.credentials).length === 0) {
+      showToast('Please fill in all credential fields.');
+      return;
     }
-    closeModal('setupWizardModal');
+
+    try {
+      const credentialsPayload = buildCredentialsPayload(meta, setupWizardState.credentials);
+      
+      await apiRequest('POST', `/auth/brand/${encodeURIComponent(brandId)}/connect`, {
+        auth_type: meta.authType,
+        credentials: credentialsPayload
+      });
+      
+      closeModal('setupWizardModal');
+      showToast('✅ Brand credentials saved successfully!');
+      await loadBrandAuthStatus();
+    } catch (error) {
+      showToast(`❌ Failed to save credentials: ${error.message}`);
+    }
   }
 
   function handleBrandAction(brandId) {

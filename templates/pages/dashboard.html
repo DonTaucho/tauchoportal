@@ -128,7 +128,13 @@
                     <div class="status-grid">
                         {{if .Dashboard.ChannelsStatus}}
                         {{range .Dashboard.ChannelsStatus}}
-                        <div class="status-item">
+                        <a href="/channels/{{ .ID }}" class="status-item">
+                            {{if .ThumbnailUrl}}
+                            <img src="{{.ThumbnailUrl}}" alt="{{.Name}}" class="status-thumbnail" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex'">
+                            <span class="status-thumbnail-placeholder" style="display:none;">📺</span>
+                            {{else}}
+                            <span class="status-thumbnail-placeholder">📺</span>
+                            {{end}}
                             <span class="status-name">{{.Name}}</span>
                             <span class="status-indicator">
                                 {{if eq .Status "live"}}
@@ -139,7 +145,7 @@
                                 <span class="status-text">{{ $.I18n.T "dashboard.offline" }}</span>
                                 {{end}}
                             </span>
-                        </div>
+                        </a>
                         {{end}}
                         {{else}}
                         <div style="padding: 1rem; color: #8b949e; text-align: center;">
@@ -157,7 +163,13 @@
                     <div class="status-grid">
                         {{if .Dashboard.DevicesStatus}}
                         {{range .Dashboard.DevicesStatus}}
-                        <div class="status-item">
+                        <a href="/devices" class="status-item">
+                            {{if .ThumbnailUrl}}
+                            <img src="{{.ThumbnailUrl}}" alt="{{.Name}}" class="status-thumbnail" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex'">
+                            <span class="status-thumbnail-placeholder" style="display:none;">💡</span>
+                            {{else}}
+                            <span class="status-thumbnail-placeholder">💡</span>
+                            {{end}}
                             <span class="status-name">{{.Name}}</span>
                             <span class="status-indicator">
                                 {{if eq .Status "online"}}
@@ -171,7 +183,7 @@
                                 <span class="status-text">{{ $.I18n.T "dashboard.offline" }}</span>
                                 {{end}}
                             </span>
-                        </div>
+                        </a>
                         {{end}}
                         {{else}}
                         <div style="padding: 1rem; color: #8b949e; text-align: center;">

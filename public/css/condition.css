@@ -1210,6 +1210,9 @@ fieldset.item.param>div.icons{
     width: 100%;
 }
 #buttonsContainer {
-    width: 14rem;
+    width: 18rem;
     padding: 1rem;
+}
+#buttonsContainer .btn {
+    margin-bottom: 0.5rem
 }

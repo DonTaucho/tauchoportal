@@ -16,52 +16,72 @@
                 </div>
                 <button class="btn btn-primary" onclick="openAddModal()">{{.I18n.T "devices.addDevice"}}</button>
             </div>
-            <!-- Stats Row (pre-rendered) -->
-            <div class="stats-row">
-                {{$total := len .Devices.Devices}}
-                {{$online := 0}}
-                {{$offline := 0}}
-                {{$notConf := 0}}
-                {{range .Devices.Devices}}
-                    {{if eq .Status "online"}}{{$online = add $online 1}}{{end}}
-                    {{if eq .Status "offline"}}{{$offline = add $offline 1}}{{end}}
-                    {{if not .IsConfigured}}{{$notConf = add $notConf 1}}{{end}}
+
+            <!-- Brand Status Widget -->
+            <div class="brand-status-widget">
+                <div class="brand-status-header">
+                    <h3>📱 Connected Brands</h3>
+                    <div class="brand-status-actions">
+                        <button class="manage-brands-link" onclick="goToBrandSettings()">⚙️ Manage Brands</button>
+                    </div>
+                </div>
+                
+        {{$hasConnected := false}}
+                <!-- Brand Status Pills -->
+                <div class="brand-status-pills" id="brandStatusPills">
+                    {{range .Devices.BrandsSorted}}
+                        {{$brandId := .ID}}
+                        {{$deviceCount := 0}}
+                        {{range $.Devices.Devices}}
+                            {{if eq .Brand $brandId}}{{$deviceCount = add $deviceCount 1}}{{end}}
+                        {{end}}
+                        {{if gt $deviceCount 0}}
+                            {{$hasConnected = true}}
+                            <div class="brand-pill connected" data-brand-id="{{$brandId}}">
+                                {{if .LogoURL}}
+                                    <img src="{{.LogoURL}}" alt="{{.Name}}" title="{{.Name}}">
+                                {{else}}
+                                    <span>📱</span>
+                                {{end}}
+                                <span>{{.Name}}</span>
+                                <span class="brand-pill-status">✓</span>
+                            </div>
+                        {{end}}
+                    {{end}}
+                    {{if not $hasConnected}}
+                        <span style="color: #9ca3af; font-style: italic;">No brands connected yet</span>
+                    {{end}}
+                </div>
+            </div>
+
+        </div>
+
+        <!-- Quick Connect New Brand Section -->
+         {{ if $hasConnected }}
+        <div style="background: #eaf4f8; border-radius: 8px; padding: 1.5rem; margin-bottom: 2rem;">
+            <h3 style="color: #0969da; margin-bottom: 1rem; font-size: 1rem; font-weight: 600;">🚀 {{.I18n.T "devices.quickConnect" }}</h3>
+            <div style="display: flex; gap: 0.75rem; flex-wrap: wrap;">
+                {{range .Devices.BrandsSorted }}
+                {{$brandId := .ID}}
+                {{$deviceCount := 0}}
+                {{range $.Devices.Devices}}
+                    {{if eq .Brand $brandId}}{{$deviceCount = add $deviceCount 1}}{{end}}
                 {{end}}
-                <div class="stat-card"><span class="stat-number">{{$total}}</span><span class="stat-label">{{.I18n.T "devices.statTotal"}}</span></div>
-                <div class="stat-card online"><span class="stat-number">{{$online}}</span><span class="stat-label">{{.I18n.T "devices.statOnline"}}</span></div>
-                <div class="stat-card offline"><span class="stat-number">{{$offline}}</span><span class="stat-label">{{.I18n.T "devices.statOffline"}}</span></div>
-                <div class="stat-card warn"><span class="stat-number">{{$notConf}}</span><span class="stat-label">{{.I18n.T "devices.statSetupIncomplete"}}</span></div>
+                {{if gt $deviceCount 0}}
+                <button style="padding: 0.5rem 1rem; background: white; border: 1px solid #0969da; border-radius: 4px; color: #0969da; font-size: 0.9rem; cursor: pointer; transition: 0.2s;" onclick="goToBrandSettings()">+ {{.Name}}</button>
+                {{end}}
+                {{end}}
             </div>
         </div>
+        {{end}}
 
-        <!-- Filter Tabs (pre-rendered) -->
-        <div class="filter-tabs">
-            <button class="filter-tab active" data-filter="all" onclick="filterByBrand('all', this)">
-                {{.I18n.T "devices.allFilter"}} <span class="tab-count">{{len .Devices.Devices}}</span>
-            </button>
-            {{range $brandId := .Devices.BrandIDs}}
-                {{$brand := index $.Devices.Brands $brandId}}
-                {{$count := 0}}
-                {{range $.Devices.Devices}}
-                    {{if eq .Brand $brandId}}{{$count = add $count 1}}{{end}}
-                {{end}}
-                {{$brandLabel := $brandId}}
-                {{if $brand}}
-                    {{$brandLabel = $brand.Name}}
-                {{end}}
-                <button class="filter-tab" data-filter="{{$brandId}}" onclick="filterByBrand('{{$brandId}}', this)">
-                    🔌 {{$brandLabel}} <span class="tab-count">{{$count}}</span>
-                </button>
-            {{end}}
-        </div>
-
-        <!-- Device List (pre-rendered) -->
+        <!-- Device List (pre-rendered) with Catalog Injections -->
         <div class="devices-list" id="devicesList">
             {{if eq (len .Devices.Devices) 0}}
             <p class="no-devices-msg">No devices yet. Click "+ Add Device" above to get started.</p>
             {{else}}
-            {{range .Devices.Devices}}
-                {{$brand := index $.Devices.Brands .Brand}}
+            {{range $idx, $device := .Devices.Devices}}
+                {{$brand := index $.Devices.Brands $device.Brand}}
                 {{$brandColor := "#888888"}}
                 {{$brandLogo := ""}}
                 {{if $brand}}
@@ -69,55 +89,102 @@
                     {{$brandLogo = $brand.LogoURL}}
                 {{end}}
                 
-                <div class="device-card" data-id="{{.ID}}" data-brand="{{.Brand}}">
-                    <div class="device-accent" style="background:{{$brandColor}}"></div>
+                <div class="device-card" data-id="{{$device.ID}}" data-brand="{{$device.Brand}}">
+                    <div class="device-header-section" data-brand="{{$device.Brand}}" style="background:linear-gradient(135deg, {{$brandColor}} 0%, {{$brandColor}} 100%);">
+                        <h4 class="device-header-name">{{$device.Name}}</h4>
+                        <p class="device-header-brand">{{$device.ProductName}}</p>
+                    </div>
                     <div class="device-body">
-                        <div class="device-brand">
-                            {{if $brandLogo}}
-                            <span class="device-brand-icon"><img src="{{$brandLogo}}" alt="{{.Brand}}" style="max-height:24px; width:auto;"></span>
+                        <div class="device-badges">
+                            {{if eq $device.Status "online"}}
+                            <span class="status-badge online">{{$.I18n.T "devices.statOnline"}}</span>
                             {{else}}
-                            <span class="device-brand-icon">🔌</span>
+                            <span class="status-badge offline">{{$.I18n.T "devices.statOffline"}}</span>
                             {{end}}
-                            <span class="device-brand-label">{{if $brand}}{{$brand.Name}}{{else}}{{.Brand}}{{end}}</span>
+                            {{if $device.Room}}
+                            <span class="device-room">🏠 {{$device.Room}}</span>
+                            {{end}}
                         </div>
-                        <div class="device-info">
-                            <div class="device-name">{{.Name}}</div>
-                            <div class="device-model">{{.ProductName}}</div>
-                            <div class="device-badges">
-                                {{if eq .Status "online"}}
-                                <span class="status-badge online">{{$.I18n.T "devices.statusBadgeOnline"}}</span>
-                                {{else}}
-                                <span class="status-badge offline">{{$.I18n.T "devices.statusBadgeOffline"}}</span>
+                        <div class="device-action-chips">
+                            {{range $aidx, $action := $device.SupportedActions}}
+                                {{if lt $aidx 5}}
+                                <span class="action-chip" data-action="{{$action}}">
+                                    {{$action}}
+                                </span>
                                 {{end}}
-                                {{if not .IsConfigured}}
-                                <span class="status-badge warn">{{$.I18n.T "devices.setupIncomplete"}}</span>
-                                {{end}}
-                                {{if .Room}}
-                                <span class="device-room">🏠 {{.Room}}</span>
-                                {{end}}
-                            </div>
-                            <div class="device-action-chips">
-                                {{range $idx, $action := .SupportedActions}}
-                                    {{if lt $idx 5}}
-                                    <span class="action-chip" data-action="{{$action}}">
-                                        {{/* Action icon will be set by JS ACTION_META */}}
-                                        {{$action}}
-                                    </span>
-                                    {{end}}
-                                {{end}}
-                                {{if gt (len .SupportedActions) 5}}
-                                <span class="action-chip more">+{{sub (len .SupportedActions) 5}}</span>
-                                {{end}}
-                            </div>
+                            {{end}}
+                            {{if gt (len $device.SupportedActions) 5}}
+                            <span class="action-chip more">+{{sub (len $device.SupportedActions) 5}}</span>
+                            {{end}}
                         </div>
                         <div class="device-ctrl">
-                            <button class="action-btn test" onclick="testDevice('{{.ID}}')">{{$.I18n.T "devices.testButton"}}</button>
-                            <button class="action-btn edit" onclick="openEditModal('{{.ID}}')">{{$.I18n.T "devices.editButton"}}</button>
-                            <button class="action-btn delete" onclick="deleteDevice('{{.ID}}')">{{$.I18n.T "devices.deleteButton"}}</button>
+                            <button class="action-btn test" onclick="testDevice('{{$device.ID}}')">{{$.I18n.T "devices.testButton"}}</button>
+                            <button class="action-btn edit" onclick="openEditModal('{{$device.ID}}')">{{$.I18n.T "devices.editButton"}}</button>
+                            <button class="action-btn delete" onclick="deleteDevice('{{$device.ID}}')">{{$.I18n.T "devices.deleteButton"}}</button>
                         </div>
                     </div>
                 </div>
+
+                <!-- Inject Catalog/Advertisement every 3 items -->
+                {{if eq $idx 2}}
+                    {{$brandIds := $.Devices.BrandIDs}}
+                    {{if gt (len $brandIds) 0}}
+                        {{$catalogBrandId := index $brandIds 0}}
+                        {{$catalogBrand := index $.Devices.Brands $catalogBrandId}}
+                        <div class="catalog-injection-row">
+                            <div class="catalog-injection-header">
+                                <h3>💡 Discover More {{if $catalogBrand}}{{$catalogBrand.Name}}{{else}}Smart Devices{{end}}</h3>
+                                <a href="#" onclick="filterByBrand('{{$catalogBrandId}}', document.querySelector('[data-filter=\'{{$catalogBrandId}}\']')); return false;">View All</a>
+                            </div>
+                            <div class="catalog-items-horizontal" id="catalog-{{$catalogBrandId}}">
+                                {{renderCatalog $catalogBrandId .}}
+                            </div>
+                        </div>
+                    {{end}}
+                {{end}}
+
+                {{if eq $idx 5}}
+                    {{$brandIds := $.Devices.BrandIDs}}
+                    {{if gt (len $brandIds) 1}}
+                        {{$catalogBrandId := index $brandIds 1}}
+                        {{$catalogBrand := index $.Devices.Brands $catalogBrandId}}
+                        <div class="catalog-injection-row">
+                            <div class="catalog-injection-header">
+                                <h3>💡 Discover More {{if $catalogBrand}}{{$catalogBrand.Name}}{{else}}Smart Devices{{end}}</h3>
+                                <a href="#" onclick="filterByBrand('{{$catalogBrandId}}', document.querySelector('[data-filter=\'{{$catalogBrandId}}\']')); return false;">View All</a>
+                            </div>
+                            <div class="catalog-items-horizontal" id="catalog-{{$catalogBrandId}}">
+                                {{renderCatalog $catalogBrandId .}}
+                            </div>
+                        </div>
+                    {{end}}
+                {{end}}
+
+                {{if eq $idx 8}}
+                    {{$brandIds := $.Devices.BrandIDs}}
+                    {{if gt (len $brandIds) 2}}
+                        {{$catalogBrandId := index $brandIds 2}}
+                        {{$catalogBrand := index $.Devices.Brands $catalogBrandId}}
+                        <div class="catalog-injection-row">
+                            <div class="catalog-injection-header">
+                                <h3>💡 Discover More {{if $catalogBrand}}{{$catalogBrand.Name}}{{else}}Smart Devices{{end}}</h3>
+                                <a href="#" onclick="filterByBrand('{{$catalogBrandId}}', document.querySelector('[data-filter=\'{{$catalogBrandId}}\']')); return false;">View All</a>
+                            </div>
+                            <div class="catalog-items-horizontal" id="catalog-{{$catalogBrandId}}">
+                                {{renderCatalog $catalogBrandId .}}
+                            </div>
+                        </div>
+                    {{end}}
+                {{end}}
             {{end}}
+            <!-- Add New Device Card (dotted border, like in mock) -->
+            <div class="device-card" style="border: 2px dashed #0969da; display: flex; align-items: center; justify-content: center; min-height: 300px; cursor: pointer; background: white; padding: 2rem; text-align: center;" onclick="openAddModal()">
+                <div style="display: flex; flex-direction: column; align-items: center; gap: 1rem;">
+                    <h3 style="color: #0969da; font-size: 1.3rem; margin: 0;">+ Add New Device</h3>
+                    <p style="color: #666; font-size: 0.95rem; margin: 0;">Click to register a new device</p>
+                    <p style="color: #999; font-size: 0.85rem; margin: 0;">Choose from connected brands or set up a new brand</p>
+                </div>
+            </div>
             {{end}}
         </div>
 
@@ -130,6 +197,9 @@
             <button class="btn btn-primary" onclick="openAddModal()">{{.I18n.T "devices.addFirstDevice"}}</button>
         </div>
         {{end}}
+
+        <!-- How to Use Legend Section -->
+        <div class="howtouse">{{.I18n.TH "devices.howToUse" }}</div>
     </div>
 
     <!-- Add / Edit Device Modal (Accordion Style) -->
@@ -201,7 +271,7 @@
                                     <div class="owned-devices-section">
                                         {{range $.Devices.Devices}}
                                             {{if eq .Brand $brandId}}
-                                            <div class="product-item" onclick="selectProduct('{{.Brand}}', '{{.ProductName}}', '{{.Name}}')">
+                                            <div class="product-item" onclick="selectProduct('{{.Brand}}', '{{.ProductID}}', '{{.ProductName}}', '{{.Name}}', {{toJSON .Credentials}})">
                                                 <div class="product-info">
                                                     <span class="product-name">{{.Name}}</span>
                                                     <span class="product-actions">{{.ProductName}}</span>
@@ -310,6 +380,15 @@
         </div>
     </div>
 <script>
+    // =============================================
+    // Option B: Devices Enhanced Layout
+    // =============================================
+    
+    // Navigate to Brand Settings page
+    function goToBrandSettings() {
+        window.location.href = '/brand-settings';
+    }
+
     // =============================================
     // Utility Functions
     // =============================================
@@ -515,7 +594,7 @@
         item.classList.toggle('open', !isOpen);
     }
     
-    function selectProduct(brandId, productId, productName) {
+    function selectProduct(brandId, productId, productName, deviceName, credentials) {
         selectedBrand = brandId;
         selectedProduct = productId;
         selectedProductName = productName;
@@ -525,12 +604,50 @@
         } else {
             const brand = BRANDS.find(b => b.id === brandId);
             setStep2Brand(brand);
+            
+            // Set the product model display (read-only)
             document.getElementById('devProductDisplay').value = productName;
             document.getElementById('devProduct').value = productId;
+            
+            // Set the display name to the device name, or suggest product name
+            const devNameInput = document.getElementById('devName');
+            if (deviceName) {
+                devNameInput.value = deviceName;
+            } else {
+                devNameInput.value = '';
+                devNameInput.placeholder = 'e.g., ' + productName;
+            }
+            
+            // Fill credentials if they exist
+            if (credentials && typeof credentials === 'object') {
+                Object.keys(credentials).forEach(key => {
+                    const credField = document.getElementById('cred_' + key);
+                    if (credField && credentials[key]) {
+                        credField.value = credentials[key];
+                    }
+                });
+            }
+            
             renderCredFields(brandId);
         }
         
         document.getElementById('deviceForm').reset();
+        // Restore values that were just set
+        if (brandId !== 'custom') {
+            document.getElementById('devProductDisplay').value = productName;
+            document.getElementById('devProduct').value = productId;
+            if (deviceName) {
+                document.getElementById('devName').value = deviceName;
+            }
+            if (credentials && typeof credentials === 'object') {
+                Object.keys(credentials).forEach(key => {
+                    const credField = document.getElementById('cred_' + key);
+                    if (credField && credentials[key]) {
+                        credField.value = credentials[key];
+                    }
+                });
+            }
+        }
         document.getElementById('devSaveBtn').textContent = 'Add Device';
         showStep(2);
     }
@@ -542,7 +659,7 @@
     }
 
     function goToStep1() {
-        renderBrandAccordion();
+        //renderBrandAccordion();
         showStep(1);
     }
 

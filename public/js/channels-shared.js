@@ -101,7 +101,7 @@
     }
 
     const PRODUCTS = {
-        'govee-h6159': { actions: ['on', 'off', 'color', 'brightness', 'scene', 'flash'] }, 'govee-h6052': { actions: ['on', 'off', 'color', 'brightness', 'color_temp'] }, 'govee-h7021': { actions: ['on', 'off', 'color', 'brightness'] }, 'govee-h5080': { actions: ['on', 'off', 'toggle'] }, 'hue-color': { actions: ['on', 'off', 'color', 'brightness', 'color_temp', 'scene'] }, 'hue-white': { actions: ['on', 'off', 'brightness', 'color_temp'] }, 'hue-strip': { actions: ['on', 'off', 'color', 'brightness', 'scene'] }, 'hue-plug': { actions: ['on', 'off', 'toggle'] }, 'kasa-ep10': { actions: ['on', 'off', 'toggle'] }, 'kasa-ep40': { actions: ['on', 'off', 'toggle'] }, 'kasa-lb130': { actions: ['on', 'off', 'color', 'brightness'] }, 'lifx-color': { actions: ['on', 'off', 'color', 'brightness', 'color_temp', 'scene'] }, 'lifx-mini': { actions: ['on', 'off', 'brightness', 'color_temp'] }, 'lifx-strip': { actions: ['on', 'off', 'color', 'brightness', 'scene'] }, 'tuya-bulb': { actions: ['on', 'off', 'color', 'brightness'] }, 'tuya-plug': { actions: ['on', 'off', 'toggle'] }, 'tuya-strip': { actions: ['on', 'off', 'color', 'brightness'] }, 'nano-shapes': { actions: ['on', 'off', 'color', 'brightness', 'scene'] }, 'nano-lines': { actions: ['on', 'off', 'color', 'brightness', 'scene'] }, 'nano-canvas': { actions: ['on', 'off', 'color', 'brightness', 'scene'] }, 'yee-color': { actions: ['on', 'off', 'color', 'brightness', 'color_temp'] }, 'yee-strip': { actions: ['on', 'off', 'color', 'brightness'] }, 'yee-desk': { actions: ['on', 'off', 'brightness', 'color_temp'] }, 'wled-ctrl': { actions: ['on', 'off', 'color', 'brightness', 'scene', 'flash'] }, 'wyze-plug': { actions: ['on', 'off', 'toggle'] }, 'wyze-bulb': { actions: ['on', 'off', 'color', 'brightness', 'color_temp'] }, 'amz-plug': { actions: ['on', 'off', 'toggle'] }, 'echo-flex': { actions: ['on', 'off', 'toggle'] },
+        'govee-h6159': { actions: ['on', 'off', 'color', 'brightness', 'scene', 'flash'] }, 'govee-h6052': { actions: ['on', 'off', 'color', 'brightness', 'color_temp'] }, 'govee-h7021': { actions: ['on', 'off', 'color', 'brightness'] }, 'govee-h5080': { actions: ['on', 'off', 'toggle'] }, 'hue-color': { actions: ['on', 'off', 'color', 'brightness', 'color_temp', 'scene'] }, 'hue-white': { actions: ['on', 'off', 'brightness', 'color_temp'] }, 'hue-strip': { actions: ['on', 'off', 'color', 'brightness', 'scene'] }, 'hue-plug': { actions: ['on', 'off', 'toggle'] }, 'kasa-ep10': { actions: ['on', 'off', 'toggle'] }, 'kasa-ep40': { actions: ['on', 'off', 'toggle'] }, 'kasa-lb130': { actions: ['on', 'off', 'color', 'brightness'] }, 'lifx-color': { actions: ['on', 'off', 'color', 'brightness', 'color_temp', 'scene'] }, 'lifx-mini': { actions: ['on', 'off', 'brightness', 'color_temp'] }, 'lifx-strip': { actions: ['on', 'off', 'color', 'brightness', 'scene'] }, 'wiz-bulb': { actions: ['on', 'off', 'color', 'brightness'] }, 'wiz-plug': { actions: ['on', 'off', 'toggle'] }, 'wiz-strip': { actions: ['on', 'off', 'color', 'brightness'] }, 'nano-shapes': { actions: ['on', 'off', 'color', 'brightness', 'scene'] }, 'nano-lines': { actions: ['on', 'off', 'color', 'brightness', 'scene'] }, 'nano-canvas': { actions: ['on', 'off', 'color', 'brightness', 'scene'] }, 'yee-color': { actions: ['on', 'off', 'color', 'brightness', 'color_temp'] }, 'yee-strip': { actions: ['on', 'off', 'color', 'brightness'] }, 'yee-desk': { actions: ['on', 'off', 'brightness', 'color_temp'] }, 'wled-ctrl': { actions: ['on', 'off', 'color', 'brightness', 'scene', 'flash'] }, 'wyze-plug': { actions: ['on', 'off', 'toggle'] }, 'wyze-bulb': { actions: ['on', 'off', 'color', 'brightness', 'color_temp'] }, 'amz-plug': { actions: ['on', 'off', 'toggle'] }, 'echo-flex': { actions: ['on', 'off', 'toggle'] },
     };
 
     const platformIcons = window.__platformIcons || {};
@@ -142,8 +142,250 @@
     // Set up apiGet_func for use in API fetch functions
     apiGet_func = apiGet;
     
+    // ============================================================
+    // Device Action Parameters (Sending Params) Helper Functions
+    // ============================================================
+
+    // Try to parse JSON string, return null if invalid
+    function parseJSON(jsonStr) {
+        try {
+            return JSON.parse(jsonStr);
+        } catch (e) {
+            return null;
+        }
+    }
+
+    // Extract keys from JSON string for param selection dropdown
+    function getParamNamesFromBody(bodyJson) {
+        const parsed = parseJSON(bodyJson);
+        if (!parsed || typeof parsed !== 'object') return [];
+        return Object.keys(parsed);
+    }
+
+    // Build evaluator UI based on selected type
+    function buildEvaluatorUI(evaluatorType) {
+        const container = document.getElementById('evaluatorUIContainer');
+        if (!container) return;
+        
+        let html = '';
+        
+        switch (evaluatorType) {
+            case 'extract_number':
+                html = `
+                    <div class="form-group">
+                        <label for="evaluatorRange">{{.I18n.T "channelLayout.numberRange"}}</label>
+                        <input type="text" id="evaluatorRange" placeholder="0-100" value="0-100">
+                    </div>
+                `;
+                break;
+            case 'extract_hex_color':
+                html = `
+                    <div class="form-help">{{.I18n.T "channelLayout.hexColorHelp"}}</div>
+                `;
+                break;
+            case 'extract_text':
+                html = `
+                    <div class="form-group">
+                        <label for="evaluatorPattern">{{.I18n.T "channelLayout.textPattern"}}</label>
+                        <input type="text" id="evaluatorPattern" placeholder="keyword or pattern">
+                    </div>
+                `;
+                break;
+            case 'regex_extract':
+                html = `
+                    <div class="form-group">
+                        <label for="evaluatorRegex">{{.I18n.T "channelLayout.regexPattern"}}</label>
+                        <input type="text" id="evaluatorRegex" placeholder="(.+)" value="(.+)">
+                    </div>
+                `;
+                break;
+            case 'conditional':
+                html = `
+                    <div class="form-help">{{.I18n.T "channelLayout.conditionalHelp"}}</div>
+                    <div class="form-group">
+                        <label for="evaluatorDefaultValue">{{.I18n.T "channelLayout.defaultValue"}}</label>
+                        <input type="text" id="evaluatorDefaultValue" placeholder="default_value">
+                    </div>
+                `;
+                break;
+            case 'fixed_value':
+                html = `
+                    <div class="form-group">
+                        <label for="evaluatorFixedValue">{{.I18n.T "channelLayout.fixedValue"}}</label>
+                        <input type="text" id="evaluatorFixedValue" placeholder="enter fixed value">
+                    </div>
+                `;
+                break;
+        }
+        
+        container.innerHTML = html;
+    }
+
+    // Build evaluator structure from UI values
+    function buildEvaluatorStructure(evaluatorType) {
+        const structure = { Operator: '' };
+        
+        switch (evaluatorType) {
+            case 'extract_number':
+                const range = (document.getElementById('evaluatorRange') || {}).value || '0-100';
+                structure.Operator = 'EXTRACT_NUMBER';
+                structure.Variables = [range];
+                break;
+            case 'extract_hex_color':
+                structure.Operator = 'REGEX_EXTRACT';
+                structure.Variables = ['#([0-9A-Fa-f]{6})'];
+                break;
+            case 'extract_text':
+                const pattern = (document.getElementById('evaluatorPattern') || {}).value || '';
+                structure.Operator = 'EXTRACT_TEXT';
+                structure.Variables = [pattern];
+                break;
+            case 'regex_extract':
+                const regex = (document.getElementById('evaluatorRegex') || {}).value || '(.+)';
+                structure.Operator = 'REGEX_EXTRACT';
+                structure.Variables = [regex];
+                break;
+            case 'conditional':
+                const defaultVal = (document.getElementById('evaluatorDefaultValue') || {}).value || '';
+                structure.Operator = 'CONDITION';
+                structure.SubConditions = [{ Operator: 'DEFAULT', Result: defaultVal }];
+                break;
+            case 'fixed_value':
+                const fixedVal = (document.getElementById('evaluatorFixedValue') || {}).value || '';
+                structure.Operator = 'FIXED_VALUE';
+                structure.Result = fixedVal;
+                break;
+        }
+        
+        return structure;
+    }
+
+    // Update param name dropdown based on body JSON
+    window.updateParamNameDropdown = function() {
+        const bodyText = (document.getElementById('condDeviceActionBody') || {}).value || '';
+        const paramNameSelect = document.getElementById('condParamName');
+        if (!paramNameSelect) return;
+        
+        const paramNames = getParamNamesFromBody(bodyText);
+        const currentValue = paramNameSelect.value;
+        
+        // Clear and repopulate
+        paramNameSelect.innerHTML = '<option value="">{{.I18n.T "channelLayout.selectParam"}}</option>';
+        paramNames.forEach(name => {
+            const opt = document.createElement('option');
+            opt.value = name;
+            opt.textContent = name;
+            paramNameSelect.appendChild(opt);
+        });
+        
+        // Update validation message
+        const msgEl = document.getElementById('bodyValidationMsg');
+        if (msgEl) {
+            msgEl.textContent = paramNames.length > 0 
+                ? `${paramNames.length} parameter(s) found`
+                : '⚠️ Invalid JSON or no parameters';
+        }
+    };
+
+    // Update evaluator UI when type changes
+    window.updateEvaluatorUI = function() {
+        const type = (document.getElementById('evaluatorType') || {}).value || '';
+        buildEvaluatorUI(type);
+    };
+
+    // Update result preview
+    window.updateResultPreview = function() {
+        const bodyText = (document.getElementById('condDeviceActionBody') || {}).value || '';
+        const paramName = (document.getElementById('condParamName') || {}).value || '';
+        const evaluatorType = (document.getElementById('evaluatorType') || {}).value || '';
+        
+        const preview = document.getElementById('resultPreview');
+        const previewContent = document.getElementById('resultPreviewContent');
+        
+        if (!preview || !previewContent) return;
+        
+        if (!bodyText || !paramName || !evaluatorType) {
+            preview.style.display = 'none';
+            return;
+        }
+        
+        const parsed = parseJSON(bodyText);
+        if (!parsed) {
+            preview.style.display = 'block';
+            previewContent.textContent = '⚠️ Invalid JSON in body template';
+            return;
+        }
+        
+        // Clone and update with example value
+        const result = JSON.parse(JSON.stringify(parsed));
+        result[paramName] = '[evaluated_value]';
+        
+        preview.style.display = 'block';
+        previewContent.textContent = JSON.stringify(result, null, 2);
+    };
+
     window.onclick = function (event) { ['conditionModal', 'filterModal', 'testConditionModal'].forEach((id) => { if (event.target === document.getElementById(id)) closeModal(id); }); };
-    Object.assign(window, { PLATFORM_EVENTS, EVENT_PARAMETERS, PLATFORM_META, PRODUCTS, escHtml, isZeroDate, formatDate, formatDateTime, hasActiveFilter, navigate, openModal, closeModal, showMonToast, apiRequest, apiGet, getEventLabel, buildTestEvent, getEventMetadata, getEventParameters, getEventsForPlatform });
+    
+    // Load device templates and populate sending parameters form
+    window.loadDeviceTemplates = async function(brandId) {
+        try {
+            const response = await apiGet(`/device-templates?brand=${encodeURIComponent(brandId)}`);
+            if (!response || !response.length) {
+                console.warn('[loadDeviceTemplates] No templates found for brand:', brandId);
+                document.getElementById('sendingParamsSection').style.display = 'none';
+                return;
+            }
+            
+            // Use first template as default
+            const template = response[0];
+            const bodyTextarea = document.getElementById('condDeviceActionBody');
+            const paramDropdown = document.getElementById('condParamName');
+            const sendingParamsSection = document.getElementById('sendingParamsSection');
+            
+            if (!bodyTextarea || !paramDropdown || !sendingParamsSection) return;
+            
+            // Populate body template
+            if (template.http_body_template) {
+                try {
+                    // If it's a JSON string, format it nicely
+                    const parsed = typeof template.http_body_template === 'string' 
+                        ? JSON.parse(template.http_body_template)
+                        : template.http_body_template;
+                    bodyTextarea.value = JSON.stringify(parsed, null, 2);
+                } catch (e) {
+                    bodyTextarea.value = template.http_body_template;
+                }
+            }
+            
+            // Populate parameter dropdown from required_parameters
+            if (paramDropdown) {
+                while (paramDropdown.options.length > 1) {
+                    paramDropdown.remove(1);
+                }
+                
+                if (template.required_parameters && Array.isArray(template.required_parameters)) {
+                    template.required_parameters.forEach(param => {
+                        const optionText = typeof param === 'string' ? param : param.name || param;
+                        paramDropdown.add(new Option(optionText, optionText));
+                    });
+                }
+            }
+            
+            // Show sending parameters section
+            sendingParamsSection.style.display = 'block';
+            
+            // Trigger parameter dropdown update to populate constraints
+            updateParamNameDropdown();
+            
+        } catch (err) {
+            console.error('[loadDeviceTemplates] Error loading templates:', err);
+            const sendingParamsSection = document.getElementById('sendingParamsSection');
+            if (sendingParamsSection) sendingParamsSection.style.display = 'none';
+        }
+    };
+    
+    Object.assign(window, { PLATFORM_EVENTS, EVENT_PARAMETERS, PLATFORM_META, PRODUCTS, escHtml, isZeroDate, formatDate, formatDateTime, hasActiveFilter, navigate, openModal, closeModal, showMonToast, apiRequest, apiGet, getEventLabel, buildTestEvent, getEventMetadata, getEventParameters, getEventsForPlatform, updateParamNameDropdown: window.updateParamNameDropdown, updateEvaluatorUI: window.updateEvaluatorUI, updateResultPreview: window.updateResultPreview, loadDeviceTemplates: window.loadDeviceTemplates });
 })();
+
 
 

@@ -383,19 +383,23 @@
     display: flex;
     justify-content: space-between;
     align-items: center;
+    gap: 0.75rem;
     padding: 0.75rem;
     border-radius: 6px;
     margin-bottom: 0.5rem;
     background: var(--bg-secondary);
     transition: all 0.2s;
 }
-
 .status-item:last-child {
     margin-bottom: 0;
 }
 
 .status-item:hover {
     background: rgba(88, 166, 255, 0.1);
+}
+
+a.status-item {
+    text-decoration: none;
 }
 
 .status-name {
@@ -444,6 +448,29 @@
     font-size: 0.75rem;
     font-weight: 600;
     color: var(--text-secondary);
+}
+
+/* ========== STATUS THUMBNAILS ========== */
+.status-thumbnail {
+    width: 32px;
+    height: 32px;
+    border-radius: 4px;
+    object-fit: cover;
+    flex-shrink: 0;
+    border: 1px solid var(--border);
+}
+
+.status-thumbnail-placeholder {
+    width: 32px;
+    height: 32px;
+    border-radius: 4px;
+    background: var(--bg-secondary);
+    border: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1rem;
+    flex-shrink: 0;
 }
 
 /* ========== SCROLLBAR ========== */
@@ -533,8 +560,21 @@
         gap: 1rem;
     }
 
-    .stat-box {
-        padding: 1rem;
-    }
 }
 
+
+@media (max-width: 1200px) {
+    .stats-bar {
+        grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));
+        padding: 0.8rem;
+    }
+    .stat-box {
+        padding: 0.2rem;
+        max-width: 12rem;
+        
+    }
+    .stat-value {
+        margin-left: 1rem;
+        font-size: 1.5rem;
+    }
+}

@@ -60,21 +60,23 @@ type DashboardActivity struct {
 
 // ChannelStatus represents a channel's current status
 type ChannelStatus struct {
-	ID        string `json:"id"`
-	Name      string `json:"name"`
-	Platform  string `json:"platform"`
-	Status    string `json:"status"`
-	LastStream string `json:"last_stream"`
+	ID           string `json:"id"`
+	Name         string `json:"name"`
+	Platform     string `json:"platform"`
+	Status       string `json:"status"`
+	LastStream   string `json:"last_stream"`
+	ThumbnailUrl string `json:"thumbnail_url"`
 }
 
 // DeviceStatus represents a device's current status
 type DeviceStatus struct {
-	ID       string `json:"id"`
-	Name     string `json:"name"`
-	Brand    string `json:"brand"`
-	Status   string `json:"status"`
-	Room     string `json:"room"`
-	LastSeen string `json:"last_seen"`
+	ID           string `json:"id"`
+	Name         string `json:"name"`
+	Brand        string `json:"brand"`
+	Status       string `json:"status"`
+	Room         string `json:"room"`
+	LastSeen     string `json:"last_seen"`
+	ThumbnailUrl string `json:"thumbnail_url"`
 }
 
 // GetDashboardStats fetches the complete dashboard data from API

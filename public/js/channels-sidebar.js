@@ -10,12 +10,12 @@
         { id: 'twitcasting', label: 'TwitCasting', hasOAuth: true, publicAccess: false },
         { id: 'kick', label: 'Kick', hasOAuth: false, publicAccess: true },
         { id: 'bilibili', label: 'Bilibili', hasOAuth: false, publicAccess: true },
-        { id: 'instagram', label: 'Instagram', hasOAuth: false, publicAccess: false },
+        { id: 'instagram', label: 'Instagram', hasOAuth: true, publicAccess: false },
         { id: 'tiktok', label: 'TikTok', hasOAuth: false, publicAccess: false },
-        { id: 'facebook', label: 'Facebook', hasOAuth: false, publicAccess: false },
-        { id: 'x', label: 'X', hasOAuth: false, publicAccess: false },
+        { id: 'facebook', label: 'Facebook', hasOAuth: true, publicAccess: false },
+        { id: 'x', label: 'X', hasOAuth: true, publicAccess: false },
     ];
-    const PROVIDER_MAP = { google: 'youtube', twitch: 'twitch', niconico: 'niconico', twitcasting: 'twitcasting' };
+    const PROVIDER_MAP = { google: 'youtube', twitch: 'twitch', niconico: 'niconico', twitcasting: 'twitcasting', instagram: 'instagram', facebook: 'facebook', x: 'x' };
     const state = { connectedSet: new Set(), existingWatchSet: new Set(), selectedChannel: null, accordionLoaded: new Set(), accSearchTimers: new Map(), onChannelsChanged: null };
     const esc = (v) => escHtml(v);
 
@@ -100,7 +100,18 @@
         results.innerHTML = '<div class="result-loading">Loading your channels…</div>';
         
         try {
-            const endpoint = `/platform/${platformId}/channels/mine`;
+            // Handle platform-specific endpoints
+            let endpoint;
+            if (platformId === 'instagram') {
+                endpoint = `/platform/instagram/user/mine`;
+            } else if (platformId === 'facebook') {
+                endpoint = `/platform/facebook/page/mine`;
+            } else if (platformId === 'x') {
+                endpoint = `/platform/x/user/mine`;
+            } else {
+                endpoint = `/platform/${platformId}/channels/mine`;
+            }
+            
             const items = await apiGet(endpoint);
             renderMiniChannelResults(results, normalizePagedData(items).items, platformId, t.noOwnChannels || 'No own channels found.');
         } catch (error) { 
@@ -113,6 +124,7 @@
     }
 
     function onAccSearch(platformId, value) {
+        if (platformId === "kick" && value.length < 3) return;
         clearTimeout(state.accSearchTimers.get(platformId)); const results = document.getElementById(`acc-results-${platformId}`);
         if (!value.trim()) { if (results) results.innerHTML = ''; return; }
         state.accSearchTimers.set(platformId, setTimeout(() => doAccSearch(platformId, value.trim()), 400));
@@ -138,9 +150,13 @@
     function renderMiniChannelResults(container, items, platformId, emptyMessage, nextToken) {
         if (!items || items.length === 0) { container.innerHTML = `<div class="result-empty">${esc(emptyMessage)}</div>`; return; }
         container.innerHTML = items.map((channel) => {
-            const channelId = channel.channel_id || channel.id || ''; const name = channel.title || channel.display_name || channel.name || channelId; const thumbnail = channel.thumbnail || channel.thumbnail_url || '';
+            // Handle platform-specific field names
+            const channelId = channel.user_id || channel.page_id || channel.channel_id || channel.id || '';
+            const name = channel.display_name || channel.username || channel.title || channel.name || channelId;
+            const thumbnail = channel.thumbnail || channel.thumbnail_url || '';
             const subtitle = channel.subscriber_count != null ? `${formatCount(channel.subscriber_count)} ${t.subscribers || 'subscribers'}` : (channel.follower_count != null ? `${formatCount(channel.follower_count)} ${t.followers || 'followers'}` : '');
-            const added = state.existingWatchSet.has(`${platformId}:${channelId}`); const thumb = thumbnail ? `<img class="mini-thumb-img" src="${esc(thumbnail)}" alt="" loading="lazy">` : `<div class="mini-thumb-placeholder">${esc(PLATFORM_META[platformId]?.icon || '📺')}</div>`;
+            const added = state.existingWatchSet.has(`${platformId}:${channelId}`);
+            const thumb = thumbnail ? `<img class="mini-thumb-img" src="${esc(thumbnail)}" alt="" loading="lazy">` : `<div class="mini-thumb-placeholder">${esc(PLATFORM_META[platformId]?.icon || '📺')}</div>`;
             return `<div class="mini-card"><div class="mini-thumb">${thumb}</div><div class="mini-info"><div class="mini-name">${esc(name)}</div><div class="mini-meta">${subtitle}</div></div>${added ? '<span class="mini-badge-added">' + (t.added || 'Added') + '</span>' : `<button class="mini-add-btn" title="${t.addChannelTitle || 'Add channel'}" onclick='openConfirm(${JSON.stringify({ platform: platformId, channelId, name, thumbnail: thumbnail || null })})'>+</button>`}</div>`;
         }).join('') + (nextToken ? `<button class="load-more-sm" onclick="loadAccSubs('${platformId}', '${esc(nextToken)}')">${t.loadMore || 'Load more…'}</button>` : '');
     }
