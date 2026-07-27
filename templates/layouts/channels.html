@@ -19,7 +19,7 @@
         "7" `{ "id": "instagram", "label": "Instagram", "connectionName": "instagram", "hasOAuth": "true", "publicAccess": "false" }`
         "8" `{ "id": "tiktok", "label": "TikTok", "connectionName": "tiktok", "hasOAuth": "false", "publicAccess": "false" }`
         "9" `{ "id": "facebook", "label": "Facebook", "connectionName": "facebook", "hasOAuth": "true", "publicAccess": "false" }`
-        "a" `{ "id": "x", "label": "X", "connectionName": "x", "hasOAuth": "false", "publicAccess": "false"}` }}
+        "a" `{ "id": "x", "label": "X", "connectionName": "x", "hasOAuth": "true", "publicAccess": "false"}` }}
 {{$currentuser := .API.Auth.GetCurrentUser }}
 {{$allwatches := .API.Watches.ListWatches }}
 
@@ -78,7 +78,7 @@
                         
                         <!-- State: Connected or public access -->
                         <div class="acc-content" style="{{if and (not $connected) (not $publicAccess)}}display:none{{end}}">
-                            {{ if and (not (eq $platformId "kick")) (not (eq $platformId "bilibili")) }}
+                            {{ if and (not (eq $platformId "kick")) (not (eq $platformId "bilibili")) (not (eq $platformId "x")) }}
                                 <div class="acc-search-wrap"><span class="acc-search-icon">🔍</span><input class="acc-search" type="text" id="acc-search-{{$platformId}}" placeholder="{{$.I18n.T "channelLayout.searchPlaceholder"}}" oninput="onAccSearch('{{$platformId}}', this.value)"></div><div class="acc-results" id="acc-results-{{$platformId}}"></div>
                             {{ else }}
                                 <div class="acc-results" id="acc-results-{{$platformId}}"></div>
