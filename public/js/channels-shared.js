@@ -173,20 +173,20 @@
             case 'extract_number':
                 html = `
                     <div class="form-group">
-                        <label for="evaluatorRange">{{.I18n.T "channelLayout.numberRange"}}</label>
+                        <label for="evaluatorRange">${window._i18nMsg?.['channelLayout.numberRange'] || 'Number Range'}</label>
                         <input type="text" id="evaluatorRange" placeholder="0-100" value="0-100">
                     </div>
                 `;
                 break;
             case 'extract_hex_color':
                 html = `
-                    <div class="form-help">{{.I18n.T "channelLayout.hexColorHelp"}}</div>
+                    <div class="form-help">${window._i18nMsg?.['channelLayout.hexColorHelp'] || 'Auto-detects hex color codes'}</div>
                 `;
                 break;
             case 'extract_text':
                 html = `
                     <div class="form-group">
-                        <label for="evaluatorPattern">{{.I18n.T "channelLayout.textPattern"}}</label>
+                        <label for="evaluatorPattern">${window._i18nMsg?.['channelLayout.textPattern'] || 'Text Pattern'}</label>
                         <input type="text" id="evaluatorPattern" placeholder="keyword or pattern">
                     </div>
                 `;
@@ -194,16 +194,16 @@
             case 'regex_extract':
                 html = `
                     <div class="form-group">
-                        <label for="evaluatorRegex">{{.I18n.T "channelLayout.regexPattern"}}</label>
+                        <label for="evaluatorRegex">${window._i18nMsg?.['channelLayout.regexPattern'] || 'Regular Expression'}</label>
                         <input type="text" id="evaluatorRegex" placeholder="(.+)" value="(.+)">
                     </div>
                 `;
                 break;
             case 'conditional':
                 html = `
-                    <div class="form-help">{{.I18n.T "channelLayout.conditionalHelp"}}</div>
+                    <div class="form-help">${window._i18nMsg?.['channelLayout.conditionalHelp'] || 'Execute if condition is met'}</div>
                     <div class="form-group">
-                        <label for="evaluatorDefaultValue">{{.I18n.T "channelLayout.defaultValue"}}</label>
+                        <label for="evaluatorDefaultValue">${window._i18nMsg?.['channelLayout.defaultValue'] || 'Default Value'}</label>
                         <input type="text" id="evaluatorDefaultValue" placeholder="default_value">
                     </div>
                 `;
@@ -211,7 +211,7 @@
             case 'fixed_value':
                 html = `
                     <div class="form-group">
-                        <label for="evaluatorFixedValue">{{.I18n.T "channelLayout.fixedValue"}}</label>
+                        <label for="evaluatorFixedValue">${window._i18nMsg?.['channelLayout.fixedValue'] || 'Fixed Value'}</label>
                         <input type="text" id="evaluatorFixedValue" placeholder="enter fixed value">
                     </div>
                 `;
@@ -270,7 +270,7 @@
         const currentValue = paramNameSelect.value;
         
         // Clear and repopulate
-        paramNameSelect.innerHTML = '<option value="">{{.I18n.T "channelLayout.selectParam"}}</option>';
+        paramNameSelect.innerHTML = `<option value="">${window._i18nMsg?.['channelLayout.selectParam'] || 'Select parameter...'}</option>`;
         paramNames.forEach(name => {
             const opt = document.createElement('option');
             opt.value = name;
@@ -281,9 +281,11 @@
         // Update validation message
         const msgEl = document.getElementById('bodyValidationMsg');
         if (msgEl) {
+            const foundMsg = window._i18nMsg?.['channelLayout.parametersFound'] || 'parameter(s) found';
+            const invalidMsg = window._i18nMsg?.['channelLayout.invalidJsonOrNoParams'] || '⚠️ Invalid JSON or no parameters';
             msgEl.textContent = paramNames.length > 0 
-                ? `${paramNames.length} parameter(s) found`
-                : '⚠️ Invalid JSON or no parameters';
+                ? `${paramNames.length} ${foundMsg}`
+                : invalidMsg;
         }
     };
 
@@ -312,7 +314,7 @@
         const parsed = parseJSON(bodyText);
         if (!parsed) {
             preview.style.display = 'block';
-            previewContent.textContent = '⚠️ Invalid JSON in body template';
+            previewContent.textContent = window._i18nMsg?.['channelLayout.invalidJsonInBody'] || '⚠️ Invalid JSON in body template';
             return;
         }
         

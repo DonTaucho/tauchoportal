@@ -100,7 +100,7 @@
             <div class="grid">
                 <div class="card">
                     <div class="platform-icon">{{platformIcon "youtube"}}</div>
-                    <strong>YouTube</strong>
+                    <strong>{{.I18n.T "login.youtubeLogin" }}</strong>
                     <ul>
                         <li>{{.I18n.T "index.featureLiveChatComments"}}</li>
                         <li>{{.I18n.T "index.featureSuperChatStickers"}}</li>
@@ -110,7 +110,7 @@
                 </div>
                 <div class="card">
                     <div class="platform-icon">{{platformIcon "twitch"}}</div>
-                    <strong>Twitch</strong>
+                    <strong>{{.I18n.T "login.twitchLogin" }}</strong>
                     <ul>
                         <li>{{.I18n.T "index.featureChatComments"}}</li>
                         <li>{{.I18n.T "index.featureCheeringBits"}}</li>
@@ -120,7 +120,7 @@
                 </div>
                 <div class="card">
                     <div class="platform-icon">{{platformIcon "niconico"}}</div>
-                    <strong>NicoNico</strong>
+                    <strong>{{.I18n.T "login.niconicoLogin" }}</strong>
                     <ul>
                         <li>{{.I18n.T "index.featureLiveComments"}}</li>
                         <li>{{.I18n.T "index.featureNicoruReactions"}}</li>
@@ -129,8 +129,18 @@
                     </ul>
                 </div>
                 <div class="card">
+                    <div class="platform-icon">{{platformIcon "twitcasting"}}</div>
+                    <strong>{{.I18n.T "login.twitcastingLogin" }}</strong>
+                    <ul>
+                        <li>{{.I18n.T "index.featureLiveComments"}}</li>
+                        <li>{{.I18n.T "index.featureTips"}}</li>
+                        <li>{{.I18n.T "index.featureStreamStartEnd"}}</li>
+                        <li><em>{{.I18n.T "index.featureComingSoon"}}</em></li>
+                    </ul>
+                </div>
+                <div class="card">
                     <div class="platform-icon">{{platformIcon "instagram"}}</div>
-                    <strong>Instagram</strong>
+                    <strong>{{.I18n.T "login.instagramLogin" }}</strong>
                     <ul>
                         <li>{{.I18n.T "index.featureLiveComments"}}</li>
                         <li>{{.I18n.T "index.featureHeartsReactions"}}</li>
@@ -140,7 +150,7 @@
                 </div>
                 <div class="card">
                     <div class="platform-icon">{{platformIcon "tiktok"}}</div>
-                    <strong>TikTok</strong>
+                    <strong>{{.I18n.T "login.tiktokLogin" }}</strong>
                     <ul>
                         <li>{{.I18n.T "index.featureLiveComments"}}</li>
                         <li>{{.I18n.T "index.featureGifts"}}</li>
@@ -150,7 +160,7 @@
                 </div>
                 <div class="card">
                     <div class="platform-icon">{{platformIcon "kick"}}</div>
-                    <strong>Kick</strong>
+                    <strong>{{.I18n.T "login.kickLogin" }}</strong>
                     <ul>
                         <li>{{.I18n.T "index.featureChatComments"}}</li>
                         <li>{{.I18n.T "index.featureSubscriptions"}}</li>
@@ -160,7 +170,7 @@
                 </div>
                 <div class="card">
                     <div class="platform-icon">{{platformIcon "facebook"}}</div>
-                    <strong>Facebook</strong>
+                    <strong>{{.I18n.T "login.facebookLogin" }}</strong>
                     <ul>
                         <li>{{.I18n.T "index.featureLiveComments"}}</li>
                         <li>{{.I18n.T "index.featureReactions"}}</li>
@@ -169,18 +179,8 @@
                     </ul>
                 </div>
                 <div class="card">
-                    <div class="platform-icon">{{platformIcon "x"}}</div>
-                    <strong>X</strong>
-                    <ul>
-                        <li>{{.I18n.T "index.featureLiveComments"}}</li>
-                        <li>{{.I18n.T "index.featureTips"}}</li>
-                        <li>{{.I18n.T "index.featureStreamStartEnd"}}</li>
-                        <li><em>{{.I18n.T "index.featureComingSoon"}}</em></li>
-                    </ul>
-                </div>
-                <div class="card">
                     <div class="platform-icon">{{platformIcon "bilibili"}}</div>
-                    <strong>Bilibili</strong>
+                    <strong>{{.I18n.T "login.bilibiliLogin" }}</strong>
                     <ul>
                         <li>{{.I18n.T "index.featureLiveComments"}}</li>
                         <li>{{.I18n.T "index.featureGifts"}}</li>

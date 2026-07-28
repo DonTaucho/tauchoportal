@@ -470,8 +470,7 @@ h3 {
 }
 .bilibili-toast.bilibili-toast-on { opacity: 1; transform: translateX(-50%) translateY(0); }
 
-
-    
+@media (max-width: 768px) {
     body {
         background-image: url(/image/bg_s.png);
         background-image: url(/image/bg_s.png), linear-gradient(165deg, #ceeaff 40%, #6c79d1 100%);

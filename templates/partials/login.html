@@ -140,7 +140,7 @@
             <!-- Loading state -->
             <div id="bili-loading" style="display:none; text-align: center;">
                 <div class="bilibili-spinner"></div>
-                <p>{{.I18n.T "login.bilibiliGeneratingQR" "Generating QR code..."}}</p>
+                <p>{{.I18n.T "login.bilibiliGeneratingQR"}}</p>
             </div>
             
             <!-- QR Code Display -->
@@ -149,10 +149,10 @@
                     <img id="bili-qr-image" src="" alt="Bilibili QR Code" />
                 </div>
                 <p class="bilibili-qr-instruction">
-                    {{.I18n.T "login.bilibiliQRInstruction" "Open the Bilibili app on your phone and scan this QR code"}}
+                    {{.I18n.T "login.bilibiliQRInstruction"}}
                 </p>
                 <p class="bilibili-qr-countdown">
-                    {{.I18n.T "login.bilibiliExpiresIn" "Expires in: "}} <span id="bili-countdown">180</span> {{.I18n.T "login.bilibiliSeconds" "seconds"}}
+                    {{.I18n.T "login.bilibiliExpiresIn"}} <span id="bili-countdown">180</span> {{.I18n.T "login.bilibiliSeconds"}}
                 </p>
                 <div id="bili-status-message" class="bilibili-status-message"></div>
             </div>
@@ -165,10 +165,10 @@
         </div>
         <div class="bilibili-qr-footer">
             <button id="bili-btn-cancel" class="btn btn-secondary" onclick="closeBilibiliModal()" style="display:none">
-                {{.I18n.T "login.bilibiliCancel" "Cancel"}}
+                {{.I18n.T "login.bilibiliCancel"}}
             </button>
             <button id="bili-btn-retry" class="btn btn-primary" onclick="showBilibiliQRCode()" style="display:none">
-                {{.I18n.T "login.bilibiliTryAgain" "Try Again"}}
+                {{.I18n.T "login.bilibiliTryAgain"}}
             </button>
         </div>
     </div>
@@ -399,7 +399,7 @@
 
             try {
                 // Call backend to generate QR code
-                const response = await fetch('/api/bilibili/login/qrcode/generate', {
+                const response = await fetch('/platform/api/bilibili/login/qrcode/generate', {
                     method: 'GET'
                 });
 
@@ -412,7 +412,7 @@
                 currentQRCodeKey = data.qrcode_key;
 
                 // Display QR code
-                displayBilibiliQRCode(data.qrcode_url, data.qrcode_key, data.ttl_seconds);
+                displayBilibiliQRCode(data.qrcode_image, data.qrcode_key, data.ttl_seconds);
             } catch (error) {
                 showBilibiliError(window._i18nMsg?.['login.bilibiliNetError'] || 'Network error: ' + error.message);
             }
@@ -459,7 +459,7 @@
 
             pollInterval = setInterval(async () => {
                 try {
-                    const response = await fetch(`/api/bilibili/login/qrcode/poll?qrcode_key=${encodeURIComponent(qrcodeKey)}`, {
+                    const response = await fetch(`/platform/api/bilibili/login/qrcode/poll?qrcode_key=${encodeURIComponent(qrcodeKey)}`, {
                         method: 'GET'
                     });
 
@@ -512,7 +512,7 @@
             setBilibiliStatus(window._i18nMsg?.['login.bilibiliCompleting'] || 'Completing login...', 'loading');
 
             try {
-                const response = await fetch('/api/bilibili/login/finish', {
+                const response = await fetch('/platform/api/bilibili/login/finish', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     credentials: 'include',
