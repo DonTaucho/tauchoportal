@@ -53,7 +53,9 @@ async function requireAuth() {
  */
 async function startOAuthLogin(provider = 'google') {
     try {
-        const response = await fetch(`${API_BASE}/oauth/login?provider=${encodeURIComponent(provider)}`);
+        const response = await fetch(`${API_BASE}/oauth/login?provider=${encodeURIComponent(provider)}`, {
+            credentials: 'include'
+        });
         if (!response.ok) {
             alert('Failed to start login. Please try again.');
             return;
