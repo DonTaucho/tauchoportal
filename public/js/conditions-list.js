@@ -125,11 +125,20 @@
             const deviceId = document.getElementById('condHasDevice').checked ? document.getElementById('condDeviceSelect').value || null : null; 
             const deviceAction = deviceId ? document.getElementById('condActionSelect').value || null : null; 
             const deviceActionParams = {}; 
+            
+            // Handle legacy color/brightness params
             if (deviceAction === 'color') { 
                 const selected = document.querySelector('.color-preset.selected'); 
                 if (selected) deviceActionParams.color = selected.dataset.color; 
             } 
             if (deviceAction === 'brightness') deviceActionParams.brightness = parseInt(document.getElementById('condBrightness').value, 10); 
+            
+            // Handle new device action body/params
+            const deviceActionBodyText = document.getElementById('condDeviceActionBody')?.value || '';
+            const deviceActionBody = deviceActionBodyText ? parseJSON(deviceActionBodyText) : null;
+            const deviceActionParamName = document.getElementById('condParamName')?.value || '';
+            const deviceActionParamEvaluator = deviceActionParamName ? buildEvaluatorLogic() : null;
+            
             const body = { 
                 watch_id: getChannelIdFromUrl(), 
                 name: document.getElementById('condName').value, 
@@ -138,7 +147,10 @@
                 is_enabled: document.getElementById('condEnabled').checked, 
                 device_id: deviceId, 
                 device_action: deviceAction, 
-                device_action_params: Object.keys(deviceActionParams).length ? deviceActionParams : null 
+                device_action_params: Object.keys(deviceActionParams).length ? deviceActionParams : null,
+                device_action_body: deviceActionBody,
+                device_action_param_name: deviceActionParamName || null,
+                device_action_param_evaluator: deviceActionParamEvaluator
             }; 
             if (editingConditionId) { 
                 await apiRequest('PATCH', `/conditions/update?id=${editingConditionId}`, body); 
@@ -329,11 +341,229 @@
         button.classList.add('selected'); 
     }
 
+    // ====== NEW: Device Action Parameters Functions ======
+
+    function parseJSON(str) {
+        try {
+            return JSON.parse(str);
+        } catch (e) {
+            return null;
+        }
+    }
+
+    async function loadDeviceTemplates(brand) {
+        // Load device action templates for a specific brand
+        // This could fetch from an API endpoint or use predefined templates
+        // For now, we'll use common templates based on brand
+        const templates = {
+            govee: {
+                brightness: { state: 'on', brightness: 50, transition_ms: 300 },
+                color: { state: 'on', color_rgb: '#FF0000', effect: 'none', brightness: 100 },
+                on: { state: 'on' },
+                off: { state: 'off' }
+            },
+            hue: {
+                brightness: { state: true, brightness: 254, transition: 4 },
+                color: { state: true, color_xy: [0.3, 0.3], brightness: 254 },
+                on: { state: true },
+                off: { state: false }
+            },
+            lifx: {
+                brightness: { power: 'on', brightness: 0.5, duration: 1.0 },
+                color: { power: 'on', color: 'rgb(255,0,0)', brightness: 1.0, duration: 1.0 },
+                on: { power: 'on' },
+                off: { power: 'off' }
+            },
+            wled: {
+                brightness: { bri: 128 },
+                on: { on: true },
+                off: { on: false }
+            }
+        };
+        return templates[brand.toLowerCase()] || {};
+    }
+
+    function updateParamNameDropdown() {
+        const bodyText = document.getElementById('condDeviceActionBody')?.value || '';
+        const body = parseJSON(bodyText);
+        const select = document.getElementById('condParamName');
+        
+        if (!body || typeof body !== 'object') {
+            select.innerHTML = `<option value="">${t['channelLayout.selectParam'] || 'Select parameter...'}</option>`;
+            return;
+        }
+
+        const keys = Object.keys(body);
+        select.innerHTML = `<option value="">${t['channelLayout.selectParam'] || 'Select parameter...'}</option>` +
+            keys.map(key => `<option value="${key}">${key}</option>`).join('');
+    }
+
+    function updateEvaluatorUI() {
+        const type = document.getElementById('evaluatorType')?.value || '';
+        const container = document.getElementById('evaluatorUIContainer');
+        
+        if (!type) {
+            container.innerHTML = '';
+            return;
+        }
+
+        let html = '';
+
+        switch(type) {
+            case 'extract_number':
+                html = `
+                    <div class="form-group">
+                        <label for="evaluatorRange">${t['channelLayout.numberRange'] || 'Number Range'}</label>
+                        <input type="text" id="evaluatorRange" placeholder="0-100" value="0-100" oninput="updateResultPreview()">
+                        <small>${t['channelLayout.numberRangeHelp'] || 'Extracts number from text within this range'}</small>
+                    </div>
+                `;
+                break;
+            case 'extract_hex_color':
+                html = `
+                    <div class="form-help">
+                        ${t['channelLayout.hexColorHelp'] || 'Auto-detects hex color codes in format #RRGGBB'}
+                    </div>
+                `;
+                break;
+            case 'extract_text':
+                html = `
+                    <div class="form-group">
+                        <label for="evaluatorTextPattern">${t['channelLayout.textPattern'] || 'Text Pattern'}</label>
+                        <input type="text" id="evaluatorTextPattern" placeholder="keyword or pattern" oninput="updateResultPreview()">
+                        <small>${t['channelLayout.textPatternHelp'] || 'Extracts text matching this pattern'}</small>
+                    </div>
+                `;
+                break;
+            case 'regex_extract':
+                html = `
+                    <div class="form-group">
+                        <label for="evaluatorRegex">${t['channelLayout.regexPattern'] || 'Regular Expression'}</label>
+                        <input type="text" id="evaluatorRegex" placeholder="(.+)" value="(.+)" oninput="updateResultPreview()">
+                        <small>${t['channelLayout.regexPatternHelp'] || 'Regex to extract value (use capturing groups)'}</small>
+                    </div>
+                `;
+                break;
+            case 'conditional':
+                html = `
+                    <div class="form-group">
+                        <label>${t['channelLayout.conditionalHelp'] || 'Execute condition if value is matched'}</label>
+                        <textarea id="evaluatorConditional" placeholder='{"Operator":"IF_GREATER_THAN","Variables":["$gift_value","1000"],"Result":"party"}' class="json-editor" rows="6" oninput="updateResultPreview()"></textarea>
+                        <small>${t['channelLayout.conditionalPatternHelp'] || 'Enter conditional logic as JSON'}</small>
+                    </div>
+                `;
+                break;
+            case 'fixed_value':
+                html = `
+                    <div class="form-group">
+                        <label for="evaluatorFixedValue">${t['channelLayout.fixedValue'] || 'Fixed Value'}</label>
+                        <input type="text" id="evaluatorFixedValue" placeholder="fixed value" oninput="updateResultPreview()">
+                        <small>${t['channelLayout.fixedValueHelp'] || 'Always use this value'}</small>
+                    </div>
+                `;
+                break;
+        }
+
+        container.innerHTML = html;
+    }
+
+    function updateResultPreview() {
+        const bodyText = document.getElementById('condDeviceActionBody')?.value || '';
+        const paramName = document.getElementById('condParamName')?.value || '';
+        const previewContainer = document.getElementById('resultPreview');
+        const previewContent = document.getElementById('resultPreviewContent');
+
+        if (!bodyText || !paramName) {
+            previewContainer.style.display = 'none';
+            return;
+        }
+
+        const body = parseJSON(bodyText);
+        if (!body) {
+            previewContainer.style.display = 'none';
+            return;
+        }
+
+        // Simulate a computed value based on evaluator type
+        const type = document.getElementById('evaluatorType')?.value || '';
+        let computedValue = '';
+
+        switch(type) {
+            case 'extract_number':
+                const range = document.getElementById('evaluatorRange')?.value || '0-100';
+                computedValue = '75'; // Example
+                break;
+            case 'extract_hex_color':
+                computedValue = '#00FF00'; // Example
+                break;
+            case 'extract_text':
+                computedValue = 'extracted_text'; // Example
+                break;
+            case 'regex_extract':
+                computedValue = 'matched_value'; // Example
+                break;
+            case 'fixed_value':
+                computedValue = document.getElementById('evaluatorFixedValue')?.value || 'value';
+                break;
+            default:
+                return;
+        }
+
+        // Clone body and replace parameter
+        const result = JSON.parse(JSON.stringify(body));
+        result[paramName] = isNaN(computedValue) ? computedValue : parseFloat(computedValue);
+
+        previewContainer.style.display = 'block';
+        previewContent.textContent = JSON.stringify(result, null, 2);
+    }
+
+    function buildEvaluatorLogic() {
+        // Build the evaluator ConditionLogic structure from the UI
+        const type = document.getElementById('evaluatorType')?.value || '';
+        
+        const logic = { Operator: '' };
+
+        switch(type) {
+            case 'extract_number':
+                const range = document.getElementById('evaluatorRange')?.value || '0-100';
+                logic.Operator = 'EXTRACT_NUMBER';
+                logic.Variables = [range];
+                break;
+            case 'extract_hex_color':
+                logic.Operator = 'EXTRACT_HEX_COLOR';
+                break;
+            case 'extract_text':
+                const pattern = document.getElementById('evaluatorTextPattern')?.value || '';
+                logic.Operator = 'EXTRACT_TEXT';
+                logic.Variables = [pattern];
+                break;
+            case 'regex_extract':
+                const regex = document.getElementById('evaluatorRegex')?.value || '(.+)';
+                logic.Operator = 'REGEX_EXTRACT';
+                logic.Variables = [regex];
+                break;
+            case 'conditional':
+                const condText = document.getElementById('evaluatorConditional')?.value || '';
+                const condLogic = parseJSON(condText);
+                return condLogic || logic;
+            case 'fixed_value':
+                const fixedVal = document.getElementById('evaluatorFixedValue')?.value || '';
+                logic.Operator = 'FIXED_VALUE';
+                logic.Variables = [fixedVal];
+                break;
+        }
+
+        return logic;
+    }
+
+    // ====== END Device Action Parameters Functions ======
+
     Object.assign(window, { 
         loadWatches, filterConds, openAddConditionModal, openEditConditionModal, populateEventSelect, 
         updateCondEventFields, saveCondition, toggleCondition, deleteCondition, openTestConditionModal, 
         updateTestEventParams, runConditionTest, displayTestResults, toggleDeviceAction, populateDeviceDropdown, 
-        updateCondActionSelect, updateCondActionParams, selectCondColor, editConditionLogic, navigate, route 
+        updateCondActionSelect, updateCondActionParams, selectCondColor, editConditionLogic, navigate, route,
+        updateParamNameDropdown, updateEvaluatorUI, updateResultPreview, buildEvaluatorLogic
     });
 
     Promise.all([route(), window.ChannelsSidebar.init({ onChannelsChanged: route })]);
