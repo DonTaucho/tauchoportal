@@ -399,7 +399,7 @@
 
             try {
                 // Call backend to generate QR code
-                const response = await fetch('/platform/api/bilibili/login/qrcode/generate', {
+                const response = await fetch('/api/bilibili/login/qrcode/generate', {
                     method: 'GET'
                 });
 
@@ -459,7 +459,7 @@
 
             pollInterval = setInterval(async () => {
                 try {
-                    const response = await fetch(`/platform/api/bilibili/login/qrcode/poll?qrcode_key=${encodeURIComponent(qrcodeKey)}`, {
+                    const response = await fetch(`/api/bilibili/login/qrcode/poll?qrcode_key=${encodeURIComponent(qrcodeKey)}`, {
                         method: 'GET'
                     });
 
@@ -512,7 +512,7 @@
             setBilibiliStatus(window._i18nMsg?.['login.bilibiliCompleting'] || 'Completing login...', 'loading');
 
             try {
-                const response = await fetch('/platform/api/bilibili/login/finish', {
+                const response = await fetch('/api/bilibili/login/finish', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     credentials: 'include',
