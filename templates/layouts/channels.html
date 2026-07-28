@@ -10,16 +10,16 @@
 {{define "content"}}
 
 {{$platforms := dictparams 
-        "1" `{ "id": "youtube", "label": "YouTube", "connectionName": "google", "hasOAuth": "true", "publicAccess": "false" }`
-        "2" `{ "id": "twitch", "label": "Twitch", "connectionName": "twitch", "hasOAuth": "true", "publicAccess": "true" }`
-        "3" `{ "id": "niconico", "label": "NicoNico", "connectionName": "niconico", "hasOAuth": "true", "publicAccess": "false" }`
-        "4" `{ "id": "twitcasting", "label": "TwitCasting", "connectionName": "twitcasting", "hasOAuth": "true", "publicAccess": "false" }`
-        "5" `{ "id": "kick", "label": "Kick", "connectionName": "kick", "hasOAuth": "false", "publicAccess": "true" }`
-        "6" `{ "id": "bilibili", "label": "Bilibili", "connectionName": "bilibili", "hasOAuth": "false", "publicAccess": "true" }`
-        "7" `{ "id": "instagram", "label": "Instagram", "connectionName": "instagram", "hasOAuth": "true", "publicAccess": "false" }`
-        "8" `{ "id": "tiktok", "label": "TikTok", "connectionName": "tiktok", "hasOAuth": "false", "publicAccess": "false" }`
-        "9" `{ "id": "facebook", "label": "Facebook", "connectionName": "facebook", "hasOAuth": "true", "publicAccess": "false" }`
-        "a" `{ "id": "x", "label": "X", "connectionName": "x", "hasOAuth": "true", "publicAccess": "false"}` }}
+        "1" `{ "id": "youtube", "i18key": "channels.youtube", "label": "YouTube", "connectionName": "google", "hasOAuth": "true", "publicAccess": "false" }`
+        "2" `{ "id": "twitch", "i18key": "channels.twitch", "label": "Twitch", "connectionName": "twitch", "hasOAuth": "true", "publicAccess": "true" }`
+        "3" `{ "id": "niconico", "i18key": "channels.niconico", "label": "NicoNico", "connectionName": "niconico", "hasOAuth": "true", "publicAccess": "false" }`
+        "4" `{ "id": "twitcasting", "i18key": "channels.twitcasting", "label": "TwitCasting", "connectionName": "twitcasting", "hasOAuth": "true", "publicAccess": "false" }`
+        "5" `{ "id": "kick", "i18key": "channels.kick", "label": "Kick", "connectionName": "kick", "hasOAuth": "false", "publicAccess": "true" }`
+        "6" `{ "id": "bilibili", "i18key": "channels.bilibili", "label": "Bilibili", "connectionName": "bilibili", "hasOAuth": "false", "publicAccess": "true" }`
+        "7" `{ "id": "instagram", "i18key": "channels.instagram", "label": "Instagram", "connectionName": "instagram", "hasOAuth": "true", "publicAccess": "false" }`
+        "8" `{ "id": "tiktok", "i18key": "channels.tiktok", "label": "TikTok", "connectionName": "tiktok", "hasOAuth": "false", "publicAccess": "false" }`
+        "9" `{ "id": "facebook", "i18key": "channels.facebook", "label": "Facebook", "connectionName": "facebook", "hasOAuth": "true", "publicAccess": "false" }`
+        "a" `{ "id": "x", "i18key": "channels.x", "label": "X", "connectionName": "x", "hasOAuth": "true", "publicAccess": "false"}` }}
 {{$currentuser := .API.Auth.GetCurrentUser }}
 {{$allwatches := .API.Watches.ListWatches }}
 
@@ -49,10 +49,11 @@
                     {{ $connected = true }}
                 {{ end }}
             {{ end }}
+            {{ $name := $.I18n.T (field $platform "i18key") }}
             <div class="acc-item" id="acc-{{ field $platform "id" }}">
                 <div class="acc-header" onclick="toggleAcc('{{field $platform "id"}}')">
                     <span class="acc-plat-icon {{field $platform "id"}}">{{ platformIcon (field $platform "id") }}</span>
-                    <span class="acc-plat-name">{{ field $platform "label" }}</span>
+                    <span class="acc-plat-name">{{ $name }}</span>
                     {{if $connected}}
                     <span class="acc-connected-dot" title="Connected"></span>
                     {{end}}
@@ -63,17 +64,17 @@
                         {{ $platformId := field $platform "id" }}
                         {{ $hasOAuth := eq (field $platform "hasOAuth") "true" }}
                         {{ $publicAccess := eq (field $platform "publicAccess") "true" }}
-                        
+
                         <!-- State: Not connected but requires OAuth -->
                         <div class="acc-not-connected" style="{{if or (not $hasOAuth) $connected}}display:none{{end}}">
-                            <p>{{$.I18n.T "channelLayout.connectFirst"}} {{field $platform "label"}}</p>
+                            <p>{{$.I18n.T "channelLayout.connectFirst"}}</p>
                             <a class="acc-connect-link" href="/account-settings">{{$.I18n.T "channelLayout.goToSettings"}}</a>
                         </div>
                         
                         <!-- State: OAuth required but not supported -->
                         <div class="acc-stub" style="{{if or $connected (not $hasOAuth) $publicAccess}}display:none{{end}}">
                             <span>🚫</span>
-                            <p>{{$.I18n.T "channelLayout.notSupported"}} {{field $platform "label"}}</p>
+                            <p>{{$.I18n.T "channelLayout.notSupported"}}</p>
                         </div>
                         
                         <!-- State: Connected or public access -->

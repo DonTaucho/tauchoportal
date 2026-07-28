@@ -8,14 +8,14 @@
         { id: 'twitch', label: 'Twitch', hasOAuth: true, publicAccess: true },
         { id: 'niconico', label: 'NicoNico', hasOAuth: true, publicAccess: false },
         { id: 'twitcasting', label: 'TwitCasting', hasOAuth: true, publicAccess: false },
-        { id: 'kick', label: 'Kick', hasOAuth: false, publicAccess: true },
-        { id: 'bilibili', label: 'Bilibili', hasOAuth: false, publicAccess: true },
+        { id: 'kick', label: 'Kick', hasOAuth: true, publicAccess: true },
+        { id: 'bilibili', label: 'Bilibili', hasOAuth: true, publicAccess: true },
         { id: 'instagram', label: 'Instagram', hasOAuth: true, publicAccess: false },
-        { id: 'tiktok', label: 'TikTok', hasOAuth: false, publicAccess: false },
+        { id: 'tiktok', label: 'TikTok', hasOAuth: true, publicAccess: false },
         { id: 'facebook', label: 'Facebook', hasOAuth: true, publicAccess: false },
         { id: 'x', label: 'X', hasOAuth: true, publicAccess: false },
     ];
-    const PROVIDER_MAP = { google: 'youtube', twitch: 'twitch', niconico: 'niconico', twitcasting: 'twitcasting', instagram: 'instagram', facebook: 'facebook', x: 'x' };
+    const PROVIDER_MAP = { google: 'youtube', twitch: 'twitch', niconico: 'niconico', twitcasting: 'twitcasting', kick: 'kick', bilibili: 'bilibili', instagram: 'instagram', tiktok: 'tiktok', facebook: 'facebook', x: 'x' };
     const state = { connectedSet: new Set(), existingWatchSet: new Set(), selectedChannel: null, accordionLoaded: new Set(), accSearchTimers: new Map(), onChannelsChanged: null };
     const esc = (v) => escHtml(v);
 

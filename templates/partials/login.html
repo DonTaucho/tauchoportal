@@ -69,7 +69,7 @@
         <span class="oauth-icon">{{platformIcon "x"}}</span>
         <span>{{.I18n.T "login.xLogin"}}</span>
     </button>
-    <button type="button" onclick="startOAuthLogin('bilibili')" class="oauth-btn bilibili-btn">
+    <button type="button" onclick="showBilibiliQRCode()" class="oauth-btn bilibili-btn">
         <span class="oauth-icon">{{platformIcon "bilibili"}}</span>
         <span>{{.I18n.T "login.bilibiliLogin"}}</span>
     </button>
@@ -128,6 +128,53 @@
     </div>
 </div>
 <div id="nicoToast" class="nico-toast"></div>
+
+<!-- Bilibili QR Code Login Modal -->
+<div id="bilibili-qr-overlay" class="bilibili-qr-overlay" style="display:none" onclick="if(event.target===this)closeBilibiliModal()">
+    <div class="bilibili-qr-box">
+        <div class="bilibili-qr-header">
+            <span class="bilibili-qr-title">{{.I18n.T "login.bilibiliDivider"}}</span>
+            <button class="bilibili-qr-close" onclick="closeBilibiliModal()">✕</button>
+        </div>
+        <div class="bilibili-qr-body">
+            <!-- Loading state -->
+            <div id="bili-loading" style="display:none; text-align: center;">
+                <div class="bilibili-spinner"></div>
+                <p>{{.I18n.T "login.bilibiliGeneratingQR"}}</p>
+            </div>
+            
+            <!-- QR Code Display -->
+            <div id="bili-qr-display" style="display:none">
+                <div class="bilibili-qr-container">
+                    <img id="bili-qr-image" src="" alt="Bilibili QR Code" />
+                </div>
+                <p class="bilibili-qr-instruction">
+                    {{.I18n.T "login.bilibiliQRInstruction"}}
+                </p>
+                <p class="bilibili-qr-countdown">
+                    {{.I18n.T "login.bilibiliExpiresIn"}} <span id="bili-countdown">180</span> {{.I18n.T "login.bilibiliSeconds"}}
+                </p>
+                <div id="bili-status-message" class="bilibili-status-message"></div>
+            </div>
+            
+            <!-- Error state -->
+            <div id="bili-error-display" style="display:none">
+                <div class="bilibili-error-icon">⚠️</div>
+                <p id="bili-error-text" class="bilibili-error-text"></p>
+            </div>
+        </div>
+        <div class="bilibili-qr-footer">
+            <button id="bili-btn-cancel" class="btn btn-secondary" onclick="closeBilibiliModal()" style="display:none">
+                {{.I18n.T "login.bilibiliCancel"}}
+            </button>
+            <button id="bili-btn-retry" class="btn btn-primary" onclick="showBilibiliQRCode()" style="display:none">
+                {{.I18n.T "login.bilibiliTryAgain"}}
+            </button>
+        </div>
+    </div>
+</div>
+
+<div id="bilibili-toast" class="bilibili-toast"></div>
 
 <script>
     // Handle form submission
@@ -332,6 +379,214 @@
             t.textContent = msg;
             t.classList.add('nico-toast-on');
             setTimeout(function () { t.classList.remove('nico-toast-on'); }, 3000);
+        }
+    })();
+
+    // Bilibili QR Code Login
+    (function () {
+        let pollInterval = null;
+        let timerInterval = null;
+        let currentQRCodeKey = null;
+
+        window.showBilibiliQRCode = async function () {
+            // Reset UI
+            document.getElementById('bili-loading').style.display = 'block';
+            document.getElementById('bili-qr-display').style.display = 'none';
+            document.getElementById('bili-error-display').style.display = 'none';
+            document.getElementById('bili-btn-cancel').style.display = 'inline-block';
+            document.getElementById('bili-btn-retry').style.display = 'none';
+            document.getElementById('bilibili-qr-overlay').style.display = 'flex';
+
+            try {
+                // Call backend to generate QR code
+                const response = await fetch('/api/bilibili/login/qrcode/generate', {
+                    method: 'GET'
+                });
+
+                if (!response.ok) {
+                    showBilibiliError(window._i18nMsg?.['login.bilibiliQRGenError'] || 'Failed to generate QR code');
+                    return;
+                }
+
+                const data = await response.json();
+                currentQRCodeKey = data.qrcode_key;
+
+                // Display QR code
+                displayBilibiliQRCode(data.qrcode_image, data.qrcode_key, data.ttl_seconds);
+            } catch (error) {
+                showBilibiliError(window._i18nMsg?.['login.bilibiliNetError'] || 'Network error: ' + error.message);
+            }
+        };
+
+        function displayBilibiliQRCode(qrcodeUrl, qrcodeKey, ttlSeconds) {
+            document.getElementById('bili-loading').style.display = 'none';
+            document.getElementById('bili-qr-display').style.display = 'block';
+            document.getElementById('bili-error-display').style.display = 'none';
+
+            // Set QR image
+            const qrImage = document.getElementById('bili-qr-image');
+            qrImage.src = qrcodeUrl;
+
+            // Start countdown timer
+            startBilibiliCountdown(ttlSeconds);
+
+            // Start polling
+            pollForBilibiliCompletion(qrcodeKey);
+        }
+
+        function startBilibiliCountdown(ttlSeconds) {
+            let remaining = ttlSeconds;
+            const timerEl = document.getElementById('bili-countdown');
+
+            if (timerInterval) clearInterval(timerInterval);
+
+            timerInterval = setInterval(() => {
+                remaining--;
+                timerEl.textContent = remaining;
+
+                if (remaining <= 0) {
+                    clearInterval(timerInterval);
+                    stopBilibiliPolling();
+                    showBilibiliError(window._i18nMsg?.['login.bilibiliQRExpired'] || 'QR code expired');
+                } else if (remaining <= 30) {
+                    timerEl.style.color = '#ff6f00';
+                }
+            }, 1000);
+        }
+
+        function pollForBilibiliCompletion(qrcodeKey) {
+            if (pollInterval) clearInterval(pollInterval);
+
+            pollInterval = setInterval(async () => {
+                try {
+                    const response = await fetch(`/api/bilibili/login/qrcode/poll?qrcode_key=${encodeURIComponent(qrcodeKey)}`, {
+                        method: 'GET'
+                    });
+
+                    if (!response.ok) return;
+
+                    const data = await response.json();
+
+                    switch (data.status) {
+                        case 'waiting':
+                            setBilibiliStatus(window._i18nMsg?.['login.bilibiliWaiting'] || 'Waiting for scan...', 'info');
+                            break;
+
+                        case 'confirming':
+                            setBilibiliStatus(window._i18nMsg?.['login.bilibiliConfirming'] || 'Please confirm on your phone...', 'info');
+                            break;
+
+                        case 'confirmed':
+                            stopBilibiliPolling();
+                            finishBilibiliLogin(data);
+                            break;
+
+                        case 'expired':
+                            stopBilibiliPolling();
+                            showBilibiliError(window._i18nMsg?.['login.bilibiliQRExpired'] || 'QR code expired');
+                            break;
+
+                        case 'invalid':
+                            stopBilibiliPolling();
+                            showBilibiliError(window._i18nMsg?.['login.bilibiliQRInvalid'] || 'Invalid QR code');
+                            break;
+
+                        default:
+                            console.warn('Unknown poll status:', data.status);
+                    }
+                } catch (error) {
+                    console.error('Poll error:', error);
+                }
+            }, 3000); // Poll every 3 seconds
+        }
+
+        function setBilibiliStatus(message, type) {
+            const el = document.getElementById('bili-status-message');
+            el.textContent = message;
+            el.className = `bilibili-status-message bilibili-status-${type}`;
+            el.style.display = message ? 'block' : 'none';
+        }
+
+        async function finishBilibiliLogin(pollData) {
+            stopBilibiliPolling();
+            setBilibiliStatus(window._i18nMsg?.['login.bilibiliCompleting'] || 'Completing login...', 'loading');
+
+            try {
+                const response = await fetch('/api/bilibili/login/finish', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    credentials: 'include',
+                    body: JSON.stringify({
+                        sessdata: pollData.sessdata,
+                        bili_jct: pollData.bili_jct,
+                        refresh_token: pollData.refresh_token
+                    })
+                });
+
+                if (!response.ok) {
+                    const error = await response.json().catch(() => ({}));
+                    showBilibiliError(window._i18nMsg?.['login.bilibiliLoginFailed'] || 'Login failed: ' + (error.error || 'Unknown error'));
+                    return;
+                }
+
+                const result = await response.json();
+
+                if (result.status === 'authenticated') {
+                    setBilibiliStatus(window._i18nMsg?.['login.bilibiliLoginSuccess'] || 'Login successful! Redirecting...', 'success');
+                    showBilibiliToast(window._i18nMsg?.['login.bilibiliLoginSuccess'] || 'Logged in via Bilibili! ✅');
+                    
+                    setTimeout(() => {
+                        window.location.href = result.redirect || '/dashboard';
+                    }, 1500);
+                } else {
+                    showBilibiliError(window._i18nMsg?.['login.bilibiliUnexpected'] || 'Unexpected response from server');
+                }
+            } catch (error) {
+                showBilibiliError(window._i18nMsg?.['login.bilibiliCompleteError'] || 'Error completing login: ' + error.message);
+            }
+        }
+
+        function showBilibiliError(message) {
+            stopBilibiliPolling();
+            clearBilibiliCountdown();
+            
+            document.getElementById('bili-loading').style.display = 'none';
+            document.getElementById('bili-qr-display').style.display = 'none';
+            document.getElementById('bili-error-display').style.display = 'block';
+            document.getElementById('bili-error-text').textContent = message;
+            
+            document.getElementById('bili-btn-cancel').style.display = 'inline-block';
+            document.getElementById('bili-btn-retry').style.display = 'inline-block';
+        }
+
+        function stopBilibiliPolling() {
+            if (pollInterval) {
+                clearInterval(pollInterval);
+                pollInterval = null;
+            }
+        }
+
+        function clearBilibiliCountdown() {
+            if (timerInterval) {
+                clearInterval(timerInterval);
+                timerInterval = null;
+            }
+        }
+
+        window.closeBilibiliModal = function () {
+            stopBilibiliPolling();
+            clearBilibiliCountdown();
+            currentQRCodeKey = null;
+            document.getElementById('bilibili-qr-overlay').style.display = 'none';
+        };
+
+        function showBilibiliToast(message) {
+            const toast = document.getElementById('bilibili-toast');
+            toast.textContent = message;
+            toast.classList.add('bilibili-toast-on');
+            setTimeout(() => {
+                toast.classList.remove('bilibili-toast-on');
+            }, 3000);
         }
     })();
 </script>

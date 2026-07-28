@@ -369,8 +369,108 @@ h3 {
 }
 .nico-toast.nico-toast-on { opacity: 1; transform: translateX(-50%) translateY(0); }
 
+/* ── Bilibili QR Code Login Modal ─────────────────────────────────────────
+   Uses .bilibili-qr- prefixed classes for QR code scanning flow.
+   ──────────────────────────────────────────────────────────────────────── */
+.bilibili-qr-overlay {
+    position: fixed; inset: 0;
+    background: rgba(0,0,0,0.45);
+    display: flex; align-items: center; justify-content: center;
+    z-index: 1000; padding: 1rem;
+}
+.bilibili-qr-box {
+    background: white; border-radius: 10px;
+    width: 100%; max-width: 460px;
+    box-shadow: 0 8px 32px rgba(0,0,0,0.18); overflow: hidden;
+}
+.bilibili-qr-header {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 1.1rem 1.4rem 0.8rem; border-bottom: 1px solid #f0f0f0;
+}
+.bilibili-qr-title { font-size: 1rem; font-weight: 700; color: #222; }
+.bilibili-qr-close {
+    background: none; border: none; font-size: 1rem; color: #999;
+    cursor: pointer; padding: 0.2rem 0.4rem; border-radius: 4px; line-height: 1;
+    transition: color 0.15s, background 0.15s;
+}
+.bilibili-qr-close:hover { color: #333; background: #f0f0f0; }
+.bilibili-qr-body { padding: 1.2rem 1.4rem; text-align: center; }
+.bilibili-qr-footer {
+    display: flex; justify-content: flex-end; gap: 0.75rem;
+    padding: 0.8rem 1.4rem 1.2rem; border-top: 1px solid #f0f0f0;
+}
+.bilibili-qr-container {
+    margin: 1.5rem auto;
+    display: flex;
+    justify-content: center;
+    background: #f9f9f9;
+    padding: 1rem;
+    border-radius: 8px;
+}
+.bilibili-qr-container img {
+    max-width: 250px;
+    height: auto;
+    border: 2px solid #ddd;
+    border-radius: 4px;
+}
+.bilibili-qr-instruction {
+    font-size: 0.95rem; color: #555; margin: 1rem 0 0.5rem; font-weight: 500;
+}
+.bilibili-qr-countdown {
+    font-size: 0.9rem; color: #777; margin: 0.5rem 0 1rem;
+}
+.bilibili-status-message {
+    padding: 0.7rem 0.9rem;
+    border-radius: 5px;
+    font-size: 0.9rem;
+    margin: 1rem 0;
+    display: none;
+}
+.bilibili-status-info {
+    background: #e3f2fd;
+    color: #1976d2;
+    border: 1px solid #90caf9;
+}
+.bilibili-status-success {
+    background: #e8f5e9;
+    color: #2e7d32;
+    border: 1px solid #a5d6a7;
+}
+.bilibili-status-loading {
+    background: #f3e5f5;
+    color: #6a1b9a;
+    border: 1px solid #ce93d8;
+}
+.bilibili-error-icon {
+    font-size: 3rem;
+    margin: 1rem 0;
+}
+.bilibili-error-text {
+    color: #c62828;
+    font-size: 0.95rem;
+    background: #fff5f5;
+    border: 1px solid #ffcdd2;
+    border-radius: 5px;
+    padding: 0.75rem;
+    margin: 1rem 0;
+}
+@keyframes bilibili-spin { to { transform: rotate(360deg); } }
+.bilibili-spinner {
+    display: inline-block; width: 1.5rem; height: 1.5rem;
+    border: 3px solid rgba(0,161,214,0.2); border-top-color: #00A1D6;
+    border-radius: 50%; animation: bilibili-spin 0.6s linear infinite;
+    margin: 1rem auto;
+}
+.bilibili-toast {
+    position: fixed; bottom: 1.5rem; left: 50%;
+    transform: translateX(-50%) translateY(2rem);
+    background: #00A1D6; color: white; padding: 0.7rem 1.4rem; border-radius: 6px;
+    font-size: 0.9rem; font-weight: 600; box-shadow: 0 4px 14px rgba(0,0,0,0.2);
+    opacity: 0; transition: opacity 0.25s, transform 0.25s; z-index: 2000; pointer-events: none;
+}
+.bilibili-toast.bilibili-toast-on { opacity: 1; transform: translateX(-50%) translateY(0); }
+
 @media (max-width: 768px) {
-    
     body {
         background-image: url(/image/bg_s.png);
         background-image: url(/image/bg_s.png), linear-gradient(165deg, #ceeaff 40%, #6c79d1 100%);
