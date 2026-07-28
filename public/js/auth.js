@@ -53,6 +53,12 @@ async function requireAuth() {
  */
 async function startOAuthLogin(provider = 'google') {
     try {
+        // Set the return URL so after OAuth callback, we redirect to dashboard instead of login
+        await fetch('/set-oauth-return?url=/dashboard', {
+            method: 'GET',
+            credentials: 'include'
+        }).catch(e => console.error('Failed to set oauth_return:', e));
+        
         const response = await fetch(`${API_BASE}/oauth/login?provider=${encodeURIComponent(provider)}`, {
             credentials: 'include'
         });
