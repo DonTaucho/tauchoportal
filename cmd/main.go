@@ -164,10 +164,19 @@ func main() {
 		log.Printf("OAuth callback: %s -> %s://%s%s", r.Method, r.URL.Scheme, r.URL.Host, r.URL.Path)
 	}
 	callbackProxy.ModifyResponse = func(resp *http.Response) error {
+		// Log all response headers for debugging
+		log.Printf("OAuth callback response status: %d", resp.StatusCode)
+		for k, v := range resp.Header {
+			if k == "Set-Cookie" {
+				log.Printf("  Response header %s: %v", k, v)
+			}
+		}
+		
 		if resp.StatusCode >= 300 && resp.StatusCode < 400 {
 			if cookie, err := resp.Request.Cookie("oauth_return"); err == nil && cookie.Value != "" {
 				returnURL := cookie.Value
 				if strings.HasPrefix(returnURL, "/") {
+					log.Printf("OAuth callback: redirecting to %s (from oauth_return cookie)", returnURL)
 					resp.Header.Set("Location", returnURL)
 					resp.Header.Add("Set-Cookie", "oauth_return=; Path=/; Max-Age=0; SameSite=Lax")
 				}
