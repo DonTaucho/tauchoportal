@@ -149,6 +149,14 @@ func main() {
 		}
 		log.Printf("Proxying: %s -> %s://%s%s", r.Method, r.URL.Scheme, r.URL.Host, r.URL.Path)
 	}
+	// Ensure Set-Cookie headers from backend are forwarded to browser
+	proxy.ModifyResponse = func(resp *http.Response) error {
+		// Log Set-Cookie headers for debugging
+		if setCookies := resp.Header.Values("Set-Cookie"); len(setCookies) > 0 {
+			log.Printf("API proxy forwarding %d Set-Cookie header(s): %v", len(setCookies), setCookies)
+		}
+		return nil
+	}
 
 	// callbackProxy forwards /auth/callback/* to the API unchanged (no prefix stripping).
 	// Google redirects the user's browser to the portal after OAuth; we relay it to the API.
@@ -178,8 +186,8 @@ func main() {
 		
 		// If backend provided Set-Cookie, ensure it's forwarded
 		// The httputil.ReverseProxy should do this automatically, but being explicit
-		if setCookie := resp.Header.Get("Set-Cookie"); setCookie != "" {
-			log.Printf("Set-Cookie found from backend: %s", setCookie)
+		if setCookies := resp.Header.Values("Set-Cookie"); len(setCookies) > 0 {
+			log.Printf("Set-Cookie found from backend: %v (count: %d)", setCookies, len(setCookies))
 		}
 		
 		if resp.StatusCode >= 300 && resp.StatusCode < 400 {
