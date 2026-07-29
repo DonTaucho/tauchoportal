@@ -594,6 +594,14 @@ func (s *Server) fetchUser(r *http.Request) *UserProfile {
 		return nil
 	}
 	cookie := r.Header.Get("Cookie")
+	
+	// Log cookie info for debugging OAuth issues
+	if cookie == "" {
+		log.Printf("fetchUser: NO COOKIES in incoming request to portal")
+	} else {
+		log.Printf("fetchUser: incoming cookies: %s", cookie)
+	}
+	
 	req.Header.Set("Cookie", cookie)
 	attachIdentityToken(req, s.tokenSource)
 
@@ -616,6 +624,7 @@ func (s *Server) fetchUser(r *http.Request) *UserProfile {
 		log.Printf("fetchUser: failed to decode user JSON: %v — body: %s", err, string(body))
 		return nil
 	}
+	log.Printf("fetchUser: successfully authenticated user ID %d", user.ID)
 	return &user
 }
 
