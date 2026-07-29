@@ -155,6 +155,10 @@ func main() {
 	// ModifyResponse: if the portal set an "oauth_return" cookie before the OAuth redirect
 	// (via /set-oauth-return), use that URL as the post-OAuth redirect destination.
 	callbackProxy := httputil.NewSingleHostReverseProxy(target)
+	
+	// Custom error handler to log any proxy errors
+	callbackProxy.ErrorLog = log.New(os.Stderr, "oauth-callback-proxy: ", log.LstdFlags)
+	
 	callbackProxy.Director = func(r *http.Request) {
 		r.URL.Scheme = target.Scheme
 		r.URL.Host = target.Host
@@ -164,12 +168,18 @@ func main() {
 		log.Printf("OAuth callback: %s -> %s://%s%s", r.Method, r.URL.Scheme, r.URL.Host, r.URL.Path)
 	}
 	callbackProxy.ModifyResponse = func(resp *http.Response) error {
-		// Log all response headers for debugging
+		// Log all response headers for debugging Set-Cookie forwarding
 		log.Printf("OAuth callback response status: %d", resp.StatusCode)
 		for k, v := range resp.Header {
-			if k == "Set-Cookie" {
+			if k == "Set-Cookie" || k == "Location" {
 				log.Printf("  Response header %s: %v", k, v)
 			}
+		}
+		
+		// If backend provided Set-Cookie, ensure it's forwarded
+		// The httputil.ReverseProxy should do this automatically, but being explicit
+		if setCookie := resp.Header.Get("Set-Cookie"); setCookie != "" {
+			log.Printf("Set-Cookie found from backend: %s", setCookie)
 		}
 		
 		if resp.StatusCode >= 300 && resp.StatusCode < 400 {
