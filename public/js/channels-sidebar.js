@@ -97,7 +97,7 @@
         if (!results) return;
         
         // Show loading state
-        results.innerHTML = '<div class="result-loading">Loading your channels…</div>';
+        results.innerHTML = '<div class="result-loading">' + (t.loadingChannels || 'Loading your channels…') + '</div>';
         
         try {
             // Handle platform-specific endpoints

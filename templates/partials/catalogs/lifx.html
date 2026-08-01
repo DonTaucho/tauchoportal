@@ -1,152 +1,214 @@
-{{/* LIFX Smart Lighting - No Hub Required */}}
+{{/* LIFX Smart Lighting - Enhanced Dialog-Friendly Catalog */}}
 {{define "catalog-lifx"}}
-<div class="catalog-lifx brand-catalog">
-    <div class="catalog-products">
-        <!-- LIFX A19 Color Bulb -->
-        <div class="catalog-card" data-product-id="lifx-a19" data-category="bulbs">
-            <div class="catalog-image">
-                <img src="/image/catalog/lifx-a19.avif" alt="LIFX A19 Bulb" loading="lazy" onerror="this.src='/image/product-placeholder.png'">
-            </div>
-            <div class="catalog-info">
-                <h3 class="catalog-product-name">LIFX A19 Color A19 Smart Bulb</h3>
-                <p class="catalog-description">16 million colors, no hub required! Connect directly to WiFi. Works with Alexa, Google Home, and Apple HomeKit.</p>
-                <div class="catalog-price">
-                    <span class="price">$14.99</span>
-                </div>
-                <ul class="catalog-features">
-                    <li>16 million colors</li>
-                    <li>No hub required (WiFi only)</li>
-                    <li>Dimmable & schedulable</li>
-                    <li>Multi-platform compatible</li>
-                    <li>Works worldwide</li>
-                </ul>
-                <div class="catalog-actions">
-                    <span class="action-tag">color</span>
-                    <span class="action-tag">brightness</span>
-                    <span class="action-tag">scene</span>
-                </div>
-            </div>
-            <div class="catalog-actions-bar">
-                <a href="https://www.lifx.com/" target="_blank" rel="noopener noreferrer" class="btn btn-buy">🛍 Buy</a>
-                <button type="button" class="btn btn-add-device" onclick="selectProduct('lifx', 'lifx-a19', 'LIFX A19 Color Bulb')">+ Add to Devices</button>
-            </div>
-        </div>
-
-        <!-- LIFX LED Strip -->
-        <div class="catalog-card" data-product-id="lifx-strip" data-category="strips">
-            <div class="catalog-image">
-                <img src="/image/catalog/lifx-strip.avif" alt="LIFX LED Strip" loading="lazy" onerror="this.src='/image/product-placeholder.png'">
-            </div>
-            <div class="catalog-info">
-                <h3 class="catalog-product-name">LIFX Colour A19 Strip (4 meters)</h3>
-                <p class="catalog-description">Addressable RGB LED strip with WiFi control. Create stunning light effects and color zones across your walls.</p>
-                <div class="catalog-price">
-                    <span class="price-range">$34.99 - $44.99</span>
-                </div>
-                <ul class="catalog-features">
-                    <li>16 million colors</li>
-                    <li>4 meters (extendable)</li>
-                    <li>Addressable zones</li>
-                    <li>WiFi only, no hub</li>
-                    <li>Music sync capabilities</li>
-                </ul>
-                <div class="catalog-actions">
-                    <span class="action-tag">color</span>
-                    <span class="action-tag">brightness</span>
-                </div>
-            </div>
-            <div class="catalog-actions-bar">
-                <a href="https://www.lifx.com/" target="_blank" rel="noopener noreferrer" class="btn btn-buy">🛍 Buy</a>
-                <button type="button" class="btn btn-add-device" onclick="selectProduct('lifx', 'lifx-strip', 'LIFX LED Strip')">+ Add to Devices</button>
-            </div>
-        </div>
-
-        <!-- LIFX BR30 Recessed Light Bulb -->
-        <div class="catalog-card" data-product-id="lifx-br30" data-category="bulbs">
-            <div class="catalog-image">
-                <img src="/image/catalog/lifx-br30.avif" alt="LIFX BR30" loading="lazy" onerror="this.src='/image/product-placeholder.png'">
-            </div>
-            <div class="catalog-info">
-                <h3 class="catalog-product-name">LIFX BR30 Recessed Light Bulb</h3>
-                <p class="catalog-description">Color-changing BR30 bulb for recessed lighting fixtures. 16 million colors, WiFi enabled, 1100 lumens.</p>
-                <div class="catalog-price">
-                    <span class="price">$24.99</span>
-                </div>
-                <ul class="catalog-features">
-                    <li>16 million colors</li>
-                    <li>1100 lumens (bright)</li>
-                    <li>WiFi only, no hub</li>
-                    <li>Dimmer compatible</li>
-                    <li>25,000 hour lifespan</li>
-                </ul>
-                <div class="catalog-actions">
-                    <span class="action-tag">color</span>
-                    <span class="action-tag">brightness</span>
-                </div>
-            </div>
-            <div class="catalog-actions-bar">
-                <a href="https://www.lifx.com/" target="_blank" rel="noopener noreferrer" class="btn btn-buy">🛍 Buy</a>
-                <button type="button" class="btn btn-add-device" onclick="selectProduct('lifx', 'lifx-br30', 'LIFX BR30 Light')">+ Add to Devices</button>
-            </div>
-        </div>
-
-        <!-- LIFX Beam (Smart Lighting System) -->
-        <div class="catalog-card" data-product-id="lifx-beam" data-category="panels">
-            <div class="catalog-image">
-                <img src="/image/catalog/lifx-beam.webp" alt="LIFX Beam" loading="lazy" onerror="this.src='/image/product-placeholder.png'">
-            </div>
-            <div class="catalog-info">
-                <h3 class="catalog-product-name">LIFX Beam (Modular Smart Light)</h3>
-                <p class="catalog-description">Modular smart lighting with 16 million colors. Stack up to 10 beams for unique designs and effects.</p>
-                <div class="catalog-price">
-                    <span class="price">$29.99 per unit</span>
-                </div>
-                <ul class="catalog-features">
-                    <li>16 million colors</li>
-                    <li>Stackable design</li>
-                    <li>Standalone or grouped</li>
-                    <li>WiFi only</li>
-                    <li>Dynamic color effects</li>
-                </ul>
-                <div class="catalog-actions">
-                    <span class="action-tag">color</span>
-                    <span class="action-tag">scene</span>
-                </div>
-            </div>
-            <div class="catalog-actions-bar">
-                <a href="https://www.lifx.com/" target="_blank" rel="noopener noreferrer" class="btn btn-buy">🛍 Buy</a>
-                <button type="button" class="btn btn-add-device" onclick="selectProduct('lifx', 'lifx-beam', 'LIFX Beam')">+ Add to Devices</button>
-            </div>
-        </div>
-
-        <!-- LIFX Filament Bulb (Vintage Style) -->
-        <div class="catalog-card" data-product-id="lifx-filament" data-category="bulbs">
-            <div class="catalog-image">
-                <img src="/image/catalog/lifx-filament.jpg" alt="LIFX Filament" loading="lazy" onerror="this.src='/image/product-placeholder.png'">
-            </div>
-            <div class="catalog-info">
-                <h3 class="catalog-product-name">LIFX Filament Bulb (Vintage Style)</h3>
-                <p class="catalog-description">Nostalgic vintage-style smart bulb with white light only. Perfect for lamps, restaurants, and décor lighting.</p>
-                <div class="catalog-price">
-                    <span class="price">$12.99</span>
-                </div>
-                <ul class="catalog-features">
-                    <li>Warm white light (1500K-4000K)</li>
-                    <li>Vintage Edison aesthetic</li>
-                    <li>Dimmable & schedulable</li>
-                    <li>WiFi enabled, no hub</li>
-                    <li>Perfect for ambiance</li>
-                </ul>
-                <div class="catalog-actions">
-                    <span class="action-tag">brightness</span>
-                    <span class="action-tag">schedule</span>
-                </div>
-            </div>
-            <div class="catalog-actions-bar">
-                <a href="https://www.lifx.com/" target="_blank" rel="noopener noreferrer" class="btn btn-buy">🛍 Buy</a>
-                <button type="button" class="btn btn-add-device" onclick="selectProduct('lifx', 'lifx-filament', 'LIFX Filament Bulb')">+ Add to Devices</button>
-            </div>
-        </div>
+<div class="catalog-lifx-v2 brand-catalog" data-brand="lifx" style="max-width: 700px; width: 100%; margin: 0 auto;">
+  
+  <!-- Header with Search -->
+  <div class="catalog-header-section" style="padding: 16px; border-bottom: 1px solid #e0e0e0;">
+    <h2 style="margin: 0 0 12px 0; font-size: 20px; font-weight: 600;">LIFX Smart Lights</h2>
+    <div class="search-box" style="display: flex; gap: 8px;">
+      <input 
+        type="text" 
+        class="lifx-search-input" 
+        id="lifxSearch"
+        placeholder="Search products..." 
+        style="flex: 1; padding: 8px 12px; border: 1px solid #ddd; border-radius: 4px; font-size: 14px;"
+      >
+      <button type="button" class="btn-icon" onclick="clearLifxSearch()" style="padding: 8px 12px; background: #f0f0f0; border: 1px solid #ddd; border-radius: 4px; cursor: pointer;">✕</button>
     </div>
+  </div>
+
+  <!-- Tab Navigation -->
+  <div class="catalog-tabs" style="display: flex; border-bottom: 2px solid #e0e0e0; padding: 0 16px; gap: 4px;">
+    <button class="tab-btn active" data-tab="all" onclick="switchLifxTab(this, 'all')" style="padding: 12px 16px; border: none; background: none; cursor: pointer; border-bottom: 3px solid transparent; margin-bottom: -2px; font-weight: 500; color: #666; transition: all 0.2s;">
+      All Products
+    </button>
+    <button class="tab-btn" data-tab="bulbs" onclick="switchLifxTab(this, 'bulbs')" style="padding: 12px 16px; border: none; background: none; cursor: pointer; border-bottom: 3px solid transparent; margin-bottom: -2px; font-weight: 500; color: #666; transition: all 0.2s;">
+      💡 Bulbs
+    </button>
+    <button class="tab-btn" data-tab="strips" onclick="switchLifxTab(this, 'strips')" style="padding: 12px 16px; border: none; background: none; cursor: pointer; border-bottom: 3px solid transparent; margin-bottom: -2px; font-weight: 500; color: #666; transition: all 0.2s;">
+      🎨 Strips
+    </button>
+    <button class="tab-btn" data-tab="panels" onclick="switchLifxTab(this, 'panels')" style="padding: 12px 16px; border: none; background: none; cursor: pointer; border-bottom: 3px solid transparent; margin-bottom: -2px; font-weight: 500; color: #666; transition: all 0.2s;">
+      ⬜ Panels
+    </button>
+  </div>
+
+  <!-- Products Grid (Scrollable) -->
+  <div class="catalog-products-wrapper" style="max-height: 500px; overflow-y: auto; padding: 16px;">
+    <div class="catalog-products" style="display: grid; grid-template-columns: 1fr; gap: 12px;">
+      
+      <!-- LIFX A19 Color Bulb -->
+      <div class="catalog-card-v2" data-product-id="lifx-a19" data-category="bulbs" data-search="a19 color smart bulb wifi" style="border: 1px solid #e0e0e0; border-radius: 8px; overflow: hidden; transition: all 0.2s; display: flex;">
+        <div class="product-image" style="width: 100px; height: 100px; background: #f5f5f5; flex-shrink: 0; display: flex; align-items: center; justify-content: center;">
+          <img src="/image/catalog/lifx-a19.avif" alt="LIFX A19" loading="lazy" style="width: 80%; height: 80%; object-fit: contain;" onerror="this.src='/image/product-placeholder.png'">
+        </div>
+        <div class="product-details" style="flex: 1; padding: 12px; display: flex; flex-direction: column; justify-content: space-between;">
+          <div>
+            <h4 style="margin: 0 0 4px 0; font-size: 15px; font-weight: 600;">LIFX A19 Color Bulb</h4>
+            <p style="margin: 0 0 8px 0; font-size: 13px; color: #666; line-height: 1.4;">16M colors, WiFi only, no hub needed</p>
+            <div style="display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 8px;">
+              <span style="background: #e3f2fd; color: #1976d2; padding: 2px 8px; border-radius: 12px; font-size: 11px; font-weight: 500;">Color</span>
+              <span style="background: #f3e5f5; color: #7b1fa2; padding: 2px 8px; border-radius: 12px; font-size: 11px; font-weight: 500;">Brightness</span>
+              <span style="background: #e0f2f1; color: #00796b; padding: 2px 8px; border-radius: 12px; font-size: 11px; font-weight: 500;">WiFi</span>
+            </div>
+          </div>
+          <div style="display: flex; gap: 6px; font-size: 13px;">
+            <span style="font-weight: 600; color: #1976d2;">$14.99</span>
+            <button type="button" class="btn-quick-add" onclick="addLifxProduct('lifx-a19', 'LIFX A19 Color Bulb')" style="flex: 1; padding: 6px 12px; background: #1976d2; color: white; border: none; border-radius: 4px; cursor: pointer; font-size: 12px; font-weight: 500;">+ Add</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- LIFX BR30 Recessed Bulb -->
+      <div class="catalog-card-v2" data-product-id="lifx-br30" data-category="bulbs" data-search="br30 recessed bulb 1100 lumens" style="border: 1px solid #e0e0e0; border-radius: 8px; overflow: hidden; transition: all 0.2s; display: flex;">
+        <div class="product-image" style="width: 100px; height: 100px; background: #f5f5f5; flex-shrink: 0; display: flex; align-items: center; justify-content: center;">
+          <img src="/image/catalog/lifx-br30.avif" alt="LIFX BR30" loading="lazy" style="width: 80%; height: 80%; object-fit: contain;" onerror="this.src='/image/product-placeholder.png'">
+        </div>
+        <div class="product-details" style="flex: 1; padding: 12px; display: flex; flex-direction: column; justify-content: space-between;">
+          <div>
+            <h4 style="margin: 0 0 4px 0; font-size: 15px; font-weight: 600;">LIFX BR30 Recessed</h4>
+            <p style="margin: 0 0 8px 0; font-size: 13px; color: #666; line-height: 1.4;">1100 lumens, 16M colors, recessed fixture</p>
+            <div style="display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 8px;">
+              <span style="background: #e3f2fd; color: #1976d2; padding: 2px 8px; border-radius: 12px; font-size: 11px; font-weight: 500;">Color</span>
+              <span style="background: #fff3e0; color: #e65100; padding: 2px 8px; border-radius: 12px; font-size: 11px; font-weight: 500;">Bright</span>
+            </div>
+          </div>
+          <div style="display: flex; gap: 6px; font-size: 13px;">
+            <span style="font-weight: 600; color: #1976d2;">$24.99</span>
+            <button type="button" class="btn-quick-add" onclick="addLifxProduct('lifx-br30', 'LIFX BR30 Recessed')" style="flex: 1; padding: 6px 12px; background: #1976d2; color: white; border: none; border-radius: 4px; cursor: pointer; font-size: 12px; font-weight: 500;">+ Add</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- LIFX Filament Bulb -->
+      <div class="catalog-card-v2" data-product-id="lifx-filament" data-category="bulbs" data-search="filament vintage warm white dimmer" style="border: 1px solid #e0e0e0; border-radius: 8px; overflow: hidden; transition: all 0.2s; display: flex;">
+        <div class="product-image" style="width: 100px; height: 100px; background: #f5f5f5; flex-shrink: 0; display: flex; align-items: center; justify-content: center;">
+          <img src="/image/catalog/lifx-filament.jpg" alt="LIFX Filament" loading="lazy" style="width: 80%; height: 80%; object-fit: contain;" onerror="this.src='/image/product-placeholder.png'">
+        </div>
+        <div class="product-details" style="flex: 1; padding: 12px; display: flex; flex-direction: column; justify-content: space-between;">
+          <div>
+            <h4 style="margin: 0 0 4px 0; font-size: 15px; font-weight: 600;">LIFX Filament Vintage</h4>
+            <p style="margin: 0 0 8px 0; font-size: 13px; color: #666; line-height: 1.4;">Warm white, vintage Edison style, dimmable</p>
+            <div style="display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 8px;">
+              <span style="background: #fff3e0; color: #e65100; padding: 2px 8px; border-radius: 12px; font-size: 11px; font-weight: 500;">Warm White</span>
+              <span style="background: #f3e5f5; color: #7b1fa2; padding: 2px 8px; border-radius: 12px; font-size: 11px; font-weight: 500;">Dimmable</span>
+            </div>
+          </div>
+          <div style="display: flex; gap: 6px; font-size: 13px;">
+            <span style="font-weight: 600; color: #1976d2;">$12.99</span>
+            <button type="button" class="btn-quick-add" onclick="addLifxProduct('lifx-filament', 'LIFX Filament Vintage')" style="flex: 1; padding: 6px 12px; background: #1976d2; color: white; border: none; border-radius: 4px; cursor: pointer; font-size: 12px; font-weight: 500;">+ Add</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- LIFX Color Strip -->
+      <div class="catalog-card-v2" data-product-id="lifx-strip" data-category="strips" data-search="led strip 4 meters addressable rgb" style="border: 1px solid #e0e0e0; border-radius: 8px; overflow: hidden; transition: all 0.2s; display: flex;">
+        <div class="product-image" style="width: 100px; height: 100px; background: #f5f5f5; flex-shrink: 0; display: flex; align-items: center; justify-content: center;">
+          <img src="/image/catalog/lifx-strip.avif" alt="LIFX Strip" loading="lazy" style="width: 80%; height: 80%; object-fit: contain;" onerror="this.src='/image/product-placeholder.png'">
+        </div>
+        <div class="product-details" style="flex: 1; padding: 12px; display: flex; flex-direction: column; justify-content: space-between;">
+          <div>
+            <h4 style="margin: 0 0 4px 0; font-size: 15px; font-weight: 600;">LIFX Color Strip (4m)</h4>
+            <p style="margin: 0 0 8px 0; font-size: 13px; color: #666; line-height: 1.4;">Addressable RGB, extendable, music sync</p>
+            <div style="display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 8px;">
+              <span style="background: #e3f2fd; color: #1976d2; padding: 2px 8px; border-radius: 12px; font-size: 11px; font-weight: 500;">RGB</span>
+              <span style="background: #fce4ec; color: #c2185b; padding: 2px 8px; border-radius: 12px; font-size: 11px; font-weight: 500;">Music Sync</span>
+            </div>
+          </div>
+          <div style="display: flex; gap: 6px; font-size: 13px;">
+            <span style="font-weight: 600; color: #1976d2;">$34.99</span>
+            <button type="button" class="btn-quick-add" onclick="addLifxProduct('lifx-strip', 'LIFX Color Strip')" style="flex: 1; padding: 6px 12px; background: #1976d2; color: white; border: none; border-radius: 4px; cursor: pointer; font-size: 12px; font-weight: 500;">+ Add</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- LIFX Beam Modular Panel -->
+      <div class="catalog-card-v2" data-product-id="lifx-beam" data-category="panels" data-search="beam modular stackable 16 million" style="border: 1px solid #e0e0e0; border-radius: 8px; overflow: hidden; transition: all 0.2s; display: flex;">
+        <div class="product-image" style="width: 100px; height: 100px; background: #f5f5f5; flex-shrink: 0; display: flex; align-items: center; justify-content: center;">
+          <img src="/image/catalog/lifx-beam.webp" alt="LIFX Beam" loading="lazy" style="width: 80%; height: 80%; object-fit: contain;" onerror="this.src='/image/product-placeholder.png'">
+        </div>
+        <div class="product-details" style="flex: 1; padding: 12px; display: flex; flex-direction: column; justify-content: space-between;">
+          <div>
+            <h4 style="margin: 0 0 4px 0; font-size: 15px; font-weight: 600;">LIFX Beam Modular</h4>
+            <p style="margin: 0 0 8px 0; font-size: 13px; color: #666; line-height: 1.4;">Stackable panels, 16M colors, dynamic effects</p>
+            <div style="display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 8px;">
+              <span style="background: #e3f2fd; color: #1976d2; padding: 2px 8px; border-radius: 12px; font-size: 11px; font-weight: 500;">Color</span>
+              <span style="background: #e8f5e9; color: #2e7d32; padding: 2px 8px; border-radius: 12px; font-size: 11px; font-weight: 500;">Stackable</span>
+            </div>
+          </div>
+          <div style="display: flex; gap: 6px; font-size: 13px;">
+            <span style="font-weight: 600; color: #1976d2;">$29.99</span>
+            <button type="button" class="btn-quick-add" onclick="addLifxProduct('lifx-beam', 'LIFX Beam Panel')" style="flex: 1; padding: 6px 12px; background: #1976d2; color: white; border: none; border-radius: 4px; cursor: pointer; font-size: 12px; font-weight: 500;">+ Add</button>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- Footer with links -->
+  <div class="catalog-footer" style="padding: 12px 16px; border-top: 1px solid #e0e0e0; font-size: 12px; color: #999; display: flex; justify-content: space-between; align-items: center;">
+    <span>WiFi-enabled, no hub required</span>
+    <a href="https://www.lifx.com/" target="_blank" rel="noopener noreferrer" style="color: #1976d2; text-decoration: none; font-weight: 500;">Visit LIFX →</a>
+  </div>
 </div>
+
+<script>
+function switchLifxTab(button, tabName) {
+  // Update active tab button
+  document.querySelectorAll('.tab-btn').forEach(btn => {
+    btn.style.borderBottomColor = 'transparent';
+    btn.style.color = '#666';
+  });
+  button.style.borderBottomColor = '#1976d2';
+  button.style.color = '#1976d2';
+  
+  // Show/hide products
+  const products = document.querySelectorAll('.catalog-card-v2');
+  products.forEach(product => {
+    if (tabName === 'all' || product.dataset.category === tabName) {
+      product.style.display = 'flex';
+    } else {
+      product.style.display = 'none';
+    }
+  });
+}
+
+function clearLifxSearch() {
+  document.getElementById('lifxSearch').value = '';
+  filterLifxProducts('');
+}
+
+function filterLifxProducts(query) {
+  const products = document.querySelectorAll('.catalog-card-v2');
+  const searchText = query.toLowerCase();
+  
+  products.forEach(product => {
+    const searchData = product.dataset.search.toLowerCase();
+    const productName = product.querySelector('h4').textContent.toLowerCase();
+    const productDesc = product.querySelector('p').textContent.toLowerCase();
+    
+    if (searchText === '' || searchData.includes(searchText) || productName.includes(searchText) || productDesc.includes(searchText)) {
+      product.style.display = 'flex';
+    } else {
+      product.style.display = 'none';
+    }
+  });
+}
+
+// Setup search on input
+document.getElementById('lifxSearch')?.addEventListener('input', (e) => {
+  filterLifxProducts(e.target.value);
+});
+
+function addLifxProduct(productId, productName) {
+  console.log('Adding LIFX product:', productId, productName);
+  // This should trigger the main app's device selection
+  if (window.selectProduct) {
+    window.selectProduct('lifx', productId, productName);
+  } else if (window.addProductToDevices) {
+    window.addProductToDevices(event, 'lifx', productId, productName);
+  }
+}
+</script>
 {{end}}

@@ -119,6 +119,7 @@
 {{end}}
 
 {{define "scripts"}}
+<script>window._i18nMsg = {{i18nJSON .I18n}};</script>
 <script id="channelDetailTranslations" type="application/json">
 {{.I18n.TByPrefix "channelDetail" | jsonMarshal}}
 </script>

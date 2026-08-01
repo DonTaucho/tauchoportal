@@ -1,6 +1,18 @@
 {{define "page"}}{{template "channels" .}}{{end}}
 
-{{define "channelshead"}}{{end}}
+{{define "channelshead"}}
+<script id="channelsListTranslations" type="application/json">
+{{.I18n.TByPrefix "channelsList" | jsonMarshal}}
+</script>
+<script id="sidebarChannelsTranslations" type="application/json">
+{{.I18n.TByPrefix "sidebarChannels" | jsonMarshal}}
+</script>
+<script>
+// Inject translations for channels-list.js and channels-sidebar.js
+window.channelsListTranslations = JSON.parse(document.getElementById('channelsListTranslations').textContent);
+window.sidebarChannelsTranslations = JSON.parse(document.getElementById('sidebarChannelsTranslations').textContent);
+</script>
+{{end}}
 
 {{define "channelscontent"}}
         <div id="view-list" class="view channels-view">
@@ -148,16 +160,5 @@
 {{end}}
 
 {{define "scripts"}}
-<script id="channelsListTranslations" type="application/json">
-{{.I18n.TByPrefix "channelsList" | jsonMarshal}}
-</script>
-<script id="sidebarChannelsTranslations" type="application/json">
-{{.I18n.TByPrefix "sidebarChannels" | jsonMarshal}}
-</script>
-<script>
-// Inject translations for channels-list.js and channels-sidebar.js
-window.channelsListTranslations = JSON.parse(document.getElementById('channelsListTranslations').textContent);
-window.sidebarChannelsTranslations = JSON.parse(document.getElementById('sidebarChannelsTranslations').textContent);
-</script>
 <script src="/js/channels-list.js"></script>
 {{end}}
