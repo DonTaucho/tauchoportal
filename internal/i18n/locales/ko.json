@@ -1326,5 +1326,26 @@
   "loginSettings.deleteConfirm": "정말로 계정을 영구적으로 삭제하시겠습니까?\r\n모든 데이터가 손실됩니다. 이는 취소할 수 없습니다.",
   "loginSettings.deletePrompt": "확인하려면 DELETE를 입력하세요:",
   "loginSettings.deleteCancelled": "계정 삭제가 취소되었습니다.",
-  "loginSettings.deleteFailed": "계정 삭제 실패: "
+  "loginSettings.deleteFailed": "계정 삭제 실패: ",
+  "auth.loginFailed": "로그인을 시작할 수 없습니다. 다시 시도하세요.",
+  "auth.configError": "로그인 구성 오류입니다. 다시 시도하세요.",
+  "auth.error": "로그인 오류",
+  "condition.selectEventType": "이벤트 유형 선택...",
+  "condition.noCustomParameters": "이 이벤트 유형에 대한 사용자 지정 매개변수가 없습니다",
+  "condition.failedLoadParameters": "매개변수를 로드할 수 없습니다",
+  "condition.testing": "테스트 중...",
+  "condition.invalidLogicJSON": "잘못된 조건 논리 JSON",
+  "condition.nameEmpty": "조건 이름은 비워둘 수 없습니다",
+  "condition.copyClipboardFailed": "클립보드로 복사할 수 없습니다",
+  "condition.matched": "일치",
+  "condition.noMatch": "일치하지 않음",
+  "condition.wouldTrigger": "(트리거됨)",
+  "condition.errors": "오류",
+  "condition.details": "세부정보",
+  "condition.totalTested": "총 테스트됨",
+  "brandSettings.fillAllFields": "모든 자격증명 필드를 입력하세요.",
+  "brandSettings.savedSuccess": "✅ 브랜드 자격증명이 성공적으로 저장되었습니다!",
+  "condition.filteredAll": "모두",
+  "channel.saveFilterFailed": "필터를 저장할 수 없습니다"
 }
+

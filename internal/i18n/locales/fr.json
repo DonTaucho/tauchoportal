@@ -1326,5 +1326,26 @@
   "loginSettings.deleteConfirm": "Êtes-vous sûr de vouloir supprimer définitivement votre compte ?\r\nToutes vos données seront perdues. Ceci ne peut pas être annulé.",
   "loginSettings.deletePrompt": "Tapez DELETE pour confirmer :",
   "loginSettings.deleteCancelled": "Suppression du compte annulée.",
-  "loginSettings.deleteFailed": "Impossible de supprimer le compte : "
+  "loginSettings.deleteFailed": "Impossible de supprimer le compte : ",
+  "auth.loginFailed": "Impossible de démarrer la connexion. Veuillez réessayer.",
+  "auth.configError": "Erreur de configuration de connexion. Veuillez réessayer.",
+  "auth.error": "Erreur de connexion",
+  "condition.selectEventType": "Sélectionnez le type d'événement...",
+  "condition.noCustomParameters": "Pas de paramètres personnalisés pour ce type d'événement",
+  "condition.failedLoadParameters": "Impossible de charger les paramètres",
+  "condition.testing": "Test en cours...",
+  "condition.invalidLogicJSON": "JSON de logique de condition invalide",
+  "condition.nameEmpty": "Le nom de la condition ne peut pas être vide",
+  "condition.copyClipboardFailed": "Impossible de copier dans le presse-papiers",
+  "condition.matched": "Correspondance",
+  "condition.noMatch": "Aucune correspondance",
+  "condition.wouldTrigger": "(déclencherait)",
+  "condition.errors": "Erreurs",
+  "condition.details": "Détails",
+  "condition.totalTested": "Total testé",
+  "brandSettings.fillAllFields": "Veuillez remplir tous les champs des identifiants.",
+  "brandSettings.savedSuccess": "✅ Identifiants de marque enregistrés avec succès !",
+  "condition.filteredAll": "Tous",
+  "channel.saveFilterFailed": "Impossible d'enregistrer le filtre"
 }
+

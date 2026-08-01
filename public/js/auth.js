@@ -63,18 +63,18 @@ async function startOAuthLogin(provider = 'google') {
             credentials: 'include'
         });
         if (!response.ok) {
-            alert('Failed to start login. Please try again.');
+            alert(window._i18nMsg?.['auth.loginFailed'] || 'Failed to start login. Please try again.');
             return;
         }
         const data = await response.json();
         if (data.auth_url) {
             window.location.href = data.auth_url;
         } else {
-            alert('Login configuration error. Please try again.');
+            alert(window._i18nMsg?.['auth.configError'] || 'Login configuration error. Please try again.');
         }
     } catch (error) {
         console.error('Error starting OAuth login:', error);
-        alert('Login error: ' + error.message);
+        alert((window._i18nMsg?.['auth.error'] || 'Login error') + ': ' + error.message);
     }
 }
 

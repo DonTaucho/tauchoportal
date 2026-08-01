@@ -1326,5 +1326,26 @@
   "loginSettings.deleteConfirm": "¿Estás seguro de que deseas eliminar permanentemente tu cuenta?\r\nTodos tus datos se perderán. Esto no se puede deshacer.",
   "loginSettings.deletePrompt": "Escribe DELETE para confirmar:",
   "loginSettings.deleteCancelled": "Eliminación de cuenta cancelada.",
-  "loginSettings.deleteFailed": "Error al eliminar la cuenta: "
+  "loginSettings.deleteFailed": "Error al eliminar la cuenta: ",
+  "auth.loginFailed": "No se pudo iniciar sesión. Por favor, inténtelo de nuevo.",
+  "auth.configError": "Error de configuración de inicio de sesión. Por favor, inténtelo de nuevo.",
+  "auth.error": "Error de inicio de sesión",
+  "condition.selectEventType": "Selecciona tipo de evento...",
+  "condition.noCustomParameters": "No hay parámetros personalizados para este tipo de evento",
+  "condition.failedLoadParameters": "No se pudieron cargar los parámetros",
+  "condition.testing": "Probando...",
+  "condition.invalidLogicJSON": "JSON de lógica de condición inválida",
+  "condition.nameEmpty": "El nombre de la condición no puede estar vacío",
+  "condition.copyClipboardFailed": "No se pudo copiar al portapapeles",
+  "condition.matched": "Coincidencia",
+  "condition.noMatch": "Sin coincidencia",
+  "condition.wouldTrigger": "(se dispararía)",
+  "condition.errors": "Errores",
+  "condition.details": "Detalles",
+  "condition.totalTested": "Total probado",
+  "brandSettings.fillAllFields": "Por favor, rellena todos los campos de credenciales.",
+  "brandSettings.savedSuccess": "✅ Credenciales de marca guardadas exitosamente!",
+  "condition.filteredAll": "Todos",
+  "channel.saveFilterFailed": "No se pudo guardar el filtro"
 }
+

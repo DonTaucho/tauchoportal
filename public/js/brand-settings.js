@@ -734,7 +734,7 @@
     if (!meta) return;
 
     if (!setupWizardState.credentials || Object.keys(setupWizardState.credentials).length === 0) {
-      showToast('Please fill in all credential fields.');
+      showToast(window._i18nMsg?.['brandSettings.fillAllFields'] || 'Please fill in all credential fields.');
       return;
     }
 
@@ -797,7 +797,7 @@
     if (!meta) return;
 
     if (!setupWizardState.credentials || Object.keys(setupWizardState.credentials).length === 0) {
-      showToast('Please fill in all credential fields.');
+      showToast(window._i18nMsg?.['brandSettings.fillAllFields'] || 'Please fill in all credential fields.');
       return;
     }
 
@@ -810,7 +810,7 @@
       });
       
       closeModal('setupWizardModal');
-      showToast('✅ Brand credentials saved successfully!');
+      showToast(window._i18nMsg?.['brandSettings.savedSuccess'] || '✅ Brand credentials saved successfully!');
       await loadBrandAuthStatus();
     } catch (error) {
       showToast(`❌ Failed to save credentials: ${error.message}`);

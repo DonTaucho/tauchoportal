@@ -127,7 +127,7 @@
             closeModal('filterModal'); 
             location.reload();
         } catch (error) { 
-            alert('Failed to save filter: ' + error.message); 
+            alert((window._i18nMsg?.['channel.saveFilterFailed'] || 'Failed to save filter') + ': ' + error.message); 
         } finally { 
             button.disabled = false; 
         } 

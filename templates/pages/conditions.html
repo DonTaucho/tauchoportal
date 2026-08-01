@@ -23,7 +23,7 @@
     </div>
     <div class="filter-tabs">
       <button class="filter-tab active" onclick="filterConds('all', this)">
-        All <span class="tab-count">{{len .Conditions}}</span>
+        {{.I18n.T "condition.filteredAll"}} <span class="tab-count">{{len .Conditions}}</span>
       </button>
       {{range $type := .EventTypes}}
       {{$count := 0}}
@@ -96,6 +96,7 @@
 {{end}}
 
 {{define "scripts"}}
+<script>window._i18nMsg = {{i18nJSON .I18n}};</script>
 <script id="conditionsListTranslations" type="application/json">
 {{.I18n.TByPrefix "conditionsList" | jsonMarshal}}
 </script>

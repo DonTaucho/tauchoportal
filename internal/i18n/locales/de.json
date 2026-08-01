@@ -1326,5 +1326,26 @@
   "loginSettings.deleteConfirm": "Sind Sie sicher, dass Sie Ihr Konto dauerhaft löschen möchten?\r\nAlle Ihre Daten gehen verloren. Dies kann nicht rückgängig gemacht werden.",
   "loginSettings.deletePrompt": "Geben Sie DELETE ein, um zu bestätigen:",
   "loginSettings.deleteCancelled": "Kontolöschung abgebrochen.",
-  "loginSettings.deleteFailed": "Kontolöschung fehlgeschlagen: "
+  "loginSettings.deleteFailed": "Kontolöschung fehlgeschlagen: ",
+  "auth.loginFailed": "Anmeldestart fehlgeschlagen. Bitte versuchen Sie es später.",
+  "auth.configError": "Anmeldekonfigurationsfehler. Bitte versuchen Sie es später.",
+  "auth.error": "Anmeldungsfehler",
+  "condition.selectEventType": "Ereignistyp auswählen...",
+  "condition.noCustomParameters": "Keine benutzerdefinierten Parameter für diesen Ereignistyp",
+  "condition.failedLoadParameters": "Parameter konnten nicht geladen werden",
+  "condition.testing": "Wird getestet...",
+  "condition.invalidLogicJSON": "Ungültige Bedingungslogik JSON",
+  "condition.nameEmpty": "Bedingungsname darf nicht leer sein",
+  "condition.copyClipboardFailed": "Kopieren in die Zwischenablage fehlgeschlagen",
+  "condition.matched": "Übereinstimmung",
+  "condition.noMatch": "Keine Übereinstimmung",
+  "condition.wouldTrigger": "(würde auslösen)",
+  "condition.errors": "Fehler",
+  "condition.details": "Details",
+  "condition.totalTested": "Insgesamt getestet",
+  "brandSettings.fillAllFields": "Bitte füllen Sie alle Anmeldedatenfelder aus.",
+  "brandSettings.savedSuccess": "✅ Markenanmeldedaten erfolgreich gespeichert!",
+  "condition.filteredAll": "Alle",
+  "channel.saveFilterFailed": "Filter konnte nicht gespeichert werden"
 }
+

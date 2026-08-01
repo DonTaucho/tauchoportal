@@ -1326,5 +1326,26 @@
   "loginSettings.deleteConfirm": "您確定要永久刪除您的帳戶嗎?\r\n您的所有數據將丟失。這無法撤銷。",
   "loginSettings.deletePrompt": "輸入 DELETE 以確認:",
   "loginSettings.deleteCancelled": "帳戶刪除已取消。",
-  "loginSettings.deleteFailed": "帳戶刪除失敗: "
+  "loginSettings.deleteFailed": "帳戶刪除失敗: ",
+  "auth.loginFailed": "無法啟動登入。請重試。",
+  "auth.configError": "登入配置錯誤。請重試。",
+  "auth.error": "登入錯誤",
+  "condition.selectEventType": "選擇事件類型...",
+  "condition.noCustomParameters": "此事件類型沒有自訂參數",
+  "condition.failedLoadParameters": "無法載入參數",
+  "condition.testing": "測試中...",
+  "condition.invalidLogicJSON": "無效的條件邏輯JSON",
+  "condition.nameEmpty": "條件名稱不能為空",
+  "condition.copyClipboardFailed": "無法複製到剪貼簿",
+  "condition.matched": "符合",
+  "condition.noMatch": "不符合",
+  "condition.wouldTrigger": "(會觸發)",
+  "condition.errors": "錯誤",
+  "condition.details": "詳情",
+  "condition.totalTested": "測試總數",
+  "brandSettings.fillAllFields": "請填寫所有認證欄位。",
+  "brandSettings.savedSuccess": "✅ 品牌認證已成功保存!",
+  "condition.filteredAll": "全部",
+  "channel.saveFilterFailed": "無法保存篩選"
 }
+
