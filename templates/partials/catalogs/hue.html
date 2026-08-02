@@ -1,153 +1,183 @@
-{{/* Philips Hue Smart Lighting - Premium Color Systems */}}
+{{/* Philips Hue Smart Lighting - API-Driven Catalog */}}
 {{define "catalog-hue"}}
-<div class="catalog-philips-hue brand-catalog">
-    <div class="catalog-products">
-        <!-- Philips Hue White & Color A19 Bulb -->
-        <div class="catalog-card" data-product-id="hue-a19" data-category="bulbs">
-            <div class="catalog-image">
-                <img src="/image/catalog/hue-a19.jpg" alt="Philips Hue A19 Bulb" loading="lazy" onerror="this.src='/image/product-placeholder.png'">
-            </div>
-            <div class="catalog-info">
-                <h3 class="catalog-product-name">Philips Hue White & Color Ambiance A19</h3>
-                <p class="catalog-description">16 million colors, dimmable white light, works with Alexa, Google, Apple HomeKit, and SmartThings.</p>
-                <div class="catalog-price">
-                    <span class="price">$19.99</span>
-                </div>
-                <ul class="catalog-features">
-                    <li>16 million colors</li>
-                    <li>Dimmable white to warm</li>
-                    <li>Schedule & automation</li>
-                    <li>Voice control compatible</li>
-                    <li>Requires Hue Bridge (sold separately)</li>
-                </ul>
-                <div class="catalog-actions">
-                    <span class="action-tag">color</span>
-                    <span class="action-tag">brightness</span>
-                    <span class="action-tag">scene</span>
-                </div>
-            </div>
-            <div class="catalog-actions-bar">
-                <a href="https://www.philips-hue.com/" target="_blank" rel="noopener noreferrer" class="btn btn-buy">🛍 Buy</a>
-                <button type="button" class="btn btn-add-device" onclick="selectProduct('philips-hue', 'hue-a19', 'Philips Hue A19 Bulb')">+ Add to Devices</button>
-            </div>
-        </div>
+<script>
+window._i18nCatalog = {{i18nJSON .I18n}};
+</script>
 
-        <!-- Philips Hue Smart Light Strip -->
-        <div class="catalog-card" data-product-id="hue-strip" data-category="strips">
-            <div class="catalog-image">
-                <img src="/image/catalog/hue-strip.jpg" alt="Philips Hue Light Strip" loading="lazy" onerror="this.src='/image/product-placeholder.png'">
-            </div>
-            <div class="catalog-info">
-                <h3 class="catalog-product-name">Philips Hue Smart Light Strip Plus (2 meters)</h3>
-                <p class="catalog-description">Flexible LED strip with 16 million colors, extendable up to 30 meters. Perfect for accent lighting and walls.</p>
-                <div class="catalog-price">
-                    <span class="price">$79.99</span>
-                </div>
-                <ul class="catalog-features">
-                    <li>16 million colors</li>
-                    <li>Extendable to 30 meters</li>
-                    <li>180° bendable</li>
-                    <li>App control with scenes</li>
-                    <li>Sync with entertainment</li>
-                </ul>
-                <div class="catalog-actions">
-                    <span class="action-tag">color</span>
-                    <span class="action-tag">brightness</span>
-                    <span class="action-tag">scene</span>
-                </div>
-            </div>
-            <div class="catalog-actions-bar">
-                <a href="https://www.philips-hue.com/" target="_blank" rel="noopener noreferrer" class="btn btn-buy">🛍 Buy</a>
-                <button type="button" class="btn btn-add-device" onclick="selectProduct('philips-hue', 'hue-strip', 'Philips Hue Light Strip')">+ Add to Devices</button>
-            </div>
-        </div>
-
-        <!-- Philips Hue Bridge (Required for Full Functionality) -->
-        <div class="catalog-card" data-product-id="hue-bridge" data-category="hubs">
-            <div class="catalog-image">
-                <img src="/image/catalog/hue-bridge.jpg" alt="Philips Hue Bridge" loading="lazy" onerror="this.src='/image/product-placeholder.png'">
-            </div>
-            <div class="catalog-info">
-                <h3 class="catalog-product-name">Philips Hue Bridge</h3>
-                <p class="catalog-description">Central hub required for full Hue automation, routines, and HomeKit integration. Connects via Ethernet.</p>
-                <div class="catalog-price">
-                    <span class="price">$59.99</span>
-                </div>
-                <ul class="catalog-features">
-                    <li>Connects up to 50 devices</li>
-                    <li>Ethernet connection</li>
-                    <li>HomeKit support</li>
-                    <li>Remote access and automation</li>
-                    <li>Geofencing & routines</li>
-                </ul>
-                <div class="catalog-actions">
-                    <span class="action-tag">hub</span>
-                    <span class="action-tag">automation</span>
-                </div>
-            </div>
-            <div class="catalog-actions-bar">
-                <a href="https://www.philips-hue.com/" target="_blank" rel="noopener noreferrer" class="btn btn-buy">🛍 Buy</a>
-                <button type="button" class="btn btn-add-device" onclick="selectProduct('philips-hue', 'hue-bridge', 'Philips Hue Bridge')">+ Add to Devices</button>
-            </div>
-        </div>
-
-        <!-- Philips Hue Starter Kit -->
-        <div class="catalog-card" data-product-id="hue-starter" data-category="kits">
-            <div class="catalog-image">
-                <img src="/image/catalog/hue-starter.jpg" alt="Philips Hue Starter Kit" loading="lazy" onerror="this.src='/image/product-placeholder.png'">
-            </div>
-            <div class="catalog-info">
-                <h3 class="catalog-product-name">Philips Hue White & Color Starter Kit</h3>
-                <p class="catalog-description">Complete kit with Bridge, 3 bulbs, and motion sensor. Everything you need to get started with Hue.</p>
-                <div class="catalog-price">
-                    <span class="price-range">$99.99 - $129.99</span>
-                </div>
-                <ul class="catalog-features">
-                    <li>1x Hue Bridge</li>
-                    <li>3x Color A19 Bulbs</li>
-                    <li>1x Motion Sensor</li>
-                    <li>Ready to use out of box</li>
-                    <li>16 million colors</li>
-                </ul>
-                <div class="catalog-actions">
-                    <span class="action-tag">kit</span>
-                    <span class="action-tag">color</span>
-                </div>
-            </div>
-            <div class="catalog-actions-bar">
-                <a href="https://www.philips-hue.com/" target="_blank" rel="noopener noreferrer" class="btn btn-buy">🛍 Buy</a>
-                <button type="button" class="btn btn-add-device" onclick="selectProduct('philips-hue', 'hue-starter', 'Philips Hue Starter Kit')">+ Add to Devices</button>
-            </div>
-        </div>
-
-        <!-- Philips Hue Ceiling Light -->
-        <div class="catalog-card" data-product-id="hue-ceiling" data-category="fixtures">
-            <div class="catalog-image">
-                <img src="/image/catalog/hue-ceiling.jpg" alt="Philips Hue Ceiling Light" loading="lazy" onerror="this.src='/image/product-placeholder.png'">
-            </div>
-            <div class="catalog-info">
-                <h3 class="catalog-product-name">Philips Hue Ceiling Lamp (Color)</h3>
-                <p class="catalog-description">Complete ceiling light fixture with 16 million colors and brightness control. No bulbs needed.</p>
-                <div class="catalog-price">
-                    <span class="price">$149.99</span>
-                </div>
-                <ul class="catalog-features">
-                    <li>16 million colors</li>
-                    <li>Dimmable brightness</li>
-                    <li>App & voice control</li>
-                    <li>Works with HomeKit</li>
-                    <li>60W equivalent brightness</li>
-                </ul>
-                <div class="catalog-actions">
-                    <span class="action-tag">color</span>
-                    <span class="action-tag">brightness</span>
-                </div>
-            </div>
-            <div class="catalog-actions-bar">
-                <a href="https://www.philips-hue.com/" target="_blank" rel="noopener noreferrer" class="btn btn-buy">🛍 Buy</a>
-                <button type="button" class="btn btn-add-device" onclick="selectProduct('philips-hue', 'hue-ceiling', 'Philips Hue Ceiling Light')">+ Add to Devices</button>
-            </div>
-        </div>
+<div class="catalog-hue brand-catalog" data-brand="hue">
+  
+  <div class="catalog-header-section">
+    <h2>{{.I18n.T "catalog.hueTitle"}}</h2>
+    <div class="search-box">
+      <input type="text" class="hue-search-input" id="hueSearch" placeholder="{{.I18n.T "catalog.searchPlaceholder"}}">
+      <button type="button" class="btn-icon" onclick="clearHueSearch()">✕</button>
     </div>
+  </div>
+
+  <div class="catalog-tabs">
+    <button class="tab-btn active" data-tab="all" onclick="switchHueTab(event, '')">{{.I18n.T "catalog.allProducts"}}</button>
+    <button class="tab-btn" data-tab="color" onclick="switchHueTab(event, 'color')">{{.I18n.T "catalog.color"}}</button>
+    <button class="tab-btn" data-tab="white" onclick="switchHueTab(event, 'white')">{{.I18n.T "catalog.white"}}</button>
+    <button class="tab-btn" data-tab="ambiance" onclick="switchHueTab(event, 'ambiance')">{{.I18n.T "catalog.ambiance"}}</button>
+  </div>
+
+  <div class="catalog-products-wrapper">
+    <div id="hueLoading" class="loading-state" style="display: none;"><div>⏳</div><div>{{.I18n.T "catalog.loading"}}</div></div>
+    <div id="hueError" class="error-state" style="display: none;"><div>⚠️</div><div id="errorMessage"></div><button type="button" class="retry-btn" onclick="loadHueProducts()">{{.I18n.T "catalog.retry"}}</button></div>
+    <div id="hueEmpty" class="empty-state" style="display: none;"><div>📭</div><div>{{.I18n.T "catalog.noResults"}}</div></div>
+    <div id="hueProductsGrid" class="catalog-products"></div>
+  </div>
+
+  <div id="huePagination" class="pagination-controls" style="display: none;">
+    <button type="button" onclick="previousHuePage()" disabled>{{.I18n.T "catalog.previous"}}</button>
+    <div class="pageInfo">Page 1 of 1</div>
+    <button type="button" onclick="nextHuePage()" disabled>{{.I18n.T "catalog.next"}}</button>
+  </div>
+
+  <div class="catalog-footer">
+    <span id="resultCount">{{.I18n.T "catalog.wifiEnabled"}}</span>
+    <a href="https://www.philips-hue.com/" target="_blank" rel="noopener noreferrer">{{ replace (.I18n.T "catalog.visitBrand") "{brand}" "Philips Hue"}}</a>
+  </div>
 </div>
+
+<script>
+function tHue(key, replacements = {}) {
+  let value = window._i18nCatalog[key] || key;
+  Object.keys(replacements).forEach(k => {
+    value = value.replace(`{${k}}`, replacements[k]);
+  });
+  return value;
+}
+
+const hueCatalogState = { currentPage: 0, limit: 20, search: '', category: '', currentData: null, isLoading: false };
+
+document.addEventListener('DOMContentLoaded', () => { loadHueProducts(); setupHueSearchHandler(); });
+
+async function loadHueProducts() {
+  if (hueCatalogState.isLoading) return;
+  hueCatalogState.isLoading = true;
+  showHueLoading(true);
+  hideHueError();
+  try {
+    const params = new URLSearchParams({ brand_id: 'hue', active_only: 'true', limit: hueCatalogState.limit, offset: hueCatalogState.currentPage * hueCatalogState.limit, category: hueCatalogState.category, search: hueCatalogState.search, sort_by: 'name' });
+    const response = await fetch(`/api/catalog/products?${params}`);
+    if (!response.ok) throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+    const data = await response.json();
+    hueCatalogState.currentData = data;
+    renderHueProducts(data.products);
+    updateHuePagination(data.pagination);
+    updateHueResultCount(data.pagination);
+    showHueLoading(false);
+  } catch (error) {
+    console.error('Error loading Hue products:', error);
+    showHueError(tHue('catalog.noResults'));
+    showHueLoading(false);
+  } finally {
+    hueCatalogState.isLoading = false;
+  }
+}
+
+function renderHueProducts(products) {
+  const grid = document.getElementById('hueProductsGrid');
+  if (!products || products.length === 0) {
+    grid.innerHTML = '';
+    document.getElementById('hueEmpty').style.display = 'block';
+    return;
+  }
+  document.getElementById('hueEmpty').style.display = 'none';
+  grid.innerHTML = products.map(product => `<div class="catalog-card-v2" data-product-id="${product.id}" data-category="${product.category}"><div class="product-image"><img src="${product.thumbnail_url || '/image/catalog/product-placeholder.png'}" alt="${product.name}" loading="lazy" onerror="this.src='/image/catalog/product-placeholder.png'"></div><div class="product-details"><div><h4>${product.name}</h4><p>${tHue('catalog.productCategory', { category: product.category })}</p><div class="product-actions">${product.supported_actions.map(action => { const actionLabel = { 'set_color': 'Color', 'set_brightness': 'Brightness', 'turn_on': 'Power', 'turn_off': 'Power' }[action] || action; return `<span class="action-tag-pill">${actionLabel}</span>`; }).join('')}</div></div><div style="display: flex; gap: 6px;"><button type="button" class="btn-quick-add" onclick="addHueProduct('${product.id}', '${product.name.replace(/'/g, "\\'")}', 'hue')">${tHue('catalog.addDevice')}</button></div></div></div>`).join('');
+}
+
+function updateHuePagination(pagination) {
+  const paginationDiv = document.getElementById('huePagination');
+  const buttons = paginationDiv.querySelectorAll('button');
+  const pageInfo = paginationDiv.querySelector('.pageInfo');
+  const currentPage = Math.floor(pagination.offset / pagination.limit) + 1;
+  const totalPages = pagination.total_pages;
+  pageInfo.textContent = tHue('catalog.pageInfo', { page: currentPage, total: totalPages });
+  buttons[0].disabled = !pagination.has_previous;
+  buttons[1].disabled = !pagination.has_next;
+  if (totalPages > 1) paginationDiv.style.display = 'flex';
+  else paginationDiv.style.display = 'none';
+}
+
+function updateHueResultCount(pagination) {
+  const resultCount = document.getElementById('resultCount');
+  const start = pagination.offset + 1;
+  const end = Math.min(pagination.offset + pagination.limit, pagination.total);
+  resultCount.textContent = tHue('catalog.showingResults', { start, end, total: pagination.total });
+}
+
+function setupHueSearchHandler() {
+  const searchInput = document.getElementById('hueSearch');
+  let timeout;
+  searchInput.addEventListener('input', (e) => {
+    clearTimeout(timeout);
+    timeout = setTimeout(() => {
+      hueCatalogState.search = e.target.value;
+      hueCatalogState.currentPage = 0;
+      loadHueProducts();
+    }, 300);
+  });
+}
+
+function clearHueSearch() {
+  document.getElementById('hueSearch').value = '';
+  hueCatalogState.search = '';
+  hueCatalogState.currentPage = 0;
+  loadHueProducts();
+}
+
+function switchHueTab(event, category) {
+  const buttons = event.target.parentElement.querySelectorAll('.tab-btn');
+  buttons.forEach(btn => { btn.style.borderBottomColor = 'transparent'; btn.style.color = '#666'; });
+  event.target.style.borderBottomColor = '#1976d2';
+  event.target.style.color = '#1976d2';
+  hueCatalogState.category = category;
+  hueCatalogState.currentPage = 0;
+  loadHueProducts();
+}
+
+function nextHuePage() {
+  if (hueCatalogState.currentData?.pagination?.has_next) {
+    hueCatalogState.currentPage++;
+    loadHueProducts();
+    document.querySelector('.catalog-hue .catalog-products-wrapper').scrollTop = 0;
+  }
+}
+
+function previousHuePage() {
+  if (hueCatalogState.currentData?.pagination?.has_previous) {
+    hueCatalogState.currentPage--;
+    loadHueProducts();
+    document.querySelector('.catalog-hue .catalog-products-wrapper').scrollTop = 0;
+  }
+}
+
+function showHueLoading(show) {
+  document.getElementById('hueLoading').style.display = show ? 'block' : 'none';
+  document.getElementById('hueProductsGrid').style.display = show ? 'none' : 'grid';
+}
+
+function showHueError(message) {
+  document.getElementById('errorMessage').textContent = message;
+  document.getElementById('hueError').style.display = 'block';
+  document.getElementById('hueProductsGrid').style.display = 'none';
+}
+
+function hideHueError() {
+  document.getElementById('hueError').style.display = 'none';
+}
+
+function addHueProduct(productId, productName, brand) {
+  console.log('Adding product:', { productId, productName, brand });
+  if (window.selectProduct) {
+    window.selectProduct(brand, productId, productName);
+  } else if (window.addProductToDevices) {
+    window.addProductToDevices({ currentTarget: event.target }, brand, productId, productName);
+  } else {
+    console.warn('No device selection handler found');
+  }
+}
+</script>
 {{end}}

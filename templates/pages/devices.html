@@ -137,7 +137,7 @@
                                 <a href="#" onclick="filterByBrand('{{$catalogBrandId}}', document.querySelector('[data-filter=\'{{$catalogBrandId}}\']')); return false;">View All</a>
                             </div>
                             <div class="catalog-items-horizontal" id="catalog-{{$catalogBrandId}}">
-                                {{renderCatalog $catalogBrandId .}}
+                                {{renderCatalog $catalogBrandId $.I18n .}}
                             </div>
                         </div>
                     {{end}}
@@ -154,7 +154,7 @@
                                 <a href="#" onclick="filterByBrand('{{$catalogBrandId}}', document.querySelector('[data-filter=\'{{$catalogBrandId}}\']')); return false;">View All</a>
                             </div>
                             <div class="catalog-items-horizontal" id="catalog-{{$catalogBrandId}}">
-                                {{renderCatalog $catalogBrandId .}}
+                                {{renderCatalog $catalogBrandId $.I18n .}}
                             </div>
                         </div>
                     {{end}}
@@ -171,7 +171,7 @@
                                 <a href="#" onclick="filterByBrand('{{$catalogBrandId}}', document.querySelector('[data-filter=\'{{$catalogBrandId}}\']')); return false;">View All</a>
                             </div>
                             <div class="catalog-items-horizontal" id="catalog-{{$catalogBrandId}}">
-                                {{renderCatalog $catalogBrandId .}}
+                                {{renderCatalog $catalogBrandId $.I18n .}}
                             </div>
                         </div>
                     {{end}}
@@ -297,7 +297,7 @@
                                     {{end}}
                                     
                                     <!-- Include brand-specific catalog partial using dynamic rendering -->
-                                    {{renderCatalog $brandId .}}
+                                    {{renderCatalog $brandId $.I18n .}}
                                 </div>
                             </div>
                         {{end}}
