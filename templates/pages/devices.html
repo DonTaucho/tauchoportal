@@ -20,37 +20,36 @@
             <!-- Brand Status Widget -->
             <div class="brand-status-widget">
                 <div class="brand-status-header">
-                    <h3>📱 Connected Brands</h3>
-                    <div class="brand-status-actions">
-                        <button class="manage-brands-link" onclick="goToBrandSettings()">⚙️ Manage Brands</button>
+                    <h3>{{.I18n.T "devices.connectedBrands"}}</h3>
+            {{$hasConnected := false}}
+                    <!-- Brand Status Pills -->
+                    <div class="brand-status-pills" id="brandStatusPills">
+                        {{range .Devices.BrandsSorted}}
+                            {{$brandId := .ID}}
+                            {{$deviceCount := 0}}
+                            {{range $.Devices.Devices}}
+                                {{if eq .Brand $brandId}}{{$deviceCount = add $deviceCount 1}}{{end}}
+                            {{end}}
+                            {{if gt $deviceCount 0}}
+                                {{$hasConnected = true}}
+                                <div class="brand-pill connected" data-brand-id="{{$brandId}}">
+                                    {{if .LogoURL}}
+                                        <img src="{{.LogoURL}}" alt="{{.Name}}" title="{{.Name}}">
+                                    {{else}}
+                                        <span>📱</span>
+                                    {{end}}
+                                    <span>{{.Name}}</span>
+                                    <span class="brand-pill-status">✓</span>
+                                </div>
+                            {{end}}
+                        {{end}}
+                        {{if not $hasConnected}}
+                            <span style="color: #9ca3af; font-style: italic;">{{.I18n.T "devices.noConnectedBrands"}}</span>
+                        {{end}}
                     </div>
-                </div>
-                
-        {{$hasConnected := false}}
-                <!-- Brand Status Pills -->
-                <div class="brand-status-pills" id="brandStatusPills">
-                    {{range .Devices.BrandsSorted}}
-                        {{$brandId := .ID}}
-                        {{$deviceCount := 0}}
-                        {{range $.Devices.Devices}}
-                            {{if eq .Brand $brandId}}{{$deviceCount = add $deviceCount 1}}{{end}}
-                        {{end}}
-                        {{if gt $deviceCount 0}}
-                            {{$hasConnected = true}}
-                            <div class="brand-pill connected" data-brand-id="{{$brandId}}">
-                                {{if .LogoURL}}
-                                    <img src="{{.LogoURL}}" alt="{{.Name}}" title="{{.Name}}">
-                                {{else}}
-                                    <span>📱</span>
-                                {{end}}
-                                <span>{{.Name}}</span>
-                                <span class="brand-pill-status">✓</span>
-                            </div>
-                        {{end}}
-                    {{end}}
-                    {{if not $hasConnected}}
-                        <span style="color: #9ca3af; font-style: italic;">No brands connected yet</span>
-                    {{end}}
+                    <div class="brand-status-actions">
+                        <button class="manage-brands-link" onclick="goToBrandSettings()">{{.I18n.T "devices.manageBrands"}}</button>
+                    </div>
                 </div>
             </div>
 
@@ -178,11 +177,11 @@
                 {{end}}
             {{end}}
             <!-- Add New Device Card (dotted border, like in mock) -->
-            <div class="device-card" style="border: 2px dashed #0969da; display: flex; align-items: center; justify-content: center; min-height: 300px; cursor: pointer; background: white; padding: 2rem; text-align: center;" onclick="openAddModal()">
-                <div style="display: flex; flex-direction: column; align-items: center; gap: 1rem;">
-                    <h3 style="color: #0969da; font-size: 1.3rem; margin: 0;">+ Add New Device</h3>
-                    <p style="color: #666; font-size: 0.95rem; margin: 0;">Click to register a new device</p>
-                    <p style="color: #999; font-size: 0.85rem; margin: 0;">Choose from connected brands or set up a new brand</p>
+            <div class="device-card addnew" onclick="openAddModal()">
+                <div class="info">
+                    <h3>{{.I18n.T "devices.addNewDevice"}}</h3>
+                    <p class="navi">{{.I18n.T "devices.addNewDeviceNav"}}</p>
+                    <p>{{.I18n.T "devices.addNewDeviceDesc"}}</p>
                 </div>
             </div>
             {{end}}
