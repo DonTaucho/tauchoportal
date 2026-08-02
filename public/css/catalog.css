@@ -603,7 +603,113 @@
     color: #1565c0;
 }
 
+/* =============================================
+   Quick Connect Modal Styles
+   ============================================= */
+
+.qc-product-card {
+border: 1px solid #e0e0e0;
+border-radius: 8px;
+overflow: hidden;
+background: white;
+cursor: pointer;
+transition: all 0.3s;
+display: flex;
+flex-direction: column;
+align-items: center;
+text-align: center;
+padding: 1rem;
+position: relative;
+}
+
+.qc-product-card:hover {
+box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+border-color: #0969da;
+transform: translateY(-2px);
+}
+
+.qc-product-image,
+.qc-product-image-placeholder {
+width: 100%;
+height: 120px;
+background: #f5f5f5;
+border-radius: 4px;
+display: flex;
+align-items: center;
+justify-content: center;
+margin-bottom: 0.75rem;
+flex-shrink: 0;
+}
+
+.qc-product-image img {
+max-width: 90%;
+max-height: 90%;
+object-fit: contain;
+}
+
+.qc-product-image-placeholder {
+font-size: 2.5rem;
+opacity: 0.6;
+}
+
+.qc-product-info {
+flex: 1;
+width: 100%;
+margin-bottom: 0.75rem;
+}
+
+.qc-product-name {
+font-size: 0.9rem;
+font-weight: 600;
+color: #222;
+margin: 0 0 0.25rem 0;
+line-height: 1.3;
+display: -webkit-box;
+-webkit-line-clamp: 2;
+-webkit-box-orient: vertical;
+overflow: hidden;
+}
+
+.qc-product-model {
+font-size: 0.75rem;
+color: #999;
+margin: 0;
+}
+
+.qc-add-btn {
+width: 100%;
+padding: 0.5rem 0.75rem;
+background: #0969da;
+color: white;
+border: none;
+border-radius: 4px;
+cursor: pointer;
+font-weight: 600;
+font-size: 0.85rem;
+transition: all 0.2s;
+}
+
+.qc-add-btn:hover {
+background: #0860ca;
+transform: scale(1.02);
+}
+
+.qc-add-btn:active {
+transform: scale(0.98);
+}
+
 /* Responsive */
+@media (max-width: 480px) {
+.qc-product-card {
+    padding: 0.75rem;
+}
+    
+.qc-product-image,
+.qc-product-image-placeholder {
+    height: 100px;
+    margin-bottom: 0.5rem;
+}
+}
 @media (max-width: 1024px) {
     .catalog-view {
         grid-template-columns: 180px 1fr;
