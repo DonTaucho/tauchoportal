@@ -562,11 +562,11 @@
                 });
             }
         } catch (e) {
-            alert(devicesI18n['devices.failedLoadDetails'] + e.message);
+            alert(devicesI18n['failedLoadDetails'] + e.message);
             return;
         }
         
-        document.getElementById('devSaveBtn').textContent = devicesI18n['devices.saveChanges'];
+        document.getElementById('devSaveBtn').textContent = devicesI18n['saveChanges'];
         showStep(2);
         document.getElementById('deviceModal').style.display = 'block';
         document.body.style.overflow = 'hidden';
@@ -591,8 +591,8 @@
         const brand = BRANDS.find(b => b.id === brandId);
         if (!brand) return;
 
-        document.getElementById('qcTitle').textContent = devicesI18n['devices.quickConnectTitle'] + ' - ' + brand.name;
-        const subtitleMsg = devicesI18n['devices.quickConnectSubtitle'];
+        document.getElementById('qcTitle').textContent = devicesI18n['quickConnectTitle'] + ' - ' + brand.name;
+        const subtitleMsg = devicesI18n['quickConnectSubtitle'];
         document.getElementById('qcSubtitle').textContent = subtitleMsg.replace('{brand}', brand.name);
         
         showQuickConnectLoading(true);
@@ -629,7 +629,7 @@
             renderQuickConnectProducts(quickConnectProducts);
             showQuickConnectLoading(false);
         } catch (error) {
-            console.error(devicesI18n['devices.failedLoadProducts'] + ' ' + error);
+            console.error(devicesI18n['failedLoadProducts'] + ' ' + error);
             showQuickConnectLoading(false);
             document.getElementById('qcEmpty').style.display = 'block';
         }
@@ -657,7 +657,7 @@
                     <div class="qc-product-name">${escapeJsString(product.name)}</div>
                     ${product.model ? `<div class="qc-product-model">${escapeJsString(product.model)}</div>` : ''}
                 </div>
-                <button class="qc-add-btn" onclick="event.stopPropagation(); selectQuickConnectDevice('${escapeJsString(product.id)}', '${escapeJsString(product.name)}', '${escapeJsString(quickConnectBrandId)}')">${escapeJsString(devicesI18n['devices.quickConnectIOwn'] || 'I Own This')}</button>
+                <button class="qc-add-btn" onclick="event.stopPropagation(); selectQuickConnectDevice('${escapeJsString(product.id)}', '${escapeJsString(product.name)}', '${escapeJsString(quickConnectBrandId)}')">${escapeJsString(devicesI18n['quickConnectIOwn'] || 'I Own This')}</button>
             </div>
         `).join('');
     }
@@ -695,7 +695,7 @@
             renderCredFields(brandId);
             document.getElementById('devName').value = '';
             document.getElementById('devRoom').value = '';
-            document.getElementById('devSaveBtn').textContent = devicesI18n['devices.addDeviceButton'];
+            document.getElementById('devSaveBtn').textContent = devicesI18n['addDeviceButton'];
             editingId = null;
             showStep(2);
             document.getElementById('deviceModal').style.display = 'block';
@@ -826,7 +826,7 @@
                 });
             }
         }
-        document.getElementById('devSaveBtn').textContent = devicesI18n['devices.addDeviceButton'];
+        document.getElementById('devSaveBtn').textContent = devicesI18n['addDeviceButton'];
         showStep(2);
     }
 
@@ -847,9 +847,9 @@
         const brandIcon = brand.icon || '🔌';
         document.getElementById('step2BrandBadge').innerHTML =
             `<span class="brand-step-badge" style="background:${brandColor}18;border-color:${brandColor};color:${brandColor}">${brandIcon} ${brand.name}</span>`;
-        const actionWord = editingId ? devicesI18n['devices.editDevice'] : devicesI18n['devices.configureDevice'];
+        const actionWord = editingId ? devicesI18n['editDevice'] : devicesI18n['configureDevice'];
         document.getElementById('step2Title').textContent = actionWord + ' ' + brand.name + ' Device';
-        document.getElementById('step2Desc').textContent = devicesI18n['devices.fillDetailsDesc'];
+        document.getElementById('step2Desc').textContent = devicesI18n['fillDetailsDesc'];
         
         // Show catalog UI, hide custom UI
         document.getElementById('catalogProductGroup').style.display = 'block';
@@ -862,10 +862,10 @@
     function setStep2Custom() {
         // Update step 2 header for custom device
         document.getElementById('step2BrandBadge').innerHTML =
-            `<span class="brand-step-badge" style="background:#FF573318;border-color:#FF5733;color:#FF5733">✏️ ${devicesI18n['devices.customDeviceTitle']}</span>`;
-        const actionWord = editingId ? devicesI18n['devices.editCustomDevice'] : devicesI18n['devices.configureCustomDevice'];
+            `<span class="brand-step-badge" style="background:#FF573318;border-color:#FF5733;color:#FF5733">✏️ ${devicesI18n['customDeviceTitle']}</span>`;
+        const actionWord = editingId ? devicesI18n['editCustomDevice'] : devicesI18n['configureCustomDevice'];
         document.getElementById('step2Title').textContent = actionWord;
-        document.getElementById('step2Desc').textContent = devicesI18n['devices.customDeviceDesc'];
+        document.getElementById('step2Desc').textContent = devicesI18n['customDeviceDesc'];
         
         // Hide catalog UI, show custom UI
         document.getElementById('catalogProductGroup').style.display = 'none';
@@ -895,7 +895,7 @@
                 <div class="cred-input-row">
                     <input type="${isPwd ? 'password' : 'text'}" id="cred_${f.id}"
                            ${isPwd ? 'placeholder="••••••••••••••••"' : ''} autocomplete="off">
-                    ${isPwd ? `<button type="button" class="show-hide-btn" onclick="toggleCredVis('cred_${f.id}',this)">${devicesI18n['devices.showPassword']}</button>` : ''}
+                    ${isPwd ? `<button type="button" class="show-hide-btn" onclick="toggleCredVis('cred_${f.id}',this)">${devicesI18n['showPassword']}</button>` : ''}
                 </div>
                 <small class="form-help">${f.help}</small>
             </div>`;
@@ -910,7 +910,7 @@
     function toggleCredVis(inputId, btn) {
         const el = document.getElementById(inputId);
         el.type = el.type === 'password' ? 'text' : 'password';
-        btn.textContent = el.type === 'password' ? devicesI18n['devices.showPassword'] : devicesI18n['devices.hidePassword'];
+        btn.textContent = el.type === 'password' ? devicesI18n['showPassword'] : devicesI18n['hidePassword'];
     }
     
     // =============================================
@@ -943,7 +943,7 @@
                           onchange="customActions[${idx}].http_body_template = this.value">${action.http_body_template || ''}</textarea>
             </div>
         `).join('');
-        document.getElementById('customActionsList').innerHTML = html || `<p style="color:#999">${devicesI18n['devices.noCustomActions']}</p>`;
+        document.getElementById('customActionsList').innerHTML = html || `<p style="color:#999">${devicesI18n['noCustomActions']}</p>`;
     }
     
     function addCustomAction() {
@@ -977,9 +977,9 @@
             // Handle custom devices
             if (selectedBrand === 'custom') {
                 const customProductName = document.getElementById('customProductName').value;
-                if (!customProductName) { alert(devicesI18n['devices.pleaseEnterDeviceType']); btn.disabled = false; return; }
+                if (!customProductName) { alert(devicesI18n['pleaseEnterDeviceType']); btn.disabled = false; return; }
                 if (!window.customActions || window.customActions.length === 0) { 
-                    alert(devicesI18n['devices.pleaseAddAction']); btn.disabled = false; return; 
+                    alert(devicesI18n['pleaseAddAction']); btn.disabled = false; return; 
                 }
                 
                 // Create custom product
@@ -990,7 +990,7 @@
                 // Create custom actions
                 for (const action of window.customActions) {
                     if (!action.action_name || !action.http_url) {
-                        alert(devicesI18n['devices.skippingAction']); 
+                        alert(devicesI18n['skippingAction']); 
                         continue;
                     }
                     const actionBody = {
@@ -1048,7 +1048,7 @@
             // Reload page to get fresh device list from server
             window.location.reload();
         } catch (e) {
-            alert(devicesI18n['devices.failedSaveDevice'] + e.message);
+            alert(devicesI18n['failedSaveDevice'] + e.message);
         } finally {
             btn.disabled = false;
         }
@@ -1063,20 +1063,20 @@
             // Reload page to get fresh device list from server
             window.location.reload();
         } catch (e) {
-            alert(devicesI18n['devices.failedDelete'] + e.message);
+            alert(devicesI18n['failedDelete'] + e.message);
         }
     }
 
     async function testDevice(devId) {
         const dev = MY_DEVICES.find(d => d.id === devId);
         if (!dev) return;
-        if (!dev.is_configured) { alert(devicesI18n['devices.completeSetupBeforeTest']); return; }
+        if (!dev.is_configured) { alert(devicesI18n['completeSetupBeforeTest']); return; }
         try {
             await apiRequest('POST', `/devices/test?id=${devId}`);
-            const msg = devicesI18n['devices.testCommandSent'];
+            const msg = devicesI18n['testCommandSent'];
             alert(msg.replace('{0}', dev.name));
         } catch (e) {
-            alert(devicesI18n['devices.testFailed'] + e.message);
+            alert(devicesI18n['testFailed'] + e.message);
         }
     }
 
