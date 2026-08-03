@@ -115,7 +115,7 @@
   "policy.accountData": "Account Information",
   "policy.accountDataDesc": "When you create a Taucho account, we collect: <ul><li>Email address</li><li>Username</li><li>Password (encrypted)</li><li>Profile information (name, profile picture)</li><li>Preferred language and timezone</li></ul>",
   "policy.streamingCreds": "Streaming Account Credentials",
-  "policy.streamingCredsDesc": "To monitor your live streams, we collect and securely store OAuth tokens and authentication credentials for <ul><li>YouTube</li><li>Twitch</li><li>NicoNico</li></ul> channels. We never store your passwords. We use OAuth authentication to access only the permissions you explicitly grant. You can revoke access at any time through your streaming platform's settings.",
+  "policy.streamingCredsDesc": "To monitor your live streams, we collect and securely store OAuth tokens and authentication credentials for <ul><li>YouTube</li><li>Twitch</li><li>NicoNico</li><li>Twitcasting</li><li>Instagram</li><li>TikTok</li><li>Facebook</li><li>Kick</li><li>Bilibili</li><li>X</li></ul> channels. We never store your passwords. We use OAuth authentication to access only the permissions you explicitly grant. You can revoke access at any time through your streaming platform's settings.",
   "policy.deviceData": "Smart Device Information",
   "policy.deviceDataDesc": "To control your smart devices, we collect: <ul><li>Device names and identifiers</li><li>Device types and capabilities</li><li>Device authentication tokens (encrypted)</li><li>Device location (if applicable)</li><li>Network configuration details</li></ul>",
   "policy.eventData": "Stream Event Data",

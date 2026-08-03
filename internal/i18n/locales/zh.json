@@ -118,7 +118,7 @@
   "policy.accountData": "帳戶資訊",
   "policy.accountDataDesc": "建立陶喬帳戶時，我們會儲存以下資訊<ul><li>電子郵件地址</li><li>使用者名稱</li><li>建立的密碼（加密後儲存雜湊值）</li><li>個人資料資訊（姓名、頭像）</li><li>語言設定及及時區資訊</li></ul>。",
   "policy.streamingCreds": "直播平台認證資訊",
-  "policy.streamingCredsDesc": "為取得直播資訊，陶喬會安全儲存 OAuth（站點間認證）資訊中的認證令牌及認證憑據。透過 OAuth 進行認證連線的平台包括 <ul><li>YouTube</li><li>Twitch</li><li>Niconico 直播</li></ul>。對於這些平台，我們不會取得或儲存密碼。陶喬服務只會使用您在指定帳戶關聯時授權的資訊。對於所有服務，您都可以隨時在設定頁面撤銷存取權限。與被撤銷存取權限的帳戶相關的所有資訊都會被刪除，不會保留任何資料。",
+  "policy.streamingCredsDesc": "為取得直播資訊，陶喬會安全儲存 OAuth（站點間認證）資訊中的認證令牌及認證憑據。透過 OAuth 進行認證連線的平台包括 <ul><li>YouTube</li><li>Twitch</li><li>Niconico 直播</li><li>Twitcasting</li><li>Instagram</li><li>TikTok</li><li>Facebook</li><li>Kick</li><li>Bilibili</li><li>X</li></ul>。對於這些平台，我們不會取得或儲存密碼。陶喬服務只會使用您在指定帳戶關聯時授權的資訊。對於所有服務，您都可以隨時在設定頁面撤銷存取權限。與被撤銷存取權限的帳戶相關的所有資訊都會被刪除，不會保留任何資料。",
   "policy.deviceData": "智慧裝置資訊",
   "policy.deviceDataDesc": "為了控制智慧裝置（這裡指的是響應外部 API 呼叫而操作的所有裝置），陶喬 使用以下 <ul><li>裝置名稱和型號資訊</li><li>裝置類型和啟用的功能</li><li>裝置的身份驗證資訊（加密和保留）</li><li>裝置地址資訊（如果啟用） </li><li>網路設定資訊</li></ul>。",
   "policy.eventData": "直播資訊",
