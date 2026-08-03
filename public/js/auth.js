@@ -53,20 +53,28 @@ async function requireAuth() {
  */
 async function startOAuthLogin(provider = 'google') {
     try {
-        const response = await fetch(`${API_BASE}/oauth/login?provider=${encodeURIComponent(provider)}`);
+        // Set the return URL so after OAuth callback, we redirect to dashboard instead of login
+        await fetch('/set-oauth-return?url=/dashboard', {
+            method: 'GET',
+            credentials: 'include'
+        }).catch(e => console.error('Failed to set oauth_return:', e));
+        
+        const response = await fetch(`${API_BASE}/oauth/login?provider=${encodeURIComponent(provider)}`, {
+            credentials: 'include'
+        });
         if (!response.ok) {
-            alert('Failed to start login. Please try again.');
+            alert(window._i18nMsg?.['auth.loginFailed'] || 'Failed to start login. Please try again.');
             return;
         }
         const data = await response.json();
         if (data.auth_url) {
             window.location.href = data.auth_url;
         } else {
-            alert('Login configuration error. Please try again.');
+            alert(window._i18nMsg?.['auth.configError'] || 'Login configuration error. Please try again.');
         }
     } catch (error) {
         console.error('Error starting OAuth login:', error);
-        alert('Login error: ' + error.message);
+        alert((window._i18nMsg?.['auth.error'] || 'Login error') + ': ' + error.message);
     }
 }
 

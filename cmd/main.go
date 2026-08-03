@@ -147,7 +147,6 @@ func main() {
 		if user := server.fetchUser(r); user != nil {
 			r.Header.Set("X-User-ID", strconv.Itoa(user.ID))
 		}
-		log.Printf("Proxying: %s -> %s://%s%s", r.Method, r.URL.Scheme, r.URL.Host, r.URL.Path)
 	}
 
 	// callbackProxy forwards /auth/callback/* to the API unchanged (no prefix stripping).
@@ -155,15 +154,17 @@ func main() {
 	// ModifyResponse: if the portal set an "oauth_return" cookie before the OAuth redirect
 	// (via /set-oauth-return), use that URL as the post-OAuth redirect destination.
 	callbackProxy := httputil.NewSingleHostReverseProxy(target)
+
 	callbackProxy.Director = func(r *http.Request) {
 		r.URL.Scheme = target.Scheme
 		r.URL.Host = target.Host
 		r.Host = target.Host
 		r.RequestURI = ""
 		attachIdentityToken(r, tokenSource)
-		log.Printf("OAuth callback: %s -> %s://%s%s", r.Method, r.URL.Scheme, r.URL.Host, r.URL.Path)
 	}
 	callbackProxy.ModifyResponse = func(resp *http.Response) error {
+		// If oauth_return cookie is set, use it as redirect destination
+		// (OAuth callback endpoint sets /auth/session-ready by default)
 		if resp.StatusCode >= 300 && resp.StatusCode < 400 {
 			if cookie, err := resp.Request.Cookie("oauth_return"); err == nil && cookie.Value != "" {
 				returnURL := cookie.Value
@@ -194,7 +195,7 @@ func main() {
 		}
 		http.SetCookie(w, &http.Cookie{
 			Name:     "oauth_return",
-			Value:    returnURL,
+			Value:    "/auth/session-ready?redirect=" + returnURL,
 			Path:     "/",
 			MaxAge:   600,
 			HttpOnly: true,
@@ -277,6 +278,25 @@ func main() {
 			fmt.Fprintf(w, "<p>%s <b>%s</b>: HTTP %d — <code>%s</code></p>",
 				emoji, htmlEscape(ep), resp.StatusCode, htmlEscape(string(body)))
 		}
+	})
+	mux.HandleFunc("/auth/session-ready", func(w http.ResponseWriter, r *http.Request) {
+		// This endpoint validates the session cookie was stored
+		user := server.fetchUser(r)
+		if user != nil {
+			// Cookie stored successfully, redirect to dashboard
+			http.Redirect(w, r, "/dashboard", http.StatusSeeOther)
+			return
+		}
+
+		// Cookie not yet stored, show intermediate page with retry logic
+		w.Header().Set("Content-Type", "text/html")
+		w.WriteHeader(http.StatusOK)
+		fmt.Fprint(w, `
+		<html>
+		<head><meta http-equiv='refresh' content='0; url=/dashboard'><title>Logging in...</title></head>
+		<body>Loading..</body>
+		</html>
+		`)
 	})
 	mux.Handle("/", server)
 
@@ -371,7 +391,7 @@ func loadTemplates() map[string]*template.Template {
 		"replace": func(s, old, new string) string {
 			return strings.ReplaceAll(s, old, new)
 		},
-		"renderCatalog": func(brandID string, data interface{}) (template.HTML, error) {
+		"renderCatalog": func(brandID string, i18nTrans *i18n.Translator, data interface{}) (template.HTML, error) {
 			if globalTemplates == nil {
 				return "", fmt.Errorf("templates not loaded")
 			}
@@ -380,8 +400,15 @@ func loadTemplates() map[string]*template.Template {
 				return "", fmt.Errorf("devices template not found")
 			}
 			tplName := fmt.Sprintf("catalog-%s", brandID)
+			
+			// Wrap data to include i18n translator
+			type catalogData struct {
+				I18n interface{}
+				Data interface{}
+			}
+			
 			buf := &strings.Builder{}
-			err := tmpl.ExecuteTemplate(buf, tplName, data)
+			err := tmpl.ExecuteTemplate(buf, tplName, catalogData{I18n: i18nTrans, Data: data})
 			if err != nil {
 				return "", err
 			}
@@ -571,7 +598,6 @@ func (s *Server) servePublicFile(w http.ResponseWriter, r *http.Request) {
 func (s *Server) fetchUser(r *http.Request) *UserProfile {
 	req, err := http.NewRequestWithContext(r.Context(), http.MethodGet, s.apiURL+"/auth/user", nil)
 	if err != nil {
-		log.Printf("fetchUser: failed to build request: %v", err)
 		return nil
 	}
 	cookie := r.Header.Get("Cookie")
@@ -581,20 +607,17 @@ func (s *Server) fetchUser(r *http.Request) *UserProfile {
 	client := &http.Client{Timeout: 3 * time.Second}
 	resp, err := client.Do(req)
 	if err != nil {
-		log.Printf("fetchUser: API call failed (url=%s, cookie_present=%v): %v", s.apiURL+"/auth/user", cookie != "", err)
 		return nil
 	}
 	defer resp.Body.Close()
 
 	body, _ := io.ReadAll(io.LimitReader(resp.Body, 16384))
 	if resp.StatusCode != http.StatusOK {
-		log.Printf("fetchUser: API returned %d (cookie_present=%v): %s", resp.StatusCode, cookie != "", string(body))
 		return nil
 	}
 
 	var user UserProfile
 	if err := json.Unmarshal(body, &user); err != nil {
-		log.Printf("fetchUser: failed to decode user JSON: %v — body: %s", err, string(body))
 		return nil
 	}
 	return &user

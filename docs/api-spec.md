@@ -1072,6 +1072,7 @@ Facebook Live events are accessible via the Meta Graph API with user OAuth token
 |--------|------|-------------|
 | GET | `/platform/facebook/page/mine` | Own Facebook page(s) |
 | GET | `/platform/facebook/search?q=` | Page search (via Meta Graph API) |
+| GET | `/platform/facebook/live?page_id=` | Live streams for a page |
 
 **`GET /platform/facebook/page/mine`**  
 Response: array of page objects
@@ -1080,14 +1081,39 @@ Response: array of page objects
   {
     "page_id": "1234567890",
     "name": "My Page",
-    "thumbnail": "https://...",
-    "follower_count": 10000
+    "thumbnail": "https://..."
   }
 ]
 ```
 
 **`GET /platform/facebook/search?q=`**  
-Response: array of page objects (same shape as above).
+Response: object with array of page objects
+```json
+{
+  "items": [
+    { "page_id": "...", "name": "...", "thumbnail": "..." }
+  ]
+}
+```
+
+**`GET /platform/facebook/live?page_id=<id>`**  
+Returns live streams for a Facebook page.
+Response: object with array of live stream objects
+```json
+{
+  "items": [
+    {
+      "stream_id": "123456789",
+      "title": "Live Stream Title",
+      "description": "Stream description",
+      "live_status": "LIVE",
+      "permalink": "https://facebook.com/...",
+      "thumbnail": "https://...",
+      "started_at": "2026-01-15T10:30:00Z"
+    }
+  ]
+}
+```
 
 ---
 
@@ -1300,23 +1326,52 @@ stream event, it can trigger a device action.
   "name": "string",
   "event_type": "comment | superchat | sticker | member | follow | sub | cheer | gift | nicoru | hype_train | raid | stream_start | stream_end",
   "filter": "string (optional keyword; empty = match all)",
+  "condition_logic": { "Operator": "...", "SubConditions": [...], "Variables": [...] },
   "is_enabled": true,
   "device_id": "string | null (FK → devices.id)",
   "device_action": "on | off | toggle | color | brightness | color_temp | scene | flash | null",
+  
   "device_action_params": {
     "color": "#ff0000",
     "brightness": 75
   },
-  "last_triggered_at": "2026-05-25T14:08:00Z | null"
+  
+  "device_action_body": {
+    "state": "on",
+    "brightness": 50,
+    "color": "#ffffff",
+    "transition_ms": 300
+  },
+  "device_action_param_name": "brightness",
+  "device_action_param_evaluator": {
+    "Operator": "PARAM",
+    "Variables": ["75"]
+  },
+  
+  "last_triggered_at": "2026-05-25T14:08:00Z | null",
+  "created_at": "timestamp",
+  "updated_at": "timestamp"
 }
 ```
+
+**Legacy vs New Parameter System:**
+- **Legacy (backward compat):** Use only `device_action_params` — a single ConditionLogicStructure that evaluates to a single value
+- **New (recommended):** Use `device_action_body` + `device_action_param_name` + `device_action_param_evaluator` to send complete device request bodies
+  - `device_action_body`: Template of the entire request body (JSON object)
+  - `device_action_param_name`: Which field in the template to replace with evaluated value
+  - `device_action_param_evaluator`: Logic to compute the value to inject
+
+**When using the new system:**
+- Provide all three fields (`device_action_body`, `device_action_param_name`, `device_action_param_evaluator`)
+- `device_action_param_name` must exist as a key in `device_action_body`
+- Cannot mix legacy and new systems (will return `400 Bad Request`)
 
 | Method | Path | Body / Params | Description |
 |--------|------|---------------|-------------|
 | GET | `/conditions?watch_id=<id>` | — | List all conditions for a watched channel |
 | GET | `/conditions/get?id=<id>` | — | Get a single condition |
-| POST | `/conditions` | `{ watch_id, name, event_type, filter?, is_enabled, device_id?, device_action?, device_action_params? }` | Create a condition |
-| PATCH | `/conditions/update?id=<id>` | any subset of `{ name, event_type, filter, is_enabled, device_id, device_action, device_action_params }` | Update a condition |
+| POST | `/conditions` | `{ watch_id, name, event_type, filter?, condition_logic?, is_enabled, device_id?, device_action?, device_action_params?, device_action_body?, device_action_param_name?, device_action_param_evaluator? }` | Create a condition |
+| PATCH | `/conditions/update?id=<id>` | any subset of `{ name, event_type, filter, condition_logic, is_enabled, device_id, device_action, device_action_params, device_action_body, device_action_param_name, device_action_param_evaluator }` | Update a condition |
 | DELETE | `/conditions?id=<id>` | — | Delete a condition |
 
 **Platform-specific event types the portal uses:**
@@ -1680,23 +1735,60 @@ Delete a brand. All its products are also deleted (`ON DELETE CASCADE`).
 
 ---
 
-### GET /catalog/products?brand_id=\<id\>&active_only=true
+### GET /catalog/products?brand_id=\<id\>&active_only=true&search=\<q\>&category=\<cat\>&sort_by=\<field\>&limit=\<n\>&offset=\<n\>
 
-List products.
+List products with optional pagination, search, filtering, and sorting.
 
 **Query params:**
-| Param | Default | Description |
-|-------|---------|-------------|
-| `brand_id` | _(all)_ | Filter to a specific brand |
-| `active_only` | `true` | Set to `false` to include retired products |
+| Param | Default | Max | Description |
+|-------|---------|-----|-------------|
+| `brand_id` | _(all)_ | — | Filter to a specific brand (e.g. `lifx`) |
+| `active_only` | `true` | — | Set to `false` to include retired products |
+| `search` | _(none)_ | — | Prefix search on product name and category (case-insensitive) |
+| `category` | _(all)_ | — | Filter by category (e.g. `bulbs`, `strips`, `panels`, `smart_plugs`, etc.) |
+| `sort_by` | `name` | — | Sort field: `name`, `category`, or `created_at` (ascending order) |
+| `limit` | `50` | `200` | Items per page (clamped to max 200) |
+| `offset` | `0` | — | Pagination offset for result paging |
 
 **Response `200`:**
 ```json
-[
-  { "id": "govee-h6159", "brand_id": "govee", "name": "H6159 LED Strip", "category": "light_strip", "logo_url": "", "supported_actions": ["set_color", "set_brightness", "turn_on", "turn_off"], "is_active": true, "created_at": "...", "updated_at": "..." },
-  { "id": "hue-play", "brand_id": "hue", "name": "Hue Play", ... }
-]
+{
+  "pagination": {
+    "limit": 50,
+    "offset": 0,
+    "total": 847,
+    "total_pages": 17,
+    "has_next": true,
+    "has_previous": false
+  },
+  "products": [
+    {
+      "id": "lifx-a19",
+      "brand_id": "lifx",
+      "name": "LIFX A19 Color Bulb",
+      "category": "bulbs",
+      "thumbnail_url": "https://cdn.example.com/lifx-a19.jpg",
+      "supported_actions": ["set_color", "set_brightness", "turn_on", "turn_off"],
+      "is_active": true,
+      "created_at": "2024-01-15T10:30:00Z",
+      "updated_at": "2024-01-15T10:30:00Z"
+    },
+    {
+      "id": "lifx-strip",
+      "brand_id": "lifx",
+      "name": "LIFX Lightstrip",
+      "category": "strips",
+      "thumbnail_url": "https://cdn.example.com/lifx-strip.jpg",
+      "supported_actions": ["set_color", "set_brightness", "turn_on", "turn_off"],
+      "is_active": true,
+      "created_at": "2024-01-15T10:30:00Z",
+      "updated_at": "2024-01-15T10:30:00Z"
+    }
+  ]
+}
 ```
+
+**Search behavior:** Prefix match (case-insensitive) on `name` and `category`. Example: `search=a19` matches "LIFX A19", `search=strip` matches "Lightstrip" and "LED Strip".
 
 ---
 

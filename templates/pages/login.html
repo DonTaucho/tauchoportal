@@ -17,3 +17,7 @@
     {{template "login" .}}
 </div>
 {{end}}
+
+{{define "scripts"}}
+<script>window._i18nMsg = {{i18nJSON .I18n}};</script>
+{{end}}

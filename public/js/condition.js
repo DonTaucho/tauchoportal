@@ -3386,7 +3386,7 @@ function copyToClipboard(text, element) {
         }, 1500);
     }).catch(err => {
         console.error('Failed to copy:', err);
-        alert('Could not copy to clipboard');
+        alert(window._i18nMsg?.['condition.copyClipboardFailed'] || 'Could not copy to clipboard');
     });
 }
 window.copyToClipboard = copyToClipboard;

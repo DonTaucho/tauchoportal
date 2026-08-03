@@ -3,6 +3,9 @@
 {{define "head"}}
 <link rel="stylesheet" href="/css/modals.css">
 <link rel="stylesheet" href="/css/account-settings.css">
+<script>
+window._i18nMsg = {{i18nJSON .I18n}};
+</script>
 {{end}}
 
 {{define "content"}}
@@ -12,9 +15,9 @@
         <!-- Sidebar navigation -->
         <nav class="settings-sidebar">
             <ul>
-                <li><a href="#" class="nav-item active" data-section="profile">👤 Profile</a></li>
-                <li><a href="#" class="nav-item" data-section="security">🔒 Password &amp; Security</a></li>
-                <li><a href="#" class="nav-item danger-nav" data-section="danger">⚠️ Danger Zone</a></li>
+                <li><a href="#" class="nav-item active" data-section="profile">👤 {{.I18n.T "loginSettings.profileTab"}}</a></li>
+                <li><a href="#" class="nav-item" data-section="security">🔒 {{.I18n.T "loginSettings.securityTab"}}</a></li>
+                <li><a href="#" class="nav-item danger-nav" data-section="danger">⚠️ {{.I18n.T "loginSettings.dangerTab"}}</a></li>
             </ul>
         </nav>
 
@@ -24,63 +27,63 @@
             <!-- ── Profile ────────────────────────────────────────────── -->
             <section id="section-profile" class="settings-section active">
                 <div class="section-header">
-                    <h2>Profile</h2>
-                    <p>Update your username and avatar.</p>
+                    <h2>{{.I18n.T "loginSettings.profileTitle"}}</h2>
+                    <p>{{.I18n.T "loginSettings.profileDesc"}}</p>
                 </div>
                 <div id="profileMsg" class="status-msg" style="display:none"></div>
                 <div class="settings-card">
                     <div class="form-row">
-                        <label>Username</label>
-                        <input id="profileUsername" type="text" value="{{if .User}}{{.User.Username}}{{end}}" placeholder="your-username">
+                        <label>{{.I18n.T "loginSettings.usernameLabel"}}</label>
+                        <input id="profileUsername" type="text" value="{{if .User}}{{.User.Username}}{{end}}" placeholder="{{.I18n.T "loginSettings.usernamePlaceholder"}}">
                     </div>
                     <div class="form-row">
-                        <label>Email</label>
+                        <label>{{.I18n.T "loginSettings.emailLabel"}}</label>
                         <input type="email" value="{{if .User}}{{.User.Email}}{{end}}" disabled>
                     </div>
                     <div class="form-row">
-                        <label>Avatar URL</label>
+                        <label>{{.I18n.T "loginSettings.avatarLabel"}}</label>
                         <input id="profilePicture" type="url" value="{{if .User}}{{.User.Picture}}{{end}}" placeholder="https://…">
                     </div>
-                    <button type="button" class="btn-primary" onclick="saveProfile()">Save Profile</button>
+                    <button type="button" class="btn-primary" onclick="saveProfile()">{{.I18n.T "loginSettings.saveProfileBtn"}}</button>
                 </div>
             </section>
 
             <!-- ── Password & Security ────────────────────────────────── -->
             <section id="section-security" class="settings-section">
                 <div class="section-header">
-                    <h2>Password &amp; Security</h2>
-                    <p>Change your account password.</p>
+                    <h2>{{.I18n.T "loginSettings.securityTitle"}}</h2>
+                    <p>{{.I18n.T "loginSettings.securityDesc"}}</p>
                 </div>
                 <div id="securityMsg" class="status-msg" style="display:none"></div>
                 <div class="settings-card">
                     <div class="form-row">
-                        <label>Current Password</label>
+                        <label>{{.I18n.T "loginSettings.currentPasswordLabel"}}</label>
                         <input id="currentPassword" type="password" placeholder="••••••••">
                     </div>
                     <div class="form-row">
-                        <label>New Password</label>
+                        <label>{{.I18n.T "loginSettings.newPasswordLabel"}}</label>
                         <input id="newPassword" type="password" placeholder="••••••••">
                     </div>
                     <div class="form-row">
-                        <label>Confirm New Password</label>
+                        <label>{{.I18n.T "loginSettings.confirmPasswordLabel"}}</label>
                         <input id="confirmPassword" type="password" placeholder="••••••••">
                     </div>
-                    <button type="button" class="btn-primary" onclick="changePassword()">Change Password</button>
+                    <button type="button" class="btn-primary" onclick="changePassword()">{{.I18n.T "loginSettings.changePasswordBtn"}}</button>
                 </div>
             </section>
 
             <!-- ── Danger Zone ──────────────────────────────────────────── -->
             <section id="section-danger" class="settings-section">
                 <div class="section-header">
-                    <h2>Danger Zone</h2>
-                    <p>Irreversible and destructive actions.</p>
+                    <h2>{{.I18n.T "loginSettings.dangerZoneTitle"}}</h2>
+                    <p>{{.I18n.T "loginSettings.dangerZoneDesc"}}</p>
                 </div>
                 <div class="danger-card">
                     <div class="danger-card-info">
-                        <strong>Delete Account</strong>
-                        <p>Permanently delete your account and all associated data. This cannot be undone.</p>
+                        <strong>{{.I18n.T "loginSettings.deleteAccountTitle"}}</strong>
+                        <p>{{.I18n.T "loginSettings.deleteAccountDesc"}}</p>
                     </div>
-                    <button type="button" class="btn-danger" onclick="deleteAccount()">Delete Account</button>
+                    <button type="button" class="btn-danger" onclick="deleteAccount()">{{.I18n.T "loginSettings.deleteAccountBtn"}}</button>
                 </div>
             </section>
 
@@ -89,6 +92,20 @@
 </div><!-- /settings-container -->
 
 <script>
+    async function apiRequest(method, path, body) {
+        const opts = { method, credentials: 'include', headers: {} };
+        if (body) {
+            opts.headers['Content-Type'] = 'application/json';
+            opts.body = JSON.stringify(body);
+        }
+        const r = await fetch(API_BASE + path, opts);
+        if (!r.ok) {
+            const t = await r.text();
+            throw new Error(t || r.status);
+        }
+        return r.status === 204 ? null : r.json();
+    }
+
     // ── Sidebar navigation ────────────────────────────────────────────────
     document.querySelectorAll('.nav-item').forEach(item => {
         item.addEventListener('click', e => {
@@ -132,13 +149,13 @@
     async function saveProfile() {
         const username = document.getElementById('profileUsername').value.trim();
         const picture  = document.getElementById('profilePicture').value.trim();
-        if (!username) { showMsg('profileMsg', 'Username is required.', true); return; }
+        if (!username) { showMsg('profileMsg', window._i18nMsg?.['loginSettings.usernameRequired'] || 'Username is required.', true); return; }
         try {
-            showMsg('profileMsg', 'Saving…', false);
+            showMsg('profileMsg', window._i18nMsg?.['loginSettings.saving'] || 'Saving…', false);
             await apiRequest('PATCH', '/auth/user', { username, picture });
-            showMsg('profileMsg', '✅ Profile updated.', false);
+            showMsg('profileMsg', window._i18nMsg?.['loginSettings.profileUpdated'] || '✅ Profile updated.', false);
         } catch (e) {
-            showMsg('profileMsg', 'Failed: ' + e.message, true);
+            showMsg('profileMsg', (window._i18nMsg?.['loginSettings.saveFailed'] || 'Failed: ') + e.message, true);
         }
     }
 
@@ -147,34 +164,34 @@
         const current  = document.getElementById('currentPassword').value;
         const newPwd   = document.getElementById('newPassword').value;
         const confirm  = document.getElementById('confirmPassword').value;
-        if (!current || !newPwd) { showMsg('securityMsg', 'All fields are required.', true); return; }
-        if (newPwd !== confirm)  { showMsg('securityMsg', 'New passwords do not match.', true); return; }
-        if (newPwd.length < 8)   { showMsg('securityMsg', 'New password must be at least 8 characters.', true); return; }
+        if (!current || !newPwd) { showMsg('securityMsg', window._i18nMsg?.['loginSettings.allFieldsRequired'] || 'All fields are required.', true); return; }
+        if (newPwd !== confirm)  { showMsg('securityMsg', window._i18nMsg?.['loginSettings.passwordMismatch'] || 'New passwords do not match.', true); return; }
+        if (newPwd.length < 8)   { showMsg('securityMsg', window._i18nMsg?.['loginSettings.passwordMinLength'] || 'New password must be at least 8 characters.', true); return; }
         try {
-            showMsg('securityMsg', 'Updating…', false);
+            showMsg('securityMsg', window._i18nMsg?.['loginSettings.updating'] || 'Updating…', false);
             await apiRequest('PATCH', '/auth/password', { current_password: current, new_password: newPwd });
-            showMsg('securityMsg', '✅ Password changed successfully.', false);
+            showMsg('securityMsg', window._i18nMsg?.['loginSettings.passwordChanged'] || '✅ Password changed successfully.', false);
             document.getElementById('currentPassword').value = '';
             document.getElementById('newPassword').value = '';
             document.getElementById('confirmPassword').value = '';
         } catch (e) {
             const msg = e.message.includes('409')
-                ? 'This account uses social login only — no password is set.'
-                : 'Failed: ' + e.message;
+                ? window._i18nMsg?.['loginSettings.socialLoginOnly'] || 'This account uses social login only — no password is set.'
+                : (window._i18nMsg?.['loginSettings.passwordChangeFailed'] || 'Failed: ') + e.message;
             showMsg('securityMsg', msg, true);
         }
     }
 
     // ── Delete account ────────────────────────────────────────────────────
     async function deleteAccount() {
-        if (!confirm('Are you sure you want to permanently delete your account?\n\nAll your data will be lost. This cannot be undone.')) return;
-        const typed = prompt('Type DELETE to confirm:');
-        if (typed !== 'DELETE') { alert('Account deletion cancelled.'); return; }
+        if (!confirm(window._i18nMsg?.['loginSettings.deleteConfirm'] || 'Are you sure you want to permanently delete your account?\n\nAll your data will be lost. This cannot be undone.')) return;
+        const typed = prompt(window._i18nMsg?.['loginSettings.deletePrompt'] || 'Type DELETE to confirm:');
+        if (typed !== 'DELETE') { alert(window._i18nMsg?.['loginSettings.deleteCancelled'] || 'Account deletion cancelled.'); return; }
         try {
             await apiRequest('DELETE', '/auth/user');
             window.location.href = '/';
         } catch (e) {
-            alert('Failed to delete account: ' + e.message);
+            alert((window._i18nMsg?.['loginSettings.deleteFailed'] || 'Failed to delete account: ') + e.message);
         }
     }
 </script>

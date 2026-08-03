@@ -248,5 +248,18 @@ p {
     .header h1 { font-size: 1.6rem; }
     .platform-grid { grid-template-columns: 1fr; }
     .cta-row { flex-direction: column; }
+    .section{
+        box-shadow: unset;
+        border-radius: unset;
+        margin-bottom: unset;
+        padding: 0px;
+    }
+    .section.lead-section > img{
+        float: unset;
+        background: unset;
+        border-radius: unset;
+        width: 100%;
+        height: unset;
+    }
 }
 

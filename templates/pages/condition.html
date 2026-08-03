@@ -419,6 +419,7 @@
 {{end}}
 
 {{define "scripts"}}
+<script>window._i18nMsg = {{i18nJSON .I18n}};</script>
 <script id="conditionTranslationsData" type="application/json">
 {{.I18n.TByPrefix "condition" | jsonMarshal}}
 </script>
@@ -477,7 +478,7 @@ async function openTestModal() {
     }
     
     // Clear existing options
-    eventTypeSelect.innerHTML = '<option value="">Select event type...</option>';
+    eventTypeSelect.innerHTML = '<option value="">' + (window._i18nMsg?.['condition.selectEventType'] || 'Select event type...') + '</option>';
     
     // Fetch event types from API
     try {
@@ -534,7 +535,7 @@ async function updateTestEventParams() {
         const params = await window.getEventParameters(platform, eventType);
         
         if (!params || params.length === 0) {
-            container.innerHTML = '<p style="color: #666; font-size: 0.9rem;">No custom parameters for this event type</p>';
+            container.innerHTML = '<p style="color: #666; font-size: 0.9rem;">' + (window._i18nMsg?.['condition.noCustomParameters'] || 'No custom parameters for this event type') + '</p>';
             return;
         }
         
@@ -558,7 +559,7 @@ async function updateTestEventParams() {
         container.innerHTML = html;
     } catch (e) {
         console.error('Failed to load event parameters:', e);
-        container.innerHTML = '<p style="color: #999;">Failed to load parameters</p>';
+        container.innerHTML = '<p style="color: #999;">' + (window._i18nMsg?.['condition.failedLoadParameters'] || 'Failed to load parameters') + '</p>';
     }
 }
 
@@ -622,7 +623,7 @@ function runConditionTest() {
     // Show loading state
     const resultsContainer = document.getElementById('testResultsContainer');
     const resultsContent = document.getElementById('testResultsContent');
-    resultsContent.innerHTML = '<div style="text-align: center;"><p>Testing...</p></div>';
+    resultsContent.innerHTML = '<div style="text-align: center;"><p>' + (window._i18nMsg?.['condition.testing'] || 'Testing...') + '</p></div>';
     resultsContainer.style.display = 'block';
     
     // Call the test endpoint
@@ -643,15 +644,15 @@ function runConditionTest() {
         // Display results
         let resultHTML = '<pre style="max-height: 300px; overflow-y: auto; background: #fff; padding: 0.5rem; border-radius: 3px; font-size: 0.85rem;">' + JSON.stringify(result, null, 2) + '</pre>';
         resultHTML += '<div style="margin-top: 1rem; padding: 1rem; background: #fff; border-left: 4px solid ' + (result.matched ? '#28a745' : '#dc3545') + ';">';
-        resultHTML += '<strong>Matched:</strong> <span style="color:' + (result.matched ? 'green' : 'red') + ';">' + (result.matched ? '✓ Yes' : '✗ No') + '</span><br>';
+        resultHTML += '<strong>' + (window._i18nMsg?.['condition.matched'] || 'Matched') + ':</strong> <span style="color:' + (result.matched ? 'green' : 'red') + ';">' + (result.matched ? '✓ Yes' : '✗ No') + '</span><br>';
         if (result.matched) {
-            resultHTML += '<strong>Would Trigger:</strong> <span style="color:' + (result.would_trigger ? 'green' : 'red') + ';">' + (result.would_trigger ? '✓ Yes' : '✗ No') + '</span><br>';
+            resultHTML += '<strong>' + (window._i18nMsg?.['condition.wouldTrigger'] || 'Would trigger') + ':</strong> <span style="color:' + (result.would_trigger ? 'green' : 'red') + ';">' + (result.would_trigger ? '✓ Yes' : '✗ No') + '</span><br>';
             if (result.computed_values && result.computed_values.length > 0) {
-                resultHTML += '<strong>Computed Values:</strong> <code>' + result.computed_values.join(', ') + '</code><br>';
+                resultHTML += '<strong>' + (window._i18nMsg?.['condition.details'] || 'Details') + ':</strong> <code>' + result.computed_values.join(', ') + '</code><br>';
             }
         }
         if (result.execution_error) {
-            resultHTML += '<br><strong style="color:red;">Error:</strong> ' + result.execution_error + '<br>';
+            resultHTML += '<br><strong style="color:red;">' + (window._i18nMsg?.['condition.errors'] || 'Errors') + ':</strong> ' + result.execution_error + '<br>';
         }
         if (result.execution_result) {
             resultHTML += '<br><strong style="color:green;">Success:</strong> ' + result.execution_result + '<br>';
@@ -677,12 +678,12 @@ function submitCondition() {
     const deviceActionParams = parseJSON(data.params);
     
     if (!conditionLogic) {
-        alert('Invalid condition logic JSON');
+        alert(window._i18nMsg?.['condition.invalidLogicJSON'] || 'Invalid condition logic JSON');
         return;
     }
     
     if (!conditionName || !conditionName.trim()) {
-        alert('Condition name cannot be empty');
+        alert(window._i18nMsg?.['condition.nameEmpty'] || 'Condition name cannot be empty');
         return;
     }
     
