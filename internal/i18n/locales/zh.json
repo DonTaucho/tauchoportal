@@ -1001,6 +1001,8 @@
   "devices.addNewDeviceNav": "點擊以註冊新裝置",
   "devices.addNewDeviceDesc": "從連接的品牌中選擇或設置新品牌的自訂裝置。",
   "devices.failedLoadActions": "此裝置沒有可用的操作",
+  "devices.ownedBadge": "✓ 已擁有",
+  "devices.availableToAdd": "可新增",
   "accountSettings.connectedAccounts": "帳戶列表",
   "accountSettings.connectedAccountsDesc": "連結或取消連結 OAuth 提供商。您可以使用任何連線的提供商登入此帳戶。",
   "accountSettings.loading": "載入中...",

@@ -1001,6 +1001,8 @@
   "devices.addNewDeviceNav": "Cliquez pour enregistrer un nouvel appareil",
   "devices.addNewDeviceDesc": "Choisissez parmi les marques connectées ou configurez une nouvelle marque",
   "devices.failedLoadActions": "Aucune action disponible pour cet appareil",
+  "devices.ownedBadge": "✓ Possédé",
+  "devices.availableToAdd": "Disponible à ajouter",
   "accountSettings.connectedAccounts": "Comptes connectés",
   "accountSettings.connectedAccountsDesc": "Liez ou dissociez les fournisseurs OAuth. Les fournisseurs connectés peuvent être utilisés pour se connecter à ce compte.",
   "accountSettings.loading": "Chargement…",

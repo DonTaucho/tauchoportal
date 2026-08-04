@@ -1001,6 +1001,8 @@
   "devices.addNewDeviceNav": "Klicken, um ein neues Gerät zu registrieren",
   "devices.addNewDeviceDesc": "Wählen Sie aus verbundenen Marken oder richten Sie eine neue Marke ein",
   "devices.failedLoadActions": "Für dieses Gerät sind keine Aktionen verfügbar",
+  "devices.ownedBadge": "✓ Besessen",
+  "devices.availableToAdd": "Zum Hinzufügen verfügbar",
   "accountSettings.connectedAccounts": "Verbundene Konten",
   "accountSettings.connectedAccountsDesc": "Verknüpfen oder trennen Sie OAuth-Provider. Verbundene Provider können zum Anmelden bei diesem Konto verwendet werden.",
   "accountSettings.loading": "Wird geladen…",

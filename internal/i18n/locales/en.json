@@ -1023,6 +1023,8 @@
   "devices.addNewDeviceNav": "Click to register a new device",
   "devices.addNewDeviceDesc": "Choose from connected brands or set up a new brand",
   "devices.failedLoadActions": "No actions available for this device",
+  "devices.ownedBadge": "✓ Owned",
+  "devices.availableToAdd": "Available to Add",
   "accountSettings.connectedAccounts": "Connected Accounts",
   "accountSettings.connectedAccountsDesc": "Link or unlink OAuth providers. Connected providers can be used to log in to this account.",
   "accountSettings.loading": "Loading…",
