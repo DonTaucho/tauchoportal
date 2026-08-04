@@ -3,18 +3,6 @@
 
     const { PLATFORM_META, apiRequest, apiGet, showMonToast, escHtml } = window;
     const t = window.sidebarChannelsTranslations || {}; // Fallback to empty object
-    const PLATFORMS = [
-        { id: 'youtube', label: 'YouTube', hasOAuth: true, publicAccess: false },
-        { id: 'twitch', label: 'Twitch', hasOAuth: true, publicAccess: true },
-        { id: 'niconico', label: 'NicoNico', hasOAuth: true, publicAccess: false },
-        { id: 'twitcasting', label: 'TwitCasting', hasOAuth: true, publicAccess: false },
-        { id: 'kick', label: 'Kick', hasOAuth: true, publicAccess: true },
-        { id: 'bilibili', label: 'Bilibili', hasOAuth: true, publicAccess: true },
-        { id: 'instagram', label: 'Instagram', hasOAuth: true, publicAccess: false },
-        { id: 'tiktok', label: 'TikTok', hasOAuth: true, publicAccess: false },
-        { id: 'facebook', label: 'Facebook', hasOAuth: true, publicAccess: false },
-        { id: 'x', label: 'X', hasOAuth: true, publicAccess: false },
-    ];
     const PROVIDER_MAP = { google: 'youtube', twitch: 'twitch', niconico: 'niconico', twitcasting: 'twitcasting', kick: 'kick', bilibili: 'bilibili', instagram: 'instagram', tiktok: 'tiktok', facebook: 'facebook', x: 'x' };
     const state = { connectedSet: new Set(), existingWatchSet: new Set(), selectedChannel: null, accordionLoaded: new Set(), accSearchTimers: new Map(), onChannelsChanged: null };
     const esc = (v) => escHtml(v);
@@ -63,29 +51,35 @@
     }
 
     function closeAllAcc() {
-        PLATFORMS.forEach((platform) => {
-            const body = document.getElementById(`acc-body-${platform.id}`); const chevron = document.getElementById(`acc-chev-${platform.id}`); if (!body || !chevron) return;
-            body.classList.remove('open'); body.previousElementSibling.classList.remove('open'); chevron.style.transform = '';
+        document.querySelectorAll('[id^="acc-body-"]').forEach((body) => {
+            const chevron = body.parentElement?.querySelector('[id^="acc-chev-"]');
+            if (!body || !chevron) return;
+            body.classList.remove('open');
+            body.previousElementSibling?.classList.remove('open');
+            chevron.style.transform = '';
         });
     }
 
     function renderAccordionBodyContent(platformId) {
         const inner = document.getElementById(`acc-inner-${platformId}`); 
-        const platform = PLATFORMS.find((item) => item.id === platformId); 
-        if (!inner || !platform) return;
+        const accItem = document.getElementById(`acc-${platformId}`);
+        if (!inner || !accItem) return;
         
-        const connected = platform.hasOAuth && state.connectedSet.has(platformId);
+        // Get platform metadata from data attributes embedded in HTML
+        const hasOAuth = accItem.dataset.hasOauth === 'true';
+        const publicAccess = accItem.dataset.publicAccess === 'true';
+        const connected = hasOAuth && state.connectedSet.has(platformId);
         
         // Template pre-renders all sections; just show/hide based on state
         const notConnected = inner.querySelector('.acc-not-connected');
         const stub = inner.querySelector('.acc-stub');
         const content = inner.querySelector('.acc-content');
         
-        if (notConnected) notConnected.style.display = (platform.hasOAuth && !connected) ? 'block' : 'none';
-        if (stub) stub.style.display = (!platform.hasOAuth && !platform.publicAccess) ? 'block' : 'none';
-        if (content) content.style.display = (connected || platform.publicAccess) ? 'block' : 'none';
+        if (notConnected) notConnected.style.display = (hasOAuth && !connected) ? 'block' : 'none';
+        if (stub) stub.style.display = (!hasOAuth && !publicAccess) ? 'block' : 'none';
+        if (content) content.style.display = (connected || publicAccess) ? 'block' : 'none';
         
-        if (platform.hasOAuth && connected) { 
+        if (hasOAuth && connected) { 
             loadAccOwnChannels(platformId);  // Lazy-load on demand
             if (platformId === 'youtube' || platformId === 'twitch') loadAccSubs(platformId, null);
         }

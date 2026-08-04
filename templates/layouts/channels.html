@@ -12,7 +12,7 @@
 {{$platforms := dictparams 
         "1" `{ "id": "youtube", "i18key": "channels.youtube", "label": "YouTube", "connectionName": "google", "hasOAuth": "true", "publicAccess": "false" }`
         "2" `{ "id": "twitch", "i18key": "channels.twitch", "label": "Twitch", "connectionName": "twitch", "hasOAuth": "true", "publicAccess": "true" }`
-        "3" `{ "id": "niconico", "i18key": "channels.niconico", "label": "NicoNico", "connectionName": "niconico", "hasOAuth": "true", "publicAccess": "false" }`
+        "3" `{ "id": "niconico", "i18key": "channels.niconico", "label": "NicoNico", "connectionName": "niconico", "hasOAuth": "false", "publicAccess": "true" }`
         "4" `{ "id": "twitcasting", "i18key": "channels.twitcasting", "label": "TwitCasting", "connectionName": "twitcasting", "hasOAuth": "true", "publicAccess": "false" }`
         "5" `{ "id": "kick", "i18key": "channels.kick", "label": "Kick", "connectionName": "kick", "hasOAuth": "false", "publicAccess": "true" }`
         "6" `{ "id": "bilibili", "i18key": "channels.bilibili", "label": "Bilibili", "connectionName": "bilibili", "hasOAuth": "false", "publicAccess": "true" }`
@@ -50,7 +50,7 @@
                 {{ end }}
             {{ end }}
             {{ $name := $.I18n.T (field $platform "i18key") }}
-            <div class="acc-item" id="acc-{{ field $platform "id" }}">
+            <div class="acc-item" id="acc-{{ field $platform "id" }}" data-platform-id="{{ field $platform "id" }}" data-has-oauth="{{ field $platform "hasOAuth" }}" data-public-access="{{ field $platform "publicAccess" }}">
                 <div class="acc-header" onclick="toggleAcc('{{field $platform "id"}}')">
                     <span class="acc-plat-icon {{field $platform "id"}}">{{ platformIcon (field $platform "id") }}</span>
                     <span class="acc-plat-name">{{ $name }}</span>
