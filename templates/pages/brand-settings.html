@@ -15,32 +15,10 @@
                 <h2>{{.I18n.T "brandSettings.title"}}</h2>
                 <p>{{.I18n.T "brandSettings.description"}}</p>
             </div>
-            <div id="brandSettingsMsg" class="status-msg">{{.I18n.T "brandSettings.loading"}}</div>
-            <div
-                id="brandSettingsStrings"
-                hidden
-                data-loading-message="{{.I18n.T "brandSettings.loading"}}"
-                data-load-error-message="{{.I18n.T "brandSettings.loadError"}}"
-                data-connected-label="{{.I18n.T "brandSettings.connected"}}"
-                data-not-connected-label="{{.I18n.T "brandSettings.notConnected"}}"
-                data-never-connected="{{.I18n.T "brandSettings.neverConnected"}}"
-                data-unsupported-label="{{.I18n.T "brandSettings.status.unsupported"}}"
-                data-external-label="{{.I18n.T "brandSettings.status.external"}}"
-                data-saved-message="{{.I18n.T "brandSettings.status.saved"}}"
-                data-disconnected-message="{{.I18n.T "brandSettings.status.disconnected"}}"
-                data-connected-success-message="{{.I18n.T "brandSettings.status.connectedSuccess"}}"
-                data-oauth-unavailable-message="{{.I18n.T "brandSettings.modal.oauthUnavailable"}}"
-                data-auth-token-hint-message="{{.I18n.T "brandSettings.modal.authTokenHint"}}"
-                data-optional-token-message="{{.I18n.T "brandSettings.modal.optionalToken"}}"
-                data-confirm-disconnect-description="{{.I18n.T "brandSettings.modal.confirmDisconnectDescription"}}"
-                data-api-key-required-message="{{.I18n.T "brandSettings.validation.apiKeyRequired"}}"
-                data-ip-required-message="{{.I18n.T "brandSettings.validation.ipRequired"}}"
-                data-connect-failed-message="{{.I18n.T "brandSettings.error.connectFailed"}}"
-                data-save-failed-message="{{.I18n.T "brandSettings.error.saveFailed"}}"
-                data-disconnect-failed-message="{{.I18n.T "brandSettings.error.disconnectFailed"}}"></div>
+            <div id="brandSettingsMsg" class="status-msg" style="display:none;"></div>
             <div id="brandsGrid" class="brands">
-                {{range .Brands}}
-                <article class="brand-card" data-brand-card data-brand-id="{{.ID}}" data-brand-title="{{.Name}}">
+                {{range .MyBrands}}
+                <article class="brand-card {{if .IsConnected}}is-connected{{end}}">
                     <div class="brand-card-header">
                         <div class="brand-card-identity">
                             <div class="brand-logo" aria-hidden="true"><img src="/image/brand_{{.ID}}.png" alt="{{.Name}}"></div>
@@ -49,22 +27,29 @@
                                 <p class="brand-description">{{if .IsConnected}}{{$.I18n.T "brandSettings.connected"}}{{else}}{{$.I18n.T "brandSettings.notConnected"}}{{end}}</p>
                             </div>
                         </div>
-                        <span class="status-badge {{if .IsConnected}}connected{{else}}disconnected{{end}}" data-brand-status>
+                        <span class="status-badge {{if .IsConnected}}connected{{else}}disconnected{{end}}">
                             {{if .IsConnected}}{{$.I18n.T "brandSettings.connected"}}{{else}}{{$.I18n.T "brandSettings.notConnected"}}{{end}}
                         </span>
                     </div>
                     <div class="brand-details">
                         <div class="brand-detail-row">
                             <span class="brand-detail-label">{{$.I18n.T "brandSettings.lastConnected"}}</span>
-                            <span data-brand-last-connected>{{if .ConnectedAt}}{{.ConnectedAt}}{{else}}{{$.I18n.T "brandSettings.neverConnected"}}{{end}}</span>
+                            <span>{{if .ConnectedAt}}{{.ConnectedAt}}{{else}}{{$.I18n.T "brandSettings.neverConnected"}}{{end}}</span>
                         </div>
                     </div>
                     <div class="brand-actions">
-                        <button type="button" class="btn-connect brand-action-button" data-brand-action-button data-brand-action="{{if .IsConnected}}manage{{else}}connect{{end}}" data-brand-id="{{.ID}}">
-                            {{if .IsConnected}}{{$.I18n.T "brandSettings.manage"}}{{else}}{{$.I18n.T "brandSettings.connect"}}{{end}}
-                        </button>
-                        {{if .IsConnected}}<button type="button" class="btn-disconnect brand-action-button" data-brand-action-button data-brand-action="disconnect" data-brand-id="{{.ID}}">{{$.I18n.T "brandSettings.disconnect"}}</button>{{end}}
-                        <span class="brand-note" data-brand-note hidden></span>
+                        {{if .IsConnected}}
+                            <button type="button" class="btn-connect brand-action-button" data-brand-id="{{.ID}}" data-brand-action="manage" onclick="handleBrandAction('{{.ID}}')">
+                                {{$.I18n.T "brandSettings.manage"}}
+                            </button>
+                            <button type="button" class="btn-disconnect brand-action-button" data-brand-id="{{.ID}}" data-brand-action="disconnect" onclick="promptDisconnect('{{.ID}}')">
+                                {{$.I18n.T "brandSettings.disconnect"}}
+                            </button>
+                        {{else}}
+                            <button type="button" class="btn-connect brand-action-button" data-brand-id="{{.ID}}" data-brand-action="connect" onclick="handleBrandAction('{{.ID}}')">
+                                {{$.I18n.T "brandSettings.connect"}}
+                            </button>
+                        {{end}}
                     </div>
                 </article>
                 {{end}}
@@ -172,9 +157,10 @@
         </div>
     </div>
 </div>
+<script>
+window._i18nMsg = {{i18nJSON .I18n}};
+window._myBrands = {{jsonMarshal .MyBrands}};
+window._allBrands = {{jsonMarshal .Brands}};
+</script>
 
-{{end}}
-
-{{define "scripts"}}
-<script>window._i18nMsg = {{i18nJSON .I18n}};</script>
 {{end}}

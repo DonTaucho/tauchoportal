@@ -1406,31 +1406,34 @@ Registered smart home devices. Credentials are stored per-brand.
   "name": "string",
   "brand": "govee | hue | kasa | lifx | tuya | nanoleaf | yeelight | wled | wyze | amazon | custom",
   "product_id": "string (e.g. govee-h6159, hue-color, or custom_product_id for custom brand)",
+  "product_name": "string (human-readable product name, e.g. 'H6159 LED Strip')",
   "room": "string (optional)",
   "is_configured": true,
   "status": "online | offline | unknown",
-  "credentials": "object (shape varies by brand — see below; omitted in list responses)"
+  "supported_actions": ["on", "off", "brightness", "color"],
+  "credentials": "object<string, string> (key-value map containing brand-specific credential fields — see table below; omitted in list responses for security)"
 }
 ```
 
-**Credentials shape per brand** — flat JSON, snake_case, no brand-nesting (brand is already in the device body):
+**Credentials structure per brand** — flat key-value map, snake_case keys, no brand-nesting (brand is already in the device body):
 
-| Brand | Fields |
-|-------|--------|
-| govee | `api_key`, `device_id` |
-| hue | `bridge_ip`, `api_key`, `light_id` |
-| kasa | `device_ip` |
-| lifx | `api_key`, `selector` |
-| tuya | `client_id`, `client_secret`, `device_id`, `region` |
-| nanoleaf | `device_ip`, `api_key` |
-| yeelight | `device_ip` |
-| wled | `device_ip` |
-| wyze | `api_key`, `api_key_id`, `device_mac` |
+| Brand | Credential Keys | Example |
+|-------|-----------------|---------|
+| govee | `api_key`, `device_id` | `{"api_key": "...", "device_id": "..."}` |
+| hue | `bridge_ip`, `api_key`, `light_id` | `{"bridge_ip": "192.168.1.100", "api_key": "...", "light_id": "..."}` |
+| kasa | `device_ip` | `{"device_ip": "192.168.1.50"}` |
+| lifx | `api_key`, `selector` | `{"api_key": "...", "selector": "..."}` |
+| tuya | `client_id`, `client_secret`, `device_id`, `region` | `{"client_id": "...", "client_secret": "...", "device_id": "...", "region": "US"}` |
+| nanoleaf | `device_ip`, `api_key` | `{"device_ip": "192.168.1.80", "api_key": "..."}` |
+| yeelight | `device_ip` | `{"device_ip": "192.168.1.60"}` |
+| wled | `device_ip` | `{"device_ip": "192.168.1.70"}` |
+| wyze | `api_key`, `api_key_id`, `device_mac` | `{"api_key": "...", "api_key_id": "...", "device_mac": "..."}` |
 | amazon | `endpoint_id` |
 | custom | *(empty; actions are user-defined HTTP requests)* |
 
 > **Storage note:** `credentials` is stored as a JSONB column in PostgreSQL. The flat layout (no brand nesting) is intentional — brand is a separate column and nesting would be redundant.  
 > **Security note:** Credentials contain API keys and local IPs. Omit or mask the `credentials` field from `GET /devices` list responses; include it only in `GET /devices/get?id=<id>`.
+> **Actions note:** `supported_actions` is a list of device capabilities (e.g., ["on", "off", "brightness", "color"]). This is populated from the device's product definition in the catalog when the device is registered, or from custom action definitions for custom brand devices.
 
 | Method | Path | Body / Params | Description |
 |--------|------|---------------|-------------|

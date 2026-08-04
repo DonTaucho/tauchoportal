@@ -275,7 +275,7 @@
                                                     <span class="product-name">{{.Name}}</span>
                                                     <span class="product-actions">{{.ProductName}}</span>
                                                 </div>
-                                                <span class="product-owned-badge">✓ Owned</span>
+                                                <span class="product-owned-badge">{{$.I18n.T "devices.ownedBadge"}}</span>
                                             </div>
                                             {{end}}
                                         {{end}}
@@ -292,7 +292,7 @@
                                     
                                     <!-- Catalog Section (from partials) -->
                                     {{if $hasOwned}}
-                                    <div class="section-divider">Available to Add</div>
+                                    <div class="section-divider">{{$.I18n.T "devices.availableToAdd"}}</div>
                                     {{end}}
                                     
                                     <!-- Include brand-specific catalog partial using dynamic rendering -->
@@ -306,14 +306,14 @@
                             <button type="button" class="accordion-header" onclick="toggleAccordion(this)">
                                 <span class="accordion-toggle-icon">▶</span>
                                 <div class="accordion-brand-icon">✏️</div>
-                                <span class="accordion-brand-name">Custom Device</span>
-                                <span class="accordion-count">define your own</span>
+                                <span class="accordion-brand-name">{{$.I18n.T "devices.customDeviceTitle"}}</span>
+                                <span class="accordion-count">{{$.I18n.T "devices.customDeviceSubtitle"}}</span>
                             </button>
                             <div class="accordion-products">
-                                <div class="product-item" onclick="selectProduct('custom', 'custom', 'Custom Device')">
+                                <div class="product-item" onclick="selectProduct('custom', 'custom', '{{.I18n.T "devices.customDeviceTitle"}}')">
                                     <div class="product-info">
-                                        <span class="product-name">Create Custom Device</span>
-                                        <span class="product-actions">HTTP-based actions</span>
+                                        <span class="product-name">{{.I18n.T "devices.createCustom"}}</span>
+                                        <span class="product-actions">{{.I18n.T "devices.httpBasedActions"}}</span>
                                     </div>
                                 </div>
                             </div>
@@ -325,43 +325,43 @@
                 <div id="step2-body" style="display:none">
                     <form id="deviceForm" onsubmit="saveDevice(event)">
                         <div class="form-group">
-                            <label for="devName">Display Name</label>
-                            <input type="text" id="devName" required placeholder="e.g., Gaming Room Strip">
-                            <small class="form-help">A friendly name to identify this device.</small>
+                            <label for="devName">{{.I18n.T "devices.displayName"}}</label>
+                            <input type="text" id="devName" required placeholder="{{.I18n.T "devices.displayNamePlaceholder"}}">
+                            <small class="form-help">{{.I18n.T "devices.displayNameHelp"}}</small>
                         </div>
                         
                         <!-- Catalog Device: Product Model (read-only display) -->
                         <div class="form-group" id="catalogProductGroup">
-                            <label for="devProductDisplay">Product Model</label>
+                            <label for="devProductDisplay">{{.I18n.T "devices.productModel"}}</label>
                             <input type="text" id="devProductDisplay" readonly>
                             <input type="hidden" id="devProduct">
                         </div>
                         
                         <!-- Custom Device: Product Name -->
                         <div class="form-group" id="customProductGroup" style="display:none">
-                            <label for="customProductName">Device Type / Model</label>
-                            <input type="text" id="customProductName" placeholder="e.g., Smart LED Controller, Home Automation Hub">
-                            <small class="form-help">Describe what kind of device this is.</small>
+                            <label for="customProductName">{{.I18n.T "devices.deviceType"}}</label>
+                            <input type="text" id="customProductName" placeholder="{{.I18n.T "devices.deviceTypePlaceholder"}}">
+                            <small class="form-help">{{.I18n.T "devices.deviceTypeHelp"}}</small>
                         </div>
                         
                         <div class="form-group">
-                            <label for="devRoom">Room / Location <span class="optional-label">(optional)</span></label>
-                            <input type="text" id="devRoom" placeholder="e.g., Gaming Room, Office, Living Room">
+                            <label for="devRoom">{{.I18n.T "devices.room"}}<span class="optional-label">{{.I18n.T "devices.optional"}}</span></label>
+                            <input type="text" id="devRoom" placeholder="{{.I18n.T "devices.roomPlaceholder"}}">
                         </div>
                         
                         <!-- Catalog Device: API Credentials -->
                         <fieldset class="form-section" id="credFieldset">
-                            <legend>API Credentials</legend>
+                            <legend>{{.I18n.T "devices.apiCredentials"}}</legend>
                             <div id="credFields"></div>
                             <div id="credDocsLink"></div>
                         </fieldset>
                         
                         <!-- Custom Device: HTTP Actions -->
                         <fieldset class="form-section" id="customActionsFieldset" style="display:none">
-                            <legend>Custom Actions</legend>
-                            <p style="font-size:0.9rem; color:#666; margin-bottom:1rem">Define HTTP requests for device actions (e.g., turn_on, turn_off, set_brightness).</p>
+                            <legend>{{.I18n.T "devices.customActions"}}</legend>
+                            <p style="font-size:0.9rem; color:#666; margin-bottom:1rem">{{.I18n.T "devices.customActionsDesc"}}</p>
                             <div id="customActionsList"></div>
-                            <button type="button" class="btn btn-secondary" onclick="addCustomAction()" style="margin-top:0.75rem">+ Add Action</button>
+                            <button type="button" class="btn btn-secondary" onclick="addCustomAction()" style="margin-top:0.75rem">{{.I18n.T "devices.addAction"}}</button>
                         </fieldset>
                     </form>
                 </div>
@@ -369,11 +369,11 @@
             
             <div class="modal-footer">
                 <div id="step1-footer">
-                    <button type="button" class="btn btn-secondary" onclick="closeModal()">Cancel</button>
+                    <button type="button" class="btn btn-secondary" onclick="closeModal()">{{.I18n.T "devices.cancelButton"}}</button>
                 </div>
                 <div id="step2-footer" style="display:none">
-                    <button type="button" class="btn btn-secondary" onclick="goToStep1()">← Back to Selection</button>
-                    <button type="submit" form="deviceForm" class="btn btn-primary" id="devSaveBtn">Add Device</button>
+                    <button type="button" class="btn btn-secondary" onclick="goToStep1()">{{.I18n.T "devices.backSelection"}}</button>
+                    <button type="submit" form="deviceForm" class="btn btn-primary" id="devSaveBtn">{{.I18n.T "devices.addDeviceButton"}}</button>
                 </div>
             </div>
         </div>
@@ -487,7 +487,7 @@
         // All products are pre-loaded from server on page load
         // This function is deprecated, kept for backward compatibility
         // If a brand's products are not yet loaded, they will be when user clicks accordion
-        return PRODUCTS[brandId] || [];
+        return [];
     }
 
     // Products are loaded on-demand via loadProductsForBrand() to minimize bandwidth
@@ -539,8 +539,9 @@
                 const brand = BRANDS.find(b => b.id === dev.brand);
                 if (brand) {
                     setStep2Brand(brand);
-                    const product = (PRODUCTS[dev.brand] || []).find(p => p.id === dev.product_id);
-                    document.getElementById('devProductDisplay').value = product ? product.name : dev.product_id;
+                    // Get product name from device API or use product_id as fallback
+                    const productName = dev.product_name || dev.product_id;
+                    document.getElementById('devProductDisplay').value = productName;
                     document.getElementById('devProduct').value = dev.product_id;
                 }
                 renderCredFields(dev.brand);
@@ -1069,9 +1070,27 @@
     async function testDevice(devId) {
         const dev = MY_DEVICES.find(d => d.id === devId);
         if (!dev) return;
-        if (!dev.is_configured) { alert(devicesI18n['completeSetupBeforeTest']); return; }
+        if (!dev.is_configured) { 
+            alert(devicesI18n['completeSetupBeforeTest']); 
+            return; 
+        }
         try {
-            await apiRequest('POST', `/devices/test?id=${devId}`);
+            const actions = dev.supported_actions || [];
+            
+            if (!actions.length) {
+                alert(devicesI18n['failedLoadActions'] || 'No actions available for this device');
+                return;
+            }
+            
+            // Test with the first available action
+            const testAction = actions[0];
+            const testRequest = {
+                template_id: 0,
+                action: testAction,
+                params: { brightness: 50 }
+            };
+            
+            await apiRequest('POST', `/devices/test?id=${devId}`, testRequest);
             const msg = devicesI18n['testCommandSent'];
             alert(msg.replace('{0}', dev.name));
         } catch (e) {
