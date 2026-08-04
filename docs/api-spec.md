@@ -1411,23 +1411,23 @@ Registered smart home devices. Credentials are stored per-brand.
   "is_configured": true,
   "status": "online | offline | unknown",
   "supported_actions": ["on", "off", "brightness", "color"],
-  "credentials": "object (shape varies by brand — see below; omitted in list responses)"
+  "credentials": "object<string, string> (key-value map containing brand-specific credential fields — see table below; omitted in list responses for security)"
 }
 ```
 
-**Credentials shape per brand** — flat JSON, snake_case, no brand-nesting (brand is already in the device body):
+**Credentials structure per brand** — flat key-value map, snake_case keys, no brand-nesting (brand is already in the device body):
 
-| Brand | Fields |
-|-------|--------|
-| govee | `api_key`, `device_id` |
-| hue | `bridge_ip`, `api_key`, `light_id` |
-| kasa | `device_ip` |
-| lifx | `api_key`, `selector` |
-| tuya | `client_id`, `client_secret`, `device_id`, `region` |
-| nanoleaf | `device_ip`, `api_key` |
-| yeelight | `device_ip` |
-| wled | `device_ip` |
-| wyze | `api_key`, `api_key_id`, `device_mac` |
+| Brand | Credential Keys | Example |
+|-------|-----------------|---------|
+| govee | `api_key`, `device_id` | `{"api_key": "...", "device_id": "..."}` |
+| hue | `bridge_ip`, `api_key`, `light_id` | `{"bridge_ip": "192.168.1.100", "api_key": "...", "light_id": "..."}` |
+| kasa | `device_ip` | `{"device_ip": "192.168.1.50"}` |
+| lifx | `api_key`, `selector` | `{"api_key": "...", "selector": "..."}` |
+| tuya | `client_id`, `client_secret`, `device_id`, `region` | `{"client_id": "...", "client_secret": "...", "device_id": "...", "region": "US"}` |
+| nanoleaf | `device_ip`, `api_key` | `{"device_ip": "192.168.1.80", "api_key": "..."}` |
+| yeelight | `device_ip` | `{"device_ip": "192.168.1.60"}` |
+| wled | `device_ip` | `{"device_ip": "192.168.1.70"}` |
+| wyze | `api_key`, `api_key_id`, `device_mac` | `{"api_key": "...", "api_key_id": "...", "device_mac": "..."}` |
 | amazon | `endpoint_id` |
 | custom | *(empty; actions are user-defined HTTP requests)* |
 

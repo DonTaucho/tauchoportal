@@ -454,11 +454,10 @@ func PrepareDevicesPageData() *DevicesPageData {
 			brandColor = brand.BrandColor
 		}
 
-		// Extract credentials map
-		credentialsMap := make(map[string]string)
-		if dev.Credentials != nil {
-			credentialsMap["api_key"] = dev.Credentials.ApiKey
-			credentialsMap["device_id"] = dev.Credentials.DeviceId
+		// Use credentials directly as a map (device.Credentials is already map[string]string)
+		credentialsMap := dev.Credentials
+		if credentialsMap == nil {
+			credentialsMap = make(map[string]string)
 		}
 
 		devicesForTemplate = append(devicesForTemplate, DeviceForTemplate{
