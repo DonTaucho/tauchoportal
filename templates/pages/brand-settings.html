@@ -17,7 +17,7 @@
             </div>
             <div id="brandSettingsMsg" class="status-msg" style="display:none;"></div>
             <div id="brandsGrid" class="brands">
-                {{range .Brands}}
+                {{range .MyBrands}}
                 <article class="brand-card {{if .IsConnected}}is-connected{{end}}">
                     <div class="brand-card-header">
                         <div class="brand-card-identity">
@@ -157,12 +157,10 @@
         </div>
     </div>
 </div>
-
-{{end}}
-
-{{define "scripts"}}
 <script>
 window._i18nMsg = {{i18nJSON .I18n}};
-window._brandMetadata = {{jsonMarshal .Brands}};
+window._myBrands = {{jsonMarshal .MyBrands}};
+window._allBrands = {{jsonMarshal .Brands}};
 </script>
+
 {{end}}

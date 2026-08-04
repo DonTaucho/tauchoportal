@@ -1,11 +1,6 @@
 (function () {
-  // Build BRANDS list from server-provided metadata
-  const BRANDS = (window._brandMetadata || []).map(brand => ({
-    id: brand.id,
-    authType: brand.auth_type || 'unknown',
-    requiresToken: brand.requires_token !== false
-  }));
-
+  // Use catalog brands directly from backend
+  const BRANDS = window._allBrands || [];
   const BRAND_LOOKUP = Object.fromEntries(BRANDS.map((brand) => [brand.id, brand]));
   const BRAND_ALIASES = {
     philipshue: 'philips-hue',
@@ -17,109 +12,10 @@
     amazonalexa: 'amazon-alexa'
   };
 
-  const SETUP_GUIDES = {
-    'govee': {
-      steps: [
-        { title: 'Open Govee App', content: 'Launch the Govee app on your iOS or Android phone.' },
-        { title: 'Get API Key', content: 'Go to Profile > Settings > API Key. Copy the full key (it looks like a UUID). This authenticates your devices.' },
-        { title: 'Add Device', content: 'In the Govee app, add your devices and note their names. You\'ll need to identify which device you want to control.' },
-        { title: 'Enter Credentials', content: 'Paste your API key. Then enter the device MAC address (found in device info in the app, format: XX:XX:XX:XX:XX:XX).' },
-        { title: 'Test Connection', content: 'Click "Test Credentials" to verify everything works before saving.' }
-      ],
-      helpFields: {
-        'api_key': 'Your Govee API key from the app settings. Used to authenticate all API requests.',
-        'device_id': 'The MAC address of your Govee device. Found in the device info page of the Govee app. Format: XX:XX:XX:XX:XX:XX'
-      }
-    },
-    'philips-hue': {
-      steps: [
-        { title: 'Locate Bridge', content: 'You need a Hue Bridge (physical hub) connected to your network. If you don\'t have one, you\'ll need to get one.' },
-        { title: 'Bridge IP Address', content: 'Find your Bridge IP on your router. Look for a device named "Philips Hue Bridge" or use the official Hue app to find it.' },
-        { title: 'Generate Token', content: 'Access the Bridge at http://[BRIDGE_IP]/debug/clip.html. Press the bridge button, then create a user. Copy the returned username (this is your API key).' },
-        { title: 'Light Identifier', content: 'In the Hue app, find the Light ID or name. You\'ll use this to identify which light to control.' },
-        { title: 'Test Connection', content: 'Click "Test Credentials" to verify the Bridge responds and your token is valid.' }
-      ],
-      helpFields: {
-        'bridge_ip': 'IP address of your Hue Bridge on your network. Example: 192.168.1.50',
-        'api_key': 'API key generated from the Bridge (username). Get this from the Bridge settings.',
-        'light_id': 'ID or name of the light you want to control. Get this from the Hue app.'
-      }
-    },
-    'lifx': {
-      steps: [
-        { title: 'Get API Key', content: 'Visit https://cloud.lifx.com/settings and generate an API token.' },
-        { title: 'Copy Token', content: 'Your personal API token will be shown. Copy it - you won\'t see it again!' },
-        { title: 'Find Device Selector', content: 'In the LIFX app or https://cloud.lifx.com, find your device label or ID. You can use "all" to control all devices.' },
-        { title: 'Enter Credentials', content: 'Paste your API token. Enter your device selector (e.g., "Living Room Light" or "all").' },
-        { title: 'Test Connection', content: 'Click "Test Credentials" to verify your token and device are accessible.' }
-      ],
-      helpFields: {
-        'api_key': 'Your LIFX personal API token from https://cloud.lifx.com/settings',
-        'selector': 'LIFX device selector. Can be device name, ID, group name, or "all". Example: "Living Room Light"'
-      }
-    },
-    'wiz': {
-      steps: [
-        { title: 'Locate Controller', content: 'Find your WiZ device\'s IP address on your local network. Check your router or the WiZ app.' },
-        { title: 'Get Auth Token', content: 'Use the WiZ app to generate an API token or auth key for local access.' },
-        { title: 'Enter IP & Token', content: 'Enter your WiZ device IP address and the authentication token.' },
-        { title: 'Test Connection', content: 'Click "Test Credentials" to verify the device responds correctly.' }
-      ],
-      helpFields: {
-        'device_ip': 'IP address of your WiZ device on your local network. Example: 192.168.1.100',
-        'api_key': 'Auth token for WiZ device local API access.'
-      }
-    },
-    'nanoleaf': {
-      steps: [
-        { title: 'Locate Controller', content: 'Find your Nanoleaf controller\'s IP address. Access it via the Nanoleaf app or your router.' },
-        { title: 'Enable API', content: 'The Nanoleaf device has an API running locally. You just need its IP address and auth token.' },
-        { title: 'Generate Token', content: 'Hold the power button for 5 seconds until it pulses. This enables the API. Then generate a token using: curl -X POST http://[IP]:[PORT]/api/v1/new' },
-        { title: 'Enter Details', content: 'Enter your Nanoleaf device IP and the auth token you generated.' },
-        { title: 'Test Connection', content: 'Click "Test Credentials" to verify local connection to your device.' }
-      ],
-      helpFields: {
-        'device_ip': 'IP address of your Nanoleaf device on your local network. Example: 192.168.1.100',
-        'api_key': 'Auth token generated from your Nanoleaf device.'
-      }
-    },
-    'tp-link-kasa': {
-      steps: [
-        { title: 'Find Device IP', content: 'Use the Kasa app or check your router to find your device\'s local IP address.' },
-        { title: 'Note Device IP', content: 'The Kasa smart device runs a local API. You only need its IP address on your network.' },
-        { title: 'Verify Local Access', content: 'Make sure your portal server can reach the device. Devices behind a VPN or firewall may not work.' },
-        { title: 'Enter IP', content: 'Type in your device\'s IP address in the format: 192.168.1.50' },
-        { title: 'Test Connection', content: 'Click "Test Credentials" to verify your device is reachable.' }
-      ],
-      helpFields: {
-        'device_ip': 'IP address of your Kasa device on your local network. Example: 192.168.1.100'
-      }
-    },
-    'yeelight': {
-      steps: [
-        { title: 'Find Device IP', content: 'In the Yeelight app, go to Device Settings. You\'ll see the device IP address.' },
-        { title: 'Enable Local Control', content: 'In Yeelight app, make sure "Local Network Control" is enabled in the device settings.' },
-        { title: 'Note the IP', content: 'Copy the device IP from the settings page.' },
-        { title: 'Enter IP Address', content: 'Type in your Yeelight device\'s IP address.' },
-        { title: 'Test Connection', content: 'Click "Test Credentials" to verify your device is reachable on the network.' }
-      ],
-      helpFields: {
-        'device_ip': 'IP address of your Yeelight device on your local network. Example: 192.168.1.100'
-      }
-    },
-    'wled': {
-      steps: [
-        { title: 'Find Device IP', content: 'Connect to your WLED device. You can find the IP in your router or from the WLED web interface.' },
-        { title: 'Local Control', content: 'WLED devices run a local API. No authentication is typically needed, just the device IP.' },
-        { title: 'Test Access', content: 'Make sure your portal can reach the device (same network or VPN).' },
-        { title: 'Enter IP', content: 'Type your WLED device\'s IP address.' },
-        { title: 'Test Connection', content: 'Click "Test Credentials" to verify the device responds.' }
-      ],
-      helpFields: {
-        'device_ip': 'IP address of your WLED device on your local network. Example: 192.168.1.100'
-      }
-    }
-  };
+  // Cache for setup guides (brand_id -> { steps, helpFields })
+  const setupGuidesCache = new Map();
+  // Track pending guide fetches to avoid duplicate requests
+  const pendingGuideFetches = new Map();
 
   let activeApiKeyBrand = null;
   let activeLocalBrand = null;
@@ -149,7 +45,7 @@
     const normalizedId = normalizeBrandId(brandId);
     for (const brand of BRANDS) {
       if (normalizeBrandId(brand.id) === normalizedId) {
-        return brand.id.split('-').map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(' ');
+        return brand.name || brand.id.split('-').map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(' ');
       }
     }
     return brandId;
@@ -204,6 +100,48 @@
       throw new Error(payload || `${response.status}`);
     }
     return payload;
+  }
+
+  async function fetchSetupGuide(brandId) {
+    const normalizedId = normalizeBrandId(brandId);
+    
+    // Check cache first
+    if (setupGuidesCache.has(normalizedId)) {
+      return setupGuidesCache.get(normalizedId);
+    }
+
+    // Check if we're already fetching this guide
+    if (pendingGuideFetches.has(normalizedId)) {
+      return pendingGuideFetches.get(normalizedId);
+    }
+
+    // Fetch from backend API
+    const fetchPromise = (async () => {
+      try {
+        const lang = document.documentElement.lang || 'en';
+        const result = await apiRequest('GET', `/brand/${encodeURIComponent(normalizedId)}/setup-guide?lang=${encodeURIComponent(lang)}`);
+        
+        // Transform API response to match expected format
+        const guide = {
+          steps: (result.steps || []).map(step => ({
+            title: step.title || '',
+            content: step.content || ''
+          })),
+          helpFields: result.help_fields || {}
+        };
+        
+        setupGuidesCache.set(normalizedId, guide);
+        pendingGuideFetches.delete(normalizedId);
+        return guide;
+      } catch (error) {
+        console.warn(`Failed to fetch setup guide for ${normalizedId}:`, error);
+        pendingGuideFetches.delete(normalizedId);
+        return null;
+      }
+    })();
+
+    pendingGuideFetches.set(normalizedId, fetchPromise);
+    return fetchPromise;
   }
 
   async function setOAuthModalContent(result, meta) {
@@ -319,13 +257,10 @@
     }
   }
 
-  function getSetupGuide(brandId) {
-    return SETUP_GUIDES[normalizeBrandId(brandId)] || null;
-  }
-
-  function openSetupWizard(brandId) {
-    const guide = getSetupGuide(brandId);
-    if (!guide) return;
+  async function openSetupWizard(brandId) {
+    const guide = await fetchSetupGuide(brandId);
+    if (!guide || !guide.steps || guide.steps.length === 0) return;
+    
     setupWizardState = { brandId, currentStep: 0, credentials: {} };
     showSetupWizardStep(brandId, 0, guide);
     openModal('setupWizardModal');
@@ -370,10 +305,10 @@
     const meta = getBrandMeta(setupWizardState.brandId);
     if (!meta) return;
 
-    const fieldIds = meta.authType === 'api_key' 
+    const fieldIds = meta.auth_type === 'api_key' 
       ? ['api_key'] 
-      : meta.authType === 'local' 
-        ? ['device_ip', ...(meta.requiresToken ? ['api_key'] : [])]
+      : meta.auth_type === 'local' 
+        ? ['device_ip', ...(meta.requires_token ? ['api_key'] : [])]
         : [];
 
     fieldIds.forEach(fieldId => {
@@ -423,7 +358,7 @@
     }
 
     try {
-      const credentialsPayload = meta.authType === 'api_key'
+      const credentialsPayload = meta.auth_type === 'api_key'
         ? { api_key: setupWizardState.credentials.api_key }
         : { bridge_ip: setupWizardState.credentials.device_ip, api_key: setupWizardState.credentials.api_key };
 
@@ -460,7 +395,7 @@
     }
 
     try {
-      const credentialsPayload = meta.authType === 'api_key'
+      const credentialsPayload = meta.auth_type === 'api_key'
         ? { api_key: setupWizardState.credentials.api_key }
         : { bridge_ip: setupWizardState.credentials.device_ip, api_key: setupWizardState.credentials.api_key };
 
@@ -476,25 +411,27 @@
     }
   }
 
-  function handleBrandAction(brandId) {
+  async function handleBrandAction(brandId) {
     const meta = getBrandMeta(brandId);
     if (!meta) return;
 
-    const guide = getSetupGuide(brandId);
+    // Try to fetch and show setup wizard if available
+    const guide = await fetchSetupGuide(brandId);
     if (guide && guide.steps && guide.steps.length > 0) {
-      openSetupWizard(brandId);
+      await openSetupWizard(brandId);
       return;
     }
 
-    if (meta.authType === 'oauth') {
+    // Fall back to direct auth methods if no guide
+    if (meta.auth_type === 'oauth') {
       openOAuthFlow(meta.id);
       return;
     }
-    if (meta.authType === 'api-key') {
+    if (meta.auth_type === 'api-key' || meta.auth_type === 'api_key') {
       openApiKeyModal(meta.id);
       return;
     }
-    if (meta.authType === 'local') {
+    if (meta.auth_type === 'local') {
       openLocalDeviceModal(meta.id);
     }
   }
@@ -559,7 +496,8 @@
       if (!wizardAction) return;
 
       const brandId = setupWizardState.brandId;
-      const guide = getSetupGuide(brandId);
+      const cacheKey = normalizeBrandId(brandId);
+      const guide = setupGuidesCache.get(cacheKey);
       if (!guide) return;
 
       if (wizardAction === 'back') {

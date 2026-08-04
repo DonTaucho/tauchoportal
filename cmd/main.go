@@ -43,7 +43,8 @@ type PageData struct {
 	Devices                 *controller.DevicesPageData
 	Channels                *controller.ChannelsPageData
 	Dashboard               *controller.DashboardPageData
-	Brands                  []controller.MyConnectedBrand
+	MyBrands                []controller.MyConnectedBrand
+	Brands                  []controller.CatalogBrand
 	PlatformMeta            map[string]map[string]interface{}
 	EventBadgeClass         map[string]string
 	EventFieldOptions       []controller.EventFieldOption
@@ -577,7 +578,10 @@ func (s *Server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	// Fetch brand-settings page data if on /brand-settings page
 	if cfg.Name == "brand-settings" {
 		myBrandSettings := controller.MyBrandSettings{}
-		data.Brands = myBrandSettings.ListMyBrands()
+		data.MyBrands = myBrandSettings.ListMyBrands()
+		
+		brandList := controller.BrandList{}
+		data.Brands = brandList.ListAll()
 	}
 
 	if err := tmpl.ExecuteTemplate(w, "page", data); err != nil {

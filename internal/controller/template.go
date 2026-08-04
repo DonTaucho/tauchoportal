@@ -61,29 +61,9 @@ type PageData struct {
 
 // GetEventLabel returns the human-readable label for an event type on a platform
 func GetEventLabel(eventType, platform string) string {
-	labels := map[string]map[string]string{
-		"youtube": {
-			"comment":      "Chat Comment",
-			"superchat":    "Super Chat",
-			"member":       "Channel Member",
-			"stream_start": "Stream Start",
-			"stream_end":   "Stream End",
-		},
-		"twitch": {
-			"comment":    "Chat Comment",
-			"cheer":      "Cheer",
-			"follow":     "Follow",
-			"sub":        "Subscribe",
-			"raid":       "Raid",
-			"hype_train": "Hype Train",
-		},
-	}
-	if platformLabels, ok := labels[platform]; ok {
-		if label, ok := platformLabels[eventType]; ok {
-			return label
-		}
-	}
-	return eventType
+	// Use capitalize for now - backend should provide event labels in future
+	// For now, just return capitalized event type
+	return capitalize(eventType)
 }
 
 // FormatDateTime formats a date string for display, returning a fallback if empty
@@ -155,55 +135,29 @@ func GetEventBadgeClasses(cond Conditions) map[string]string {
 
 // GetEventFieldOptions returns available fields from the event schema with translated labels
 func GetEventFieldOptions(cond Conditions, platform, eventType string, translator *i18n.Translator) []EventFieldOption {
-	metadata := cond.GetEventMetadata(platform, eventType)
+	// Fetch available parameters from platform config API
+	platformConfig := PlatformConfig{}
+	parameters := platformConfig.GetAvailableParameters(platform, eventType)
 
 	var options []EventFieldOption
 
-	if metadata.Fields != nil {
-		// Convert map to sorted slice for consistent ordering
-		type fieldEntry struct {
-			name  string
-			field EventSchemaField
+	// Convert parameters to field options with translations
+	for _, param := range parameters {
+		label := param.Name
+		if translator != nil {
+			// Look up translation key: condition.{fieldname}
+			translatedLabel := translator.T("condition." + param.Name)
+			if translatedLabel != "" && translatedLabel != "condition."+param.Name {
+				label = translatedLabel
+			}
 		}
-		var entries []fieldEntry
-
-		for name, field := range metadata.Fields {
-			entries = append(entries, fieldEntry{name, field})
-		}
-
-		// Sort by name for consistent ordering
-		sort.Slice(entries, func(i, j int) bool {
-			return entries[i].name < entries[j].name
+		options = append(options, EventFieldOption{
+			Name:  param.Name,
+			Label: label,
 		})
-
-		for _, entry := range entries {
-			label := entry.name
-			if translator != nil {
-				// Look up translation key: condition.{fieldname}
-				label = translator.T("condition." + entry.name)
-			}
-			options = append(options, EventFieldOption{
-				Name:  entry.name,
-				Label: label,
-			})
-		}
 	}
 
-	// Fallback if no metadata available
-	if len(options) == 0 {
-		defaultFields := []string{"message", "sender_id", "sender_name", "amount_value", "amount_display", "is_member", "is_mod"}
-		for _, fieldName := range defaultFields {
-			label := fieldName
-			if translator != nil {
-				label = translator.T("condition." + fieldName)
-			}
-			options = append(options, EventFieldOption{
-				Name:  fieldName,
-				Label: label,
-			})
-		}
-	}
-
+	// Return options or empty slice if no parameters available
 	return options
 }
 

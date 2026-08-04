@@ -1406,9 +1406,11 @@ Registered smart home devices. Credentials are stored per-brand.
   "name": "string",
   "brand": "govee | hue | kasa | lifx | tuya | nanoleaf | yeelight | wled | wyze | amazon | custom",
   "product_id": "string (e.g. govee-h6159, hue-color, or custom_product_id for custom brand)",
+  "product_name": "string (human-readable product name, e.g. 'H6159 LED Strip')",
   "room": "string (optional)",
   "is_configured": true,
   "status": "online | offline | unknown",
+  "supported_actions": ["on", "off", "brightness", "color"],
   "credentials": "object (shape varies by brand — see below; omitted in list responses)"
 }
 ```
@@ -1431,6 +1433,7 @@ Registered smart home devices. Credentials are stored per-brand.
 
 > **Storage note:** `credentials` is stored as a JSONB column in PostgreSQL. The flat layout (no brand nesting) is intentional — brand is a separate column and nesting would be redundant.  
 > **Security note:** Credentials contain API keys and local IPs. Omit or mask the `credentials` field from `GET /devices` list responses; include it only in `GET /devices/get?id=<id>`.
+> **Actions note:** `supported_actions` is a list of device capabilities (e.g., ["on", "off", "brightness", "color"]). This is populated from the device's product definition in the catalog when the device is registered, or from custom action definitions for custom brand devices.
 
 | Method | Path | Body / Params | Description |
 |--------|------|---------------|-------------|

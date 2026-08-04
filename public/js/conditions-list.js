@@ -295,13 +295,14 @@
         const actionSelect = document.getElementById('condActionSelect'); 
         const sendingParamsSection = document.getElementById('sendingParamsSection');
         
-        if (!device || !PRODUCTS[device.product_id]?.actions?.length) { 
+        if (!device || !device.supported_actions || !device.supported_actions.length) { 
             group.style.display = 'none'; 
             actionSelect.value = ''; 
             if (sendingParamsSection) sendingParamsSection.style.display = 'none';
             updateCondActionParams(); 
             return; 
-        } 
+        }
+        
         const currentValue = actionSelect.value; 
         group.style.display = 'block'; 
         while (actionSelect.options.length > 1) actionSelect.remove(1); 
@@ -315,8 +316,8 @@
             scene: t['deviceAction.scene'] || 'Scene Mode', 
             flash: t['deviceAction.flash'] || 'Flash Alert' 
         }; 
-        PRODUCTS[device.product_id].actions.forEach((action) => actionSelect.add(new Option(labels[action] || action, action))); 
-        if (currentValue && PRODUCTS[device.product_id].actions.includes(currentValue)) actionSelect.value = currentValue; 
+        device.supported_actions.forEach((action) => actionSelect.add(new Option(labels[action] || action, action))); 
+        if (currentValue && device.supported_actions.includes(currentValue)) actionSelect.value = currentValue; 
         
         // Load device templates for sending parameters
         if (sendingParamsSection && device.brand) {

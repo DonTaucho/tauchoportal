@@ -18,11 +18,13 @@ type Device struct {
 	Name          string                   `json:"name"`
 	Brand         string                   `json:"brand"`
 	ProductId     string                   `json:"product_id"`
+	ProductName   string                   `json:"product_name"`
 	Room          string                   `json:"room"`
 	IsConfigured  bool                     `json:"is_configured"`
 	Status        string                   `json:"status"`
 	Credentials   *DeviceCredentialPayload `json:"credentials"`
 	DeviceGroupId string                   `json:"device_group_id"`
+	SupportedActions []string              `json:"supported_actions"`
 	CreatedAt     string                   `json:"created_at"`
 	UpdatedAt     string                   `json:"updated_at"`
 }
@@ -72,12 +74,6 @@ type TestDeviceResponse struct {
 func (Devices) ListDevices() ListDevicesResponse {
 	var result ListDevicesResponse
 	apiRequest(&result, http.MethodGet, "/devices")
-	return result
-}
-
-func (Devices) GetDevice(id string) GetDeviceResponse {
-	var result GetDeviceResponse
-	apiRequest(&result, http.MethodGet, "/devices/get?id="+url.QueryEscape(id))
 	return result
 }
 

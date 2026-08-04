@@ -9,17 +9,18 @@ type MyBrandSettings struct{}
 
 // MyConnectedBrand represents a brand with connection status from the /auth/brands API
 type MyConnectedBrand struct {
-	ID               string                `json:"id"`
-	Name             string                `json:"name"`
-	IsConnected      bool                  `json:"is_connected"`
-	AuthType         *string               `json:"auth_type"`
-	Status           *string               `json:"status"`
-	ConnectedAt      *string               `json:"connected_at"`
-	LastTestedAt     *string               `json:"last_tested_at"`
-	LastUsedAt       *string               `json:"last_used_at"`
-	ErrorMessage     *string               `json:"error_message"`
-	OAuthScope       *string               `json:"oauth_scope"`
-	CredentialFields []BrandCredentialField `json:"credential_fields"`
+	ID                       string                 `json:"id"`
+	Name                     string                 `json:"name"`
+	IsConnected              bool                   `json:"is_connected"`
+	AuthType                 *string                `json:"auth_type"`
+	Status                   *string                `json:"status"`
+	ConnectedAt              *string                `json:"connected_at"`
+	LastTestedAt             *string                `json:"last_tested_at"`
+	LastUsedAt               *string                `json:"last_used_at"`
+	ErrorMessage             *string                `json:"error_message"`
+	OAuthScope               *string                `json:"oauth_scope"`
+	CredentialFields         []BrandCredentialField `json:"credential_fields"`
+	RequiresBrandCredentials bool                   `json:"requires_brand_credentials"`
 }
 
 // BrandCredentialField represents a single credential input field for brand connection
@@ -55,23 +56,23 @@ type BrandList struct{}
 
 // CatalogBrand represents a brand from the catalog API response
 type CatalogBrand struct {
-	ID                      string                 `json:"id"`
-	Name                    string                 `json:"name"`
-	Website                 *string                `json:"website"`
-	LogoURL                 *string                `json:"logo_url"`
-	Icon                    *string                `json:"icon"`
-	BrandColor              *string                `json:"brand_color"`
-	AffiliateURL            *string                `json:"affiliate_url"`
-	AffiliateCommissionPct  *float64               `json:"affiliate_commission_percent"`
-	RequiresBrandCredentials bool                  `json:"requires_brand_credentials"`
-	RequiresToken           *bool                  `json:"requires_token"`
-	DocsURL                 *string                `json:"docs_url"`
-	DocsLabel               *string                `json:"docs_label"`
-	CredentialFields        []BrandCredentialField `json:"credential_fields"`
-	SortOrder               int                    `json:"sort_order"`
-	IsActive                bool                   `json:"is_active"`
-	CreatedAt               *string                `json:"created_at"`
-	UpdatedAt               *string                `json:"updated_at"`
+	ID                       string                 `json:"id"`
+	Name                     string                 `json:"name"`
+	Website                  *string                `json:"website"`
+	LogoURL                  *string                `json:"logo_url"`
+	Icon                     *string                `json:"icon"`
+	BrandColor               *string                `json:"brand_color"`
+	AffiliateURL             *string                `json:"affiliate_url"`
+	AffiliateCommissionPct   *float64               `json:"affiliate_commission_percent"`
+	RequiresBrandCredentials bool                   `json:"requires_brand_credentials"`
+	RequiresToken            *bool                  `json:"requires_token"`
+	DocsURL                  *string                `json:"docs_url"`
+	DocsLabel                *string                `json:"docs_label"`
+	CredentialFields         []BrandCredentialField `json:"credential_fields"`
+	SortOrder                int                    `json:"sort_order"`
+	IsActive                 bool                   `json:"is_active"`
+	CreatedAt                *string                `json:"created_at"`
+	UpdatedAt                *string                `json:"updated_at"`
 }
 
 // CatalogBrandsResponse wraps the API response for /catalog/brands
