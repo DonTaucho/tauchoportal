@@ -1409,6 +1409,7 @@
   "catalog.noResults": "No products found. Try a different search.",
   "catalog.retry": "Retry",
   "catalog.addDevice": "+ Add to Devices",
+  "catalog.buyNow": "Buy Now",
   "catalog.pageInfo": "Page {page} of {total}",
   "catalog.previous": "← Previous",
   "catalog.next": "Next →",
@@ -1424,5 +1425,11 @@
   "catalog.kasaTitle": "TP-Link Kasa Smart Devices",
   "catalog.yeelightTitle": "Yeelight Smart Lighting",
   "catalog.alexaTitle": "Amazon Alexa Compatible Devices",
+  "catalog.switchbotTitle": "SwitchBot Smart Home",
+  "catalog.hubs": "🏠 Hubs",
+  "catalog.remotes": "🎮 Remotes",
+  "catalog.meters": "📊 Meters",
+  "catalog.others": "🔧 Other Devices",
+  "catalog.connectedHome": "Wireless smart home automation",
   "catalog.productCategory": "WiFi-enabled {category} product"
 }

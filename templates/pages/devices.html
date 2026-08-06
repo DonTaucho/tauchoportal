@@ -894,7 +894,7 @@
                 <label for="cred_${f.id}">${f.label}</label>
                 <div class="cred-input-row">
                     <input type="${isPwd ? 'password' : 'text'}" id="cred_${f.id}"
-                           ${isPwd ? 'placeholder="••••••••••••••••"' : ''} autocomplete="off">
+                           ${isPwd ? 'placeholder="••••••••••••••••"' : ''} autocomplete="new-password">
                     ${isPwd ? `<button type="button" class="show-hide-btn" onclick="toggleCredVis('cred_${f.id}',this)">${devicesI18n['showPassword']}</button>` : ''}
                 </div>
                 <small class="form-help">${f.help}</small>

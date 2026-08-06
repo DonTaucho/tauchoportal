@@ -1406,34 +1406,40 @@ Registered smart home devices. Credentials are stored per-brand.
   "name": "string",
   "brand": "govee | hue | kasa | lifx | tuya | nanoleaf | yeelight | wled | wyze | amazon | custom",
   "product_id": "string (e.g. govee-h6159, hue-color, or custom_product_id for custom brand)",
-  "product_name": "string (human-readable product name, e.g. 'H6159 LED Strip')",
+  "product_name": "string (human-readable product name from catalog, e.g. 'H6159 LED Strip')",
+  "supported_actions": ["string (device capability IDs, e.g. 'on', 'off', 'brightness', 'color')"],
   "room": "string (optional)",
   "is_configured": true,
   "status": "online | offline | unknown",
-  "supported_actions": ["on", "off", "brightness", "color"],
-  "credentials": "object<string, string> (key-value map containing brand-specific credential fields — see table below; omitted in list responses for security)"
+  "credentials": "object (shape varies by brand — see below; omitted in list responses)",
+  "device_group_id": "string (optional; nano-time ID if device belongs to a group)"
 }
 ```
 
-**Credentials structure per brand** — flat key-value map, snake_case keys, no brand-nesting (brand is already in the device body):
+**Product Information Sourcing:**
+- `product_name` is populated from the product catalog when the device is retrieved. If the product is not found in the catalog, this field is omitted from the response.
+- `supported_actions` is populated from the product catalog. Contains device capabilities like `"on"`, `"off"`, `"brightness"`, `"color"`, `"temperature"`, etc. If the product is not found in the catalog, this field is omitted from the response.
+- For `custom` brand devices, `supported_actions` is omitted (actions are user-defined HTTP requests).
 
-| Brand | Credential Keys | Example |
-|-------|-----------------|---------|
-| govee | `api_key`, `device_id` | `{"api_key": "...", "device_id": "..."}` |
-| hue | `bridge_ip`, `api_key`, `light_id` | `{"bridge_ip": "192.168.1.100", "api_key": "...", "light_id": "..."}` |
-| kasa | `device_ip` | `{"device_ip": "192.168.1.50"}` |
-| lifx | `api_key`, `selector` | `{"api_key": "...", "selector": "..."}` |
-| tuya | `client_id`, `client_secret`, `device_id`, `region` | `{"client_id": "...", "client_secret": "...", "device_id": "...", "region": "US"}` |
-| nanoleaf | `device_ip`, `api_key` | `{"device_ip": "192.168.1.80", "api_key": "..."}` |
-| yeelight | `device_ip` | `{"device_ip": "192.168.1.60"}` |
-| wled | `device_ip` | `{"device_ip": "192.168.1.70"}` |
-| wyze | `api_key`, `api_key_id`, `device_mac` | `{"api_key": "...", "api_key_id": "...", "device_mac": "..."}` |
+**Credentials shape per brand** — flat JSON, snake_case, no brand-nesting (brand is already in the device body):
+
+| Brand | Fields |
+|-------|--------|
+| govee | `api_key`, `device_id` |
+| hue | `bridge_ip`, `api_key`, `light_id` |
+| kasa | `device_ip` |
+| lifx | `api_key`, `selector` |
+| tuya | `client_id`, `client_secret`, `device_id`, `region` |
+| nanoleaf | `device_ip`, `api_key` |
+| yeelight | `device_ip` |
+| wled | `device_ip` |
+| wyze | `api_key`, `api_key_id`, `device_mac` |
 | amazon | `endpoint_id` |
 | custom | *(empty; actions are user-defined HTTP requests)* |
 
 > **Storage note:** `credentials` is stored as a JSONB column in PostgreSQL. The flat layout (no brand nesting) is intentional — brand is a separate column and nesting would be redundant.  
 > **Security note:** Credentials contain API keys and local IPs. Omit or mask the `credentials` field from `GET /devices` list responses; include it only in `GET /devices/get?id=<id>`.
-> **Actions note:** `supported_actions` is a list of device capabilities (e.g., ["on", "off", "brightness", "color"]). This is populated from the device's product definition in the catalog when the device is registered, or from custom action definitions for custom brand devices.
+> **Actions note:** `supported_actions` is populated from the product definition in the catalog. If a product is not in the catalog, this field is omitted from the response.
 
 | Method | Path | Body / Params | Description |
 |--------|------|---------------|-------------|
@@ -1613,6 +1619,24 @@ List all brands.
     "updated_at": "2024-01-15T10:30:00Z"
   },
   {
+    "id": "lifx",
+    "name": "LIFX",
+    "website": "https://www.lifx.com",
+    "logo_url": "https://www.lifx.com/favicon.ico",
+    "icon": "💡",
+    "brand_color": "#000000",
+    "affiliate_url": null,
+    "affiliate_commission_percent": null,
+    "requires_brand_credentials": false,
+    "docs_url": "https://api.developer.lifx.com/",
+    "docs_label": "LIFX HTTP API Documentation",
+    "credential_fields": [],
+    "sort_order": 2,
+    "is_active": true,
+    "created_at": "2026-08-04T12:44:00Z",
+    "updated_at": "2026-08-04T12:44:00Z"
+  },
+  {
     "id": "tuya",
     "name": "Tuya",
     "website": "https://www.tuya.com",
@@ -1742,6 +1766,8 @@ Delete a brand. All its products are also deleted (`ON DELETE CASCADE`).
 
 List products with optional pagination, search, filtering, and sorting.
 
+> **🟢 LIFX Products: API-Based** — LIFX products are dynamically fetched from LIFX's GitHub repository (https://github.com/LIFX/products) instead of stored in the database. When requesting `brand_id=lifx`, the API fetches the authoritative 173+ products. Products are cached locally for 24 hours. All LIFX products are automatically categorized based on device capabilities (color, multizone, matrix, etc.) and have supported_actions mapped based on their features.
+
 **Query params:**
 | Param | Default | Max | Description |
 |-------|---------|-----|-------------|
@@ -1766,26 +1792,37 @@ List products with optional pagination, search, filtering, and sorting.
   },
   "products": [
     {
-      "id": "lifx-a19",
+      "id": "lifx-1",
       "brand_id": "lifx",
-      "name": "LIFX A19 Color Bulb",
-      "category": "bulbs",
-      "thumbnail_url": "https://cdn.example.com/lifx-a19.jpg",
-      "supported_actions": ["set_color", "set_brightness", "turn_on", "turn_off"],
+      "name": "LIFX Original",
+      "category": "light",
+      "thumbnail_url": "",
+      "supported_actions": ["set_color", "set_brightness", "turn_on", "turn_off", "set_color_temperature", "start_effect"],
       "is_active": true,
-      "created_at": "2024-01-15T10:30:00Z",
-      "updated_at": "2024-01-15T10:30:00Z"
+      "created_at": "2026-08-04T12:44:55Z",
+      "updated_at": "2026-08-04T12:44:55Z"
     },
     {
-      "id": "lifx-strip",
+      "id": "lifx-2",
       "brand_id": "lifx",
-      "name": "LIFX Lightstrip",
-      "category": "strips",
-      "thumbnail_url": "https://cdn.example.com/lifx-strip.jpg",
-      "supported_actions": ["set_color", "set_brightness", "turn_on", "turn_off"],
+      "name": "LIFX Original 1000",
+      "category": "light",
+      "thumbnail_url": "",
+      "supported_actions": ["set_color", "set_brightness", "turn_on", "turn_off", "set_color_temperature", "start_effect"],
       "is_active": true,
-      "created_at": "2024-01-15T10:30:00Z",
-      "updated_at": "2024-01-15T10:30:00Z"
+      "created_at": "2026-08-04T12:44:55Z",
+      "updated_at": "2026-08-04T12:44:55Z"
+    },
+    {
+      "id": "lifx-57",
+      "brand_id": "lifx",
+      "name": "LIFX Tile",
+      "category": "matrix_light",
+      "thumbnail_url": "",
+      "supported_actions": ["set_color", "set_brightness", "turn_on", "turn_off", "set_matrix_pattern", "start_effect"],
+      "is_active": true,
+      "created_at": "2026-08-04T12:44:55Z",
+      "updated_at": "2026-08-04T12:44:55Z"
     }
   ]
 }
@@ -1802,15 +1839,15 @@ Get a single product.
 **Response `200`:**
 ```json
 {
-  "id": "govee-h6159",
-  "brand_id": "govee",
-  "name": "H6159 LED Strip",
-  "category": "light_strip",
+  "id": "lifx-1",
+  "brand_id": "lifx",
+  "name": "LIFX Original",
+  "category": "light",
   "thumbnail_url": "",
-  "supported_actions": ["set_color", "set_brightness", "turn_on", "turn_off"],
+  "supported_actions": ["set_color", "set_brightness", "turn_on", "turn_off", "set_color_temperature", "start_effect"],
   "is_active": true,
-  "created_at": "...",
-  "updated_at": "..."
+  "created_at": "2026-08-04T12:44:55Z",
+  "updated_at": "2026-08-04T12:44:55Z"
 }
 ```
 

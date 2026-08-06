@@ -86,7 +86,7 @@
         <div class="modal-body">
             <div class="form-group">
                 <label for="apiKeyInput">{{.I18n.T "brandSettings.modal.apiKeyLabel"}}</label>
-                <input id="apiKeyInput" type="password" autocomplete="off" placeholder="{{.I18n.T "brandSettings.modal.apiKeyPlaceholder"}}">
+                <input id="apiKeyInput" type="password" autocomplete="new-password" placeholder="{{.I18n.T "brandSettings.modal.apiKeyPlaceholder"}}">
             </div>
         </div>
         <div class="modal-footer">
@@ -106,11 +106,11 @@
         <div class="modal-body">
             <div class="form-group">
                 <label for="deviceIpInput">{{.I18n.T "brandSettings.modal.ipAddress"}}</label>
-                <input id="deviceIpInput" type="text" inputmode="decimal" autocomplete="off" placeholder="{{.I18n.T "brandSettings.modal.ipPlaceholder"}}">
+                <input id="deviceIpInput" type="text" inputmode="decimal" autocomplete="new-password" placeholder="{{.I18n.T "brandSettings.modal.ipPlaceholder"}}">
             </div>
             <div id="deviceTokenGroup" class="form-group">
                 <label for="deviceTokenInput">{{.I18n.T "brandSettings.modal.authToken"}}</label>
-                <input id="deviceTokenInput" type="password" autocomplete="off" placeholder="{{.I18n.T "brandSettings.modal.authTokenPlaceholder"}}">
+                <input id="deviceTokenInput" type="password" autocomplete="new-password" placeholder="{{.I18n.T "brandSettings.modal.authTokenPlaceholder"}}">
                 <span id="deviceTokenHint" class="field-hint">{{.I18n.T "brandSettings.modal.optionalToken"}}</span>
             </div>
         </div>

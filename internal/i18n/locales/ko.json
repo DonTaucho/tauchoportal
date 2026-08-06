@@ -1403,7 +1403,8 @@
   "catalog.noResults": "제품을 찾을 수 없습니다. 다른 검색을 시도하세요.",
   "catalog.retry": "다시 시도",
   "catalog.addDevice": "+ 기기에 추가",
-  "catalog.pageInfo": "{page}/{total} 페이지",
+  "catalog.buyNow": "지금 구매",
+  "catalog.pageInfo": "{page} / {total} 페이지",
   "catalog.previous": "← 이전",
   "catalog.next": "다음 →",
   "catalog.showingResults": "{start}-{end} / {total} 제품 표시",
@@ -1418,6 +1419,12 @@
   "catalog.kasaTitle": "TP-Link Kasa 스마트 기기",
   "catalog.yeelightTitle": "Yeelight 스마트 라이팅",
   "catalog.alexaTitle": "Amazon Alexa 호환 기기",
+  "catalog.switchbotTitle": "SwitchBot 스마트 홈",
+  "catalog.hubs": "🏠 허브",
+  "catalog.remotes": "🎮 리모컨",
+  "catalog.meters": "📊 미터",
+  "catalog.others": "🔧 기타 기기",
+  "catalog.connectedHome": "무선 스마트홈 자동화",
   "catalog.productCategory": "WiFi 지원 {category} 제품"
 }
 
