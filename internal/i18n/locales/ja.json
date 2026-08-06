@@ -1403,6 +1403,7 @@
   "catalog.noResults": "製品が見つかりません。別の検索を試してください。",
   "catalog.retry": "再試行",
   "catalog.addDevice": "+ デバイスに追加",
+  "catalog.buyNow": "今すぐ購入",
   "catalog.pageInfo": "ページ {page} / {total}",
   "catalog.previous": "← 前へ",
   "catalog.next": "次へ →",
@@ -1418,5 +1419,11 @@
   "catalog.kasaTitle": "TP-Link Kasa スマートデバイス",
   "catalog.yeelightTitle": "Yeelight スマートライティング",
   "catalog.alexaTitle": "Amazon Alexa 互換デバイス",
+  "catalog.switchbotTitle": "SwitchBot スマートホーム",
+  "catalog.hubs": "🏠 ハブ",
+  "catalog.remotes": "🎮 リモコン",
+  "catalog.meters": "📊 メーター",
+  "catalog.others": "🔧 その他デバイス",
+  "catalog.connectedHome": "ワイヤレススマートホーム自動化",
   "catalog.productCategory": "WiFi対応{category}製品"
 }

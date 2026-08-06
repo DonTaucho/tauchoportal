@@ -1403,6 +1403,7 @@
   "catalog.noResults": "未找到產品。請嘗試其他搜索。",
   "catalog.retry": "重試",
   "catalog.addDevice": "+ 添加到設備",
+  "catalog.buyNow": "立即購買",
   "catalog.pageInfo": "第 {page} 頁，共 {total} 頁",
   "catalog.previous": "← 上一頁",
   "catalog.next": "下一頁 →",
@@ -1418,6 +1419,12 @@
   "catalog.kasaTitle": "TP-Link Kasa 智能設備",
   "catalog.yeelightTitle": "Yeelight 智能照明",
   "catalog.alexaTitle": "Amazon Alexa 兼容設備",
+  "catalog.switchbotTitle": "SwitchBot 智能家居",
+  "catalog.hubs": "🏠 集線器",
+  "catalog.remotes": "🎮 遙控器",
+  "catalog.meters": "📊 儀表",
+  "catalog.others": "🔧 其他設備",
+  "catalog.connectedHome": "無線智能家居自動化",
   "catalog.productCategory": "WiFi支持的{category}產品"
 }
 

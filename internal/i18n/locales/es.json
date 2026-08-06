@@ -1403,6 +1403,7 @@
   "catalog.noResults": "No se encontraron productos. Intenta otra búsqueda.",
   "catalog.retry": "Reintentar",
   "catalog.addDevice": "+ Agregar a dispositivos",
+  "catalog.buyNow": "Comprar ahora",
   "catalog.pageInfo": "Página {page} de {total}",
   "catalog.previous": "← Anterior",
   "catalog.next": "Siguiente →",
@@ -1418,6 +1419,12 @@
   "catalog.kasaTitle": "Dispositivos Inteligentes TP-Link Kasa",
   "catalog.yeelightTitle": "Iluminación Inteligente Yeelight",
   "catalog.alexaTitle": "Dispositivos Compatibles Amazon Alexa",
+  "catalog.switchbotTitle": "SwitchBot Hogar Inteligente",
+  "catalog.hubs": "🏠 Hubs",
+  "catalog.remotes": "🎮 Controles Remotos",
+  "catalog.meters": "📊 Medidores",
+  "catalog.others": "🔧 Otros Dispositivos",
+  "catalog.connectedHome": "Automatización del hogar inalámbrica",
   "catalog.productCategory": "Producto {category} WiFi"
 }
 

@@ -320,9 +320,10 @@
       label.textContent = fieldId.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
 
       const input = document.createElement('input');
-      input.type = fieldId.includes('password') || fieldId === 'api_key' ? 'password' : 'text';
+      const isPassword = fieldId.includes('password') || fieldId === 'api_key';
+      input.type = isPassword ? 'password' : 'text';
       input.id = fieldId;
-      input.autocomplete = 'off';
+      input.autocomplete = isPassword ? 'new-password' : 'new-password';
       input.placeholder = fieldId.replace(/_/g, ' ');
       input.addEventListener('input', (e) => {
         setupWizardState.credentials[fieldId] = e.target.value;
