@@ -32,6 +32,19 @@ type LiveEvent struct {
 	Raw            LiveEventRaw `json:"raw"`
 	ReceivedAt     string       `json:"received_at"`
 	CreatedAt      string       `json:"created_at"`
+	Color          *string      `json:"color,omitempty"`
+	ColorRgb       *ColorRgb    `json:"color_rgb,omitempty"`
+	Position       *string      `json:"position,omitempty"`
+	Size           *string      `json:"size,omitempty"`
+	Font           *string      `json:"font,omitempty"`
+	Opacity        *string      `json:"opacity,omitempty"`
+}
+
+type ColorRgb struct {
+	R   int    `json:"r"`
+	G   int    `json:"g"`
+	B   int    `json:"b"`
+	Hex string `json:"hex"`
 }
 
 type ListLiveEventsResponse []LiveEvent
