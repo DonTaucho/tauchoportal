@@ -93,7 +93,7 @@
           {{$badgeClass := index $.EventBadgeClass $condition.EventType}}
           <div class="condition-preview-row" onclick="navigate('/channels/{{$.ChannelDetail.ID}}/conditions/{{$condition.ID}}')">
             <span class="event-badge {{if $badgeClass}}{{$badgeClass}}{{else}}stream{{end}}">
-              {{getEventLabel $condition.EventType $.ChannelDetail.Platform}}
+              {{getEventLabel $condition.EventType $.ChannelDetail.Platform $.I18n}}
             </span>
             <span class="cond-preview-name">{{escHtml $condition.Name}}</span>
             <span class="rule-status {{if $condition.IsEnabled}}enabled{{else}}disabled{{end}}">
