@@ -150,14 +150,19 @@
             const thumbnail = channel.thumbnail || channel.thumbnail_url || '';
             const subtitle = channel.subscriber_count != null ? `${formatCount(channel.subscriber_count)} ${t.subscribers || 'subscribers'}` : (channel.follower_count != null ? `${formatCount(channel.follower_count)} ${t.followers || 'followers'}` : '');
             const added = state.existingWatchSet.has(`${platformId}:${channelId}`);
-            const thumb = thumbnail ? `<img class="mini-thumb-img" src="${esc(thumbnail)}" alt="" loading="lazy">` : `<div class="mini-thumb-placeholder">${esc(PLATFORM_META[platformId]?.icon || '📺')}</div>`;
+            // Use platform icon SVG if no thumbnail, fallback to emoji
+            const placeholderIcon = (window.__platformIcons && window.__platformIcons[platformId]) || (PLATFORM_META[platformId]?.icon || '📺');
+            const thumb = thumbnail ? `<img class="mini-thumb-img" src="${esc(thumbnail)}" alt="" loading="lazy">` : `<div class="mini-thumb-placeholder" style="display:flex; align-items:center; justify-content:center; width:100%; height:100%;">${typeof placeholderIcon === 'string' && placeholderIcon.includes('<svg') ? placeholderIcon : `<span>${esc(placeholderIcon)}</span>`}</div>`;
             return `<div class="mini-card"><div class="mini-thumb">${thumb}</div><div class="mini-info"><div class="mini-name">${esc(name)}</div><div class="mini-meta">${subtitle}</div></div>${added ? '<span class="mini-badge-added">' + (t.added || 'Added') + '</span>' : `<button class="mini-add-btn" title="${t.addChannelTitle || 'Add channel'}" onclick='openConfirm(${JSON.stringify({ platform: platformId, channelId, name, thumbnail: thumbnail || null })})'>+</button>`}</div>`;
         }).join('') + (nextToken ? `<button class="load-more-sm" onclick="loadAccSubs('${platformId}', '${esc(nextToken)}')">${t.loadMore || 'Load more…'}</button>` : '');
     }
 
     function openConfirm(channel) {
         state.selectedChannel = channel; const meta = PLATFORM_META[channel.platform] || { icon: '📺', label: channel.platform };
-        const thumb = channel.thumbnail ? `<img style="width:100%; height:100%; object-fit:cover; border-radius:4px;" src="${esc(channel.thumbnail)}" alt="">` : `<div style="display:flex; align-items:center; justify-content:center; width:100%; height:100%; font-size:32px;">${meta.icon}</div>`;
+        // Use platform icon SVG if no thumbnail, fallback to emoji
+        const svgIcon = (window.__platformIcons && window.__platformIcons[channel.platform]) || null;
+        const iconDisplay = svgIcon && svgIcon.includes('<svg') ? svgIcon : (meta.icon ? `<span style="font-size:32px;">${meta.icon}</span>` : '📺');
+        const thumb = channel.thumbnail ? `<img style="width:100%; height:100%; object-fit:cover; border-radius:4px;" src="${esc(channel.thumbnail)}" alt="">` : `<div style="display:flex; align-items:center; justify-content:center; width:100%; height:100%;">${iconDisplay}</div>`;
         document.getElementById('confirmPreview').innerHTML = `<div class="cf-platform-icon ${esc(channel.platform)}" style="position:relative; width:80px; height:80px; border-radius:4px; flex-shrink:0; overflow:hidden;">${thumb}</div><div class="cf-channel-info"><strong>${esc(channel.name)}</strong><span>${meta.icon} ${esc(meta.label)} · ${esc(channel.channelId)}</span></div>`;
         document.getElementById('confirmName').value = channel.name || ''; document.getElementById('confirmActive').checked = true; document.getElementById('confirmError').style.display = 'none'; document.getElementById('confirmAddBtn').disabled = false; document.getElementById('confirmAddBtn').textContent = '+ Add Channel'; document.getElementById('confirmOverlay').style.display = 'block'; document.getElementById('confirmDrawer').classList.add('open'); document.getElementById('confirmName').focus();
     }
