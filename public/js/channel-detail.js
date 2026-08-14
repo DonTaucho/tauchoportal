@@ -1,6 +1,6 @@
 (function () {
     'use strict';
-    const { PLATFORM_META, PLATFORM_EVENTS, apiRequest, escHtml, hasActiveFilter, openModal, closeModal, buildTestEvent, getEventParameters } = window;
+    const { PLATFORM_META, PLATFORM_EVENTS, apiRequest, escHtml, hasActiveFilter, openModal, closeModal, buildTestEvent, getEventParameters, getEventLabel } = window;
     const t = window.channelDetailTranslations || {}; // Fallback to empty object if not loaded
     let filteringChannelId = null;
     const getChannelIdFromURL = () => {
@@ -142,7 +142,7 @@
             console.log('[openTestAllConditionsModal] Events returned:', events);
             select.innerHTML = '<option value="">' + (t.selectEventType || 'Select event type...') + '</option>' + (events || []).map((evt) => {
                 console.log('[openTestAllConditionsModal] Mapping event:', evt);
-                return `<option value="${evt.value}">${evt.value}</option>`;
+                return `<option value="${evt.value}">${getEventLabel(evt.value, platform)}</option>`;
             }).join('');
             console.log('[openTestAllConditionsModal] Select innerHTML updated');
         } catch (e) {
