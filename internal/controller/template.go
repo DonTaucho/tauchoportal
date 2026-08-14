@@ -154,9 +154,11 @@ func GetEventFieldOptions(cond Conditions, platform, eventType string, translato
 	for _, param := range parameters {
 		label := param.Name
 		if translator != nil {
-			// Look up translation key: condition.{fieldname}
-			translatedLabel := translator.T("condition." + param.Name)
-			if translatedLabel != "" && translatedLabel != "condition."+param.Name {
+			// Look up translation key: condition.eventProp.{fieldname}.label
+			translationKey := "condition.eventProp." + param.Name + ".label"
+			translatedLabel := translator.T(translationKey)
+			// If translation found (not the key itself), use it
+			if translatedLabel != "" && translatedLabel != translationKey {
 				label = translatedLabel
 			}
 		}
