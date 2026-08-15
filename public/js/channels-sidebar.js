@@ -158,25 +158,108 @@
     }
 
     function openConfirm(channel) {
-        state.selectedChannel = channel; const meta = PLATFORM_META[channel.platform] || { icon: '📺', label: channel.platform };
+        // Store channel for validation
+        state.selectedChannel = channel;
+        // Validate channel access before showing confirmation drawer
+        validateAndShowConfirm(channel);
+    }
+
+    async function validateAndShowConfirm(channel) {
+        const meta = PLATFORM_META[channel.platform] || { icon: '📺', label: channel.platform };
         // Use platform icon SVG if no thumbnail, fallback to emoji
         const svgIcon = (window.__platformIcons && window.__platformIcons[channel.platform]) || null;
         const iconDisplay = svgIcon && svgIcon.includes('<svg') ? svgIcon : (meta.icon ? `<span style="font-size:32px;">${meta.icon}</span>` : '📺');
         const thumb = channel.thumbnail ? `<img style="width:100%; height:100%; object-fit:cover; border-radius:4px;" src="${esc(channel.thumbnail)}" alt="">` : `<div style="display:flex; align-items:center; justify-content:center; width:100%; height:100%;">${iconDisplay}</div>`;
-        document.getElementById('confirmPreview').innerHTML = `<div class="cf-platform-icon ${esc(channel.platform)}" style="position:relative; width:80px; height:80px; border-radius:4px; flex-shrink:0; overflow:hidden;">${thumb}</div><div class="cf-channel-info"><strong>${esc(channel.name)}</strong><span>${meta.icon} ${esc(meta.label)} · ${esc(channel.channelId)}</span></div>`;
-        document.getElementById('confirmName').value = channel.name || ''; document.getElementById('confirmActive').checked = true; document.getElementById('confirmError').style.display = 'none'; document.getElementById('confirmAddBtn').disabled = false; document.getElementById('confirmAddBtn').textContent = '+ Add Channel'; document.getElementById('confirmOverlay').style.display = 'block'; document.getElementById('confirmDrawer').classList.add('open'); document.getElementById('confirmName').focus();
+        
+        // Prepare preview
+        const confirmPreview = document.getElementById('confirmPreview');
+        const confirmName = document.getElementById('confirmName');
+        const confirmActive = document.getElementById('confirmActive');
+        const confirmAddBtn = document.getElementById('confirmAddBtn');
+        const confirmError = document.getElementById('confirmError');
+        
+        // Show preview with greyed-out state initially while validating
+        confirmPreview.innerHTML = `<div class="cf-platform-icon ${esc(channel.platform)}" style="position:relative; width:80px; height:80px; border-radius:4px; flex-shrink:0; overflow:hidden;">${thumb}</div><div class="cf-channel-info"><strong>${esc(channel.name)}</strong><span>${meta.icon} ${esc(meta.label)} · ${esc(channel.channelId)}</span></div>`;
+        confirmName.value = channel.name || '';
+        confirmActive.checked = true;
+        confirmError.style.display = 'none';
+        confirmAddBtn.disabled = false;
+        confirmAddBtn.textContent = t.validating || 'Validating…';
+        
+        // Show drawer
+        document.getElementById('confirmOverlay').style.display = 'block';
+        document.getElementById('confirmDrawer').classList.add('open');
+        
+        // Validate channel access
+        try {
+            const validation = await apiRequest('POST', '/watches/validate-channel-access', {
+                platform: channel.platform,
+                channel_id: channel.channelId
+            });
+            
+            if (validation.is_accessible) {
+                // Validation passed - enable add button
+                confirmAddBtn.disabled = false;
+                confirmAddBtn.textContent = t.addChannelTitle || '+ Add Channel';
+                confirmName.style.opacity = '1';
+                confirmActive.style.opacity = '1';
+                confirmError.style.display = 'none';
+                confirmName.focus();
+            } else {
+                // Validation failed - disable and show error
+                confirmAddBtn.disabled = true;
+                confirmAddBtn.textContent = t.cannotAdd || 'Cannot Add';
+                confirmName.style.opacity = '0.5';
+                confirmActive.style.opacity = '0.5';
+                
+                // Build error message with details
+                let errorMsg = validation.error || (t.failedValidateChannel || 'Cannot access this channel');
+                if (validation.suggestion) {
+                    errorMsg += '\n\n💡 ' + validation.suggestion;
+                }
+                confirmError.textContent = errorMsg;
+                confirmError.style.display = 'block';
+                confirmError.style.whiteSpace = 'pre-wrap';
+            }
+        } catch (error) {
+            // API call failed - show error
+            confirmAddBtn.disabled = true;
+            confirmAddBtn.textContent = t.cannotAdd || 'Cannot Add';
+            confirmName.style.opacity = '0.5';
+            confirmActive.style.opacity = '0.5';
+            confirmError.textContent = t.failedValidateChannel || 'Failed to validate channel access';
+            confirmError.style.display = 'block';
+        }
     }
 
     function cancelConfirm() { document.getElementById('confirmOverlay').style.display = 'none'; document.getElementById('confirmDrawer').classList.remove('open'); state.selectedChannel = null; }
     function showConfirmError(message) { const error = document.getElementById('confirmError'); error.textContent = message; error.style.display = 'block'; }
     async function confirmAdd() {
-        if (!state.selectedChannel) return; const name = document.getElementById('confirmName').value.trim(); if (!name) { showConfirmError(t.emptyName || 'Please enter a display name.'); return; }
-        const button = document.getElementById('confirmAddBtn'); button.disabled = true; button.textContent = t.adding || 'Adding…'; document.getElementById('confirmError').style.display = 'none';
+        const button = document.getElementById('confirmAddBtn');
+        // Check if validation failed (button disabled due to channel access error)
+        if (button.disabled && button.textContent === (t.cannotAdd || 'Cannot Add')) {
+            showConfirmError(t.channelNotAccessible || 'This channel cannot be accessed. Please check the error message above.');
+            return;
+        }
+        if (!state.selectedChannel) return;
+        const name = document.getElementById('confirmName').value.trim();
+        if (!name) { showConfirmError(t.emptyName || 'Please enter a display name.'); return; }
+        button.disabled = true;
+        button.textContent = t.adding || 'Adding…';
+        document.getElementById('confirmError').style.display = 'none';
         try {
             const body = { platform: state.selectedChannel.platform, channel_id: state.selectedChannel.channelId, name, is_active: document.getElementById('confirmActive').checked };
-            if (state.selectedChannel.thumbnail) body.thumbnail_url = state.selectedChannel.thumbnail; await apiRequest('POST', '/watches', body); state.existingWatchSet.add(`${state.selectedChannel.platform}:${state.selectedChannel.channelId}`);
-            cancelConfirm(); showMonToast(`✅ "${name}" added!`); if (typeof state.onChannelsChanged === 'function') await state.onChannelsChanged();
-        } catch (error) { showConfirmError(error.message || (t.failedAddChannel || 'Failed to add channel.')); button.disabled = false; button.textContent = '+ Add Channel'; }
+            if (state.selectedChannel.thumbnail) body.thumbnail_url = state.selectedChannel.thumbnail;
+            await apiRequest('POST', '/watches', body);
+            state.existingWatchSet.add(`${state.selectedChannel.platform}:${state.selectedChannel.channelId}`);
+            cancelConfirm();
+            showMonToast(`✅ "${name}" added!`);
+            if (typeof state.onChannelsChanged === 'function') await state.onChannelsChanged();
+        } catch (error) {
+            showConfirmError(error.message || (t.failedAddChannel || 'Failed to add channel.'));
+            button.disabled = false;
+            button.textContent = t.addChannelTitle || '+ Add Channel';
+        }
     }
 
     function normalizePagedData(data) { if (Array.isArray(data)) return { items: data, next_page_token: null, cursor: null }; if (data && Array.isArray(data.items)) return data; return { items: [], next_page_token: null, cursor: null }; }

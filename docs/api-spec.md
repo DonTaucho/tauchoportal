@@ -1298,11 +1298,115 @@ PATCH /watches/update?id=watch_123
 - **Frontend usage**: Use directly in `<img>` tags (no server proxying needed)
 - **Null behavior**: If not provided and auto-fetch fails, remains `null` in database (no error)
 
+#### Watches — Channel Access Validation (NEW)
+
+**Purpose:** Test if backend can access a channel **before** creating a watch.
+
+This prevents the "silent failure" scenario where:
+1. User creates watch for channel X on frontend
+2. Frontend shows success (no error)
+3. Backend silently fails to fetch events with 401/403
+4. User doesn't realize their watch isn't working
+
+**When to call:**
+- **Before** `POST /watches` is called
+- After user selects a platform and enters channel ID
+- Show validation result to user before allowing watch creation
+
+**Request:**
+```json
+{
+  "platform": "twitcasting",
+  "channel_id": "c:bandan"
+}
+```
+
+**Response — success (`200`):**
+```json
+{
+  "is_accessible": true,
+  "message": "Backend can access this TwitCasting channel: ユーザー名"
+}
+```
+
+**Response — failure (`200` with error details):**
+```json
+{
+  "is_accessible": false,
+  "error": "TwitCasting API returned 401 Unauthorized",
+  "account_type": "regular (non-c prefix)",
+  "suggestion": "Your TwitCasting account may not have API access. Try using a c: prefix account (bot/creator account) instead. Or check if you need to OAuth login again with your account."
+}
+```
+
+**Response — platform not supported (`200`):**
+```json
+{
+  "is_accessible": false,
+  "error": "Platform \"myplatform\" not supported"
+}
+```
+
+**Key fields:**
+- **is_accessible**: Boolean — whether backend can access this channel
+- **message**: Human-readable success message (only if `is_accessible: true`)
+- **error**: Technical error message (only if `is_accessible: false`)
+- **account_type**: Platform-specific account information (e.g., "c_prefix" vs "regular" for TwitCasting)
+- **suggestion**: How to fix the issue (e.g., "Try using a different account type")
+
+**Per-user OAuth tokens:**
+The validation endpoint uses the user's OAuth token **if they've authenticated with that platform**. For example:
+- If user OAuth-logged in with TwitCasting, their token is used
+- If user has only set a static/shared token, that is used
+- If neither exists, validation fails
+
+This means **each user can use their own platform account** without interfering with others.
+
+**Frontend integration example:**
+
+```javascript
+async function validateChannelThenCreate() {
+  const platform = 'twitcasting';
+  const channelId = 'c:bandan';
+  
+  // 1. Validate access first
+  const validation = await fetch('/watches/validate-channel-access', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ platform, channel_id: channelId })
+  }).then(r => r.json());
+  
+  if (!validation.is_accessible) {
+    // Show error to user
+    showError(validation.error);
+    if (validation.suggestion) {
+      showInfo(validation.suggestion);
+    }
+    return; // Block watch creation
+  }
+  
+  // 2. Validation passed — now create watch
+  const watch = await fetch('/watches', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      name: 'My Channel',
+      platform,
+      channel_id: channelId,
+      is_active: true
+    })
+  }).then(r => r.json());
+  
+  showSuccess(`Watch created: ${watch.name}`);
+}
+```
+
 ---
 
 | Method | Path | Body / Params | Description |
 |--------|------|---------------|-------------|
 | GET | `/watches` | — | List all watches for the authenticated user |
+| POST | `/watches/validate-channel-access` | `{ platform, channel_id }` | **[NEW]** Test if backend can access a channel before creating watch |
 | POST | `/watches` | `{ name, platform, channel_id, is_active, [thumbnail_url] }` | Create a new watched channel (thumbnail optional) |
 | PATCH | `/watches/update?id=<id>` | `{ [thumbnail_url], [clear_thumbnail] }` | Update thumbnail for a watch |
 | DELETE | `/watches?id=<id>` | — | Delete a watch (also removes its conditions) |
@@ -2657,10 +2761,14 @@ Returns platform-specific event schema. Each platform and event type has unique 
     "event_type": {"name": "event_type", "type": "string", "description": "Always 'comment' for this endpoint", "optional": false},
     "sender_id": {"name": "sender_id", "type": "string", "description": "NicoNico user ID (optional; can be anonymous)", "optional": true},
     "sender_name": {"name": "sender_name", "type": "string", "description": "Display name of the commenter", "optional": false},
+    "sender_avatar": {"name": "sender_avatar", "type": "string", "description": "URL to user profile picture", "optional": true},
     "message": {"name": "message", "type": "string", "description": "Comment text", "optional": false},
-    "color": {"name": "color", "type": "string", "description": "Comment text color (e.g., 'white', 'red', 'green')", "optional": true},
-    "size": {"name": "size", "type": "string", "description": "Comment text size (e.g., 'small', 'medium', 'large')", "optional": true},
-    "position": {"name": "position", "type": "string", "description": "Screen position (e.g., 'top', 'center', 'bottom')", "optional": true},
+    "color": {"name": "color", "type": "string", "description": "Comment text color in hex format (e.g., '#FF0000', '#547698')", "optional": true},
+    "color_rgb": {"name": "color_rgb", "type": "object", "description": "RGB breakdown of comment color (r, g, b: 0-255, hex: color string)", "optional": true},
+    "position": {"name": "position", "type": "string", "description": "Screen position: 'ue' (top), 'naka' (middle), 'shita' (bottom)", "optional": true},
+    "size": {"name": "size", "type": "string", "description": "Comment size: 'small', 'medium', 'big'", "optional": true},
+    "font": {"name": "font", "type": "string", "description": "Font style: 'defont' (default), 'mincho' (serif), 'gothic' (sans-serif)", "optional": true},
+    "opacity": {"name": "opacity", "type": "string", "description": "Comment opacity: 'Normal' (opaque), 'Translucent' (semi-transparent)", "optional": true},
     "received_at": {"name": "received_at", "type": "timestamp", "description": "When the event was received from the platform", "optional": false},
     "created_at": {"name": "created_at", "type": "timestamp", "description": "When the event record was created in our database", "optional": false}
   }
@@ -2669,7 +2777,7 @@ Returns platform-specific event schema. Each platform and event type has unique 
 
 **Key differences by platform:**
 - **YouTube comments**: Include `is_member` flag; no color/position fields
-- **NicoNico comments**: Include `color`, `size`, `position` (danmaku styling); `sender_id` is optional
+- **NicoNico comments**: Include comprehensive danmaku styling (`color`, `color_rgb`, `size`, `position`, `font`, `opacity`); `sender_id` is optional
 - **Twitch comments**: Include `is_mod`, `badges`, channel-specific badges
 - **Bilibili comments** (danmaku): Include `color`, `size`, `position` like NicoNico
 - **TikTok/Instagram/Facebook comments**: Minimal field set (sender, message only)
@@ -2681,3 +2789,264 @@ Returns platform-specific event schema. Each platform and event type has unique 
 - Frontend calls this when user is building a condition for a specific platform and event
 - Display only the available fields for that platform-event combination
 - Fields with `"optional": false` are always present; `"optional": true` fields may be absent for some events
+
+---
+
+### GET /event-metadata/niconico/nicoru
+
+**Response (example: GET /event-metadata/niconico/nicoru):**
+```json
+{
+  "platform": "niconico",
+  "event_type": "nicoru",
+  "fields": {
+    "id": {"name": "id", "type": "string", "description": "Unique identifier (UUID) for this event", "optional": false},
+    "user_id": {"name": "user_id", "type": "number", "description": "ID of the user who owns the watch target", "optional": false},
+    "watch_target_id": {"name": "watch_target_id", "type": "string", "description": "ID of the watch target this event came from", "optional": false},
+    "stream_event_id": {"name": "stream_event_id", "type": "string", "description": "ID of the parent stream_event", "optional": false},
+    "platform": {"name": "platform", "type": "string", "description": "Platform name", "optional": false},
+    "event_type": {"name": "event_type", "type": "string", "description": "Always 'nicoru' for this endpoint (emotion/reaction)", "optional": false},
+    "sender_id": {"name": "sender_id", "type": "string", "description": "NicoNico user ID (optional; can be anonymous)", "optional": true},
+    "sender_name": {"name": "sender_name", "type": "string", "description": "Display name of the user", "optional": false},
+    "sender_avatar": {"name": "sender_avatar", "type": "string", "description": "URL to user profile picture", "optional": true},
+    "message": {"name": "message", "type": "string", "description": "Empty or reaction identifier", "optional": true},
+    "color": {"name": "color", "type": "string", "description": "Emotion color in hex format", "optional": true},
+    "color_rgb": {"name": "color_rgb", "type": "object", "description": "RGB breakdown of emotion color (r, g, b: 0-255, hex: color string)", "optional": true},
+    "position": {"name": "position", "type": "string", "description": "Screen position: 'ue' (top), 'naka' (middle), 'shita' (bottom)", "optional": true},
+    "size": {"name": "size", "type": "string", "description": "Emotion size: 'small', 'medium', 'big'", "optional": true},
+    "opacity": {"name": "opacity", "type": "string", "description": "Emotion opacity: 'Normal' (opaque), 'Translucent' (semi-transparent)", "optional": true},
+    "received_at": {"name": "received_at", "type": "timestamp", "description": "When the event was received from the platform", "optional": false},
+    "created_at": {"name": "created_at", "type": "timestamp", "description": "When the event record was created in our database", "optional": false}
+  }
+}
+```
+
+**Note:** Nicoru represents emotion/reaction buttons during live. Similar styling to comments but often displayed as floating emoticons.
+
+---
+
+### GET /event-metadata/niconico/gift
+
+**Response (example: GET /event-metadata/niconico/gift):**
+```json
+{
+  "platform": "niconico",
+  "event_type": "gift",
+  "fields": {
+    "id": {"name": "id", "type": "string", "description": "Unique identifier (UUID) for this event", "optional": false},
+    "user_id": {"name": "user_id", "type": "number", "description": "ID of the user who owns the watch target", "optional": false},
+    "watch_target_id": {"name": "watch_target_id", "type": "string", "description": "ID of the watch target this event came from", "optional": false},
+    "stream_event_id": {"name": "stream_event_id", "type": "string", "description": "ID of the parent stream_event", "optional": false},
+    "platform": {"name": "platform", "type": "string", "description": "Platform name", "optional": false},
+    "event_type": {"name": "event_type", "type": "string", "description": "Always 'gift' for this endpoint", "optional": false},
+    "sender_id": {"name": "sender_id", "type": "string", "description": "NicoNico user ID of gift sender", "optional": false},
+    "sender_name": {"name": "sender_name", "type": "string", "description": "Display name of the gift sender", "optional": false},
+    "sender_avatar": {"name": "sender_avatar", "type": "string", "description": "URL to sender profile picture", "optional": true},
+    "message": {"name": "message", "type": "string", "description": "Optional message attached to gift", "optional": true},
+    "amount_value": {"name": "amount_value", "type": "number", "description": "Gift point value (e.g., 50)", "optional": false},
+    "amount_currency": {"name": "amount_currency", "type": "string", "description": "Currency code (JPY for NicoNico)", "optional": false},
+    "amount_display": {"name": "amount_display", "type": "string", "description": "Formatted display string (e.g., '50pt', '¥500')", "optional": false},
+    "is_member": {"name": "is_member", "type": "boolean", "description": "Whether sender is a channel member/supporter", "optional": true},
+    "badges": {"name": "badges", "type": "array", "description": "Array of badge descriptors (e.g., ['supporter', 'subscriber'])", "optional": true},
+    "received_at": {"name": "received_at", "type": "timestamp", "description": "When the event was received from the platform", "optional": false},
+    "created_at": {"name": "created_at", "type": "timestamp", "description": "When the event record was created in our database", "optional": false}
+  }
+}
+```
+
+**Note:** Gift amounts are tracked for monetization and viewer engagement tracking.
+
+---
+
+### GET /event-metadata/niconico/follow
+
+**Response (example: GET /event-metadata/niconico/follow):**
+```json
+{
+  "platform": "niconico",
+  "event_type": "follow",
+  "fields": {
+    "id": {"name": "id", "type": "string", "description": "Unique identifier (UUID) for this event", "optional": false},
+    "user_id": {"name": "user_id", "type": "number", "description": "ID of the user who owns the watch target", "optional": false},
+    "watch_target_id": {"name": "watch_target_id", "type": "string", "description": "ID of the watch target this event came from", "optional": false},
+    "stream_event_id": {"name": "stream_event_id", "type": "string", "description": "ID of the parent stream_event", "optional": false},
+    "platform": {"name": "platform", "type": "string", "description": "Platform name", "optional": false},
+    "event_type": {"name": "event_type", "type": "string", "description": "Always 'follow' for this endpoint", "optional": false},
+    "sender_id": {"name": "sender_id", "type": "string", "description": "NicoNico user ID of new follower", "optional": false},
+    "sender_name": {"name": "sender_name", "type": "string", "description": "Display name of new follower", "optional": false},
+    "sender_avatar": {"name": "sender_avatar", "type": "string", "description": "URL to follower profile picture", "optional": true},
+    "received_at": {"name": "received_at", "type": "timestamp", "description": "When the event was received from the platform", "optional": false},
+    "created_at": {"name": "created_at", "type": "timestamp", "description": "When the event record was created in our database", "optional": false}
+  }
+}
+```
+
+---
+
+### GET /event-metadata/niconico/stream_start
+
+**Response (example: GET /event-metadata/niconico/stream_start):**
+```json
+{
+  "platform": "niconico",
+  "event_type": "stream_start",
+  "fields": {
+    "id": {"name": "id", "type": "string", "description": "Unique identifier (UUID) for this event", "optional": false},
+    "user_id": {"name": "user_id", "type": "number", "description": "ID of the user who owns the watch target", "optional": false},
+    "watch_target_id": {"name": "watch_target_id", "type": "string", "description": "ID of the watch target this event came from", "optional": false},
+    "stream_event_id": {"name": "stream_event_id", "type": "string", "description": "ID of the parent stream_event", "optional": false},
+    "platform": {"name": "platform", "type": "string", "description": "Platform name", "optional": false},
+    "event_type": {"name": "event_type", "type": "string", "description": "Always 'stream_start' for this endpoint", "optional": false},
+    "received_at": {"name": "received_at", "type": "timestamp", "description": "When the event was received from the platform", "optional": false},
+    "created_at": {"name": "created_at", "type": "timestamp", "description": "When the event record was created in our database", "optional": false}
+  }
+}
+```
+
+**Note:** System event indicating a live stream has started. No sender information (applies to channel level).
+
+---
+
+### GET /event-metadata/niconico/stream_end
+
+**Response (example: GET /event-metadata/niconico/stream_end):**
+```json
+{
+  "platform": "niconico",
+  "event_type": "stream_end",
+  "fields": {
+    "id": {"name": "id", "type": "string", "description": "Unique identifier (UUID) for this event", "optional": false},
+    "user_id": {"name": "user_id", "type": "number", "description": "ID of the user who owns the watch target", "optional": false},
+    "watch_target_id": {"name": "watch_target_id", "type": "string", "description": "ID of the watch target this event came from", "optional": false},
+    "stream_event_id": {"name": "stream_event_id", "type": "string", "description": "ID of the parent stream_event", "optional": false},
+    "platform": {"name": "platform", "type": "string", "description": "Platform name", "optional": false},
+    "event_type": {"name": "event_type", "type": "string", "description": "Always 'stream_end' for this endpoint", "optional": false},
+    "received_at": {"name": "received_at", "type": "timestamp", "description": "When the event was received from the platform", "optional": false},
+    "created_at": {"name": "created_at", "type": "timestamp", "description": "When the event record was created in our database", "optional": false}
+  }
+}
+```
+
+**Note:** System event indicating a live stream has ended. No sender information (applies to channel level).
+
+---
+
+Provides metadata about platform capabilities and event parameters. Read-only queryable catalog. No authentication required for GET endpoints.
+
+### GET /platform-config/platforms
+
+List all supported platforms.
+
+**Response `200`:**
+```json
+{
+  "platforms": ["youtube", "twitch", "bilibili", "tiktok", "kick", "niconico"]
+}
+```
+
+---
+
+### GET /platform-config/platforms/{platform}/events
+
+List event types for a platform.
+
+**Example:** `GET /platform-config/platforms/youtube/events`
+
+**Response `200`:**
+```json
+{
+  "platform": "youtube",
+  "events": ["comment", "superchat", "sticker", "member"]
+}
+```
+
+---
+
+### GET /platform-config/platforms/{platform}/events/{event}/parameters
+
+Get all parameters for platform/event (all parameters are available for use in conditions).
+
+**Response `200`:**
+```json
+{
+  "platform": "youtube",
+  "event": "superchat",
+  "parameters": [
+    { "name": "message", "type": "string", "available": true, "optional": false, "description": "Message text (always present)" },
+    { "name": "channel_name", "type": "string", "available": true, "optional": true, "description": "Channel name (sometimes missing)" }
+  ]
+}
+```
+
+**Fields:**
+- `available` (bool): Whether this parameter can be used in conditions (all parameters are always available)
+- `optional` (bool): Whether this field is sometimes missing from events
+  - `false` = guaranteed to be present in every event
+  - `true` = sometimes missing (use null coalescing when building conditions)
+
+---
+
+### GET /platform-config/platforms/{platform}/events/{event}/parameters/available
+
+Get available parameters (all parameters, for UI condition builder).
+
+**Response `200`:** All parameters including both required and optional fields. Filter by `optional: false` in the response if you only want guaranteed-present fields.
+
+**Example:**
+```json
+{
+  "platform": "youtube",
+  "event": "superchat",
+  "parameters": [
+    { "name": "message", "type": "string", "available": true, "optional": false },
+    { "name": "channel_name", "type": "string", "available": true, "optional": true }
+  ]
+}
+```
+
+---
+
+### GET /platform-config/platforms/{platform}/events/{event}/parameters/unavailable
+
+Get only unavailable parameters with reasons (currently returns empty, reserved for future use).
+
+**Response `200`:** Empty array (all parameters are currently available)
+
+---
+
+### GET /platform-config/platforms/{platform}/events/{event}/parameters/{param}/available
+
+Check if specific parameter is available.
+
+**Response `200`:**
+```json
+{
+  "platform": "youtube",
+  "event": "superchat",
+  "parameter": "message",
+  "available": true,
+  "optional": false
+}
+```
+
+---
+
+### GET /platform-config/catalog
+
+Get complete catalog (large response).
+
+**Use case:** Offline documentation, bulk export.
+
+**Response `200`:**
+```json
+{
+  "status": "success",
+  "message": "Platform catalog reloaded"
+}
+```
+
+**Notes:**
+- Catalog defined in `internal/config/platform_event_parameters.json`
+- All parameters use `event_` prefix (e.g., `event_message`, `event_amount`)
+- No database required
+- All responses are JSON

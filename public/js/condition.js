@@ -281,7 +281,7 @@ const eventPropertyDefinitions = {
         { name: "sender_id", descriptionKey: "condition.eventProp.sender_id.description", example: "user_12345" },
         { name: "sender_name", descriptionKey: "condition.eventProp.sender_name.description", example: "StreamFan42" },
         { name: "message", descriptionKey: "condition.eventProp.message.description", example: "Great stream!" },
-        { name: "badges", descriptionKey: "condition.eventProp.badges.description", example: "moderator, member" },
+        { name: "badges", descriptionKey: "condition.eventProp.senderbadges.description", example: "moderator, member" },
         { name: "is_member", descriptionKey: "condition.eventProp.is_member.description", example: "true / false" },
         { name: "is_mod", descriptionKey: "condition.eventProp.is_mod.description", example: "true / false" },
         { name: "received_at", descriptionKey: "condition.eventProp.received_at.description", example: "2026-07-23T11:21:59Z" }
