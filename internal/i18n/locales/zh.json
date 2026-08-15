@@ -730,11 +730,11 @@
   "channelLayout.startWatching": "目標登記",
   "channelLayout.confirmCancel": "取消",
   "channelLayout.confirmAddButton": "+ 新增頻道",
-  "channelLayout.validating": "驗證中…",
-  "channelLayout.cannotAdd": "無法新增",
-  "channelLayout.failedValidateChannel": "驗證頻道存取權限失敗",
-  "channelLayout.channelNotAccessible": "無法存取此頻道。請檢查上方的錯誤訊息。",
-  "channelLayout.addChannelTitle": "+ 新增頻道",
+  "sidebarChannels.validating": "驗證中…",
+  "sidebarChannels.cannotAdd": "無法新增",
+  "sidebarChannels.failedValidateChannel": "驗證頻道存取權限失敗",
+  "sidebarChannels.channelNotAccessible": "無法存取此頻道。請檢查上方的錯誤訊息。",
+  "sidebarChannels.addChannelTitle": "+ 新增頻道",
   "channelLayout.filterTitle": "分配過濾器",
   "channelLayout.filterSubtitle": "選擇目標分佈",
   "channelLayout.filterIntro": "即使在指定頻道內，您也可以跳過與某些關鍵字匹配的廣播，或僅定位標題中包含特定單詞的廣播。",
@@ -1655,3 +1655,4 @@
   "opacity.normal": "正常",
   "opacity.translucent": "半透明"
 }
+

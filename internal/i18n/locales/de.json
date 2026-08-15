@@ -727,11 +727,11 @@
   "channelLayout.startWatching": "Sofort mit dem Zuschauen beginnen",
   "channelLayout.confirmCancel": "Abbrechen",
   "channelLayout.confirmAddButton": "+ Kanal hinzufügen",
-  "channelLayout.validating": "Wird überprüft…",
-  "channelLayout.cannotAdd": "Kann nicht hinzugefügt werden",
-  "channelLayout.failedValidateChannel": "Der Zugriff auf den Kanal konnte nicht überprüft werden",
-  "channelLayout.channelNotAccessible": "Auf diesen Kanal kann nicht zugegriffen werden. Bitte prüfen Sie die obige Fehlermeldung.",
-  "channelLayout.addChannelTitle": "+ Kanal hinzufügen",
+  "sidebarChannels.validating": "Wird überprüft…",
+  "sidebarChannels.cannotAdd": "Kann nicht hinzugefügt werden",
+  "sidebarChannels.failedValidateChannel": "Der Zugriff auf den Kanal konnte nicht überprüft werden",
+  "sidebarChannels.channelNotAccessible": "Auf diesen Kanal kann nicht zugegriffen werden. Bitte prüfen Sie die obige Fehlermeldung.",
+  "sidebarChannels.addChannelTitle": "+ Kanal hinzufügen",
   "channelLayout.filterTitle": "Stream-Filter",
   "channelLayout.filterSubtitle": "Steuern Sie, welche Live-Streams für diesen Kanal verfolgt werden.",
   "channelLayout.filterIntro": "Auch wenn Sie einen Kanal verfolgen, können Sie Streams überspringen, die bestimmte Schlüsselwörter enthalten, oder nur Streams verfolgen, deren Titel bestimmte Wörter enthalten.",
@@ -1655,3 +1655,4 @@
   "opacity.normal": "Normal",
   "opacity.translucent": "Halbtransparent"
 }
+

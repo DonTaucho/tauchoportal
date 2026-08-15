@@ -727,11 +727,11 @@
   "channelLayout.startWatching": "Commencer la surveillance immédiatement",
   "channelLayout.confirmCancel": "Annuler",
   "channelLayout.confirmAddButton": "+ Ajouter un canal",
-  "channelLayout.validating": "Validation…",
-  "channelLayout.cannotAdd": "Impossible d’ajouter",
-  "channelLayout.failedValidateChannel": "Échec de la validation de l’accès au canal",
-  "channelLayout.channelNotAccessible": "Ce canal est inaccessible. Veuillez vérifier le message d’erreur ci-dessus.",
-  "channelLayout.addChannelTitle": "+ Ajouter un canal",
+  "sidebarChannels.validating": "Validation…",
+  "sidebarChannels.cannotAdd": "Impossible d’ajouter",
+  "sidebarChannels.failedValidateChannel": "Échec de la validation de l’accès au canal",
+  "sidebarChannels.channelNotAccessible": "Ce canal est inaccessible. Veuillez vérifier le message d’erreur ci-dessus.",
+  "sidebarChannels.addChannelTitle": "+ Ajouter un canal",
   "channelLayout.filterTitle": "Filtre de stream",
   "channelLayout.filterSubtitle": "Contrôlez quels streams en direct sont suivis pour ce canal.",
   "channelLayout.filterIntro": "Même si vous surveillez un canal, vous pouvez ignorer les streams qui correspondent à certains mots-clés ou ne suivre que ceux dont le titre contient des mots spécifiques.",
@@ -1655,3 +1655,4 @@
   "opacity.normal": "Normal",
   "opacity.translucent": "Translucide"
 }
+

@@ -727,11 +727,11 @@
   "channelLayout.startWatching": "Empezar a monitorear de inmediato",
   "channelLayout.confirmCancel": "Cancelar",
   "channelLayout.confirmAddButton": "+ Agregar canal",
-  "channelLayout.validating": "Validando…",
-  "channelLayout.cannotAdd": "No se puede agregar",
-  "channelLayout.failedValidateChannel": "No se pudo validar el acceso al canal",
-  "channelLayout.channelNotAccessible": "No se puede acceder a este canal. Revisa el mensaje de error anterior.",
-  "channelLayout.addChannelTitle": "+ Agregar canal",
+  "sidebarChannels.validating": "Validando…",
+  "sidebarChannels.cannotAdd": "No se puede agregar",
+  "sidebarChannels.failedValidateChannel": "No se pudo validar el acceso al canal",
+  "sidebarChannels.channelNotAccessible": "No se puede acceder a este canal. Revisa el mensaje de error anterior.",
+  "sidebarChannels.addChannelTitle": "+ Agregar canal",
   "channelLayout.filterTitle": "Filtro de transmisión",
   "channelLayout.filterSubtitle": "Controla qué transmisiones en vivo se siguen para este canal.",
   "channelLayout.filterIntro": "Aunque estés siguiendo un canal, puedes omitir transmisiones que coincidan con ciertas palabras clave o seguir solo las transmisiones cuyos títulos contengan palabras específicas.",
@@ -1655,3 +1655,4 @@
   "opacity.normal": "Normal",
   "opacity.translucent": "Translúcido"
 }
+
