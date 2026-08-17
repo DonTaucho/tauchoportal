@@ -136,7 +136,13 @@
     function openModal(id) { const modal = document.getElementById(id); if (!modal) return; modal.style.display = 'block'; document.body.style.overflow = 'hidden'; }
     function closeModal(id) { const modal = document.getElementById(id); if (!modal) return; modal.style.display = 'none'; document.body.style.overflow = 'auto'; }
     function showMonToast(message) { const toast = document.getElementById('monToast'); if (!toast) return; toast.textContent = message; toast.classList.add('visible'); setTimeout(() => toast.classList.remove('visible'), 3000); }
-    function getEventLabel(type, platform) { const event = (PLATFORM_EVENTS[platform] || []).find((item) => item.value === type); return event ? type : type; }
+    function getEventLabel(type, platform) {
+        // Try to get translated label from i18n, fallback to event type itself
+        const i18n = window._i18nMsg || {};
+        const translationKey = `event.type.${type}`;
+        const translated = i18n[translationKey];
+        return translated || type;
+    }
     function buildTestEvent(eventType, platform, customParams = {}) { const activeChannel = typeof window.currentChannel !== 'undefined' ? window.currentChannel : null; return { id: 'evt_test_' + Date.now(), user_id: 1, watch_target_id: activeChannel ? activeChannel.id : 'watch_1', platform, event_type: eventType, message: customParams.event_message || '', amount_value: parseInt(customParams.event_amount, 10) || 0, amount_currency: 'USD', amount_display: customParams.event_amount ? `$${customParams.event_amount}` : '$0', sender_name: customParams.event_sender_name || 'TestUser', sender_id: customParams.event_sender_id || 'user_test_123', sender_avatar: '', is_member: customParams.event_is_member === true || customParams.event_is_member === 'true', is_mod: customParams.event_is_mod === true || customParams.event_is_mod === 'true', badges: [], received_at: new Date().toISOString(), created_at: new Date().toISOString() }; }
 
     // Set up apiGet_func for use in API fetch functions

@@ -1,8 +1,7 @@
 (function () {
     'use strict';
-    const { PLATFORM_META, PLATFORM_EVENTS, apiRequest, escHtml, hasActiveFilter, openModal, closeModal, buildTestEvent, getEventParameters } = window;
+    const { PLATFORM_META, PLATFORM_EVENTS, apiRequest, escHtml, hasActiveFilter, openModal, closeModal, buildTestEvent, getEventParameters, getEventLabel } = window;
     const t = window.channelDetailTranslations || {}; // Fallback to empty object if not loaded
-    let filteringChannelId = null;
     const getChannelIdFromURL = () => {
         const match = window.location.pathname.match(/^\/channels\/([^\/]+)\/?$/);
         return match ? match[1] : null;
@@ -89,49 +88,6 @@
             alert((t.failedDelete || 'Failed to delete channel: ') + error.message); 
         } 
     }
-    const textToArray = (text) => text.split('\n').map((item) => item.trim()).filter(Boolean);
-    function openFilterModal(channelId) { 
-        filteringChannelId = channelId; 
-        const nameElem = document.querySelector('.editable-name');
-        const channelName = nameElem ? nameElem.textContent.replace(' ✏️', '').trim() : 'this channel';
-        document.getElementById('filterModalSubtitle').textContent = `Control which live streams are tracked for "${channelName}".`; 
-        const filterBtnData = document.querySelector('.action-btn.filter');
-        const hasFilter = filterBtnData && filterBtnData.classList.contains('active');
-        document.getElementById('filterSkipTitle').value = '';
-        document.getElementById('filterSkipDesc').value = '';
-        document.getElementById('filterRequireTitle').value = '';
-        document.getElementById('filterClearAll').checked = !hasFilter;
-        openModal('filterModal'); 
-    }
-    async function saveFilter() { 
-        const button = document.getElementById('filterSaveBtn'); 
-        button.disabled = true; 
-        try { 
-            const clearAll = document.getElementById('filterClearAll').checked; 
-            let body; 
-            if (clearAll) { 
-                body = { clear_filter: true }; 
-            } else { 
-                const skipTitle = textToArray(document.getElementById('filterSkipTitle').value),
-                    skipDesc = textToArray(document.getElementById('filterSkipDesc').value),
-                    requireTitle = textToArray(document.getElementById('filterRequireTitle').value); 
-                body = skipTitle.length || skipDesc.length || requireTitle.length ? { 
-                    stream_filter: { 
-                        ...(skipTitle.length ? { skip_if_title_contains: skipTitle } : {}), 
-                        ...(skipDesc.length ? { skip_if_description_contains: skipDesc } : {}), 
-                        ...(requireTitle.length ? { require_title_contains: requireTitle } : {}) 
-                    } 
-                } : { clear_filter: true }; 
-            } 
-            await apiRequest('PATCH', `/watches/update?id=${filteringChannelId}`, body); 
-            closeModal('filterModal'); 
-            location.reload();
-        } catch (error) { 
-            alert((window._i18nMsg?.['channel.saveFilterFailed'] || 'Failed to save filter') + ': ' + error.message); 
-        } finally { 
-            button.disabled = false; 
-        } 
-    }
     async function openTestAllConditionsModal() { 
         const select = document.getElementById('testEventType'); 
         const platformTag = document.querySelector('.platform-tag');
@@ -142,7 +98,7 @@
             console.log('[openTestAllConditionsModal] Events returned:', events);
             select.innerHTML = '<option value="">' + (t.selectEventType || 'Select event type...') + '</option>' + (events || []).map((evt) => {
                 console.log('[openTestAllConditionsModal] Mapping event:', evt);
-                return `<option value="${evt.value}">${evt.value}</option>`;
+                return `<option value="${evt.value}">${getEventLabel(evt.value, platform)}</option>`;
             }).join('');
             console.log('[openTestAllConditionsModal] Select innerHTML updated');
         } catch (e) {
@@ -209,6 +165,6 @@
         container.style.display = 'block'; 
         content.innerHTML = `<p><strong>${t.totalTested || 'Total tested:'}` + `</strong> ${response.total_conditions}</p><p><strong>${t.matched || 'Matched:'}` + `</strong> ${response.matched}</p><p><strong>${t.wouldTrigger || 'Would trigger:'}` + `</strong> ${response.triggered}</p><p><strong>${t.errors || 'Errors:'}` + `</strong> ${response.errors}</p>${response.results && response.results.length ? `<hr><h5>${t.details || 'Details:'}</h5><div style="max-height:300px; overflow-y:auto;">${response.results.map((result) => `<div style="margin:0.5rem 0; padding:0.5rem; background:${result.matched ? '#e8f5e9' : '#ffebee'}; border-radius:4px;"><strong>${escHtml(result.condition_name)}</strong>: ${result.matched ? t.matched_badge || '✅ Matched' : t.no_match || '❌ No match'}${result.would_trigger ? ' ' + (t.would_trigger || '(would trigger)') : ''}</div>`).join('')}</div>` : ''}`; 
     }
-    Object.assign(window, { openTestAllConditionsModal, toggleChannel, deleteChannel, updateDisplayName, startEditDisplayName, openFilterModal, saveFilter, updateTestEventParams, runConditionTest, displayTestResults });
+    Object.assign(window, { openTestAllConditionsModal, toggleChannel, deleteChannel, updateDisplayName, startEditDisplayName, updateTestEventParams, runConditionTest, displayTestResults });
     route();
 })();

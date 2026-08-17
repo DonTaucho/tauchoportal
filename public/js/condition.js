@@ -281,7 +281,7 @@ const eventPropertyDefinitions = {
         { name: "sender_id", descriptionKey: "condition.eventProp.sender_id.description", example: "user_12345" },
         { name: "sender_name", descriptionKey: "condition.eventProp.sender_name.description", example: "StreamFan42" },
         { name: "message", descriptionKey: "condition.eventProp.message.description", example: "Great stream!" },
-        { name: "badges", descriptionKey: "condition.eventProp.badges.description", example: "moderator, member" },
+        { name: "badges", descriptionKey: "condition.eventProp.senderbadges.description", example: "moderator, member" },
         { name: "is_member", descriptionKey: "condition.eventProp.is_member.description", example: "true / false" },
         { name: "is_mod", descriptionKey: "condition.eventProp.is_mod.description", example: "true / false" },
         { name: "received_at", descriptionKey: "condition.eventProp.received_at.description", example: "2026-07-23T11:21:59Z" }
@@ -337,25 +337,47 @@ const eventPropertySchemas = {
         { name: 'sender_avatar', type: 'string', description: 'Profile picture URL', optional: true }
     ],
     'niconico:comment': [
-        { name: 'content', type: 'string', description: 'Chat message content (field: content from comment data)', optional: false },
-        { name: 'user_id', type: 'string', description: 'NicoNico user ID (anonymized in archived format)', optional: false },
-        { name: 'date', type: 'number', description: 'Unix timestamp when comment was posted', optional: false },
-        { name: 'mail', type: 'string', description: 'Danmaku formatting: color, size, position (e.g. \'white 184 big\')', optional: true },
-        { name: 'vpos_sec', type: 'number', description: 'Video position in seconds where comment appears', optional: true }
+        { name: 'sender_id', type: 'string', description: 'User ID', optional: true },
+        { name: 'sender_name', type: 'string', description: 'User name', optional: false },
+        { name: 'sender_avatar', type: 'string', description: 'User avatar URL', optional: true },
+        { name: 'message', type: 'string', description: 'Chat message content', optional: false },
+        { name: 'color', type: 'string', description: 'Hex color code (e.g. "#547698")', optional: true },
+        { name: 'position', type: 'string', description: 'Danmaku position (ue/top, naka/middle, shita/bottom)', optional: true },
+        { name: 'size', type: 'string', description: 'Text size (small, medium, big)', optional: true },
+        { name: 'font', type: 'string', description: 'Font type (defont, mincho, gothic)', optional: true },
+        { name: 'opacity', type: 'string', description: 'Opacity (Normal, Translucent)', optional: true }
     ],
-    'niconico:nicoad': [
-        { name: 'user_id', type: 'string', description: 'User who sent advertisement (NicoNico point)', optional: false },
-        { name: 'amount_point', type: 'number', description: 'NicoNico points spent (actual monetary value not disclosed)', optional: false },
-        { name: 'date', type: 'number', description: 'Unix timestamp', optional: false },
-        { name: 'message', type: 'string', description: 'Optional message with advertisement', optional: true }
+    'niconico:nicoru': [
+        { name: 'sender_id', type: 'string', description: 'User ID', optional: true },
+        { name: 'sender_name', type: 'string', description: 'User name', optional: false },
+        { name: 'sender_avatar', type: 'string', description: 'User avatar URL', optional: true },
+        { name: 'message', type: 'string', description: 'Reaction message (usually empty)', optional: true },
+        { name: 'color', type: 'string', description: 'Hex color code', optional: true },
+        { name: 'position', type: 'string', description: 'Reaction position (ue/top, naka/middle, shita/bottom)', optional: true },
+        { name: 'size', type: 'string', description: 'Reaction size (small, medium, big)', optional: true },
+        { name: 'opacity', type: 'string', description: 'Opacity (Normal, Translucent)', optional: true }
     ],
     'niconico:gift': [
-        { name: 'user_id', type: 'string', description: 'User who sent gift', optional: false },
-        { name: 'gift_id', type: 'string', description: 'Gift item ID', optional: true },
-        { name: 'gift_name', type: 'string', description: 'Gift name', optional: true },
-        { name: 'amount', type: 'number', description: 'Amount spent or count', optional: true },
-        { name: 'date', type: 'number', description: 'Unix timestamp', optional: false },
-        { name: 'message', type: 'string', description: 'Optional message with gift', optional: true }
+        { name: 'sender_id', type: 'string', description: 'User ID', optional: false },
+        { name: 'sender_name', type: 'string', description: 'User name', optional: false },
+        { name: 'sender_avatar', type: 'string', description: 'User avatar URL', optional: false },
+        { name: 'message', type: 'string', description: 'Optional gift message', optional: true },
+        { name: 'amount_value', type: 'number', description: 'Gift amount', optional: false },
+        { name: 'amount_currency', type: 'string', description: 'Currency code (JPY)', optional: false },
+        { name: 'amount_display', type: 'string', description: 'Formatted amount (e.g. "50pt")', optional: false },
+        { name: 'is_member', type: 'boolean', description: 'Is member?', optional: true },
+        { name: 'badges', type: 'array', description: 'User badges', optional: true }
+    ],
+    'niconico:follow': [
+        { name: 'sender_id', type: 'string', description: 'User ID', optional: false },
+        { name: 'sender_name', type: 'string', description: 'User name', optional: false },
+        { name: 'sender_avatar', type: 'string', description: 'User avatar URL', optional: false }
+    ],
+    'niconico:stream_start': [
+        { name: 'event_type', type: 'string', description: 'Event type (stream_start)', optional: false }
+    ],
+    'niconico:stream_end': [
+        { name: 'event_type', type: 'string', description: 'Event type (stream_end)', optional: false }
     ],
     'twitch:comment': [
         { name: 'message', type: 'string', description: 'Chat message', optional: false },

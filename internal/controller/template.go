@@ -59,10 +59,19 @@ type PageData struct {
 	EventFieldOptions []EventFieldOption
 }
 
-// GetEventLabel returns the human-readable label for an event type on a platform
-func GetEventLabel(eventType, platform string) string {
-	// Use capitalize for now - backend should provide event labels in future
-	// For now, just return capitalized event type
+// GetEventLabel returns the human-readable label for an event type, using i18n translations if available
+func GetEventLabel(eventType, platform string, translator *i18n.Translator) string {
+	if translator == nil {
+		return capitalize(eventType)
+	}
+	// Try to get translated label from i18n
+	translationKey := "event.type." + eventType
+	translated := translator.T(translationKey)
+	// If translation key wasn't found, i18n returns the key itself, so check if we got a translation
+	if translated != translationKey {
+		return translated
+	}
+	// Fallback to capitalize if no translation found
 	return capitalize(eventType)
 }
 
@@ -145,9 +154,11 @@ func GetEventFieldOptions(cond Conditions, platform, eventType string, translato
 	for _, param := range parameters {
 		label := param.Name
 		if translator != nil {
-			// Look up translation key: condition.{fieldname}
-			translatedLabel := translator.T("condition." + param.Name)
-			if translatedLabel != "" && translatedLabel != "condition."+param.Name {
+			// Look up translation key: condition.eventProp.{fieldname}.label
+			translationKey := "condition.eventProp." + param.Name + ".label"
+			translatedLabel := translator.T(translationKey)
+			// If translation found (not the key itself), use it
+			if translatedLabel != "" && translatedLabel != translationKey {
 				label = translatedLabel
 			}
 		}

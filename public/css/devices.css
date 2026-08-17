@@ -95,15 +95,12 @@ body {
     transition: all 0.2s ease;
 }
 
-.manage-brands-link {
-    background: #fff;
-    color: #0969da;
-    border: 1px solid #d0d7de;
-}
-
-.manage-brands-link:hover {
-    background: #f1f5f9;
-    border-color: #0969da;
+.brand-status-actions button.manage-brands-link {
+    padding: 0px;
+    margin: 0px;
+    font-size: x-large;
+    background: none;
+    border: none;
 }
 
 .quick-connect-btn {
@@ -1018,6 +1015,17 @@ body {
     background: #fafbfc;
     border-radius: 8px;
     border: 1px solid #e1e4e8;
+}
+
+.product-item{
+    display: block;
+    width: 80%;
+    background-color: #F6F6F6;
+    border-radius: 0.5rem;
+    padding: 1rem;
+    margin: 0.5rem;
+    border: 1px solid lightgrey;
+    cursor: pointer;
 }
 
 /* Responsive */

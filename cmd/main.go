@@ -392,6 +392,9 @@ func loadTemplates() map[string]*template.Template {
 		"replace": func(s, old, new string) string {
 			return strings.ReplaceAll(s, old, new)
 		},
+		"tostring": func(v interface{}) string {
+			return fmt.Sprintf("%v", v)
+		},
 		"renderCatalog": func(brandID string, i18nTrans *i18n.Translator, data interface{}) (template.HTML, error) {
 			if globalTemplates == nil {
 				return "", fmt.Errorf("templates not loaded")
@@ -401,13 +404,13 @@ func loadTemplates() map[string]*template.Template {
 				return "", fmt.Errorf("devices template not found")
 			}
 			tplName := fmt.Sprintf("catalog-%s", brandID)
-			
+
 			// Wrap data to include i18n translator
 			type catalogData struct {
 				I18n interface{}
 				Data interface{}
 			}
-			
+
 			buf := &strings.Builder{}
 			err := tmpl.ExecuteTemplate(buf, tplName, catalogData{I18n: i18nTrans, Data: data})
 			if err != nil {
@@ -579,7 +582,7 @@ func (s *Server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	if cfg.Name == "brand-settings" {
 		myBrandSettings := controller.MyBrandSettings{}
 		data.MyBrands = myBrandSettings.ListMyBrands()
-		
+
 		brandList := controller.BrandList{}
 		data.Brands = brandList.ListAll()
 	}

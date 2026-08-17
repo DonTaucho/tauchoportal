@@ -33,7 +33,7 @@
         {{end}}
       {{end}}
       <button class="filter-tab" data-type="{{$type}}" onclick="filterConds('{{$type}}', this)">
-        {{getEventLabel $type $.CurrentChannel.Platform}} <span class="tab-count">{{$count}}</span>
+        {{getEventLabel $type $.CurrentChannel.Platform $.I18n}} <span class="tab-count">{{$count}}</span>
       </button>
       {{end}}
     </div>
@@ -57,7 +57,7 @@
       <div class="rule-header">
         <div class="rule-title-group">
           {{$badgeClass := index $.EventBadgeClass .EventType}}
-          <span class="event-badge {{if $badgeClass}}{{$badgeClass}}{{else}}stream{{end}}">{{getEventLabel .EventType $.CurrentChannel.Platform}}</span>
+          <span class="event-badge {{if $badgeClass}}{{$badgeClass}}{{else}}stream{{end}}">{{getEventLabel .EventType $.CurrentChannel.Platform $.I18n}}</span>
           <h3 class="rule-name">{{escHtml .Name}}</h3>
           <span class="rule-status {{if .IsEnabled}}enabled{{else}}disabled{{end}}">{{if .IsEnabled}}{{$.I18n.T "conditions.enabled"}}{{else}}{{$.I18n.T "conditions.disabled"}}{{end}}</span>
         </div>
@@ -76,7 +76,7 @@
         <div class="rule-detail-row">
           <div class="rule-detail">
             <span class="detail-label">{{$.I18n.T "conditions.event"}}</span>
-            <span class="detail-value">{{getEventLabel .EventType $.CurrentChannel.Platform}}{{if .Filter}} {{$.I18n.T "conditions.eventContaining"}}<code>"{{escHtml .Filter}}"</code>{{end}}</span>
+            <span class="detail-value">{{getEventLabel .EventType $.CurrentChannel.Platform $.I18n}}{{if .Filter}} {{$.I18n.T "conditions.eventContaining"}}<code>"{{escHtml .Filter}}"</code>{{end}}</span>
           </div>
           <div class="rule-detail">
             <span class="detail-label">{{$.I18n.T "conditions.externalApi"}}</span>

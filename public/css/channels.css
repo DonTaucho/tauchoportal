@@ -225,6 +225,7 @@ body {
     white-space: nowrap;
 }
 
+
 .watch-toggle-label {
     font-size: 0.8rem;
     color: #555;
@@ -276,6 +277,19 @@ body {
 
 .toggle-switch input:checked + .toggle-slider::before {
     transform: translateX(18px);
+}
+
+.channel-toggle-container {
+    width: 4.5rem;
+    display: inline-block
+}
+.channel-action-buttons {
+    width: 2.2em;
+    display: inline-block;
+}
+.channel-action-buttons-details {
+    width: 6.2em;
+    display: inline-block;
 }
 
 /* Channel Footer */
@@ -419,7 +433,7 @@ body {
 
 .btn-primary {
     background: #4CAF50;
-    color: white;
+    color: #ffffff;
 }
 
 .btn-primary:hover { background: #43a047; }
@@ -451,6 +465,11 @@ body {
 }
 
 .btn-attempt:hover { background: #d6cd53; }
+
+.btn-manage {
+    background: linear-gradient(135deg, #668fea 0%, #4e71d3 100%);
+    color: white;
+}
 
 /* =============================================
    Breadcrumb
@@ -491,7 +510,10 @@ body {
 }
 
 .channel-edit {
-    width: 110px;
+    width: 160px;
+}
+.channel-edit-details {
+    width: 220px;
 }
 
 .channel-edit button {
@@ -525,11 +547,10 @@ body {
 }
 
 .channel-detail-toggle {
-    display: flex;
-    flex-direction: column;
+    display: inline-block;
     align-items: center;
-    gap: 0.4rem;
-    flex-shrink: 0;
+    width: 6rem;
+    text-align: center;
 }
 
 .meta-item {
@@ -894,42 +915,9 @@ body {
     border-color: #0284c7;
 }
 
-.filter-intro {
-    font-size: 0.9rem;
-    color: #666;
-    margin-bottom: 1.25rem;
-}
-
-.filter-textarea {
-    width: 100%;
-    box-sizing: border-box;
-    font-size: 0.9rem;
-    font-family: inherit;
-    padding: 0.6rem 0.75rem;
-    border: 1px solid #ddd;
-    border-radius: 6px;
-    resize: vertical;
-    background: #fafafa;
-    transition: border-color 0.15s;
-}
-.filter-textarea:focus {
-    outline: none;
-    border-color: #7b5ea7;
-    background: #fff;
-}
-
-.filter-clear-row {
-    margin: 1.25rem 0 0.5rem;
-}
-
-.filter-eval-note {
-    font-size: 0.82rem;
-    color: #888;
-    background: #f8f8f8;
-    border-left: 3px solid #ddd;
-    padding: 0.5rem 0.75rem;
-    border-radius: 0 4px 4px 0;
-    margin-top: 1rem;
+.channel-action-buttons-details .action-btn{
+    width: 7rem;
+    padding: 0.4rem 0.7rem;
 }
 
 /* Filter inactive message in detail view */
@@ -1371,6 +1359,11 @@ input[type="range"] {
     gap: 0.3rem;
 }
 
+#acc-youtube .mini-meta.subscriber-count,
+#acc-kick .mini-meta.subscriber-count{
+    display: none;
+}
+
 /* Mini channel card */
 .mini-card {
     display: flex;
@@ -1684,7 +1677,13 @@ input[type="range"] {
 .cf-error {
     font-size: 0.875rem;
     color: #f88;
-    padding: 0.4rem 0;
+    padding: 0.5rem 0.75rem;
+    background: rgba(255, 136, 136, 0.1);
+    border: 1px solid rgba(255, 136, 136, 0.3);
+    border-radius: 5px;
+    line-height: 1.5;
+    white-space: pre-wrap;
+    word-wrap: break-word;
 }
 .cf-actions {
     display: flex;

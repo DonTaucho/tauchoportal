@@ -107,7 +107,7 @@
     async function populateEventSelect(platform) { 
         try {
             const events = await window.getEventsForPlatform(platform);
-            document.getElementById('condEventType').innerHTML = `<option value="">${t.selectEventType || 'Select event type...'}</option>` + (events || []).map((eventType) => `<option value="${eventType.value}">${eventType.value}</option>`).join('');
+            document.getElementById('condEventType').innerHTML = `<option value="">${t.selectEventType || 'Select event type...'}</option>` + (events || []).map((eventType) => `<option value="${eventType.value}">${getEventLabel(eventType.value, platform)}</option>`).join('');
         } catch (e) {
             console.error('Failed to populate events:', e);
         }
@@ -199,7 +199,7 @@
         document.getElementById('testConditionTitle').textContent = (t.testTitle || 'Test Condition: {name}').replace('{name}', conditionName); 
         try {
             const events = await window.getEventsForPlatform(platform);
-            document.getElementById('testEventType').innerHTML = `<option value="">${t.selectEventType || 'Select event type...'}</option>` + (events || []).map((evt) => `<option value="${evt.value}">${evt.value}</option>`).join('');
+            document.getElementById('testEventType').innerHTML = `<option value="">${t.selectEventType || 'Select event type...'}</option>` + (events || []).map((evt) => `<option value="${evt.value}">${getEventLabel(evt.value, platform)}</option>`).join('');
         } catch (e) {
             console.error(t.populateEventsError || 'Failed to populate test events:', e);
         }

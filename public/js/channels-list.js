@@ -1,8 +1,7 @@
 (function () {
     'use strict';
-    const { apiRequest, openModal, closeModal } = window;
+    const { apiRequest } = window;
     const t = window.channelsListTranslations || {}; // Fallback to empty object if not loaded
-    let filteringChannelId = null;
     async function updateDisplayName(channelId, newName) {
         const trimmed = (newName || '').trim();
         if (!trimmed) {
@@ -72,71 +71,10 @@
         }
     }
 
-    function textToArray(text) {
-        return text.split('\n').map((item) => item.trim()).filter(Boolean);
-    }
-
-    function openFilterModal(channelId) {
-        filteringChannelId = channelId;
-        
-        // Find the channel card to get filter data from data attributes
-        const card = document.querySelector(`[data-channel-id="${channelId}"]`);
-        if (!card) return;
-        
-        const filterData = card.dataset.filterData ? JSON.parse(card.dataset.filterData) : {};
-        
-        const channelName = card.dataset.channelName || 'this channel';
-        document.getElementById('filterModalSubtitle').textContent = `${t.filterDesc || 'Control which live streams are tracked for'} "${channelName}".`;
-        document.getElementById('filterSkipTitle').value = (filterData.skip_if_title_contains || []).join('\n');
-        document.getElementById('filterSkipDesc').value = (filterData.skip_if_description_contains || []).join('\n');
-        document.getElementById('filterRequireTitle').value = (filterData.require_title_contains || []).join('\n');
-        document.getElementById('filterClearAll').checked = false;
-        
-        openModal('filterModal');
-    }
-
-    async function saveFilter() {
-        const button = document.getElementById('filterSaveBtn');
-        button.disabled = true;
-        
-        try {
-            const clearAll = document.getElementById('filterClearAll').checked;
-            let body;
-            
-            if (clearAll) {
-                body = { clear_filter: true };
-            } else {
-                const skipTitle = textToArray(document.getElementById('filterSkipTitle').value);
-                const skipDesc = textToArray(document.getElementById('filterSkipDesc').value);
-                const requireTitle = textToArray(document.getElementById('filterRequireTitle').value);
-                
-                body = skipTitle.length || skipDesc.length || requireTitle.length
-                    ? {
-                        stream_filter: {
-                            ...(skipTitle.length ? { skip_if_title_contains: skipTitle } : {}),
-                            ...(skipDesc.length ? { skip_if_description_contains: skipDesc } : {}),
-                            ...(requireTitle.length ? { require_title_contains: requireTitle } : {})
-                        }
-                    }
-                    : { clear_filter: true };
-            }
-            
-            await apiRequest('PATCH', `/watches/update?id=${filteringChannelId}`, body);
-            closeModal('filterModal');
-            location.reload();
-        } catch (error) {
-            alert((t.failedSaveFilter || 'Failed to save filter: ') + error.message);
-        } finally {
-            button.disabled = false;
-        }
-    }
-
     Object.assign(window, {
         startEditDisplayName,
         toggleChannel,
-        deleteChannel,
-        openFilterModal,
-        saveFilter
+        deleteChannel
     });
 
     // Initialize sidebar if it exists

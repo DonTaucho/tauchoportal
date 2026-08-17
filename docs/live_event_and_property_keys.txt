@@ -1,0 +1,354 @@
+
+// getPlatformEventSchemas returns platform-specific field definitions
+// Key format: "platform:event_type"
+func getPlatformEventSchemas() map[string][]EventFieldInfo {
+	return map[string][]EventFieldInfo{
+		// YouTube Comment
+		"youtube:comment": {
+			{Name: "message", Type: "string", Description: "Chat message content", Optional: false},
+			{Name: "sender_id", Type: "string", Description: "YouTube channel ID (authorDetails.channelId)", Optional: false},
+			{Name: "sender_name", Type: "string", Description: "Display name (authorDetails.displayName)", Optional: false},
+			{Name: "sender_avatar", Type: "string", Description: "Profile picture URL", Optional: true},
+			{Name: "is_member", Type: "boolean", Description: "Is channel member?", Optional: true},
+			{Name: "badges", Type: "array", Description: "Member/moderator badges", Optional: true},
+		},
+		// YouTube Super Chat
+		"youtube:superchat": {
+			{Name: "message", Type: "string", Description: "Super Chat message", Optional: true},
+			{Name: "amount_value", Type: "number", Description: "Amount in USD", Optional: false},
+			{Name: "amount_currency", Type: "string", Description: "Currency (USD)", Optional: false},
+			{Name: "amount_display", Type: "string", Description: "Formatted amount (e.g. $5.00)", Optional: false},
+			{Name: "sender_id", Type: "string", Description: "YouTube channel ID", Optional: false},
+			{Name: "sender_name", Type: "string", Description: "Display name", Optional: false},
+			{Name: "sender_avatar", Type: "string", Description: "Profile picture URL", Optional: true},
+		},
+		// YouTube Sticker
+		"youtube:sticker": {
+			{Name: "amount_value", Type: "number", Description: "Sticker price in USD", Optional: false},
+			{Name: "amount_currency", Type: "string", Description: "Currency (USD)", Optional: false},
+			{Name: "amount_display", Type: "string", Description: "Formatted price", Optional: false},
+			{Name: "sender_id", Type: "string", Description: "YouTube channel ID", Optional: false},
+			{Name: "sender_name", Type: "string", Description: "Display name", Optional: false},
+			{Name: "sender_avatar", Type: "string", Description: "Profile picture URL", Optional: true},
+		},
+		// NicoNico Comment (Chat message with danmaku formatting)
+		// Source: dwango.nicolive.chat.data.Chat protobuf
+		"niconico:comment": {
+			{Name: "content", Type: "string", Description: "Chat message content", Optional: false},
+			{Name: "user_id", Type: "string", Description: "Raw NicoNico user ID (from raw_user_id field)", Optional: true},
+			{Name: "user_id_hashed", Type: "string", Description: "Anonymized/hashed user ID (from hashed_user_id field)", Optional: true},
+			{Name: "user_name", Type: "string", Description: "Display name", Optional: true},
+			{Name: "vpos", Type: "number", Description: "Video position in milliseconds (vpos field)", Optional: false},
+			{Name: "comment_no", Type: "number", Description: "Comment sequence number (no field)", Optional: false},
+			{Name: "account_status", Type: "string", Description: "Account status: 'Standard' or 'Premium'", Optional: true},
+			{Name: "modifier_position", Type: "string", Description: "Danmaku position: 'naka' (middle), 'shita' (bottom), 'ue' (top)", Optional: true},
+			{Name: "modifier_size", Type: "string", Description: "Text size: 'medium', 'small', 'big'", Optional: true},
+			{Name: "modifier_color", Type: "string", Description: "Color name or hex value", Optional: true},
+			{Name: "modifier_font", Type: "string", Description: "Font type", Optional: true},
+			{Name: "modifier_opacity", Type: "string", Description: "Text opacity", Optional: true},
+		},
+		// NicoNico Operator Comment (Moderator comment)
+		// Source: dwango.nicolive.chat.data.OperatorComment protobuf
+		"niconico:operator_comment": {
+			{Name: "content", Type: "string", Description: "Operator/moderator comment", Optional: false},
+			{Name: "user_name", Type: "string", Description: "Operator/moderator name", Optional: true},
+			{Name: "link", Type: "string", Description: "Optional link in comment", Optional: true},
+			{Name: "modifier_position", Type: "string", Description: "Danmaku position: 'naka', 'shita', 'ue'", Optional: true},
+			{Name: "modifier_size", Type: "string", Description: "Text size: 'medium', 'small', 'big'", Optional: true},
+			{Name: "modifier_color", Type: "string", Description: "Color name or hex value", Optional: true},
+			{Name: "modifier_font", Type: "string", Description: "Font type", Optional: true},
+			{Name: "modifier_opacity", Type: "string", Description: "Text opacity", Optional: true},
+		},
+		// NicoNico 広告 (Advertisement / Nicoad)
+		// Source: dwango.nicolive.chat.data.Nicoad protobuf (v0 and v1)
+		"niconico:nicoad": {
+			{Name: "advertiser_user_id", Type: "string", Description: "User ID of advertiser", Optional: true},
+			{Name: "advertiser_name", Type: "string", Description: "Advertiser display name", Optional: false},
+			{Name: "total_ad_point", Type: "number", Description: "Total NicoNico ad points (nicoad:total_ad_point v1)", Optional: true},
+			{Name: "latest_point", Type: "number", Description: "Latest single ad point (nicoad:latest:point v0)", Optional: true},
+			{Name: "latest_advertiser", Type: "string", Description: "Latest advertiser name (v0)", Optional: true},
+			{Name: "ranking_advertiser", Type: "string", Description: "Ranking position advertiser name (v0)", Optional: true},
+			{Name: "ranking_position", Type: "number", Description: "User's ranking position (v0)", Optional: true},
+			{Name: "ranking_rank", Type: "number", Description: "Overall ranking (v0)", Optional: true},
+			{Name: "message", Type: "string", Description: "Optional message with advertisement", Optional: true},
+		},
+		// NicoNico ギフト (Gift / Item)
+		// Source: dwango.nicolive.chat.data.Gift protobuf
+		"niconico:gift": {
+			{Name: "item_id", Type: "string", Description: "Gift item ID", Optional: false},
+			{Name: "item_name", Type: "string", Description: "Gift item name", Optional: false},
+			{Name: "advertiser_user_id", Type: "string", Description: "User ID of gift sender", Optional: true},
+			{Name: "advertiser_name", Type: "string", Description: "Gift sender name", Optional: false},
+			{Name: "point", Type: "number", Description: "NicoNico points spent for gift", Optional: false},
+			{Name: "contribution_rank", Type: "number", Description: "Gift contributor rank/tier", Optional: true},
+			{Name: "message", Type: "string", Description: "Optional message with gift", Optional: false},
+			{Name: "gift_bar_current_level", Type: "number", Description: "Current gift accumulation level", Optional: true},
+			{Name: "gift_bar_next_level_reward", Type: "number", Description: "Reward count for next level", Optional: true},
+			{Name: "gift_bar_remaining_points", Type: "number", Description: "Points remaining to next level", Optional: true},
+			{Name: "gift_bar_required_points", Type: "number", Description: "Total points required for next level", Optional: true},
+		},
+		// NicoNico Simple Notification (Various platform notifications)
+		// Source: dwango.nicolive.chat.data.SimpleNotification protobuf
+		"niconico:notification": {
+			{Name: "notification_type", Type: "string", Description: "Type: ichiba, quote, emotion, cruise, program_extended, ranking_in, visited, ranking_updated, supporter_registered, user_level_up", Optional: false},
+			{Name: "message", Type: "string", Description: "Notification message content", Optional: false},
+		},
+		// NicoNico Emotion (Reaction)
+		// Source: SimpleNotification.emotion field
+		"niconico:emotion": {
+			{Name: "message", Type: "string", Description: "Emotion/reaction message", Optional: false},
+		},
+		// NicoNico Cruise (Cruise mode update)
+		// Source: SimpleNotification.cruise field
+		"niconico:cruise": {
+			{Name: "message", Type: "string", Description: "Cruise mode message", Optional: false},
+		},
+		// NicoNico Ranking Update
+		// Source: SimpleNotification.ranking_in, ranking_updated
+		"niconico:ranking": {
+			{Name: "message", Type: "string", Description: "Ranking notification message", Optional: false},
+			{Name: "ranking_type", Type: "string", Description: "Type: ranking_in or ranking_updated", Optional: false},
+		},
+		// NicoNico Comment Lock Status
+		// Source: dwango.nicolive.chat.data.CommentLock protobuf
+		"niconico:comment_lock": {
+			{Name: "status", Type: "string", Description: "Lock status (enum value)", Optional: false},
+			{Name: "minimum_follow_duration", Type: "number", Description: "Minimum follow duration required to comment (seconds)", Optional: true},
+		},
+		// NicoNico Comment Mode
+		// Source: dwango.nicolive.chat.data.CommentMode protobuf
+		"niconico:comment_mode": {
+			{Name: "layout", Type: "string", Description: "Comment layout mode (enum value)", Optional: false},
+		},
+		// NicoNico Game Update
+		// Source: dwango.nicolive.chat.data.GameUpdate protobuf (no fields - event only)
+		"niconico:game_update": {
+			{Name: "event_type", Type: "string", Description: "Game update event", Optional: false},
+		},
+		// NicoNico FingerPrint (Watermark/Anti-cheat)
+		// Source: dwango.nicolive.chat.data.FingerPrint protobuf
+		"niconico:fingerprint": {
+			{Name: "position", Type: "string", Description: "Display position (enum)", Optional: false},
+			{Name: "size", Type: "string", Description: "Size setting (enum)", Optional: false},
+			{Name: "duration_ms", Type: "number", Description: "Display duration in milliseconds", Optional: false},
+		},
+		// NicoNico Trial Panel
+		// Source: dwango.nicolive.chat.data.TrialPanel protobuf
+		"niconico:trial_panel": {
+			{Name: "panel_type", Type: "string", Description: "Trial panel type (enum)", Optional: false},
+			{Name: "unqualified_user", Type: "string", Description: "Qualification status (enum)", Optional: false},
+		},
+		// NicoNico Program Status
+		// Source: dwango.nicolive.chat.data.ProgramStatus protobuf
+		"niconico:program_status": {
+			{Name: "state", Type: "string", Description: "Program state (enum: e.g. ON_AIR, ENDED)", Optional: false},
+		},
+		// NicoNico Tag Updated
+		// Source: dwango.nicolive.chat.data.TagUpdated protobuf
+		"niconico:tag_updated": {
+			{Name: "tags", Type: "array", Description: "Array of tag objects with text, locked, reserved, nicopedia_uri", Optional: false},
+			{Name: "owner_locked", Type: "boolean", Description: "Whether tags are owner-locked", Optional: false},
+		},
+		// NicoNico Marquee (Scrolling message)
+		// Source: dwango.nicolive.chat.data.Marquee protobuf
+		"niconico:marquee": {
+			{Name: "operator_comment", Type: "string", Description: "Marquee message from operator", Optional: true},
+			{Name: "duration_ms", Type: "number", Description: "Display duration in milliseconds", Optional: true},
+		},
+		// NicoNico Enquete (Poll)
+		// Source: dwango.nicolive.chat.data.Enquete protobuf
+		"niconico:enquete": {
+			{Name: "question", Type: "string", Description: "Poll question", Optional: false},
+			{Name: "choices", Type: "array", Description: "Array of choice objects with description and per_mille percentage", Optional: false},
+			{Name: "status", Type: "string", Description: "Poll status (enum)", Optional: false},
+		},
+		// NicoNico Statistics (Complete snapshot)
+		// Sent periodically (every ~5-10 seconds) with all viewer stats
+		// Source: WebSocket messageServer statistics data
+		"niconico:statistics": {
+			{Name: "viewers", Type: "number", Description: "Current viewer count", Optional: false},
+			{Name: "comments", Type: "number", Description: "Total comment count", Optional: false},
+			{Name: "adPoints", Type: "number", Description: "Total ad points accumulated (nicoad points)", Optional: false},
+			{Name: "giftPoints", Type: "number", Description: "Total gift points accumulated", Optional: false},
+			{Name: "timeshiftReservations", Type: "number", Description: "Total timeshift/archive reservations", Optional: true},
+		},
+		// NicoNico Statistics - Viewers (Individual metric)
+		// Source: dwango.nicolive.chat.data.Statistics.viewers
+		"niconico:viewers": {
+			{Name: "value", Type: "number", Description: "Current viewer count", Optional: false},
+			{Name: "delta", Type: "number", Description: "Change since last update (positive/negative)", Optional: true},
+			{Name: "timestamp", Type: "number", Description: "Unix timestamp when stat was received", Optional: false},
+		},
+		// NicoNico Statistics - Comments (Individual metric)
+		// Source: dwango.nicolive.chat.data.Statistics.comments
+		"niconico:comments": {
+			{Name: "value", Type: "number", Description: "Total comment count", Optional: false},
+			{Name: "delta", Type: "number", Description: "Change since last update (positive/negative)", Optional: true},
+			{Name: "timestamp", Type: "number", Description: "Unix timestamp when stat was received", Optional: false},
+		},
+		// NicoNico Statistics - Ad Points (Individual metric)
+		// Source: dwango.nicolive.chat.data.Statistics.ad_points
+		"niconico:ad_points": {
+			{Name: "value", Type: "number", Description: "Total ad points accumulated", Optional: false},
+			{Name: "delta", Type: "number", Description: "Change since last update (positive/negative)", Optional: true},
+			{Name: "timestamp", Type: "number", Description: "Unix timestamp when stat was received", Optional: false},
+		},
+		// NicoNico Statistics - Gift Points (Individual metric)
+		// Source: dwango.nicolive.chat.data.Statistics.gift_points
+		"niconico:gift_points": {
+			{Name: "value", Type: "number", Description: "Total gift points accumulated", Optional: false},
+			{Name: "delta", Type: "number", Description: "Change since last update (positive/negative)", Optional: true},
+			{Name: "timestamp", Type: "number", Description: "Unix timestamp when stat was received", Optional: false},
+		},
+		// NicoNico Statistics - Timeshift Reservations (Individual metric)
+		// Source: dwango.nicolive.chat.data.Statistics.timeshift_reservations
+		"niconico:timeshift_reservations": {
+			{Name: "value", Type: "number", Description: "Total timeshift reservations", Optional: false},
+			{Name: "delta", Type: "number", Description: "Change since last update (positive/negative)", Optional: true},
+			{Name: "timestamp", Type: "number", Description: "Unix timestamp when stat was received", Optional: false},
+		},
+		// Twitch Comment
+		"twitch:comment": {
+			{Name: "message", Type: "string", Description: "Chat message", Optional: false},
+			{Name: "sender_id", Type: "string", Description: "Twitch user ID (user_id field)", Optional: false},
+			{Name: "sender_name", Type: "string", Description: "Twitch username (user_login field) or display name (user_name)", Optional: false},
+			{Name: "sender_avatar", Type: "string", Description: "Profile picture URL", Optional: true},
+			{Name: "is_mod", Type: "boolean", Description: "Is moderator?", Optional: true},
+			{Name: "is_member", Type: "boolean", Description: "Is subscriber?", Optional: true},
+			{Name: "badges", Type: "array", Description: "Mod, subscriber, bits badges", Optional: true},
+		},
+		// Twitch Cheer (Bits)
+		"twitch:cheer": {
+			{Name: "message", Type: "string", Description: "Cheer message", Optional: true},
+			{Name: "amount_value", Type: "number", Description: "Number of bits", Optional: false},
+			{Name: "amount_currency", Type: "string", Description: "Currency code (BITS)", Optional: false},
+			{Name: "amount_display", Type: "string", Description: "Formatted (e.g. 100 Bits)", Optional: false},
+			{Name: "sender_id", Type: "string", Description: "Twitch user ID", Optional: false},
+			{Name: "sender_name", Type: "string", Description: "Twitch username", Optional: false},
+			{Name: "is_anonymous", Type: "boolean", Description: "Anonymous cheer?", Optional: true},
+		},
+		// Twitch Subscribe
+		"twitch:sub": {
+			{Name: "message", Type: "string", Description: "Sub message", Optional: true},
+			{Name: "amount_value", Type: "number", Description: "Sub tier (1, 2, 3)", Optional: false},
+			{Name: "sender_id", Type: "string", Description: "Twitch user ID", Optional: false},
+			{Name: "sender_name", Type: "string", Description: "Twitch username", Optional: false},
+			{Name: "is_gift", Type: "boolean", Description: "Is gifted sub?", Optional: true},
+		},
+		// Bilibili Comment (Danmaku)
+		"bilibili:comment": {
+			{Name: "message", Type: "string", Description: "Danmaku message (msg field)", Optional: false},
+			{Name: "sender_id", Type: "string", Description: "UID (uid field from p attribute)", Optional: false},
+			{Name: "sender_name", Type: "string", Description: "Display name (uname - requires additional API call, may be empty)", Optional: true},
+			{Name: "color", Type: "string", Description: "Danmaku color from p attribute (e.g. 'white', '#FF0000')", Optional: true},
+			{Name: "size", Type: "string", Description: "Font size from p attribute", Optional: true},
+			{Name: "position", Type: "string", Description: "Screen position from p attribute", Optional: true},
+			{Name: "badges", Type: "array", Description: "User level, membership badges", Optional: true},
+		},
+		// Bilibili SuperChat
+		"bilibili:superchat": {
+			{Name: "message", Type: "string", Description: "Message", Optional: true},
+			{Name: "amount_value", Type: "number", Description: "Amount in yuan", Optional: false},
+			{Name: "amount_currency", Type: "string", Description: "Currency (CNY)", Optional: false},
+			{Name: "amount_display", Type: "string", Description: "Formatted amount", Optional: false},
+			{Name: "sender_id", Type: "string", Description: "UID", Optional: false},
+			{Name: "sender_name", Type: "string", Description: "Display name", Optional: false},
+		},
+		// TikTok Comment
+		"tiktok:comment": {
+			{Name: "message", Type: "string", Description: "Comment text (comment field)", Optional: false},
+			{Name: "sender_id", Type: "string", Description: "TikTok user ID (user.user_id)", Optional: false},
+			{Name: "sender_name", Type: "string", Description: "Display name (user.nickname)", Optional: false},
+			{Name: "sender_avatar", Type: "string", Description: "Profile picture (user.profile_picture_url)", Optional: true},
+		},
+		// TikTok Gift
+		"tiktok:gift": {
+			{Name: "sender_id", Type: "string", Description: "TikTok user ID (user.user_id)", Optional: false},
+			{Name: "sender_name", Type: "string", Description: "Display name (user.nickname)", Optional: false},
+			{Name: "sender_avatar", Type: "string", Description: "Profile picture (user.profile_picture_url)", Optional: true},
+			{Name: "gift_id", Type: "string", Description: "Gift ID", Optional: false},
+			{Name: "gift_name", Type: "string", Description: "Gift name", Optional: true},
+			{Name: "count", Type: "number", Description: "Number of gifts sent", Optional: false},
+			{Name: "diamond_count", Type: "number", Description: "Diamond cost (TikTok currency)", Optional: true},
+		},
+		// Facebook Comment
+		"facebook:comment": {
+			{Name: "message", Type: "string", Description: "Comment text (message field)", Optional: false},
+			{Name: "sender_id", Type: "string", Description: "Facebook user ID (from.id)", Optional: false},
+			{Name: "sender_name", Type: "string", Description: "User name (from.name)", Optional: false},
+			{Name: "comment_id", Type: "string", Description: "Comment ID", Optional: false},
+		},
+		// Facebook Reaction (on comments)
+		"facebook:reaction": {
+			{Name: "reaction_type", Type: "string", Description: "Reaction type (LIKE, LOVE, WOW, HAHA, SAD, ANGRY)", Optional: false},
+			{Name: "sender_id", Type: "string", Description: "User ID who reacted", Optional: false},
+			{Name: "sender_name", Type: "string", Description: "User name who reacted", Optional: true},
+			{Name: "comment_id", Type: "string", Description: "ID of the comment being reacted to", Optional: false},
+		},
+		// Kick Comment
+		"kick:comment": {
+			{Name: "message", Type: "string", Description: "Chat message (content field)", Optional: false},
+			{Name: "sender_id", Type: "string", Description: "User ID from sender object", Optional: false},
+			{Name: "sender_name", Type: "string", Description: "Username or display name", Optional: false},
+			{Name: "badges", Type: "array", Description: "User badges", Optional: true},
+		},
+		// Kick Gift
+		"kick:gift": {
+			{Name: "sender_id", Type: "string", Description: "User ID from sender object", Optional: false},
+			{Name: "sender_name", Type: "string", Description: "Username or display name", Optional: false},
+			{Name: "gift_type", Type: "string", Description: "Type of gift", Optional: true},
+			{Name: "amount_value", Type: "number", Description: "Gift amount or count", Optional: true},
+			{Name: "gift_message", Type: "string", Description: "Optional message with gift", Optional: true},
+		},
+		// TwitCasting Comment
+		"twitcasting:comment": {
+			{Name: "message", Type: "string", Description: "Comment text (comment field)", Optional: false},
+			{Name: "sender_id", Type: "string", Description: "User ID (user.id)", Optional: false},
+			{Name: "sender_name", Type: "string", Description: "Display name (user.name)", Optional: false},
+			{Name: "sender_avatar", Type: "string", Description: "Profile picture (user.image)", Optional: true},
+			{Name: "is_broadcaster", Type: "boolean", Description: "Is message from broadcaster?", Optional: true},
+		},
+		// TwitCasting Gift
+		"twitcasting:gift": {
+			{Name: "sender_id", Type: "string", Description: "User ID (user.id)", Optional: false},
+			{Name: "sender_name", Type: "string", Description: "Display name (user.name)", Optional: false},
+			{Name: "sender_avatar", Type: "string", Description: "Profile picture (user.image)", Optional: true},
+			{Name: "gift_id", Type: "string", Description: "Gift ID", Optional: false},
+			{Name: "gift_name", Type: "string", Description: "Gift name", Optional: false},
+			{Name: "gift_image_url", Type: "string", Description: "Gift image URL", Optional: true},
+			{Name: "count", Type: "number", Description: "Number of gifts", Optional: false},
+			{Name: "gift_message", Type: "string", Description: "Optional message with gift", Optional: true},
+		},
+		// Instagram Comment
+		// Source: Instagram Graph API /v18.0/{broadcast_id}/comments endpoint
+		"instagram:comment": {
+			{Name: "message", Type: "string", Description: "Comment text", Optional: false},
+			{Name: "sender_id", Type: "string", Description: "Commenter's Instagram user ID (from.id)", Optional: false},
+			{Name: "sender_name", Type: "string", Description: "Commenter's username or display name (from.username or from.name)", Optional: false},
+			{Name: "timestamp", Type: "timestamp", Description: "When comment was posted (ISO 8601 format)", Optional: false},
+		},
+		// X (Twitter) Comment
+		// NOTE: X does not have real-time live API; only supports filtered stream of tweets
+		// This is primarily for tweet content matching search filters (e.g., hashtag, keyword)
+		"x:comment": {
+			{Name: "message", Type: "string", Description: "Tweet text", Optional: false},
+			{Name: "sender_id", Type: "string", Description: "Author ID", Optional: false},
+			{Name: "sender_name", Type: "string", Description: "Author username or display name", Optional: false},
+			{Name: "created_at", Type: "timestamp", Description: "Tweet creation timestamp", Optional: false},
+		},
+	}
+}
+
+// getCommonEventFields returns the universal fields available in all event types
+func getCommonEventFields() []EventFieldInfo {
+	return []EventFieldInfo{
+		{Name: "id", Type: "string", Description: "Unique event ID (UUID)", Optional: false},
+		{Name: "user_id", Type: "number", Description: "Taucho user ID who owns the watch target", Optional: false},
+		{Name: "watch_target_id", Type: "string", Description: "Watch target ID this event is from", Optional: false},
+		{Name: "platform", Type: "string", Description: "Platform (youtube, twitch, niconico, etc.)", Optional: false},
+		{Name: "event_type", Type: "string", Description: "Event type (comment, superchat, gift, etc.)", Optional: false},
+		{Name: "received_at", Type: "timestamp", Description: "When event was received from platform", Optional: false},
+		{Name: "created_at", Type: "timestamp", Description: "When event was stored in database", Optional: false},
+		{Name: "raw", Type: "object", Description: "Full original platform JSON for additional fields", Optional: true},
+	}
+}

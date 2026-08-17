@@ -1,0 +1,40 @@
+
+const (
+	LiveEventComment       LiveEventType = "comment"           // regular chat message / danmaku
+	LiveEventSuperchat     LiveEventType = "superchat"         // YouTube Super Chat / Bilibili Super Chat
+	LiveEventSticker       LiveEventType = "sticker"           // YouTube Super Sticker
+	LiveEventGift          LiveEventType = "gift"              // Twitch gift sub, Bilibili gift, NicoNico nicoad/gift, TikTok gift
+	LiveEventCheer         LiveEventType = "cheer"             // Twitch Bits (cheers)
+	LiveEventMember        LiveEventType = "member"            // YouTube membership join / Bilibili guard buy
+	LiveEventFollow        LiveEventType = "follow"            // Twitch follow / Kick follow
+	LiveEventSub           LiveEventType = "sub"               // Twitch sub / Kick sub
+	LiveEventRaid          LiveEventType = "raid"              // Twitch raid
+	LiveEventNicoru        LiveEventType = "nicoru"            // NicoNico nicoru (like reaction during stream)
+	LiveEventLike          LiveEventType = "like"              // TikTok like burst
+	LiveEventHypeTrain     LiveEventType = "hype_train"        // Twitch Hype Train progress
+	LiveEventReaction      LiveEventType = "reaction"          // Facebook Live reaction
+	LiveEventViewerJoin    LiveEventType = "viewer_join"       // TikTok member join, Bilibili enter room
+	
+	// NicoNico-specific events
+	LiveEventNicoAd        LiveEventType = "nicoad"            // NicoNico advertisement / points system
+	LiveEventStatistics    LiveEventType = "statistics"        // NicoNico statistics snapshot (viewers, comments, points)
+	LiveEventOperator      LiveEventType = "operator_comment"  // NicoNico moderator comment
+	LiveEventEmotion       LiveEventType = "emotion"           // NicoNico reaction / emotion (similar to nicoru)
+	LiveEventCruise        LiveEventType = "cruise"            // NicoNico cruise mode
+	LiveEventRanking       LiveEventType = "ranking"           // NicoNico ranking notifications
+	LiveEventCommentLock   LiveEventType = "comment_lock"      // NicoNico comment lock status change
+	LiveEventCommentMode   LiveEventType = "comment_mode"      // NicoNico comment layout mode change
+	LiveEventGameUpdate    LiveEventType = "game_update"       // NicoNico game event update
+	LiveEventFingerprint   LiveEventType = "fingerprint"       // NicoNico watermark / anti-cheat
+	LiveEventTrialPanel    LiveEventType = "trial_panel"       // NicoNico trial panel updates
+	LiveEventProgramStatus LiveEventType = "program_status"    // NicoNico program state (ON_AIR, ENDED)
+	LiveEventTagUpdated    LiveEventType = "tag_updated"       // NicoNico tag updates
+	LiveEventMarquee       LiveEventType = "marquee"           // NicoNico scrolling messages
+	LiveEventEnquete       LiveEventType = "enquete"           // NicoNico polls / surveys
+	LiveEventNotification  LiveEventType = "notification"      // NicoNico generic notification
+	LiveEventViewers       LiveEventType = "viewers"           // NicoNico viewer count metric
+	LiveEventComments      LiveEventType = "comments"          // NicoNico total comment count metric
+	LiveEventAdPoints      LiveEventType = "ad_points"         // NicoNico total ad points metric
+	LiveEventGiftPoints    LiveEventType = "gift_points"       // NicoNico total gift points metric
+	LiveEventTimeshiftRes  LiveEventType = "timeshift_reservations" // NicoNico timeshift reservation count metric
+)
