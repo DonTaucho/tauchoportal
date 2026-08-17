@@ -48,7 +48,7 @@
                         {{end}}
                     </div>
                     <div class="brand-status-actions">
-                        <button class="manage-brands-link" onclick="goToBrandSettings()">{{.I18n.T "devices.manageBrands"}}</button>
+                        <button class="manage-brands-link" onclick="goToBrandSettings()" title='{{.I18n.T "devices.manageBrands"}}'>⚙️</button>
                     </div>
                 </div>
             </div>
@@ -247,9 +247,9 @@
                                     <span class="accordion-count">
                                         {{if $ownedDevices}}
                                             {{if eq $ownedDevices 1}}
-                                                {{$ownedDevices}} {{$.I18n.T "devices.ownedDevice"}}
+                                                {{ replace ($.I18n.T "devices.ownedDevice") "{0}" (tostring $ownedDevices)}}
                                             {{else}}
-                                                {{$ownedDevices}} {{$.I18n.T "devices.ownedDevices"}}
+                                                {{ replace ($.I18n.T "devices.ownedDevices") "{0}" (tostring $ownedDevices)}}
                                             {{end}}
                                         {{else}}
                                             {{$.I18n.T "devices.browseCatalog"}}
@@ -272,7 +272,7 @@
                                             {{if eq .Brand $brandId}}
                                             <div class="product-item" onclick="selectProduct('{{.Brand}}', '{{.ProductID}}', '{{.ProductName}}', '{{.Name}}', {{toJSON .Credentials}})">
                                                 <div class="product-info">
-                                                    <span class="product-name">{{.Name}}</span>
+                                                    <h5 class="product-name">{{.Name}}</h5>
                                                     <span class="product-actions">{{.ProductName}}</span>
                                                 </div>
                                                 <span class="product-owned-badge">{{$.I18n.T "devices.ownedBadge"}}</span>
@@ -312,7 +312,7 @@
                             <div class="accordion-products">
                                 <div class="product-item" onclick="selectProduct('custom', 'custom', '{{.I18n.T "devices.customDeviceTitle"}}')">
                                     <div class="product-info">
-                                        <span class="product-name">{{.I18n.T "devices.createCustom"}}</span>
+                                        <h5 class="product-name">{{.I18n.T "devices.createCustom"}}</h5>
                                         <span class="product-actions">{{.I18n.T "devices.httpBasedActions"}}</span>
                                     </div>
                                 </div>

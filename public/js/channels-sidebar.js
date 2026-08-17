@@ -346,7 +346,10 @@
             
             // Already cached?
             if (this.cache.has(key)) {
-                this.applyThumbnail(card, this.cache.get(key));
+                const cached = this.cache.get(key);
+                const url = typeof cached === 'string' ? cached : cached.url;
+                const followerCount = typeof cached === 'object' ? cached.followerCount : null;
+                this.applyThumbnail(card, url, followerCount);
                 return;
             }
             
@@ -367,17 +370,18 @@
                 try {
                     const response = await apiGet(`/platform/${platform}/channel/${encodeURIComponent(channelId)}`);
                     const url = response.thumbnail_url || "";
+                    const followerCount = response.follower_count;
                     
-                    this.cache.set(`${platform}:${channelId}`, url);
+                    this.cache.set(`${platform}:${channelId}`, { url, followerCount });
                     
                     // Card may have been replaced by now, find current one
                     const currentCard = document.querySelector(`.mini-card[data-platform="${platform}"][data-channel-id="${channelId}"]`);
                     if (currentCard) {
-                        this.applyThumbnail(currentCard, url);
+                        this.applyThumbnail(currentCard, url, followerCount);
                     }
                 } catch (err) {
                     console.error(`Failed to load thumbnail for ${platform}:${channelId}`, err);
-                    this.cache.set(`${platform}:${channelId}`, "failed");
+                    this.cache.set(`${platform}:${channelId}`, { url: "failed", followerCount: null });
                 } finally {
                     this.activeRequests--;
                     this.processQueue();
@@ -385,7 +389,7 @@
             }
         },
         
-        applyThumbnail(card, url) {
+        applyThumbnail(card, url, followerCount) {
             if (!url || url === "failed") {
                 card.dataset.thumbLoaded = 'true';
                 return; // Silent fail - keep platform icon
@@ -398,6 +402,15 @@
             const placeholder = thumb.querySelector('.mini-thumb-placeholder');
             if (placeholder) {
                 thumb.innerHTML = `<img class="mini-thumb-img" src="${esc(url)}" alt="" loading="lazy" onerror="this.parentElement.innerHTML='<div class=\\'mini-thumb-placeholder\\' style=\\'display:flex;align-items:center;justify-content:center;width:100%;height:100%;\\'>📺</div>'">`;
+            }
+            
+            // Update follower count if available
+            if (followerCount != null) {
+                const meta = card.querySelector('.mini-meta');
+                if (meta) {
+                    const followerText = (t.followers || '{0} followers').replace("{0}", formatCount(followerCount));
+                    meta.textContent = followerText;
+                }
             }
             
             card.dataset.thumbLoaded = 'true';
