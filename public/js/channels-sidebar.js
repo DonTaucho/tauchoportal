@@ -29,6 +29,8 @@
                 if (data.currentUser?.niconico && data.currentUser.niconico.connected) {
                     state.connectedSet.add('niconico');
                 }
+                // Initialize thumbnail loader
+                thumbnailLoader.init();
                 return;  // Skip old API call entirely
             } catch (e) {
                 console.error('Failed to parse sidebar data:', e);
@@ -41,6 +43,9 @@
             (user.connections || []).forEach((connection) => { const platformId = PROVIDER_MAP[connection.provider]; if (platformId) state.connectedSet.add(platformId); });
             if (user.niconico && user.niconico.connected) state.connectedSet.add('niconico');
         } catch (_) {}
+        
+        // Initialize thumbnail loader even in fallback
+        thumbnailLoader.init();
     }
 
     function toggleAcc(platformId) {
@@ -146,15 +151,18 @@
         container.innerHTML = items.map((channel) => {
             // Handle platform-specific field names
             const channelId = channel.user_id || channel.page_id || channel.channel_id || channel.id || '';
-            const name = channel.display_name || channel.username || channel.title || channel.name || channelId;
-            const thumbnail = channel.thumbnail || channel.thumbnail_url || '';
-            const subtitle = channel.subscriber_count != null ? `${formatCount(channel.subscriber_count)} ${t.subscribers || 'subscribers'}` : (channel.follower_count != null ? `${formatCount(channel.follower_count)} ${t.followers || 'followers'}` : '');
+            const name = channel.display_name || channel.username || channel.title || channel.name || channel.nickname || channelId;
+            const thumbnail = channel.thumbnail || channel.thumbnail_url || channel.profile_icon_small || '';
+            const subtitle = channel.subscriber_count != null ? (t.subscribers || '{0} subscribers').replace("{0}", formatCount(channel.subscriber_count)) : (channel.follower_count != null ? (t.followers || '{0} followers').replace("{0}", formatCount(channel.follower_count)) : '');
             const added = state.existingWatchSet.has(`${platformId}:${channelId}`);
             // Use platform icon SVG if no thumbnail, fallback to emoji
             const placeholderIcon = (window.__platformIcons && window.__platformIcons[platformId]) || (PLATFORM_META[platformId]?.icon || '📺');
             const thumb = thumbnail ? `<img class="mini-thumb-img" src="${esc(thumbnail)}" alt="" loading="lazy">` : `<div class="mini-thumb-placeholder" style="display:flex; align-items:center; justify-content:center; width:100%; height:100%;">${typeof placeholderIcon === 'string' && placeholderIcon.includes('<svg') ? placeholderIcon : `<span>${esc(placeholderIcon)}</span>`}</div>`;
-            return `<div class="mini-card"><div class="mini-thumb">${thumb}</div><div class="mini-info"><div class="mini-name">${esc(name)}</div><div class="mini-meta">${subtitle}</div></div>${added ? '<span class="mini-badge-added">' + (t.added || 'Added') + '</span>' : `<button class="mini-add-btn" title="${t.addChannelTitle || 'Add channel'}" onclick='openConfirm(${JSON.stringify({ platform: platformId, channelId, name, thumbnail: thumbnail || null })})'>+</button>`}</div>`;
+            return `<div class="mini-card" data-platform="${esc(platformId)}" data-channel-id="${esc(channelId)}" data-thumb-loaded="${thumbnail ? 'true' : 'false'}"><div class="mini-thumb">${thumb}</div><div class="mini-info"><div class="mini-name">${esc(name)}</div><div class="mini-meta">${subtitle}</div></div>${added ? '<span class="mini-badge-added">' + (t.added || 'Added') + '</span>' : `<button class="mini-add-btn" title="${t.addChannelTitle || 'Add channel'}" onclick='openConfirm(${JSON.stringify({ platform: platformId, channelId, name, thumbnail: thumbnail || null })})'>+</button>`}</div>`;
         }).join('') + (nextToken ? `<button class="load-more-sm" onclick="loadAccSubs('${platformId}', '${esc(nextToken)}')">${t.loadMore || 'Load more…'}</button>` : '');
+        
+        // Trigger thumbnail loading for newly rendered items (for scroll-based loading)
+        if (thumbnailLoader) thumbnailLoader.onDOMUpdate();
     }
 
     function openConfirm(channel) {
@@ -194,7 +202,7 @@
         try {
             const validation = await apiRequest('POST', '/watches/validate-channel-access', {
                 platform: channel.platform,
-                channel_id: channel.channelId
+                channel_id: channel.channelId.toString()
             });
             
             if (validation.is_accessible) {
@@ -248,10 +256,10 @@
         button.textContent = t.adding || 'Adding…';
         document.getElementById('confirmError').style.display = 'none';
         try {
-            const body = { platform: state.selectedChannel.platform, channel_id: state.selectedChannel.channelId, name, is_active: document.getElementById('confirmActive').checked };
+            const body = { platform: state.selectedChannel.platform, channel_id: state.selectedChannel.channelId.toString(), name, is_active: document.getElementById('confirmActive').checked };
             if (state.selectedChannel.thumbnail) body.thumbnail_url = state.selectedChannel.thumbnail;
             await apiRequest('POST', '/watches', body);
-            state.existingWatchSet.add(`${state.selectedChannel.platform}:${state.selectedChannel.channelId}`);
+            state.existingWatchSet.add(`${state.selectedChannel.platform}:${state.selectedChannel.channelId.toString()}`);
             cancelConfirm();
             showMonToast(`✅ "${name}" added!`);
             if (typeof state.onChannelsChanged === 'function') await state.onChannelsChanged();
@@ -265,6 +273,147 @@
     function normalizePagedData(data) { if (Array.isArray(data)) return { items: data, next_page_token: null, cursor: null }; if (data && Array.isArray(data.items)) return data; return { items: [], next_page_token: null, cursor: null }; }
     function formatCount(value) { if (value == null) return ''; if (value >= 1000000) return `${(value / 1000000).toFixed(1)}M`; if (value >= 1000) return `${(value / 1000).toFixed(1)}K`; return String(value); }
 
+    // Thumbnail lazy-loading system (scroll-based)
+    const thumbnailLoader = {
+        cache: new Map(),          // `twitch:channel_id` → URL or "failed"
+        queue: [],                 // Items pending load
+        activeRequests: 0,         // Currently loading
+        maxConcurrent: 5,          // Max simultaneous API calls
+        lastProcessedScroll: 0,    // Track scroll position
+        scrollThreshold: 400,      // pixels between load batches
+        loadedThreshold: 10,       // Initial items to load on first call
+        scrollTimeout: null,
+        
+        init() {
+            // Load initial batch from top
+            this.loadInitialBatch(this.loadedThreshold);
+            
+            // Attach scroll listener with throttle
+            document.addEventListener('scroll', () => this.handleScroll(), { passive: true });
+        },
+        
+        handleScroll() {
+            if (this.scrollTimeout) clearTimeout(this.scrollTimeout);
+            this.scrollTimeout = setTimeout(() => this.onScroll(), 100);
+        },
+        
+        onScroll() {
+            const scrollY = window.scrollY;
+            const rangeIndex = Math.floor(scrollY / this.scrollThreshold);
+            
+            // Only process if we've scrolled into a new 400px range
+            if (rangeIndex !== this.lastProcessedScroll) {
+                this.lastProcessedScroll = rangeIndex;
+                
+                const rangeStart = rangeIndex * this.scrollThreshold;
+                const rangeEnd = rangeStart + this.scrollThreshold;
+                
+                this.loadThumbnailsInRange(rangeStart, rangeEnd);
+            }
+        },
+        
+        loadInitialBatch(count) {
+            const cards = Array.from(document.querySelectorAll('.mini-card')).slice(0, count);
+            cards.forEach(card => this.queueCardLoad(card));
+        },
+        
+        loadThumbnailsInRange(startY, endY) {
+            const cards = document.querySelectorAll('.mini-card');
+            
+            cards.forEach(card => {
+                if (card.dataset.thumbLoaded === 'true') return;
+                
+                const rect = card.getBoundingClientRect();
+                const cardY = window.scrollY + rect.top;
+                
+                if (cardY >= startY && cardY <= endY + 100) {
+                    this.queueCardLoad(card);
+                }
+            });
+        },
+        
+        queueCardLoad(card) {
+            const platformId = card.dataset.platform;
+            const channelId = card.dataset.channelId;
+            
+            if (!platformId || !channelId) return;
+            if (card.dataset.thumbLoaded === 'true') return;
+            
+            // Skip non-Twitch for now (can extend later)
+            if (platformId !== 'twitch') return;
+            
+            const key = `${platformId}:${channelId}`;
+            
+            // Already cached?
+            if (this.cache.has(key)) {
+                this.applyThumbnail(card, this.cache.get(key));
+                return;
+            }
+            
+            // Already queued? Don't duplicate
+            if (this.queue.find(item => item.platform === platformId && item.channelId === channelId)) {
+                return;
+            }
+            
+            this.queue.push({ platform: platformId, channelId, card });
+            this.processQueue();
+        },
+        
+        async processQueue() {
+            while (this.activeRequests < this.maxConcurrent && this.queue.length > 0) {
+                this.activeRequests++;
+                const { platform, channelId, card } = this.queue.shift();
+                
+                try {
+                    const response = await apiGet(`/platform/${platform}/channel/${encodeURIComponent(channelId)}`);
+                    const url = response.thumbnail_url || "";
+                    
+                    this.cache.set(`${platform}:${channelId}`, url);
+                    
+                    // Card may have been replaced by now, find current one
+                    const currentCard = document.querySelector(`.mini-card[data-platform="${platform}"][data-channel-id="${channelId}"]`);
+                    if (currentCard) {
+                        this.applyThumbnail(currentCard, url);
+                    }
+                } catch (err) {
+                    console.error(`Failed to load thumbnail for ${platform}:${channelId}`, err);
+                    this.cache.set(`${platform}:${channelId}`, "failed");
+                } finally {
+                    this.activeRequests--;
+                    this.processQueue();
+                }
+            }
+        },
+        
+        applyThumbnail(card, url) {
+            if (!url || url === "failed") {
+                card.dataset.thumbLoaded = 'true';
+                return; // Silent fail - keep platform icon
+            }
+            
+            const thumb = card.querySelector('.mini-thumb');
+            if (!thumb) return;
+            
+            // Only update if placeholder is still showing
+            const placeholder = thumb.querySelector('.mini-thumb-placeholder');
+            if (placeholder) {
+                thumb.innerHTML = `<img class="mini-thumb-img" src="${esc(url)}" alt="" loading="lazy" onerror="this.parentElement.innerHTML='<div class=\\'mini-thumb-placeholder\\' style=\\'display:flex;align-items:center;justify-content:center;width:100%;height:100%;\\'>📺</div>'">`;
+            }
+            
+            card.dataset.thumbLoaded = 'true';
+        },
+        
+        onDOMUpdate() {
+            // Called when new items are rendered - refresh initial batch if needed
+            const unloadedCards = document.querySelectorAll('.mini-card[data-thumb-loaded="false"]');
+            if (unloadedCards.length > 0) {
+                // Queue first few unloaded cards
+                Array.from(unloadedCards).slice(0, 10).forEach(card => this.queueCardLoad(card));
+            }
+        }
+    };
+
     Object.assign(window, { toggleAcc, closeAllAcc, onAccSearch, loadAccSubs, submitAccManual, openConfirm, cancelConfirm, confirmAdd });
     window.ChannelsSidebar = { init, setExistingChannels, closeAllAcc };
+    window.thumbnailLoader = thumbnailLoader; // Expose for testing
 })();
