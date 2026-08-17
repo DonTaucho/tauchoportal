@@ -915,42 +915,9 @@ body {
     border-color: #0284c7;
 }
 
-.filter-intro {
-    font-size: 0.9rem;
-    color: #666;
-    margin-bottom: 1.25rem;
-}
-
-.filter-textarea {
-    width: 100%;
-    box-sizing: border-box;
-    font-size: 0.9rem;
-    font-family: inherit;
-    padding: 0.6rem 0.75rem;
-    border: 1px solid #ddd;
-    border-radius: 6px;
-    resize: vertical;
-    background: #fafafa;
-    transition: border-color 0.15s;
-}
-.filter-textarea:focus {
-    outline: none;
-    border-color: #7b5ea7;
-    background: #fff;
-}
-
-.filter-clear-row {
-    margin: 1.25rem 0 0.5rem;
-}
-
-.filter-eval-note {
-    font-size: 0.82rem;
-    color: #888;
-    background: #f8f8f8;
-    border-left: 3px solid #ddd;
-    padding: 0.5rem 0.75rem;
-    border-radius: 0 4px 4px 0;
-    margin-top: 1rem;
+.channel-action-buttons-details .action-btn{
+    width: 7rem;
+    padding: 0.4rem 0.7rem;
 }
 
 /* Filter inactive message in detail view */
@@ -1390,6 +1357,11 @@ input[type="range"] {
     display: flex;
     flex-direction: column;
     gap: 0.3rem;
+}
+
+#acc-youtube .mini-meta.subscriber-count,
+#acc-kick .mini-meta.subscriber-count{
+    display: none;
 }
 
 /* Mini channel card */

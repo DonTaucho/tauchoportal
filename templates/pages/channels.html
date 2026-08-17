@@ -66,11 +66,6 @@ window.sidebarChannelsTranslations = JSON.parse(document.getElementById('sidebar
                             <div class="channel-info">
                                 <div class="channel-name editable-name" onclick="event.stopPropagation(); startEditDisplayName(event, '{{.ID}}', decodeURIComponent('{{.Name | urlEscape}}'))">
                                     {{.Name}} <span class="name-edit-pencil">✏️</span>
-                                    {{if .StreamFilter.RequireTitleContains}}
-                                        {{if or .StreamFilter.SkipIfTitleContains .StreamFilter.SkipIfDescriptionContains}}
-                                            <span class="filter-badge" title="Stream filter active"><svg width="1em" height="1em" viewBox="0 0 512 512" xmlns="http://www.w3.org/2000/svg"><path fill="#ffffff" stroke="black" stroke-width="6%" d="M296,464a23.88,23.88,0,0,1-7.55-1.23l-80.15-26.67A23.92,23.92,0,0,1,192,413.32V294.11a.44.44,0,0,0-.09-.13L23.26,97.54A30,30,0,0,1,46.05,48H466a30,30,0,0,1,22.79,49.54L320.09,294a.77.77,0,0,0-.09.13V440a23.93,23.93,0,0,1-24,24Z"></path></svg> Filter</span>
-                                        {{end}}
-                                    {{end}}
                                 </div>
                                 
                                 <div class="channel-meta">
@@ -105,9 +100,6 @@ window.sidebarChannelsTranslations = JSON.parse(document.getElementById('sidebar
                                     </label>
                                 </div>
                                 <div class="channel-action-buttons">
-                                    <button class="action-btn filter {{if or .StreamFilter.RequireTitleContains .StreamFilter.SkipIfTitleContains .StreamFilter.SkipIfDescriptionContains}}active{{end}}" onclick="event.stopPropagation(); openFilterModal('{{.ID}}')">
-                                        <svg width="1em" height="1em" viewBox="0 0 512 512" xmlns="http://www.w3.org/2000/svg"><path fill="#ffffff" stroke="black" stroke-width="6%" d="M296,464a23.88,23.88,0,0,1-7.55-1.23l-80.15-26.67A23.92,23.92,0,0,1,192,413.32V294.11a.44.44,0,0,0-.09-.13L23.26,97.54A30,30,0,0,1,46.05,48H466a30,30,0,0,1,22.79,49.54L320.09,294a.77.77,0,0,0-.09.13V440a23.93,23.93,0,0,1-24,24Z"></path></svg>
-                                    </button>
                                     <button class="action-btn delete" onclick="event.stopPropagation(); deleteChannel('{{.ID}}')">🗑</button>
                                 </div>
                             </div>
@@ -123,44 +115,7 @@ window.sidebarChannelsTranslations = JSON.parse(document.getElementById('sidebar
             {{end}}
         </div>
 
-        <!-- Filter Modal -->
-        <div id="filterModal" class="modal" style="display:none">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h2>{{.I18n.T "channels.filterModal"}}</h2>
-                    <p id="filterModalSubtitle"></p>
-                </div>
-                
-                <div class="modal-body">
-                    <div class="form-section">
-                        <label>{{.I18n.T "channels.requireTitle"}}</label>
-                        <textarea id="filterRequireTitle" placeholder="{{.I18n.T "channels.requireTitlePlaceholder"}}"></textarea>
-                    </div>
-                    
-                    <div class="form-section">
-                        <label>{{.I18n.T "channels.skipTitle"}}</label>
-                        <textarea id="filterSkipTitle" placeholder="{{.I18n.T "channels.skipTitlePlaceholder"}}"></textarea>
-                    </div>
-                    
-                    <div class="form-section">
-                        <label>{{.I18n.T "channels.skipDesc"}}</label>
-                        <textarea id="filterSkipDesc" placeholder="{{.I18n.T "channels.skipDescPlaceholder"}}"></textarea>
-                    </div>
-                    
-                    <div class="form-section">
-                        <label class="checkbox-label">
-                            <input type="checkbox" id="filterClearAll">
-                            <span>{{.I18n.T "channels.clearAllFilters"}}</span>
-                        </label>
-                    </div>
-                </div>
-                
-                <div class="modal-buttons">
-                    <button class="btn btn-secondary" onclick="closeModal('filterModal')">{{.I18n.T "channels.cancelFilter"}}</button>
-                    <button id="filterSaveBtn" class="btn btn-primary" onclick="saveFilter()">{{.I18n.T "channels.saveFilter"}}</button>
-                </div>
-            </div>
-        </div>
+        {{end}}
 {{end}}
 
 {{define "scripts"}}
