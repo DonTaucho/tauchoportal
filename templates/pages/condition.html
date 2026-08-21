@@ -426,8 +426,17 @@
 <script id="conditionEventFieldOptionsData" type="application/json">
 {{.EventFieldOptions | jsonMarshal}}
 </script>
+<script id="conditionTemplatesData" type="application/json">
+{{.ConditionTemplates | jsonMarshal}}
+</script>
+<script id="conditionPropertiesData" type="application/json">
+{{.ConditionProperties | jsonMarshal}}
+</script>
 <script>
 var translations = JSON.parse(document.getElementById('conditionTranslationsData').textContent);
+</script>
+<script id="templateLibraryHintData" type="application/json">
+{{.TemplateLibraryHintText | jsonMarshal}}
 </script>
 <script src="/js/condition.js"></script>
 <script>
@@ -440,7 +449,10 @@ const conditionToolboxContext = {
     platform: conditionView?.dataset?.platform || '',
     eventType: (document.getElementById('currentEventType')?.innerText || conditionView?.dataset?.eventType || '').trim(),
     channelName: conditionView?.dataset?.channelName || '',
-    eventFieldOptions: JSON.parse(document.getElementById('conditionEventFieldOptionsData').textContent || '[]')
+    eventFieldOptions: JSON.parse(document.getElementById('conditionEventFieldOptionsData').textContent || '[]'),
+    conditionTemplates: JSON.parse(document.getElementById('conditionTemplatesData').textContent || '[]'),
+    conditionProperties: JSON.parse(document.getElementById('conditionPropertiesData').textContent || '[]'),
+    templateLibraryHintText: JSON.parse(document.getElementById('templateLibraryHintData').textContent || '""')
 };
 
 // Get condition data from page
@@ -803,7 +815,16 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 
     updateTemplatePreview();
-    initializeTemplates();
+    
+    
+    // Templates are initialized on server side; client just needs to render them
+    const templates = conditionToolboxContext.conditionTemplates || [];
+    const hint = document.getElementById('templateLibraryHint');
+    if (hint && conditionToolboxContext.templateLibraryHintText) {
+        hint.textContent = conditionToolboxContext.templateLibraryHintText;
+    }
+    
+    renderTemplateCards(templates);
 });
 
 // Global refreshSummary for any external code that still calls it

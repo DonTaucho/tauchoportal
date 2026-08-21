@@ -1327,6 +1327,7 @@
   "condition.toolbox.title": "Boîte à Outils",
   "condition.templates.heading": "Modèles",
   "condition.templates.hint": "Les modèles pour ce type d'événement se chargent automatiquement.",
+  "condition.templates.hintWithEventType": "Les modèles pour {0} se chargent automatiquement.",
   "condition.templates.empty": "Pas encore de modèles pour ce type d'événement.",
   "condition.tools.heading": "Outils",
   "condition.tools.regexTester": "🔍 Testeur Regex",

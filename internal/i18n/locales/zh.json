@@ -1327,6 +1327,7 @@
   "condition.toolbox.title": "工具箱",
   "condition.templates.heading": "範本",
   "condition.templates.hint": "此事件類型的範本會自動載入。",
+  "condition.templates.hintWithEventType": " {0} 的範本會自動載入。",
   "condition.templates.empty": "此事件類型還沒有範本。",
   "condition.tools.heading": "工具",
   "condition.tools.regexTester": "🔍 正規表達式測試工具",

@@ -1350,6 +1350,7 @@
   "condition.toolbox.title": "ToolBox",
   "condition.templates.heading": "Templates",
   "condition.templates.hint": "Templates for this event type load automatically.",
+  "condition.templates.hintWithEventType": "Templates for {0} load automatically.",
   "condition.templates.empty": "No templates for this event type yet.",
   "condition.tools.heading": "Tools",
   "condition.tools.regexTester": "🔍 Regex Tester",

@@ -28,26 +28,29 @@ import (
 )
 
 type PageData struct {
-	TitleKey                string
-	User                    *UserProfile
-	Page                    string
-	Lang                    string
-	I18n                    *i18n.Translator
-	API                     *controller.API
-	CurrentChannel          *controller.ChannelForTemplate
-	Condition               *controller.ConditionForTemplate
-	Conditions              []controller.ConditionForTemplate
-	EventTypes              []string
-	ChannelDetail           *controller.ChannelDetailForTemplate
-	ChannelDetailConditions []controller.ConditionDetailForTemplate
-	Devices                 *controller.DevicesPageData
-	Channels                *controller.ChannelsPageData
-	Dashboard               *controller.DashboardPageData
-	MyBrands                []controller.MyConnectedBrand
-	Brands                  []controller.CatalogBrand
-	PlatformMeta            map[string]map[string]interface{}
-	EventBadgeClass         map[string]string
-	EventFieldOptions       []controller.EventFieldOption
+	TitleKey                 string
+	User                     *UserProfile
+	Page                     string
+	Lang                     string
+	I18n                     *i18n.Translator
+	API                      *controller.API
+	CurrentChannel           *controller.ChannelForTemplate
+	Condition                *controller.ConditionForTemplate
+	Conditions               []controller.ConditionForTemplate
+	EventTypes               []string
+	ChannelDetail            *controller.ChannelDetailForTemplate
+	ChannelDetailConditions  []controller.ConditionDetailForTemplate
+	Devices                  *controller.DevicesPageData
+	Channels                 *controller.ChannelsPageData
+	Dashboard                *controller.DashboardPageData
+	MyBrands                 []controller.MyConnectedBrand
+	Brands                   []controller.CatalogBrand
+	PlatformMeta             map[string]map[string]interface{}
+	EventBadgeClass          map[string]string
+	EventFieldOptions        []controller.EventFieldOption
+	ConditionTemplates       []controller.ConditionTemplate
+	ConditionProperties      []controller.EventSchemaField
+	TemplateLibraryHintText  string
 }
 
 type UserProfile struct {
@@ -534,6 +537,9 @@ func (s *Server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 				data.Condition = pageData.Condition
 				data.PlatformMeta = pageData.PlatformMeta
 				data.EventFieldOptions = pageData.EventFieldOptions
+				data.ConditionTemplates = pageData.ConditionTemplates
+				data.ConditionProperties = pageData.ConditionProperties
+				data.TemplateLibraryHintText = pageData.TemplateLibraryHintText
 			} else {
 				// This is the conditions list page
 				pageData := controller.PrepareConditionsPageData(channelID)

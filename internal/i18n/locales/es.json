@@ -1327,6 +1327,7 @@
   "condition.toolbox.title": "Caja de Herramientas",
   "condition.templates.heading": "Plantillas",
   "condition.templates.hint": "Las plantillas para este tipo de evento se cargan automáticamente.",
+  "condition.templates.hintWithEventType": "Las plantillas para {0} se cargan automáticamente.",
   "condition.templates.empty": "No hay plantillas para este tipo de evento aún.",
   "condition.tools.heading": "Herramientas",
   "condition.tools.regexTester": "🔍 Probador de Regex",

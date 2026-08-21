@@ -1327,6 +1327,7 @@
   "condition.toolbox.title": "Werkzeugkasten",
   "condition.templates.heading": "Vorlagen",
   "condition.templates.hint": "Vorlagen für diesen Ereignistyp werden automatisch geladen.",
+  "condition.templates.hintWithEventType": "Vorlagen für {0} werden automatisch geladen.",
   "condition.templates.empty": "Es gibt noch keine Vorlagen für diesen Ereignistyp.",
   "condition.tools.heading": "Werkzeuge",
   "condition.tools.regexTester": "🔍 Regex-Tester",

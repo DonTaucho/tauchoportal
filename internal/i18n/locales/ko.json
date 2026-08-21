@@ -1327,6 +1327,7 @@
   "condition.toolbox.title": "도구 상자",
   "condition.templates.heading": "템플릿",
   "condition.templates.hint": "이 이벤트 유형의 템플릿은 자동으로 로드됩니다.",
+  "condition.templates.hintWithEventType": " {0} 의 템플릿은 자동으로 로드됩니다.",
   "condition.templates.empty": "이 이벤트 유형에 대한 템플릿이 아직 없습니다.",
   "condition.tools.heading": "도구",
   "condition.tools.regexTester": "🔍 정규 표현식 테스터",

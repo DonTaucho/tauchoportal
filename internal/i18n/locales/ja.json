@@ -1327,6 +1327,7 @@
   "condition.toolbox.title": "ツールボックス",
   "condition.templates.heading": "テンプレート",
   "condition.templates.hint": "よく使われるフレーズを用意しました",
+  "condition.templates.hintWithEventType": " {0} のテンプレートは自動的にロードされます。",
   "condition.templates.empty": "このイベントにはテンプレートがありません。",
   "condition.tools.heading": "ツール",
   "condition.tools.regexTester": "🔍 正規表現チェッカ",
