@@ -4,7 +4,6 @@ import (
 	"encoding/json"
 	"html"
 	"sort"
-	"strings"
 	"time"
 
 	"tauchoportal/internal/i18n"
@@ -546,14 +545,12 @@ func PrepareChannelsPageData() *ChannelsPageData {
 
 // ConditionPageData contains all data needed to render the condition logic page
 type ConditionPageData struct {
-	CurrentChannel          *ChannelForTemplate
-	Condition               *ConditionForTemplate
-	PlatformMeta            map[string]map[string]interface{}
-	EventFieldOptions       []EventFieldOption
-	ConditionTemplates      []ConditionTemplate
-	ConditionProperties     []EventSchemaField
-	InitializedTemplates    []ConditionTemplate
-	TemplateLibraryHintText string
+	CurrentChannel      *ChannelForTemplate
+	Condition           *ConditionForTemplate
+	PlatformMeta        map[string]map[string]interface{}
+	EventFieldOptions   []EventFieldOption
+	ConditionTemplates  []ConditionTemplate
+	ConditionProperties []EventSchemaField
 }
 
 // PrepareConditionPageData prepares all data needed to render a single condition logic page
@@ -595,19 +592,6 @@ func PrepareConditionPageData(channelID, conditionID string, translator *i18n.Tr
 	eventMeta := EventMetadata{}
 	templatesResponse := eventMeta.GetTemplatesForEvent(currentChannel.Platform, condition.EventType)
 
-	// Initialize templates on server side (equivalent to initializeTemplates() in JavaScript)
-	var hintText string
-	var eventType string
-	if condition.EventType != "" {
-		hintKey := "condition.templates.hintWithEventType"
-		hintText = translator.T(hintKey)
-		eventType = translator.T("event.type." + condition.EventType)
-		hintText = strings.ReplaceAll(hintText, "{0}", eventType)
-	} else {
-		hintKey := "condition.templates.hint"
-		hintText = translator.T(hintKey)
-	}
-
 	return &ConditionPageData{
 		CurrentChannel:     currentChannel,
 		Condition:          condForTemplate,
@@ -615,7 +599,5 @@ func PrepareConditionPageData(channelID, conditionID string, translator *i18n.Tr
 		EventFieldOptions:  GetEventFieldOptions(cond, currentChannel.Platform, condition.EventType, translator),
 		ConditionTemplates: templatesResponse.Templates,
 		//		ConditionProperties:     templatesResponse.Properties,
-		InitializedTemplates:    templatesResponse.Templates,
-		TemplateLibraryHintText: hintText,
 	}
 }

@@ -35,10 +35,18 @@
       
       <h4>{{.I18n.T "condition.templates.heading"}}</h4>
       <div id="currentEventType" style="display:none;">{{.Condition.EventType}}</div>
-      <div id="templateLibraryHint">{{.I18n.T "condition.templates.hint"}}</div>
-      <div id="templateCards"></div>
-      <div id="templateEmptyState">{{.I18n.T "condition.templates.empty"}}</div>
-      
+      {{if eq .ConditionTemplates nil}}
+        <div id="templateEmptyState">{{.I18n.T "condition.templates.empty" ($.I18n.T (print "channels." .CurrentChannel.Platform)) ($.I18n.T (print "event.type." .Condition.EventType))}}</div>
+      {{else}}
+        <div id="templateCards">
+        {{range .ConditionTemplates}}
+        <div class="template-card" onclick="conditionEditor.addTemplate('{{toJSON .JSON}}')" title="Click to add: {{($.I18n.T .NameKey .Name)}}">
+          <h5 class="template-card-name">{{$.I18n.T .NameKey .Name}}</h5>
+          <p class="template-card-desc">{{$.I18n.T .DescriptionKey .Description}}</p>
+        </div>
+        {{end}}
+        </div>
+      {{end}}
       <h4 style="margin-top:1rem;">{{.I18n.T "condition.tools.heading"}}</h4>
       <div class="toolutils">
         <!-- Regex Tester Tool -->
@@ -254,45 +262,6 @@
         </div>
     </div>
 
-    <div id="eventInspectorModal" class="modal">
-        <div class="modal-content modal-large">
-            <div class="modal-header">
-                <span class="close" onclick="closeModal('eventInspectorModal')">×</span>
-                <h2>{{.I18n.T "condition.modal.eventInspector.title"}}</h2>
-                <p>{{.I18n.T "condition.modal.eventInspector.description"}}</p>
-            </div>
-            <div class="modal-body">
-                <div style="margin-bottom:1rem;">
-                    <div><strong>{{.I18n.T "condition.modal.eventInspector.platform"}}:</strong> <span id="eventInspectorPlatform">-</span></div>
-                    <div><strong>{{.I18n.T "condition.modal.eventInspector.eventType"}}:</strong> <span id="eventInspectorEventType">-</span></div>
-                </div>
-                <div id="eventInspectorProperties" style="display:flex; flex-direction:column; gap:0.5rem;"></div>
-            </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" onclick="closeModal('eventInspectorModal')">{{.I18n.T "condition.button.close"}}</button>
-            </div>
-        </div>
-    </div>
-
-    <div id="conditionTemplateInputModal" class="modal">
-        <div class="modal-content modal-small">
-            <div class="modal-header">
-                <span class="close" onclick="closeConditionTemplateInput()">×</span>
-                <h2 id="conditionTemplateInputTitle">{{.I18n.T "condition.modal.templateInput.title"}}</h2>
-                <p id="conditionTemplateInputDescription">{{.I18n.T "condition.modal.templateInput.description"}}</p>
-            </div>
-            <div class="modal-body">
-                <label id="conditionTemplateInputLabel" for="conditionTemplateInputField" style="display:block; margin-bottom:0.5rem; font-weight:600;">{{.I18n.T "condition.modal.templateInput.value"}}</label>
-                <input id="conditionTemplateInputField" type="text" style="width:100%; padding:0.5rem;">
-                <select id="conditionTemplateSelectField" style="display:none; width:100%; padding:0.5rem;"></select>
-            </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" onclick="closeConditionTemplateInput()">{{.I18n.T "condition.button.cancel"}}</button>
-                <button id="conditionTemplateInputSubmit" type="button" class="btn btn-primary">{{.I18n.T "condition.modal.templateInput.submit"}}</button>
-            </div>
-        </div>
-    </div>
-
     <!-- Regex Tester Modal -->
     <div id="regexTesterModal" class="modal">
         <div class="modal-content modal-large">
@@ -435,9 +404,6 @@
 <script>
 var translations = JSON.parse(document.getElementById('conditionTranslationsData').textContent);
 </script>
-<script id="templateLibraryHintData" type="application/json">
-{{.TemplateLibraryHintText | jsonMarshal}}
-</script>
 <script src="/js/condition.js"></script>
 <script>
 let conditionEditor = null;
@@ -451,8 +417,7 @@ const conditionToolboxContext = {
     channelName: conditionView?.dataset?.channelName || '',
     eventFieldOptions: JSON.parse(document.getElementById('conditionEventFieldOptionsData').textContent || '[]'),
     conditionTemplates: JSON.parse(document.getElementById('conditionTemplatesData').textContent || '[]'),
-    conditionProperties: JSON.parse(document.getElementById('conditionPropertiesData').textContent || '[]'),
-    templateLibraryHintText: JSON.parse(document.getElementById('templateLibraryHintData').textContent || '""')
+    conditionProperties: JSON.parse(document.getElementById('conditionPropertiesData').textContent || '[]')
 };
 
 // Get condition data from page
@@ -765,8 +730,7 @@ document.addEventListener('DOMContentLoaded', function() {
         logicDescriptionArea: document.getElementById('logictotaldescription'),
         platform: conditionToolboxContext.platform,
         eventType: conditionToolboxContext.eventType,
-        eventFieldOptions: conditionToolboxContext.eventFieldOptions,
-        onRefresh: updateTemplatePreview
+        eventFieldOptions: conditionToolboxContext.eventFieldOptions
     });
     
     // Pretty-print conditionLogicInput if it has content
@@ -813,18 +777,6 @@ document.addEventListener('DOMContentLoaded', function() {
             }
         });
     }
-
-    updateTemplatePreview();
-    
-    
-    // Templates are initialized on server side; client just needs to render them
-    const templates = conditionToolboxContext.conditionTemplates || [];
-    const hint = document.getElementById('templateLibraryHint');
-    if (hint && conditionToolboxContext.templateLibraryHintText) {
-        hint.textContent = conditionToolboxContext.templateLibraryHintText;
-    }
-    
-    renderTemplateCards(templates);
 });
 
 // Global refreshSummary for any external code that still calls it
@@ -845,15 +797,6 @@ function stripSummaryToText(summaryHtml) {
     temp.innerHTML = summaryHtml || '';
     return (temp.textContent || temp.innerText || '').trim();
 }
-
-function updateTemplatePreview(detail) {
-    const preview = document.getElementById('templatePreviewContent');
-    if (!preview) return;
-    const summaryText = detail?.summaryText || stripSummaryToText(detail?.summaryHtml || document.getElementById('logictotaldescription')?.innerHTML || '');
-    preview.textContent = summaryText || 'No sub-conditions have been added yet.';
-}
-
-
 
 function openQuickOperator(operatorType) {
     if (conditionEditor) {
