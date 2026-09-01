@@ -792,81 +792,11 @@ function refreshRequest() {
     }
 }
 
-function stripSummaryToText(summaryHtml) {
-    const temp = document.createElement('div');
-    temp.innerHTML = summaryHtml || '';
-    return (temp.textContent || temp.innerText || '').trim();
-}
-
 function openQuickOperator(operatorType) {
     if (conditionEditor) {
         conditionEditor.openQuickOperatorDialog(operatorType);
     }
 }
-
-function getTemplateInputValue(templateDef) {
-    const input = document.getElementById('conditionTemplateInputField');
-    const select = document.getElementById('conditionTemplateSelectField');
-    if (templateDef?.input?.type === 'select') {
-        return select.value;
-    }
-    return input.value;
-}
-
-function closeConditionTemplateInput(value = null) {
-    closeModal('conditionTemplateInputModal');
-    if (conditionTemplateInputResolver) {
-        const resolver = conditionTemplateInputResolver;
-        conditionTemplateInputResolver = null;
-        resolver(value);
-    }
-}
-
-function openConditionTemplateInput(templateDef) {
-    const title = document.getElementById('conditionTemplateInputTitle');
-    const description = document.getElementById('conditionTemplateInputDescription');
-    const label = document.getElementById('conditionTemplateInputLabel');
-    const input = document.getElementById('conditionTemplateInputField');
-    const select = document.getElementById('conditionTemplateSelectField');
-    const submit = document.getElementById('conditionTemplateInputSubmit');
-    const config = templateDef?.input || {};
-
-    title.textContent = templateDef?.name || 'Customize Template';
-    description.textContent = templateDef?.description || 'Adjust the template value before adding it.';
-    label.textContent = config.label || 'Value';
-
-    input.style.display = config.type === 'select' ? 'none' : 'block';
-    select.style.display = config.type === 'select' ? 'block' : 'none';
-
-    if (config.type === 'select') {
-        select.innerHTML = '';
-        (config.options || []).forEach(optionDef => {
-            const option = document.createElement('option');
-            option.value = optionDef.value;
-            option.textContent = optionDef.label;
-            if (optionDef.value === config.defaultValue) {
-                option.selected = true;
-            }
-            select.appendChild(option);
-        });
-    } else {
-        input.type = config.type || 'text';
-        input.value = config.defaultValue || '';
-        input.placeholder = config.placeholder || '';
-        input.min = config.min || '';
-    }
-
-    submit.onclick = function() {
-        closeConditionTemplateInput(getTemplateInputValue(templateDef));
-    };
-
-    openModal('conditionTemplateInputModal');
-    return new Promise(resolve => {
-        conditionTemplateInputResolver = resolve;
-    });
-}
-
-window.openConditionTemplateInput = openConditionTemplateInput;
 
 window.addEventListener('click', function(event) {
     ['eventInspectorModal', 'conditionTemplateInputModal'].forEach(function(modalId) {

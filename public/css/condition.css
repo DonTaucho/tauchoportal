@@ -21,6 +21,7 @@
     width: 42%;
     height: 100%;
     border-right: 1px solid #e0e7ff;
+    min-width: 200px;
 }
 
 .toolbox h3 {
@@ -204,7 +205,6 @@ display:none;
 	overflow: hidden;
     color: lightgrey;
     border-top: 1px dotted lightgray;
-    padding-top: 0.7em;
 }
 #drawingArea>div.detailarea>.subcondition>.item:hover>.detailarea {
 	max-height: 20em;

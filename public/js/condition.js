@@ -1,67 +1,3 @@
-const conditionTemplateHelpers = {
-    clone(value) {
-        return JSON.parse(JSON.stringify(value));
-    },
-
-    buildParam(name) {
-        return { "Operator": "PARAM", "SubConditions": null, "Variables": [name] };
-    },
-
-    buildTextCompare(operator, property, value, range = "") {
-        const variables = [String(value)];
-        if (range) {
-            variables.push(range);
-        }
-        return {
-            "Operator": operator,
-            "SubConditions": [this.buildParam(property)],
-            "Variables": variables
-        };
-    },
-
-    buildRegexMatch(property, pattern) {
-        return {
-            "Operator": "REGEX_MATCH",
-            "SubConditions": [this.buildParam(property)],
-            "Variables": [pattern]
-        };
-    },
-
-    buildNumericCompare(operator, property, value) {
-        return {
-            "Operator": operator,
-            "SubConditions": [
-                { "Operator": "PARSEINT", "SubConditions": [this.buildParam(property)], "Variables": null },
-                { "Operator": "PARSEINT", "SubConditions": null, "Variables": [String(value)] }
-            ],
-            "Variables": []
-        };
-    },
-
-    buildWordCountPattern(minWords) {
-        const threshold = Math.max(1, parseInt(minWords, 10) || 1);
-        if (threshold === 1) {
-            return "^\\s*\\S+(?:\\s+\\S+)*\\s*$";
-        }
-        return `^\\s*(?:\\S+\\s+){${threshold - 1},}\\S+(?:\\s+\\S+)*\\s*$`;
-    },
-
-    replacePlaceholders(value, replacements) {
-        if (Array.isArray(value)) {
-            return value.map((item) => this.replacePlaceholders(item, replacements));
-        }
-        if (value && typeof value === "object") {
-            return Object.fromEntries(
-                Object.entries(value).map(([key, item]) => [key, this.replacePlaceholders(item, replacements)])
-            );
-        }
-        if (typeof value === "string" && replacements[value] !== undefined) {
-            return replacements[value];
-        }
-        return value;
-    }
-};
-
 /**
  * ConditionEditor - Reusable condition logic editor class
  * Handles JSON editing, rendering, and synchronization across multiple textarea/form elements
@@ -191,24 +127,6 @@ class ConditionEditor {
         }
     }
 
-    _getTemplateEventGroup(eventType = this.eventType) {
-        return templateEventTypeGroups[String(eventType || '').toLowerCase()] || null;
-    }
-
-    _resolveTemplateDefinition(templateDef) {
-        return {
-            ...templateDef,
-            json: conditionTemplateHelpers.clone(templateDef.json)
-        };
-    }
-
-    getTemplatesForEventType(eventType = this.eventType) {
-        const normalizedEventType = String(eventType || '').trim().toLowerCase();
-        const templateKey = conditionTemplateLibrary[normalizedEventType] ? normalizedEventType : this._getTemplateEventGroup(normalizedEventType);
-        const templates = conditionTemplateLibrary[templateKey] || [];
-        return templates.map((templateDef) => this._resolveTemplateDefinition(templateDef));
-    }
-
     addTemplate(templateJSONString) {
         let templateJSON;
         try {
@@ -222,28 +140,9 @@ class ConditionEditor {
         if (!Array.isArray(json.SubConditions)) {
             json.SubConditions = [];
         }
-        json.SubConditions.push(conditionTemplateHelpers.clone(templateJSON));
+        json.SubConditions.push(JSON.parse(JSON.stringify(templateJSON)));
         this.setJSON(json);
         return true;
-    }
-
-    async addTemplateFromLibrary(templateDef) {
-        if (!templateDef) {
-            return false;
-        }
-
-        const resolvedTemplate = this._resolveTemplateDefinition(templateDef);
-        return this.addTemplate(resolvedTemplate.json);
-    }
-
-    _requestTemplateInput(templateDef) {
-        if (typeof window.openConditionTemplateInput === 'function') {
-            return window.openConditionTemplateInput(templateDef);
-        }
-        const promptLabel = templateDef?.input?.label || templateDef?.name || 'Template value';
-        const defaultValue = templateDef?.input?.defaultValue || '';
-        const response = window.prompt(promptLabel, defaultValue);
-        return Promise.resolve(response);
     }
 
     openQuickOperatorDialog(operatorType) {
@@ -400,7 +299,7 @@ class ConditionEditor {
             addcompbutton.innerText = "+";
             addcompbutton.setAttribute("path", path);
             addcompbutton.setAttribute("operator", operator);
-            addcompbutton.onclick = numModal;
+            addcompbutton.onclick = this.numericDialog.open.bind(this.numericDialog);
             area.append(addcompbutton);
         } else if (this.textoperators.includes(operator)) {
             if (!jsonnode.SubConditions || jsonnode.SubConditions.length < 1) {
@@ -1735,6 +1634,12 @@ class NumericDialogHandler {
             calcvalinputbutton.onclick = this.appendValue.bind(this);
             document.getElementById("calctoolarea").appendChild(calcvalinputbutton);
         }
+        const self = this;
+        window.onkeyup = function(e) {
+            if (self.keyupEvent) {
+                self.keyupEvent(e);
+            }
+        }
     }
 
     /**
@@ -1754,6 +1659,18 @@ class NumericDialogHandler {
         document.getElementById("numModalButton").onclick = function(){
             callback(document.getElementById("calcformula").value, document.getElementById("calcdisplay").innerText);
             document.getElementById("numModal").style["display"] = "none";
+        }
+        this.keyupEvent = function(e) {
+            if (e.key === "Escape") {
+                document.getElementById("numModal").style["display"] = "none";
+            } else if (e.key === "Enter") {
+                if (!document.getElementById("numModalButton").disabled) {
+                    callback(document.getElementById("calcformula").value, document.getElementById("calcdisplay").innerText);
+                    document.getElementById("numModal").style["display"] = "none";
+                }
+            } else if (!isNaN(e.key)) {
+                this.typeNumericValue(parseInt(e.key));
+            }
         }
     }
 
@@ -1778,10 +1695,48 @@ class NumericDialogHandler {
         this.appendItemToFormula({"Operator": operatortype, SubConditions: null, Variables: null});
     }
 
+    typeNumericValue(value) {
+        const current = document.getElementById("calcformula").value;
+        let formula;
+        try {
+            formula = JSON.parse(current);
+        } catch {
+            formula = {};
+        }
+        const cursorpath = document.getElementById("calccursorpos").value;
+        const pathParts = cursorpath.split("/").filter(part => part);
+        let targetNode = formula;
+        for (const part of pathParts) {
+            const [type, index] = part.split(":");
+            if (type === "sub" && targetNode.SubConditions && targetNode.SubConditions[index]) {
+                targetNode = targetNode.SubConditions[index];
+            } else {
+                console.error(`Invalid path: ${cursorpath}`);
+                return;
+            }
+        }
+        if (targetNode.Operator === "PARSEINT" && !targetNode.SubConditions) {
+            if (targetNode.Variables && targetNode.Variables.length > 0 && !isNaN(targetNode.Variables[0])) {
+                targetNode.Variables[0] = targetNode.Variables[0] + value.toString();
+            } else {
+                targetNode.Variables = [value];
+            }
+        } else if (targetNode.SubConditions && targetNode.SubConditions.length === 1 && targetNode.SubConditions[0].Operator === "PARSEINT") {
+            targetNode.SubConditions[0].Variables = [value];
+        } else {
+            targetNode.Operator = "PARSEINT";
+            targetNode.Variables = [value];
+        }
+        document.getElementById("calcformula").value = JSON.stringify(formula);
+        this.visualizeFormula(formula); 
+    }
+
     /**
      * Appends a value to the calculation formula
      */
     appendValue() {
+        const keyEventEvac = this.keyupEvent;
+        this.keyupEvent = null;
         this.editor.textDialog.open(null, null, null, null, true, true, function(dispval, val, type, exttype, extval){
             let appendnode;
             if (type == "env") {
@@ -1796,6 +1751,7 @@ class NumericDialogHandler {
             if (appendnode) {
                 this.appendItemToFormula(appendnode);
             }
+            this.keyupEvent = keyEventEvac;
         }.bind(this), "^[0-9]+(\\.[0-9]+)?$");
     }
 
@@ -2263,46 +2219,52 @@ class NumericDialogHandler {
      */
     appendItemToFormula(elem) {
         const cursorpath = document.getElementById("calccursorpos").value;
-        const formula = JSON.parse(document.getElementById("calcformula").value?document.getElementById("calcformula").value:'{"Operator": "ADD", "SubConditions":null, "Variables": null}');
-        let targetcontainer = formula;
-        if (cursorpath.split("/").length>2) {
-            for (const i in cursorpath.split("/").slice(0, cursorpath.split("/").length-1)) {
-                const address = cursorpath.split("/")[i];
-                if (!address) {
-                    continue;
+        let formula;
+        if (document.getElementById("calcformula").value)
+        {
+            formula = JSON.parse(document.getElementById("calcformula").value);
+            let targetcontainer = formula;
+            if (cursorpath.split("/").length>2) {
+                for (const i in cursorpath.split("/").slice(0, cursorpath.split("/").length-1)) {
+                    const address = cursorpath.split("/")[i];
+                    if (!address) {
+                        continue;
+                    }
+                    const type = address.split(":")[0];
+                    const index = address.split(":")[1];
+                    if (type=="sub" || type == "placeholder") {
+                        targetcontainer = targetcontainer.SubConditions[index];
+                    } else if (type == "const") {
+                        targetcontainer = targetcontainer.Variables[index];
+                    }
                 }
-                const type = address.split(":")[0];
-                const index = address.split(":")[1];
-                if (type=="sub" || type == "placeholder") {
-                    targetcontainer = targetcontainer.SubConditions[index];
-                } else if (type == "const") {
-                    targetcontainer = targetcontainer.Variables[index];
+            }
+            const address = cursorpath.split("/")[cursorpath.split("/").length-1];
+            const type = address.split(":")[0];
+            const index = address.split(":")[1];
+            const prepending = address.split(":").length > 2 && address.split(":")[2] == "pre";
+            if (cursorpath.length < 2 || type == "placeholder" || !address) {
+                if (targetcontainer.SubConditions) {
+                    targetcontainer.SubConditions.push(elem);
+                } else {
+                    targetcontainer.SubConditions = [elem];
+                }
+                document.getElementById("calccursorpos").value = document.getElementById("calccursorpos").value.replace("placeholder", "sub");
+            } else if (type == "sub") {
+                if (targetcontainer.SubConditions) {
+                    targetcontainer.SubConditions.splice(index + (prepending?0:1), 0, elem);
+                } else {
+                    targetcontainer.SubConditions = [elem];
+                }
+            } else if (type == "const" || type == "param") { // even if the cursor is on "variable", cannot splice between variables since the appendance is SubCondition anyway. Append to the last of SubConditions
+                if (targetcontainer.SubConditions) {
+                    targetcontainer.SubConditions.push(elem);
+                } else {
+                    targetcontainer.SubConditions = [elem];
                 }
             }
-        }
-        const address = cursorpath.split("/")[cursorpath.split("/").length-1];
-        const type = address.split(":")[0];
-        const index = address.split(":")[1];
-        const prepending = address.split(":").length > 2 && address.split(":")[2] == "pre";
-        if (cursorpath.length < 2 || type == "placeholder" || !address) {
-            if (targetcontainer.SubConditions) {
-                targetcontainer.SubConditions.push(elem);
-            } else {
-                targetcontainer.SubConditions = [elem];
-            }
-            document.getElementById("calccursorpos").value = document.getElementById("calccursorpos").value.replace("placeholder", "sub");
-        } else if (type == "sub") {
-            if (targetcontainer.SubConditions) {
-                targetcontainer.SubConditions.splice(index + (prepending?0:1), 0, elem);
-            } else {
-                targetcontainer.SubConditions = [elem];
-            }
-        } else if (type == "const" || type == "param") { // even if the cursor is on "variable", cannot splice between variables since the appendance is SubCondition anyway. Append to the last of SubConditions
-            if (targetcontainer.SubConditions) {
-                targetcontainer.SubConditions.push(elem);
-            } else {
-                targetcontainer.SubConditions = [elem];
-            }
+        } else {
+            formula = elem;
         }
         document.getElementById("calcformula").value = JSON.stringify(formula);
         this.visualizeFormula();
@@ -2348,10 +2310,6 @@ function closeModal(modalId) {
     }
 }
 
-// ============================================
-// Condition Testing UI Functions
-// ============================================
-
 /**
  * Updates test event parameter fields
  */
@@ -2361,82 +2319,12 @@ function updateTestEventParams() {
 }
 
 /**
- * Updates condition event type fields
- */
-function updateCondEventFields() {
-    console.log('updateCondEventFields called');
-    // TODO: Implement dynamic fields for condition event type
-}
-
-/**
- * Toggles device action section visibility
- */
-function toggleDeviceAction(checkbox) {
-    console.log('toggleDeviceAction:', checkbox.checked);
-    // TODO: Implement device action toggle
-}
-
-/**
- * Updates the action select options based on device
- */
-function updateCondActionSelect() {
-    console.log('updateCondActionSelect called');
-    // TODO: Implement action selection for device
-}
-
-/**
- * Updates the action parameters based on selected action
- */
-function updateCondActionParams() {
-    console.log('updateCondActionParams called');
-    // TODO: Implement parameter fields for action
-}
-
-/**
- * Selects a color preset
- */
-function selectCondColor(btn) {
-    console.log('selectCondColor:', btn.getAttribute('data-color'));
-    // TODO: Implement color selection
-}
-
-/**
  * Runs a condition test
  */
 function runConditionTest() {
     console.log('runConditionTest called');
     // TODO: Implement condition testing with API call
 }
-
-/**
- * Saves a filter
- */
-function saveFilter() {
-    console.log('saveFilter called');
-    // TODO: Implement filter saving with API call
-}
-
-/**
- * Cancels confirmation dialog
- */
-function cancelConfirm() {
-    const overlay = document.getElementById('confirmOverlay');
-    if (overlay) {
-        overlay.style.display = 'none';
-    }
-}
-
-/**
- * Confirms add operation
- */
-function confirmAdd() {
-    console.log('confirmAdd called');
-    // TODO: Implement add confirmation
-}
-
-// ============================================
-// New Tool Functions: Regex Tester, Snippets, Operators
-// ============================================
 
 /**
  * Opens the Regex Tester modal
