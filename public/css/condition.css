@@ -900,6 +900,12 @@ fieldset.item.first > .icons,
 fieldset.item.last > .icons {
     display:none;
 }
+#sendingParameterArea fieldset.item.regex_extract > .icons,
+#sendingParameterArea fieldset.item.substring > .icons,
+#sendingParameterArea fieldset.item.first > .icons,
+#sendingParameterArea fieldset.item.last > .icons {
+    display:block;
+}
 fieldset.item.regex_extract>.detailarea>div,
 fieldset.item.substring>.detailarea>div,
 fieldset.item.first>.detailarea>div,
