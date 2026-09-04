@@ -403,6 +403,12 @@ fieldset{
     border-radius: 4px;
 }
 
+.item .variable.range{
+    background-color: rgb(200 79 8 / 12%);
+    border: 1px solid rgb(200 35 8 / 52%);
+    color: #c83608;
+}
+
 .item.focus{
 	border: 1px solid yellow;
 }
@@ -898,6 +904,12 @@ fieldset.item.regex_extract > .icons,
 fieldset.item.substring > .icons,
 fieldset.item.first > .icons,
 fieldset.item.last > .icons {
+    display:none;
+}
+fieldset.item.and > .icons > .edit,
+fieldset.item.or > .icons > .edit,
+fieldset.item.not > .icons > .edit,
+fieldset.item.some > .icons > .edit {
     display:none;
 }
 #sendingParameterArea fieldset.item.regex_extract > .icons,

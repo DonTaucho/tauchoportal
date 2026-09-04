@@ -44,6 +44,7 @@ class ConditionEditor {
         this.groupoperators = ["COUNT", "SUM"];
         this.calcoperators = ["ADD", "SUBTRACT", "MULTIPLY", "DIVIDE", "MODULO"];
         this.convoperators = ["PARSEINT", "EXCHANGE", "COLOR_PICKUP"];
+        this.operatorswithrange = ["INCLUDES", "SUBSTRING"];
 
         this.namingmap = {"AND": "and", "OR": "or", "NOT": "not", "SOME": "some", "EQUIVALENT": "equivalent", "GREATER_THAN": "greater_than", "GREATER_OR_EQUAL": "greater_or_equal", "LESS_THAN": "less_than", "LESS_OR_EQUAL": "less_or_equal", "EQUALS": "equals", "INCLUDES": "includes", "REGEX_MATCH": "regex_match", "COUNT": "count", "SUM": "sum", "WHOLESENTENCE": "wholesentence", "REGEX_EXTRACT": "regex_extract", "SUBSTRING": "substring", "FIRST": "first", "LAST": "last", "ADD": "add", "SUBTRACT": "subtract", "MULTIPLY": "multiply", "DIVIDE": "divide", "MODULO": "modulo", "PARSEINT": "parseint", "COLOR_PICKUP": "color_pickup", "PARAM": "param" };
         this.operatormap = { "and": "AND", "or": "OR", "not": "NOT", "some": "SOME", "equivalent": "EQUIVALENT", "greater_than": "GREATER_THAN", "greater_or_equal": "GREATER_OR_EQUAL", "less_than": "LESS_THAN", "less_or_equal": "LESS_OR_EQUAL", "equals": "EQUALS", "includes": "INCLUDES", "regex_match": "REGEX_MATCH", "count": "COUNT", "sum": "SUM", "wholesentence": "WHOLESENTENCE", "regex_extract": "REGEX_EXTRACT", "substring": "SUBSTRING", "first": "FIRST", "last": "LAST", "add": "ADD", "subtract": "SUBTRACT", "multiply": "MULTIPLY", "divide": "DIVIDE", "modulo": "MODULO", "parseint": "PARSEINT", "exchange": "EXCHANGE", "color_pickup": "COLOR_PICKUP", "param": "PARAM" };
@@ -55,6 +56,9 @@ class ConditionEditor {
         
         // Initialize text condition dialog handler
         this.textDialog = new TextDialogHandler(this);
+        
+        // Initialize range dialog handler
+        this.rangeDialog = new RangeDialogHandler(this);
         
         // Initialize text condition dialog handler
         this.textConditionDialog = new TextConditionDialogHandler(this);
@@ -268,6 +272,9 @@ class ConditionEditor {
             for (const iv in jsonnode.Variables) {
                 const variableitem = document.createElement("div");
                 variableitem.classList.add("variable");
+                if (this.operatorswithrange.includes(operator) && iv > 0) {
+                    variableitem.classList.add("range");
+                }
                 variableitem.innerText = jsonnode.Variables[iv];
                 if (jsonnode.Operator != "PARAM") {
                     variableitem.setAttribute("operator", "_variable");
@@ -831,7 +838,7 @@ class ConditionEditor {
                     items_param.push(this._summarize(node.SubConditions[i]));
                 }
                 for (const i in node.Variables) {
-                    items_param.push("<span class='param'>" + translations[node.Variables[i]] + "</span>");
+                    items_param.push("<span class='param'>" + this._getEventName(node.Variables[i]) + "</span>");
                 }
                 return translations["valueof-sentense"].replace("{0}", items_param.join(translations["valueof-joint"]));
                 break;
@@ -885,10 +892,18 @@ class ConditionEditor {
                 // Variable editing
                 const ind = e.target.getAttribute("index");
                 const current = e.target.innerText;
-                this.textDialog.open(current, "variable", null, null, false, true, function(dispval, val) {
-                    currentnode.Variables[ind] = val;
-                    finishupdating();
-                }.bind(this));
+                if (this.operatorswithrange.includes(currentnode.Operator) && ind > 0) {
+                    variableitem.classList.add("range");
+                    this.rangeDialog.open(current, "variable", null, null, false, true, function(dispval, val) {
+                        currentnode.Variables[ind] = val;
+                        finishupdating();
+                    }.bind(this));
+                } else {
+                    this.textDialog.open(current, "variable", null, null, false, true, function(dispval, val) {
+                        currentnode.Variables[ind] = val;
+                        finishupdating();
+                    }.bind(this));
+                }
             }
         } catch (err) {
             console.error('Error in editItem:', err);
@@ -917,8 +932,6 @@ class ConditionEditor {
             console.error('Error in deleteItem:', err);
         }
     }
-
-
 
     _editBoolItem(path) {
         try {
@@ -1009,7 +1022,6 @@ class ConditionEditor {
         }
         return currentnode;
     }
-
     
     /**
      * Generates human-readable display text for text extraction/condition operations
@@ -1070,6 +1082,14 @@ class ConditionEditor {
                 break;
         }
         return dispval
+    }
+
+    _getEventName(eventname) {
+        return translations[this._generateLocalizedKey(eventname)];
+    }
+
+    _generateLocalizedKey(eventname) {
+        return "schema." + conditionEditor.platform + "." + eventname + ".label";
     }
  }
 
@@ -1435,36 +1455,37 @@ class TextDialogHandler {
         this.validate();
         document.getElementById("textModal").style["display"] = "block";
         document.getElementById("textSubmitButton").onclick = function() {
-            let dispval,val,type,exttype,extval;
+            let dispval,val,type,exttype,extval,env;
             if (document.getElementById("textenterradio").checked) {
                 dispval = document.getElementById("textEnter").value;
                 val = document.getElementById("textEnter").value;
                 type = "variable";
             } else if (document.getElementById("textenvradio").checked) {
                 val = document.getElementById("textEnvSelect").value;
+                env = this.editor._generateLocalizedKey(val);
                 type = "env";
                 exttype = document.getElementById("textExtSelect").value;
                 switch (exttype) {
                     case "regex_extract":
                         extval = document.getElementById("textExtRegex").value;
-                        dispval = this.editor._generateDisplayText("extract", "regex_extract", val, extval);
+                        dispval = this.editor._generateDisplayText("extract", "regex_extract", env, extval);
                         break;
                     case "substring":
                         extval = `${document.getElementById('textExtSubFrom').value}-${document.getElementById('textExtSubTo').value}`;
-                        dispval = this.editor._generateDisplayText("extract", "substring", val, document.getElementById('textExtSubFrom').value, document.getElementById('textExtSubTo').value);
+                        dispval = this.editor._generateDisplayText("extract", "substring", env, extval);
                         break;
                     case "first":
                         extval = document.getElementById("textExtFirst").value;
-                        dispval = this.editor._generateDisplayText("extract", "first", val, extval);
+                        dispval = this.editor._generateDisplayText("extract", "first", env, extval);
                         break;
                     case "last":
                         extval = document.getElementById("textExtLast").value;
-                        dispval = this.editor._generateDisplayText("extract", "last", val, extval);
+                        dispval = this.editor._generateDisplayText("extract", "last", env, extval);
                         break;
                     default:
                         extval = "";
                         exttype = "wholesentence";
-                        dispval = this.editor._generateDisplayText("extract", "wholesentence", val);
+                        dispval = this.editor._generateDisplayText("extract", "wholesentence", env);
                         break;
                 }
             }
@@ -1503,7 +1524,21 @@ class TextDialogHandler {
         
         document.getElementById("textSubmitButton").disabled = valid ? "" : "disabled";
     }
-}    
+}
+
+class RangeDialogHandler {
+    constructor(editor) {
+        this.editor = editor;
+    }
+
+    open(current, type, val, exttype, extval, callback) {
+        // Implementation for opening the range dialog
+    }
+
+    validate() {
+        // Implementation for validating the range dialog
+    }
+}
 
 /**
  * TextConditionDialogHandler - Manages the text condition dialog for the ConditionEditor
@@ -2189,7 +2224,7 @@ class NumericDialogHandler {
                         const param = document.createElement("span");
                         param.classList.add("param");
                         param.classList.add("const");
-                        param.innerText = translations[node.Variables[i]];
+                        param.innerText = this._getEventName(node.Variables[i]);
                         param.setAttribute("path",  path + "/param:" + i);
                         param.onclick = this.updateCursor.bind(this);
                         base.append(param);

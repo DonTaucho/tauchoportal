@@ -167,7 +167,7 @@
                 <h4><input id="textenvradio" type="radio" name="inputtextradio"> {{.I18n.T "condition.modal.text.selectInput"}}</h4>
                 <select id="textEnvSelect">
                     {{range .EventFieldOptions}}
-                    <option value="{{.Name}}" data-translation-key="condition.eventProp.{{.Name}}.label">{{.Label}}</option>
+                    <option value="{{.Name}}" data-translation-key="condition.schema.{{$.CurrentChannel.Platform}}.{{.Name}}.label">{{.Label}}</option>
                     {{end}}
                 </select>
                 </div>
@@ -763,7 +763,10 @@ document.addEventListener('DOMContentLoaded', function() {
     deviceParamsEditor = new ConditionEditor('sendingparamjson', {
         baseType: 'WHOLESENTENCE',
         drawingArea: document.getElementById('sendingParameterArea'),
-        logicDescriptionArea: null
+        logicDescriptionArea: null,
+        platform: conditionToolboxContext.platform,
+        eventType: conditionToolboxContext.eventType,
+        eventFieldOptions: conditionToolboxContext.eventFieldOptions
     });
     deviceParamsEditor.refresh();
     
