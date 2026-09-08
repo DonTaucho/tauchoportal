@@ -359,7 +359,7 @@ type DeviceForTemplate struct {
 	BrandColor       string            `json:"brand_color"`
 	BrandLogo        string            `json:"brand_logo"`
 	SupportedActions []string          `json:"supported_actions"`
-	Credentials      map[string]string `json:"credentials"`
+	DeviceIdentifier map[string]string `json:"device_identifier"`
 }
 
 // BrandForTemplate represents a device brand for template rendering
@@ -379,10 +379,11 @@ type BrandForTemplate struct {
 
 // DevicesPageData contains all data needed to render the devices page
 type DevicesPageData struct {
-	Devices      []DeviceForTemplate
-	Brands       map[string]*BrandForTemplate
-	BrandsSorted []*BrandForTemplate
-	BrandIDs     []string
+	Devices                []DeviceForTemplate
+	Brands                 map[string]*BrandForTemplate
+	BrandsSorted           []*BrandForTemplate
+	BrandIDs               []string
+	DeviceTemplatesByBrand map[string][]DeviceTemplate
 }
 
 // PrepareDevicesPageData prepares all data needed to render the devices page
@@ -396,6 +397,7 @@ func PrepareDevicesPageData() *DevicesPageData {
 	brands := catalog.ListBrands(true)
 	brandsMap := make(map[string]*BrandForTemplate)
 	brandsSorted := make([]*BrandForTemplate, 0)
+	deviceTemplatesByBrand := make(map[string][]DeviceTemplate)
 
 	// Sort brands by sort_order
 	sort.Slice(brands, func(i, j int) bool {
@@ -419,12 +421,16 @@ func PrepareDevicesPageData() *DevicesPageData {
 		}
 		brandsMap[b.Id] = brandForTemplate
 		brandsSorted = append(brandsSorted, brandForTemplate)
+		deviceTemplatesByBrand[b.Id] = DeviceTemplates{}.ListTemplatesByBrand(b.Id)
 	}
 
 	// Convert devices to template format
 	for _, dev := range devices {
 		brand := brandsMap[dev.Brand]
-		productName := dev.ProductId
+		productName := dev.ProductName
+		if productName == "" {
+			productName = dev.ProductId
+		}
 
 		brandLogo := ""
 		brandColor := "#888888"
@@ -434,10 +440,10 @@ func PrepareDevicesPageData() *DevicesPageData {
 			brandColor = brand.BrandColor
 		}
 
-		// Use credentials directly as a map (device.Credentials is already map[string]string)
-		credentialsMap := dev.Credentials
-		if credentialsMap == nil {
-			credentialsMap = make(map[string]string)
+		// Use device identifiers directly as a map.
+		deviceIdentifier := dev.DeviceIdentifier
+		if deviceIdentifier == nil {
+			deviceIdentifier = make(map[string]string)
 		}
 
 		devicesForTemplate = append(devicesForTemplate, DeviceForTemplate{
@@ -452,15 +458,16 @@ func PrepareDevicesPageData() *DevicesPageData {
 			BrandColor:       brandColor,
 			BrandLogo:        brandLogo,
 			SupportedActions: dev.SupportedActions,
-			Credentials:      credentialsMap,
+			DeviceIdentifier: deviceIdentifier,
 		})
 	}
 
 	return &DevicesPageData{
-		Devices:      devicesForTemplate,
-		Brands:       brandsMap,
-		BrandsSorted: brandsSorted,
-		BrandIDs:     getBrandIDsFromDevices(devicesForTemplate),
+		Devices:                devicesForTemplate,
+		Brands:                 brandsMap,
+		BrandsSorted:           brandsSorted,
+		BrandIDs:               getBrandIDsFromDevices(devicesForTemplate),
+		DeviceTemplatesByBrand: deviceTemplatesByBrand,
 	}
 }
 

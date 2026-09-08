@@ -23,10 +23,12 @@ type DeviceTemplateParameterConstraints struct {
 }
 
 type DeviceTemplateUIField struct {
-	Key  string `json:"key"`
-	Type string `json:"type"`
-	Min  int    `json:"min"`
-	Max  int    `json:"max"`
+	Name    string   `json:"name"`
+	Key     string   `json:"key"`
+	Options []string `json:"options"`
+	Type    string   `json:"type"`
+	Min     int      `json:"min"`
+	Max     int      `json:"max"`
 }
 
 type DeviceTemplateExample struct {

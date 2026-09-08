@@ -575,6 +575,8 @@ func (s *Server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	// Fetch devices page data if on /devices page
 	if cfg.Name == "devices" {
 		pageData := controller.PrepareDevicesPageData()
+		myBrandSettings := controller.MyBrandSettings{}
+		data.MyBrands = myBrandSettings.ListMyBrands()
 		data.Devices = pageData
 	}
 

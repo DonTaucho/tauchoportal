@@ -17,7 +17,7 @@ type Device struct {
 	Room          string            `json:"room"`
 	IsConfigured  bool              `json:"is_configured"`
 	Status        string            `json:"status"`
-	Credentials   map[string]string `json:"credentials"`
+	DeviceIdentifier map[string]string `json:"device_identifier"`
 	DeviceGroupId string            `json:"device_group_id"`
 	SupportedActions []string       `json:"supported_actions"`
 	CreatedAt     string            `json:"created_at"`
@@ -34,14 +34,14 @@ type CreateDeviceRequest struct {
 	Brand       string            `json:"brand"`
 	ProductId   string            `json:"product_id"`
 	Room        string            `json:"room"`
-	Credentials map[string]string `json:"credentials"`
+	DeviceIdentifier map[string]string `json:"device_identifier"`
 }
 
 type UpdateDeviceRequest struct {
 	Name        string            `json:"name"`
 	ProductId   string            `json:"product_id"`
 	Room        string            `json:"room"`
-	Credentials map[string]string `json:"credentials"`
+	DeviceIdentifier map[string]string `json:"device_identifier"`
 }
 
 type DeleteDeviceResponse struct {
